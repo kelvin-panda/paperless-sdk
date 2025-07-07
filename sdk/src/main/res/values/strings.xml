@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="error_0">平台初始化成功</string>
+    <string name="error_1">过期了</string>
+    <string name="error_2">程序出错</string>
+    <string name="error_3">不允许接入的企业</string>
+    <string name="error_4">没有多余的设备ID了</string>
+    <string name="error_5">不允许接入的设备</string>
+    <string name="error_6">文件数据错误</string>
+    <string name="error_7">非法的设备</string>
+    <string name="error_8">设备ID已经被使用了</string>
+    <string name="error_9">不存在的需要的资源</string>
+    <string name="error_10">文件数据错误,但可以解析出原设备ID</string>
+    <string name="error_11">指定设备与设备类型不匹配</string>
+    <string name="maximum_number_of_online_devices_exceeded">已超过点位数量</string>
+</resources>
