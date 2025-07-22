@@ -2360,7 +2360,7 @@ open class BaseJni {
         return null
     }
 
-    fun queryFileName(mediaId: Int): String? {
+    fun queryFileName(mediaId: Int): String {
         queryFileAttribute(InterfaceMacro.Pb_MeetFilePropertyID.Pb_MEETFILE_PROPERTY_NAME.number, mediaId)?.let {
             InterfaceBase.pbui_CommonTextProperty.parseFrom(it)?.let {
                 return it.propertyval.toStringUtf8()
@@ -2369,7 +2369,7 @@ open class BaseJni {
         return ""
     }
 
-    fun queryCacheFilePath(dirId: Int, mediaId: Int): String? {
+    fun queryCacheFilePath(dirId: Int, mediaId: Int): String {
         queryFileAttribute(InterfaceMacro.Pb_MeetFilePropertyID.Pb_MEETFILE_PROPERTY_CACHEPATHNAME.number, mediaId, dirId)?.let {
             InterfaceBase.pbui_CommonTextProperty.parseFrom(it)?.let {
                 return it.propertyval.toStringUtf8()
