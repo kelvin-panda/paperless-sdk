@@ -70,19 +70,16 @@ afterEvaluate {
             create<MavenPublication>("release") {
                 groupId = "com.gitee.xlk_gitee"
                 artifactId = "sdk-library"
-                version = "1.0.0"
+                version = "1.0.1"
                 from(components["release"])
             }
         }
     }
 }
 dependencies {
-
-    api(libs.androidx.core.ktx)
-    api(libs.androidx.appcompat)
-    api(libs.material)
-    api(libs.eventbus)
-    api(libs.utilcodex)
+    implementation("androidx.appcompat:appcompat:1.6.1")
+    implementation("com.blankj:utilcodex:1.31.1")
+    implementation("org.greenrobot:eventbus:3.3.1")
     api(files("libs/ini4j-0.5.2.jar"))
     api(files("libs/protobuf-java-3.3.0.jar"))
 }

@@ -1,7 +1,6 @@
 package com.xlk.paperless.sdk
 
 import android.os.Bundle
-import android.os.Handler
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
@@ -19,8 +18,8 @@ import com.mogujie.tt.protobuf.InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_DEV
 import com.mogujie.tt.protobuf.InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_READY_VALUE
 import com.paperless.bus.EventBusMessage
 import com.paperless.sdk.Call
-import com.paperless.sdk.CallValue
-import com.paperless.sdk.CallValue.Companion.localDeviceId
+import com.paperless.sdk.SdkVars
+import com.paperless.sdk.SdkVars.Companion.localDeviceId
 import com.paperless.sdk.Protocol
 import com.paperless.sdk.ProtocolTool
 import com.paperless.util.IniUtil
@@ -44,18 +43,18 @@ class MainActivity : AppCompatActivity() {
         initConfigFile()
         Jni.initialization(
             InterfaceMacro.Pb_ProgramType.Pb_MEET_PROGRAM_TYPE_MEETCLIENT_VALUE,
-            CallValue.root_dir + "client.ini", DeviceUtils.getUniqueDeviceId(), 4, 0
+            SdkVars.root_dir + "client.ini", DeviceUtils.getUniqueDeviceId(), 4, 0
         )
     }
 
     private fun initConfigFile() {
         val currentTimeMillis = System.currentTimeMillis()
-        FileUtils.createOrExistsDir(CallValue.root_dir)
-        val exists = FileUtils.isFileExists(CallValue.root_dir + "client.ini")
+        FileUtils.createOrExistsDir(SdkVars.root_dir)
+        val exists = FileUtils.isFileExists(SdkVars.root_dir + "client.ini")
         if (!exists) {
-            ResourceUtils.copyFileFromAssets("client.ini", CallValue.root_dir + "client.ini")
+            ResourceUtils.copyFileFromAssets("client.ini", SdkVars.root_dir + "client.ini")
         }
-        val file = File(CallValue.root_dir + "client.ini")
+        val file = File(SdkVars.root_dir + "client.ini")
         val isLoadIniFileSuccess = IniUtil.loadFile(file)
         LogUtils.e("配置文件是否存在：${file.exists()},文件大小：${file.length()},isLoadFile:${isLoadIniFileSuccess}")
         if (isLoadIniFileSuccess) {
@@ -71,9 +70,9 @@ class MainActivity : AppCompatActivity() {
                 "加载ini文件成功：ip=" + ip + ",port=" + port
                         + ",discardms=" + discardms
                         + ",playcachems=" + playcachems
-                        + ",bitrate=" + CallValue.bitrate
-                        + ",frameRate=" + CallValue.frameRate
-                        + ",iframeInterval=" + CallValue.iframeInterval
+                        + ",bitrate=" + SdkVars.bitrate
+                        + ",frameRate=" + SdkVars.frameRate
+                        + ",iframeInterval=" + SdkVars.iframeInterval
                         + ",tickdebug=" + tickdebug
                         + ",tickint=" + tickint
                         + ",keybind=" + keybind
@@ -99,12 +98,12 @@ class MainActivity : AppCompatActivity() {
             IniUtil.playCacheMs = playcachems
             IniUtil.hardver = hardver
             IniUtil.softver = softver
-            IniUtil.configDir = CallValue.root_dir
-            IniUtil.mediaDir = CallValue.root_dir + "mediadir" + File.separator
+            IniUtil.configDir = SdkVars.root_dir
+            IniUtil.mediaDir = SdkVars.root_dir + "mediadir" + File.separator
             IniUtil.store()
         }
-        FileUtils.delete(CallValue.root_dir + "client.dev")
-        ResourceUtils.copyFileFromAssets("client.dev", CallValue.root_dir + "client.dev")
+        FileUtils.delete(SdkVars.root_dir + "client.dev")
+        ResourceUtils.copyFileFromAssets("client.dev", SdkVars.root_dir + "client.dev")
         LogUtils.e("耗时：${System.currentTimeMillis() - currentTimeMillis}")
     }
 

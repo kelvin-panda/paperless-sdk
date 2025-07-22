@@ -39,6 +39,10 @@ android {
             isUniversalApk = false //不生成包含所有 ABI 的单一 APK
         }
     }
+
+    buildFeatures {
+        buildConfig = true
+    }
 }
 
 dependencies {
@@ -49,9 +53,9 @@ dependencies {
     implementation(libs.androidx.activity)
     implementation(libs.androidx.constraintlayout)
     implementation(libs.xxPermissions)
-    testImplementation(libs.junit)
-    androidTestImplementation(libs.androidx.junit)
-    androidTestImplementation(libs.androidx.espresso.core)
+    implementation(libs.eventbus)
+    implementation(libs.utilcodex)
 
+//    implementation(libs.paperlessSdk)
     api(project(":sdk"))
 }

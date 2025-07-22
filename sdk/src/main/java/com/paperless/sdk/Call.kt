@@ -15,38 +15,14 @@ import java.util.concurrent.LinkedBlockingQueue
  */
 object Call {
 
-//    init {
-//        LogUtils.e("loadLibrary start")
-//        System.loadLibrary("avcodec-57")
-//        System.loadLibrary("avdevice-57")
-//        System.loadLibrary("avfilter-6")
-//        System.loadLibrary("avformat-57")
-//        System.loadLibrary("avutil-55")
-//        System.loadLibrary("postproc-54")
-//        System.loadLibrary("swresample-2")
-//        System.loadLibrary("swscale-4")
-//        System.loadLibrary("SDL2")
-//        System.loadLibrary("main")
-//        System.loadLibrary("NetClient")
-//        System.loadLibrary("Codec")
-//        System.loadLibrary("ExecProc")
-//        System.loadLibrary("Device-OpenSles")
-//        System.loadLibrary("meetcoreAnd")
-//        System.loadLibrary("PBmeetcoreAnd")
-//        System.loadLibrary("meetAnd")
-//        System.loadLibrary("native-lib")
-//        System.loadLibrary("z")
-//        LogUtils.e("loadLibrary end")
-//    }
 
     private var m_dbuf: ByteBuffer? = null
     private var m_dexbuf: ByteBuffer? = null
     fun initSetDirectBuf() {
-        m_dbuf = ByteBuffer.allocateDirect(CallValue.frame_size)
-        m_dexbuf = ByteBuffer.allocateDirect(CallValue.frame_codec_size)
+        m_dbuf = ByteBuffer.allocateDirect(SdkVars.frame_size)
+        m_dexbuf = ByteBuffer.allocateDirect(SdkVars.frame_codec_size)
         setDirectBuf(m_dbuf!!, m_dexbuf!!)
     }
-
 
     /**
      * 初始化之前调用，切换议题3模式
@@ -232,11 +208,11 @@ object Call {
             }
 
             2 -> {
-                return if (type == 2) CallValue.record_width else CallValue.camera_width
+                return if (type == 2) SdkVars.record_width else SdkVars.camera_width
             }
 
             3 -> {
-                return if (type == 2) CallValue.record_height else CallValue.camera_height
+                return if (type == 2) SdkVars.record_height else SdkVars.camera_height
             }
             // start capture
             4 -> {
@@ -294,26 +270,26 @@ object Call {
         codecdatalen: Int
     ): Int {
         if (m_dbuf == null) {
-            m_dbuf = ByteBuffer.allocateDirect(CallValue.frame_size)
+            m_dbuf = ByteBuffer.allocateDirect(SdkVars.frame_size)
         }
         if (m_dexbuf == null) {
-            m_dexbuf = ByteBuffer.allocateDirect(CallValue.frame_codec_size)
+            m_dexbuf = ByteBuffer.allocateDirect(SdkVars.frame_codec_size)
         }
         m_dbuf!!.position(0)
         m_dbuf!!.limit(datalen)
         m_dexbuf!!.position(0)
         m_dexbuf!!.limit(codecdatalen)
         if (res == Protocol.resource_id_0) {
-            CallValue.frame_count++
+            SdkVars.frame_count++
         }
-        var decodeQueue = CallValue.decodeMap[res]
+        var decodeQueue = SdkVars.decodeMap[res]
         if (decodeQueue == null) {
             LogUtils.e("player_log", "新建 LinkedBlockingQueue<FrameData>")
-            val value = LinkedBlockingQueue<FrameData>(CallValue.CAPACITY)
-            CallValue.decodeMap.put(res, value)
+            val value = LinkedBlockingQueue<FrameData>(SdkVars.CAPACITY)
+            SdkVars.decodeMap.put(res, value)
             decodeQueue = value
         }
-        var frameData = CallValue.frameDataPool.poll()
+        var frameData = SdkVars.frameDataPool.poll()
         if (frameData == null) {
             frameData = FrameData()
             LogUtils.e("player_log", "新建对象 size=${decodeQueue.size}")

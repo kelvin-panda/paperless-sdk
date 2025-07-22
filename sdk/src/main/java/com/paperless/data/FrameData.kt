@@ -1,6 +1,6 @@
 package com.paperless.data
 
-import com.paperless.sdk.CallValue
+import com.paperless.sdk.SdkVars
 import java.nio.ByteBuffer
 
 /**
@@ -14,9 +14,9 @@ data class FrameData(
     var w: Int = 0,
     var h: Int = 0,
     var pts: Long = 0,
-    var packet: ByteArray = ByteArray(CallValue.frame_size),
+    var packet: ByteArray = ByteArray(SdkVars.frame_size),
     var packetSize: Int = 0,
-    var codecData: ByteArray = ByteArray(CallValue.frame_codec_size),
+    var codecData: ByteArray = ByteArray(SdkVars.frame_codec_size),
     var codecDataSize: Int = 0
 ) {
 

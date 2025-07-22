@@ -7,7 +7,7 @@ import com.blankj.utilcode.util.CrashUtils
 import com.blankj.utilcode.util.LogUtils
 import com.blankj.utilcode.util.PathUtils
 import com.blankj.utilcode.util.ScreenUtils
-import com.paperless.sdk.CallValue
+import com.paperless.sdk.SdkVars
 import java.io.File
 
 /**
@@ -18,7 +18,7 @@ class App : Application() {
     override fun onCreate() {
         super.onCreate()
         initDirPath()
-        CrashUtils.init(CallValue.crash_dir)
+        CrashUtils.init(SdkVars.crash_dir)
         initScreenSize()
     }
 
@@ -26,28 +26,28 @@ class App : Application() {
         val metric = DisplayMetrics()
         val window = this.getSystemService(WINDOW_SERVICE) as WindowManager
         window.defaultDisplay.getMetrics(metric)
-        CallValue.screen_width = ScreenUtils.getScreenWidth()
-        CallValue.screen_height = ScreenUtils.getScreenHeight()
-        CallValue.dpi = metric.densityDpi
-        LogUtils.e("屏幕宽高：${CallValue.screen_width} x ${CallValue.screen_height},dpi:${CallValue.dpi}")
+        SdkVars.screen_width = ScreenUtils.getScreenWidth()
+        SdkVars.screen_height = ScreenUtils.getScreenHeight()
+        SdkVars.dpi = metric.densityDpi
+        LogUtils.e("屏幕宽高：${SdkVars.screen_width} x ${SdkVars.screen_height},dpi:${SdkVars.dpi}")
     }
 
     private fun initDirPath() {
-        CallValue.root_dir = getExternalFilesDir("Paperless")!!.absolutePath + File.separator
-        CallValue.cache_dir = cacheDir?.absolutePath + File.separator
-        CallValue.externalCacheDir = externalCacheDir?.absolutePath + File.separator
-        CallValue.file_dir = CallValue.root_dir + "files" + File.separator
-        CallValue.download_dir = CallValue.root_dir + "download" + File.separator
-        CallValue.logcat_dir = CallValue.root_dir + "logcat" + File.separator
-        CallValue.crash_dir = CallValue.root_dir + "crash" + File.separator
-        CallValue.system_logcat_dir = CallValue.root_dir + "systemLogcat" + File.separator
+        SdkVars.root_dir = getExternalFilesDir("Paperless")!!.absolutePath + File.separator
+        SdkVars.cache_dir = cacheDir?.absolutePath + File.separator
+        SdkVars.externalCacheDir = externalCacheDir?.absolutePath + File.separator
+        SdkVars.files_dir = SdkVars.root_dir + "files" + File.separator
+        SdkVars.download_dir = SdkVars.root_dir + "download" + File.separator
+        SdkVars.logcat_dir = SdkVars.root_dir + "logcat" + File.separator
+        SdkVars.crash_dir = SdkVars.root_dir + "crash" + File.separator
+        SdkVars.system_logcat_dir = SdkVars.root_dir + "systemLogcat" + File.separator
         LogUtils.e(
             "目录："
-                    + "\nroot_dir:${CallValue.root_dir}"
-                    + "\ncache_dir:${CallValue.cache_dir}"
-                    + "\nlogcat_dir:${CallValue.logcat_dir}"
-                    + "\ncrash_dir:${CallValue.crash_dir}"
-                    + "\nsystem_logcat_dir:${CallValue.system_logcat_dir}"
+                    + "\nroot_dir:${SdkVars.root_dir}"
+                    + "\ncache_dir:${SdkVars.cache_dir}"
+                    + "\nlogcat_dir:${SdkVars.logcat_dir}"
+                    + "\ncrash_dir:${SdkVars.crash_dir}"
+                    + "\nsystem_logcat_dir:${SdkVars.system_logcat_dir}"
                     + "\nPathUtils:"
                     + "\ngetRootPath:${PathUtils.getRootPath()}"
                     + "\ngetDataPath:${PathUtils.getDataPath()}"

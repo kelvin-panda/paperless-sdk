@@ -7,16 +7,15 @@ import java.util.concurrent.LinkedBlockingQueue
  *  @author : Administrator
  *  created on 2025/7/7 9:27
  */
-class CallValue {
+class SdkVars {
     companion object {
-        //<editor-fold desc="版本开关">
 
-        var isTableCardEnable: Boolean = false
-
-        //</editor-fold>
-
+        //<editor-fold desc="本机会议参数">
         var localDeviceId: Int = 0
-
+        var localMeetingId: Int = 0
+        var localRoomId: Int = 0
+        var localMemberId: Int = 0
+        //</editor-fold>
 
         //<editor-fold desc="应用目录">
         var root_dir: String = ""
@@ -25,7 +24,9 @@ class CallValue {
         var logcat_dir: String = ""
         var crash_dir: String = ""
         var system_logcat_dir: String = ""
-        var file_dir: String = ""
+        var files_dir: String = ""
+        var agenda_dir: String = ""
+        var bind_pdf_dir: String = ""
         var download_dir: String = ""
         //</editor-fold>
 
