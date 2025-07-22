@@ -13,9 +13,27 @@ class SdkVars {
         //<editor-fold desc="本机会议参数">
         var localDeviceId: Int = 0
         var localMeetingId: Int = 0
+        var localSingInType: Int = 0
         var localRoomId: Int = 0
         var localMemberId: Int = 0
+        var localMemberName = ""
+        var localMeetingName = ""
         //</editor-fold>
+
+        /**
+         * 成功绑定
+         */
+        var isBindAidl = false
+
+        /**
+         * 是否已经展示了第二屏桌牌
+         */
+        var isShowingTablePresentation = false
+
+        var initializationFinished = false
+        var initializationIsOver = false
+        var isServerConnected = false
+
 
         //<editor-fold desc="应用目录">
         var root_dir: String = ""

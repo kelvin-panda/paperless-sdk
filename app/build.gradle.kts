@@ -52,9 +52,9 @@ dependencies {
     implementation(libs.material)
     implementation(libs.androidx.activity)
     implementation(libs.androidx.constraintlayout)
-    implementation(libs.xxPermissions)
-    implementation(libs.eventbus)
-    implementation(libs.utilcodex)
+    api(libs.xxPermissions)
+    api(libs.eventbus)
+    api(libs.utilcodex)
 
 //    implementation(libs.paperlessSdk)
     api(project(":sdk"))

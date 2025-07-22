@@ -70,7 +70,7 @@ afterEvaluate {
             create<MavenPublication>("release") {
                 groupId = "com.gitee.xlk_gitee"
                 artifactId = "sdk-library"
-                version = "1.0.1"
+                version = "1.0.2"
                 from(components["release"])
             }
         }
@@ -78,8 +78,8 @@ afterEvaluate {
 }
 dependencies {
     implementation("androidx.appcompat:appcompat:1.6.1")
-    implementation("com.blankj:utilcodex:1.31.1")
-    implementation("org.greenrobot:eventbus:3.3.1")
+    api("com.blankj:utilcodex:1.31.1")
+    api("org.greenrobot:eventbus:3.3.1")
     api(files("libs/ini4j-0.5.2.jar"))
     api(files("libs/protobuf-java-3.3.0.jar"))
 }
