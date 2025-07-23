@@ -16,8 +16,8 @@ class SdkVars {
         var localSingInType: Int = 0
         var localRoomId: Int = 0
         var localMemberId: Int = 0
-        var localMemberName = ""
-        var localMeetingName = ""
+        var localMemberName: String = ""
+        var localMeetingName: String = ""
         //</editor-fold>
 
         /**
@@ -29,10 +29,19 @@ class SdkVars {
          * 是否已经展示了第二屏桌牌
          */
         var isShowingTablePresentation = false
-
         var initializationFinished = false
         var initializationIsOver = false
         var isServerConnected = false
+
+        /**
+         * 存放当前的界面状态
+         * - 0 主界面
+         * - 1 会议界面
+         * - 2 后台管理界面
+         * - 3 离线会议界面
+         * - 4 常用人员界面
+         */
+        var current_face_status = 0
 
 
         //<editor-fold desc="应用目录">

@@ -7,7 +7,7 @@ import java.nio.ByteBuffer
  *  @author : Administrator
  *  created on 2025/7/7 9:28
  */
-data class FrameData(
+class FrameData(
     var isKeyFrame: Int = 0,
     var res: Int = 0,
     var codecid: Int = 0,

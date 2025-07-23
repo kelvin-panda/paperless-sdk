@@ -198,7 +198,7 @@ open class BaseJni {
     /**
      * 设备是否免签到模式
      */
-    fun isExemptCheckIn(devId: Int): Boolean {
+    fun isExemptCheckIn(devId: Int = SdkVars.localDeviceId): Boolean {
         queryDeviceProperty(
             devId,
             InterfaceMacro.Pb_MeetDevicePropertyID.Pb_MEETDEVICE_PROPERTY_DEVICEFLAG.number
@@ -228,7 +228,7 @@ open class BaseJni {
     /**
      * 判断设备是否在线
      */
-    fun isOnline(devId: Int): Boolean {
+    fun isOnline(devId: Int = SdkVars.localDeviceId): Boolean {
         queryDeviceProperty(
             devId,
             InterfaceMacro.Pb_MeetDevicePropertyID.Pb_MEETDEVICE_PROPERTY_NETSTATUS.number
@@ -342,6 +342,14 @@ open class BaseJni {
                 .setLiftgroupres1(liftgroupres1)
                 .setDeviceflag(deviceflag)
                 .build().toByteArray()
+        )
+    }
+
+    fun modDevice(build: InterfaceDevice.pbui_DeviceModInfo) {
+        Call.callMethod(
+            InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_DEVICEINFO.number,
+            InterfaceMacro.Pb_Method.Pb_METHOD_MEET_INTERFACE_MODIFYINFO.number,
+            build.toByteArray()
         )
     }
 
@@ -1763,14 +1771,16 @@ open class BaseJni {
     }
 
     /**
-     * 绑定参会人（不修改参会人角色）
+     * 绑定参会人
      */
-    fun bindMember(devId: Int, memberId: Int) {
+    fun bindMember(devId: Int, memberId: Int = 0, role: Int = -1) {
+        val builder = InterfaceRoom.pbui_Item_MeetSeatDetailInfo.newBuilder()
+        if (role != -1) builder.setRole(role)
         Call.callMethod(
             InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_MEETSEAT.number,
             InterfaceMacro.Pb_Method.Pb_METHOD_MEET_INTERFACE_MODIFY.number,
             InterfaceRoom.pbui_Type_MeetSeatDetailInfo.newBuilder()
-                .addItem(InterfaceRoom.pbui_Item_MeetSeatDetailInfo.newBuilder().setSeatid(devId).setNameId(memberId).build())
+                .addItem(builder.setSeatid(devId).setNameId(memberId).build())
                 .build().toByteArray()
         )
     }
@@ -3211,13 +3221,13 @@ open class BaseJni {
 
     //<editor-fold desc="停止资源操作">
 
-    fun stopResource(resId: Int, devIds: MutableList<Int>, playflag: Int, triggeruserval: Int) {
+    fun stopResource(resId: Int, devIds: MutableList<Int>, playflag: Int = 0, triggeruserval: Int = 0) {
         val temps: MutableList<Int> = mutableListOf()
         temps.add(resId)
         stopResource(temps, devIds, playflag, triggeruserval)
     }
 
-    fun stopResource(resId: Int, devId: Int, playflag: Int, triggeruserval: Int) {
+    fun stopResource(resId: Int, devId: Int, playflag: Int = 0, triggeruserval: Int = 0) {
         Call.callMethod(
             InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_STOPPLAY.number,
             InterfaceMacro.Pb_Method.Pb_METHOD_MEET_INTERFACE_CLOSE.number,
@@ -3233,7 +3243,7 @@ open class BaseJni {
     /**
      * 停止资源操作
      */
-    fun stopResource(resIds: MutableList<Int>, devIds: MutableList<Int>, playflag: Int, triggeruserval: Int) {
+    fun stopResource(resIds: MutableList<Int>, devIds: MutableList<Int>, playflag: Int = 0, triggeruserval: Int = 0) {
         Call.callMethod(
             InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_STOPPLAY.number,
             InterfaceMacro.Pb_Method.Pb_METHOD_MEET_INTERFACE_CLOSE.number,
