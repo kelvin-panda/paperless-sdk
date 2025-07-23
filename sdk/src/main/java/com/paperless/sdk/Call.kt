@@ -21,7 +21,7 @@ object Call {
     fun initSetDirectBuf() {
         m_dbuf = ByteBuffer.allocateDirect(SdkVars.frame_size)
         m_dexbuf = ByteBuffer.allocateDirect(SdkVars.frame_codec_size)
-        setDirectBuf(m_dbuf!!, m_dexbuf!!)
+        initDirectBuf(m_dbuf!!, m_dexbuf!!)
     }
 
     /**
@@ -31,7 +31,7 @@ object Call {
      */
     external fun switchAgendav3(enable: Int)
 
-    external fun setDirectBuf(dbuf: ByteBuffer, dexbuf: ByteBuffer)
+    external fun initDirectBuf(dbuf: ByteBuffer, dexbuf: ByteBuffer)
 
     //初始化无纸化接口
     //data 参考无纸化接口对照表

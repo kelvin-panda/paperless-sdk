@@ -1029,7 +1029,7 @@ open class BaseJni {
         )
     }
 
-    open fun startBulletin(id: Int) {
+    open fun stopBulletin(id: Int) {
         Call.callMethod(
             InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_MEETBULLET.number,
             InterfaceMacro.Pb_Method.Pb_METHOD_MEET_INTERFACE_STOP.number,
@@ -1670,6 +1670,7 @@ open class BaseJni {
                 .build().toByteArray()
         )
     }
+
     /**
      * [InterfaceMember.Pb_MemPermProID]
      */
@@ -1679,6 +1680,7 @@ open class BaseJni {
     ): Boolean {
         return queryMemberPermissionsAttribute(perCode, memberId) == 1
     }
+
     /**
      * 查询参会人员权限属性
      * @param propertyid [InterfaceMember.Pb_MemPermProID]
@@ -2097,13 +2099,13 @@ open class BaseJni {
      */
     open fun complexQueryMeetInfo(
         queryflag: Int,
-        meetingid: Int,
-        cacheflag: Long,
-        roomId: Int,
-        status: Int,
-        startutctime: Int,
-        endutctime: Int,
-        phone: String
+        meetingid: Int = 0,
+        cacheflag: Long = 0L,
+        roomId: Int = 0,
+        status: Int = 0,
+        startutctime: Int = 0,
+        endutctime: Int = 0,
+        phone: String = ""
     ) {
         Call.callMethod(
             InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_MEETINFO.number,
@@ -2119,6 +2121,10 @@ open class BaseJni {
                 .setPhone(phone.s2b())
                 .build().toByteArray()
         )
+    }
+
+    open fun complexQueryMeetInfo(flag: Int, phone: String) {
+        complexQueryMeetInfo(flag, 0, 0, 0, 0, 0, 0, phone)
     }
 
     open fun addMeet(item: InterfaceMeet.pbui_Item_MeetMeetInfo) {
@@ -2272,6 +2278,17 @@ open class BaseJni {
             InterfaceFile.pbui_Type_MeetDirDetailInfo.newBuilder()
                 .addItem(item)
                 .build().toByteArray()
+        )
+    }
+
+    open fun modDirFlag(item: InterfaceFile.pbui_Item_MeetDirDetailInfo) {
+        val build = InterfaceFile.pbui_Type_MeetDirDetailInfo.newBuilder()
+            .addItem(item)
+            .build()
+        Call.callMethod(
+            InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_MEETDIRECTORY.number,
+            InterfaceMacro.Pb_Method.Pb_METHOD_MEET_INTERFACE_MODIFY.number,
+            build.toByteArray()
         )
     }
 
@@ -3130,14 +3147,9 @@ open class BaseJni {
     }
 
     open fun artBoardInk(
-        opermemberid: Int,
-        srcmemid: Int,
-        srcwbid: Long,
-        operid: Int,
-        linesize: Int,
-        argb: Int,
-        utcstamp: Long,
-        inkList: MutableList<PointF>
+        opermemberid: Int, srcmemid: Int, srcwbid: Long,
+        operid: Int, linesize: Int, argb: Int,
+        utcstamp: Long, inkList: MutableList<PointF>
     ) {
         Call.callMethod(
             InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_WHITEBOARD.number,
@@ -3157,19 +3169,14 @@ open class BaseJni {
     }
 
     open fun artBoardLine(
-        opermemberid: Int,
-        srcmemid: Int,
-        srcwbid: Long,
-        operid: Int,
-        linesize: Int,
-        argb: Int,
-        utcstamp: Long,
-        inkList: MutableList<PointF>
+        opermemberid: Int, srcmemid: Int, srcwbid: Long,
+        operid: Int, linesize: Int, argb: Int,
+        utcstamp: Long, inkList: MutableList<Float>
     ) {
         Call.callMethod(
             InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_WHITEBOARD.number,
-            InterfaceMacro.Pb_Method.Pb_METHOD_MEET_INTERFACE_ADDINK.number,
-            InterfaceWhiteboard.pbui_Type_MeetWhiteBoardInkItem.newBuilder()
+            InterfaceMacro.Pb_Method.Pb_METHOD_MEET_INTERFACE_ADDRECT.number,
+            InterfaceWhiteboard.pbui_Item_MeetWBRectDetail.newBuilder()
                 .setOpermemberid(opermemberid)
                 .setSrcmemid(srcmemid)
                 .setSrcwbid(srcwbid)
@@ -3177,7 +3184,7 @@ open class BaseJni {
                 .setUtcstamp(utcstamp)
                 .setArgb(argb)
                 .setLinesize(linesize)
-                .addAllPinklist(SdkUtil.formatList(inkList))
+                .addAllPt(inkList)
                 .setFiguretype(InterfaceMacro.Pb_MeetPostilFigureType.Pb_WB_FIGURETYPE_LINE.number)
                 .build().toByteArray()
         )
@@ -3209,7 +3216,6 @@ open class BaseJni {
                 .build().toByteArray()
         )
     }
-
 
     open fun artBoardCircle(
         opermemberid: Int,
@@ -3797,7 +3803,7 @@ open class BaseJni {
         )
     }
 
-    open fun submitScore(build:InterfaceFilescorevote.pbui_Type_UserDefineFileScoreMemberStatisticNotify) {
+    open fun submitScore(build: InterfaceFilescorevote.pbui_Type_UserDefineFileScoreMemberStatisticNotify) {
         Call.callMethod(
             InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_FILESCOREVOTESIGN.number,
             InterfaceMacro.Pb_Method.Pb_METHOD_MEET_INTERFACE_SUBMIT.number,

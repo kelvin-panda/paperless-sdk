@@ -503,7 +503,7 @@ Java_com_paperless_sdk_Call_callMethod(JNIEnv *env, jobject thiz, jint type, jin
 }
 
 extern "C" JNIEXPORT void JNICALL
-Java_com_paperless_sdk_Call_setDirectBuf(JNIEnv *env, jobject thiz, jobject dbuf, jobject dbufexdata) {
+Java_com_paperless_sdk_Call_initDirectBuf(JNIEnv *env, jobject thiz, jobject dbuf, jobject dbufexdata) {
     g_disbuf = (char *) (env->GetDirectBufferAddress(dbuf));
     g_disbufsize = env->GetDirectBufferCapacity(dbuf);
     g_disbufexdata = (char *) (env->GetDirectBufferAddress(dbufexdata));
