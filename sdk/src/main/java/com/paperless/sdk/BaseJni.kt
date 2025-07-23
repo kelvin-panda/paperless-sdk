@@ -1,5 +1,6 @@
 package com.paperless.sdk
 
+import android.graphics.Color
 import android.graphics.PointF
 import android.os.Build
 import com.blankj.utilcode.util.LogUtils
@@ -8,9 +9,11 @@ import com.google.protobuf.ByteString
 import com.mogujie.tt.protobuf.InterfaceAdmin
 import com.mogujie.tt.protobuf.InterfaceAgenda
 import com.mogujie.tt.protobuf.InterfaceBase
+import com.mogujie.tt.protobuf.InterfaceBase.pbui_QueryInfoByID
 import com.mogujie.tt.protobuf.InterfaceBullet
 import com.mogujie.tt.protobuf.InterfaceContext
 import com.mogujie.tt.protobuf.InterfaceDevice
+import com.mogujie.tt.protobuf.InterfaceDevice.pbui_Type_DeviceResPlay
 import com.mogujie.tt.protobuf.InterfaceDownload
 import com.mogujie.tt.protobuf.InterfaceFaceconfig
 import com.mogujie.tt.protobuf.InterfaceFile
@@ -23,16 +26,21 @@ import com.mogujie.tt.protobuf.InterfaceMeetuserdef
 import com.mogujie.tt.protobuf.InterfaceMember
 import com.mogujie.tt.protobuf.InterfacePerson
 import com.mogujie.tt.protobuf.InterfacePlaymedia
+import com.mogujie.tt.protobuf.InterfacePublicinfo
 import com.mogujie.tt.protobuf.InterfaceRoom
 import com.mogujie.tt.protobuf.InterfaceSignin
 import com.mogujie.tt.protobuf.InterfaceStop
 import com.mogujie.tt.protobuf.InterfaceStream
 import com.mogujie.tt.protobuf.InterfaceSystemlog
+import com.mogujie.tt.protobuf.InterfaceSystemlog.pbui_Add_MeetSystemLog
 import com.mogujie.tt.protobuf.InterfaceTablecard
 import com.mogujie.tt.protobuf.InterfaceUpload
 import com.mogujie.tt.protobuf.InterfaceVideo
 import com.mogujie.tt.protobuf.InterfaceVote
+import com.mogujie.tt.protobuf.InterfaceVote.pbui_Type_MeetOnVotingDetailInfo
 import com.mogujie.tt.protobuf.InterfaceWhiteboard
+import com.paperless.sdk.SdkVars.Companion.localDeviceId
+import com.paperless.sdk.SdkVars.Companion.localMemberId
 import com.paperless.util.SdkUtil
 import java.util.UUID
 
@@ -43,7 +51,7 @@ import java.util.UUID
  */
 open class BaseJni {
 
-    fun loadLibrary() {
+    open fun loadLibrary() {
         LogUtils.e("loadLibrary start")
         System.loadLibrary("avcodec-57")
         System.loadLibrary("avdevice-57")
@@ -68,14 +76,14 @@ open class BaseJni {
     }
 
     //    @RequiresApi(api = Build.VERSION_CODES.O)
-    fun getUUID(): String {
+    open fun getUUID(): String {
         val replace = UUID.randomUUID().toString().replace("-", "")
         val my_uuid = SPUtils.getInstance().getString("my_uuid", replace)
         SPUtils.getInstance().put("my_uuid", my_uuid)
         return my_uuid
     }
 
-    fun initialization(
+    open fun initialization(
         programType: Int,
         iniFilePath: String,
         uniqueId: String,
@@ -100,7 +108,7 @@ open class BaseJni {
     }
 
     //<editor-fold desc="缓存">
-    fun cache(type: Int) {
+    open fun cache(type: Int) {
         if (type == InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_MEETAGENDA.number) {
             cache(type, InterfaceMacro.Pb_AgendaType.Pb_MEET_AGENDA_TYPE_TEXT.number)
             cache(type, InterfaceMacro.Pb_AgendaType.Pb_MEET_AGENDA_TYPE_FILE.number)
@@ -116,7 +124,7 @@ open class BaseJni {
      * @param id id用法描述 eg:缓存目录,id设置为0表示缓存所有目录信息(不包括目录里的文件),当id=1时表示缓存该目录里的文件,
      * 如果id=0不支持则会返回 ERROR_MEET_INTERFACE_PARAMETER（-12参数错误）
      */
-    fun cache(type: Int, id: Int = 0, cacheflag: Int = 0) {
+    open fun cache(type: Int, id: Int = 0, cacheflag: Int = 0) {
         val build = InterfaceBase.pbui_MeetCacheOper.newBuilder()
             .setCacheflag(cacheflag)
             .setId(id)
@@ -128,24 +136,24 @@ open class BaseJni {
         )
     }
 
-    fun checkCache(type: Int, id: Int = 0, cacheflag: Int = 0): Boolean {
+    open fun checkCache(type: Int, id: Int = 0, cacheflag: Int = 0): Boolean {
         val ret = Call.checkcache(type, id, cacheflag)
         LogUtils.e("检查缓存 type=$type,id=$id,cacheflag=$cacheflag, ret=$ret")
         return ret >= 0
     }
 
-    fun cleanAllCache() {
+    open fun cleanAllCache() {
         cleanCache(InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_MEETCLEAR.number)
     }
 
-    fun cleanCache(type: Int) {
+    open fun cleanCache(type: Int) {
         Call.callMethod(type, InterfaceMacro.Pb_Method.Pb_METHOD_MEET_INTERFACE_CLEAR.number, null)
     }
     //</editor-fold>
 
     //<editor-fold desc="设备相关">
 
-    fun queryDevice(type: Int = InterfaceDevice.Pb_DeviceExcludeFlag.Pb_DEVICE_QUERYFLAG_ZERO_VALUE): InterfaceDevice.pbui_Type_DeviceDetailInfo? {
+    open fun queryDevice(type: Int = InterfaceDevice.Pb_DeviceExcludeFlag.Pb_DEVICE_QUERYFLAG_ZERO_VALUE): InterfaceDevice.pbui_Type_DeviceDetailInfo? {
         Call.callMethod(
             InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_DEVICEINFO.number,
             InterfaceMacro.Pb_Method.Pb_METHOD_MEET_INTERFACE_QUERY.number,
@@ -158,7 +166,20 @@ open class BaseJni {
         return null
     }
 
-    fun queryDeviceById(devId: Int): InterfaceDevice.pbui_Item_DeviceDetailInfo? {
+    open fun queryCanJoinDevice(): pbui_Type_DeviceResPlay? {
+        Call.callMethod(
+            InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_DEVICEINFO.number,
+            InterfaceMacro.Pb_Method.Pb_METHOD_MEET_INTERFACE_RESINFO.number,
+            pbui_Type_DeviceResPlay.newBuilder()
+                .setQueryflag(InterfaceDevice.Pb_DevicePlayQueryFlag.Pb_DEVICEPLAY_FLAG_SCREEN.number)
+                .build().toByteArray()
+        )?.let {
+            return pbui_Type_DeviceResPlay.parseFrom(it)
+        }
+        return null
+    }
+
+    open fun queryDeviceById(devId: Int): InterfaceDevice.pbui_Item_DeviceDetailInfo? {
         Call.callMethod(
             InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_DEVICEINFO.number,
             InterfaceMacro.Pb_Method.Pb_METHOD_MEET_INTERFACE_SINGLEQUERYBYID.number,
@@ -173,7 +194,7 @@ open class BaseJni {
         return null
     }
 
-    fun queryDeviceNameById(devId: Int): String {
+    open fun queryDeviceNameById(devId: Int): String {
         queryDeviceProperty(devId, InterfaceMacro.Pb_MeetDevicePropertyID.Pb_MEETDEVICE_PROPERTY_NAME.number)?.let {
             InterfaceDevice.pbui_DeviceStringProperty.parseFrom(it)?.let {
                 return it.propertytext.toStringUtf8()
@@ -182,7 +203,7 @@ open class BaseJni {
         return ""
     }
 
-    fun queryMemberIdByDevId(devId: Int, meetingid: Int): Int {
+    open fun queryMemberIdByDevId(devId: Int, meetingid: Int): Int {
         queryDeviceProperty(
             devId,
             InterfaceMacro.Pb_MeetDevicePropertyID.Pb_MEETDEVICE_PROPERTY_MEMBERID.number,
@@ -196,9 +217,49 @@ open class BaseJni {
     }
 
     /**
+     * 获取设备的媒体播放状态
+     * @return =-1 不在播放媒体，=0 媒体播放中，=1 媒体暂停播放中
+     */
+    open fun queryMediaPlayStatus(devId: Int): Int {
+        queryDeviceById(devId)?.let {
+            if (it.resinfoList.isNotEmpty()) {
+                val item = it.resinfoList[0]
+                if (item.playstatus == InterfaceMacro.Pb_DevicePlayStatus.Pb_DEVICE_PLAYSTATUS_MEDIA.number) {
+                    return item.val2
+                }
+            }
+        }
+        return -1
+    }
+
+    /**
+     * 获取A设备所有正在播放B设备[subId]通道的播放资源id
+     * - eg：A的0号和2号资源正在播放B的屏幕源，则返回[0,2]列表
+     * @param id1 A设备id
+     * @param id2 B设备id
+     * @param subId 播放通道 2：屏幕 3：摄像头
+     * @return 如果不为空，则调用端进行停止A设备的该资源列表
+     */
+    open fun queryPlayingResId(id1: Int, id2: Int, subId: Int): MutableList<Int> {
+        val temps = mutableListOf<Int>()
+        queryDeviceById(id1)?.let {
+            it.resinfoList.forEachIndexed { index, info ->
+                //val: playstatus =Pb_DEVICE_PLAYSTATUS_MEDIA mediaid，Pb_DEVICE_PLAYSTATUS_STREAM 设备ID，Pb_DEVICE_PLAYSTATUS_TALK 对讲设备ID
+                //val2:playstatus =Pb_DEVICE_PLAYSTATUS_MEDIA 0播放中,1暂停| Pb_DEVICE_PLAYSTATUS_STREAM,Pb_DEVICE_PLAYSTATUS_TALK 子流通道
+                if (info.playstatus == InterfaceMacro.Pb_DevicePlayStatus.Pb_DEVICE_PLAYSTATUS_STREAM.number) {
+                    if (info.`val` == id2 && info.val2 == subId) {
+                        temps.add(index)
+                    }
+                }
+            }
+        }
+        return temps
+    }
+
+    /**
      * 设备是否免签到模式
      */
-    fun isExemptCheckIn(devId: Int = SdkVars.localDeviceId): Boolean {
+    open fun isExemptCheckIn(devId: Int = SdkVars.localDeviceId): Boolean {
         queryDeviceProperty(
             devId,
             InterfaceMacro.Pb_MeetDevicePropertyID.Pb_MEETDEVICE_PROPERTY_DEVICEFLAG.number
@@ -213,7 +274,7 @@ open class BaseJni {
     /**
      * 获取设备绑定的父设备id
      */
-    fun queryBoundParentId(devId: Int): Int {
+    open fun queryBoundParentId(devId: Int): Int {
         queryDeviceProperty(
             devId,
             InterfaceMacro.Pb_MeetDevicePropertyID.Pb_MEETDEVICE_PROPERTY_PARENTDEVICE.number
@@ -228,7 +289,7 @@ open class BaseJni {
     /**
      * 判断设备是否在线
      */
-    fun isOnline(devId: Int = SdkVars.localDeviceId): Boolean {
+    open fun isOnline(devId: Int = SdkVars.localDeviceId): Boolean {
         queryDeviceProperty(
             devId,
             InterfaceMacro.Pb_MeetDevicePropertyID.Pb_MEETDEVICE_PROPERTY_NETSTATUS.number
@@ -248,7 +309,7 @@ open class BaseJni {
      * @param paramterval 传入参数
      * @return [InterfaceDevice.pbui_DeviceInt32uProperty]（整数）、[InterfaceDevice.pbui_DeviceStringProperty]（字符串）
      */
-    fun queryDeviceProperty(devId: Int, propertyid: Int, paramterval: Int = 0): ByteArray? {
+    open fun queryDeviceProperty(devId: Int, propertyid: Int, paramterval: Int = 0): ByteArray? {
         return Call.callMethod(
             InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_DEVICEINFO.number,
             InterfaceMacro.Pb_Method.Pb_METHOD_MEET_INTERFACE_QUERYPROPERTY.number,
@@ -260,7 +321,7 @@ open class BaseJni {
         )
     }
 
-    fun complexQueryDevice(
+    open fun complexQueryDevice(
         queryflag: Int,
         devcietype: Int,
         mask: Int,
@@ -286,7 +347,7 @@ open class BaseJni {
         return null
     }
 
-    fun modDeviceFlag(devId: Int, deviceflag: Int) {
+    open fun modDeviceFlag(devId: Int, deviceflag: Int) {
         Call.callMethod(
             InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_DEVICEINFO.number,
             InterfaceMacro.Pb_Method.Pb_METHOD_MEET_INTERFACE_MODIFYINFO.number,
@@ -298,7 +359,7 @@ open class BaseJni {
         )
     }
 
-    fun modParentId(tableDevId: Int, parentId: Int) {
+    open fun modParentId(tableDevId: Int, parentId: Int) {
         Call.callMethod(
             InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_DEVICEINFO.number,
             InterfaceMacro.Pb_Method.Pb_METHOD_MEET_INTERFACE_MODIFYINFO.number,
@@ -321,7 +382,7 @@ open class BaseJni {
      * @param liftgroupres1 升降话筒组ID
      * @param deviceflag    参见 Interface_Macro.proto Pb_MeetDeviceFlag 定义
      */
-    fun modDevice(
+    open fun modDevice(
         modflag: Int,
         devcieid: Int,
         devname: String,
@@ -345,7 +406,7 @@ open class BaseJni {
         )
     }
 
-    fun modDevice(build: InterfaceDevice.pbui_DeviceModInfo) {
+    open fun modDevice(build: InterfaceDevice.pbui_DeviceModInfo) {
         Call.callMethod(
             InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_DEVICEINFO.number,
             InterfaceMacro.Pb_Method.Pb_METHOD_MEET_INTERFACE_MODIFYINFO.number,
@@ -356,7 +417,7 @@ open class BaseJni {
     /**
      * 修改设备硬件信息
      */
-    fun modDeviceMacInfo(json: String) {
+    open fun modDeviceMacInfo(json: String) {
         Call.callMethod(
             InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_DEVICEINFO.number,
             InterfaceMacro.Pb_Method.Pb_METHOD_MEET_INTERFACE_SEND.number,
@@ -368,7 +429,7 @@ open class BaseJni {
 
     // 删除
 
-    fun delDevice(devId: Int) {
+    open fun delDevice(devId: Int) {
         delRoomDevice(0, devId)
         Call.callMethod(
             InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_DEVICEINFO.number,
@@ -381,7 +442,7 @@ open class BaseJni {
 
     // 升级
 
-    fun uploadDevice(mediaId: Int) {
+    open fun uploadDevice(mediaId: Int) {
         Call.callMethod(
             InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_DEVICEINFO.number,
             InterfaceMacro.Pb_Method.Pb_METHOD_MEET_INTERFACE_UPDATE.number,
@@ -397,7 +458,7 @@ open class BaseJni {
      * {"dev":[{"id":"0x1100000","dy":80,"kj":"","time":"456789123"},{"dy":89,"id":"0x110800c","kj":"13.25GB/104.35GB","time":"1748068477145","wifi":"Redmi_95_5G"}]}
      * ```
      */
-    fun sendDeviceMacInfo(json: String) {
+    open fun sendDeviceMacInfo(json: String) {
         Call.callMethod(
             InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_DEVICEINFO.number,
             InterfaceMacro.Pb_Method.Pb_METHOD_MEET_INTERFACE_SEND.number,
@@ -413,7 +474,7 @@ open class BaseJni {
      * {"dev":[{"id":"0x1100000","dy":80,"kj":"","time":"456789123"},{"dy":89,"id":"0x110800c","kj":"13.25GB/104.35GB","time":"1748068477145","wifi":"Redmi_95_5G"}]}
      * ```
      */
-    fun queryDeviceMacInfo(): InterfaceDevice.pbui_Type_DeviceMacInfo? {
+    open fun queryDeviceMacInfo(): InterfaceDevice.pbui_Type_DeviceMacInfo? {
         Call.callMethod(
             InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_DEVICEINFO.number,
             InterfaceMacro.Pb_Method.Pb_METHOD_MEET_INTERFACE_DUMP.number,
@@ -433,7 +494,7 @@ open class BaseJni {
     /**
      * 辅助签到
      */
-    fun assistedCheckIn(devIds: MutableList<Int>) {
+    open fun assistedCheckIn(devIds: MutableList<Int>) {
         Call.callMethod(
             InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_DEVICEOPER.number,
             InterfaceMacro.Pb_Method.Pb_METHOD_MEET_INTERFACE_ENTER.number,
@@ -446,7 +507,7 @@ open class BaseJni {
     /**
      * 网络唤醒
      */
-    fun wakeupDevices(devIds: MutableList<Int>) {
+    open fun wakeupDevices(devIds: MutableList<Int>) {
         Call.callMethod(
             InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_DEVICEOPER.number,
             InterfaceMacro.Pb_Method.Pb_METHOD_MEET_INTERFACE_REBOOT.number,
@@ -460,7 +521,7 @@ open class BaseJni {
      * 申请参会人权限
      * @param privilege [InterfaceMacro.Pb_MemberPermissionPropertyID]
      */
-    fun applyMemberPermission(devId: Int, privilege: Int) {
+    open fun applyMemberPermission(devId: Int, privilege: Int) {
         Call.callMethod(
             InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_DEVICEOPER.number,
             InterfaceMacro.Pb_Method.Pb_METHOD_MEET_INTERFACE_REQUESTPRIVELIGE.number,
@@ -475,7 +536,7 @@ open class BaseJni {
      * 回复参会人的权限申请
      * @param returnCode 1=同意,0=不同意
      */
-    fun responseMemberPermission(devId: Int, returnCode: Int) {
+    open fun responseMemberPermission(devId: Int, returnCode: Int) {
         Call.callMethod(
             InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_DEVICEOPER.number,
             InterfaceMacro.Pb_Method.Pb_METHOD_MEET_INTERFACE_RESPONSEPRIVELIGE.number,
@@ -486,14 +547,13 @@ open class BaseJni {
         )
     }
 
-
     /**
      * 设备对讲
      *
      * @param devIds      设备Id
      * @param inviteflage 设备对讲标志 [InterfaceDevice.Pb_DeviceInviteFlag]
      */
-    fun deviceIntercom(devIds: List<Int?>?, inviteflage: Int) {
+    open fun deviceIntercom(devIds: List<Int?>?, inviteflage: Int) {
         Call.callMethod(
             InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_DEVICEOPER.number,
             InterfaceMacro.Pb_Method.Pb_METHOD_MEET_INTERFACE_REQUESTINVITE.number,
@@ -509,7 +569,7 @@ open class BaseJni {
      *
      * @param devid 发起端设备ID
      */
-    fun stopDeviceIntercom(devid: Int) {
+    open fun stopDeviceIntercom(devid: Int) {
         Call.callMethod(
             InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_DEVICEOPER.number,
             InterfaceMacro.Pb_Method.Pb_METHOD_MEET_INTERFACE_EXITCHAT.number,
@@ -525,7 +585,7 @@ open class BaseJni {
      * @param devId       设备Id
      * @param inviteflage 设备对讲标志 [InterfaceDevice.Pb_DeviceInviteFlag]
      */
-    fun responseDeviceIntercom(devId: Int, inviteflage: Int) {
+    open fun responseDeviceIntercom(devId: Int, inviteflage: Int) {
         Call.callMethod(
             InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_DEVICEOPER.number,
             InterfaceMacro.Pb_Method.Pb_METHOD_MEET_INTERFACE_RESPONSEINVITE.number,
@@ -543,7 +603,7 @@ open class BaseJni {
      * @param textType 文本类型 参见 [InterfaceDevice.Pb_TextBroadcast_Type]
      * @param message  文本信息
      */
-    fun sendTextBroadcast(devIds: List<Int>, textType: Int, message: String) {
+    open fun sendTextBroadcast(devIds: List<Int>, textType: Int, message: String) {
         Call.callMethod(
             InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_DEVICEOPER.number,
             InterfaceMacro.Pb_Method.Pb_METHOD_MEET_INTERFACE_TEXTMSG.number,
@@ -556,12 +616,27 @@ open class BaseJni {
     }
 
     /**
+     * 发布语音广播给发布端
+     */
+    open fun sendVoiceBroadcast(msg: String) {
+        Call.callMethod(
+            InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_DEVICEOPER.number,
+            InterfaceMacro.Pb_Method.Pb_METHOD_MEET_INTERFACE_TEXTMSG.number,
+            InterfaceDevice.pbui_Type_MeetDoTextBrodcast.newBuilder()
+                .addAllDevid(mutableListOf())
+                .setTexttype(6)
+                .setPtextmsg(msg.s2b())
+                .build().toByteArray()
+        )
+    }
+
+    /**
      * 发送远程配置
      *
      * @param devIds   设备id
      * @param jsonText json格式
      */
-    fun remoteConfig(devIds: List<Int>, jsonText: String) {
+    open fun remoteConfig(devIds: List<Int>, jsonText: String) {
         Call.callMethod(
             InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_DEVICEOPER.number,
             InterfaceMacro.Pb_Method.Pb_METHOD_MEET_INTERFACE_REMOTESET.number,
@@ -577,7 +652,7 @@ open class BaseJni {
      *
      * @param pageId [InterfaceDevice.Pb_SwitchPageId]
      */
-    fun togglePublisherPage(pageId: Int) {
+    open fun togglePublisherPage(pageId: Int) {
         Call.callMethod(
             InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_DEVICEOPER.number,
             InterfaceMacro.Pb_Method.Pb_METHOD_MEET_INTERFACE_SUBMIT.number,
@@ -597,7 +672,7 @@ open class BaseJni {
      * @param oper [InterfaceMacro.Pb_DeviceControlFlag]
      * @param devIds 控制的设备,为0表示当前会议所有
      */
-    fun terminalControl(oper: Int, operval1: Int, operval2: Int, devIds: List<Int>) {
+    open fun terminalControl(oper: Int, devIds: List<Int>, operval1: Int = 0, operval2: Int = 0) {
         Call.callMethod(
             InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_DEVICECONTROL.number,
             InterfaceMacro.Pb_Method.Pb_METHOD_MEET_INTERFACE_CONTROL.number,
@@ -616,7 +691,7 @@ open class BaseJni {
     /**
      * @param propertyId [InterfaceMacro.Pb_ContextPropertyID]
      */
-    fun queryContextAttribute(propertyId: Int): InterfaceContext.pbui_MeetContextInfo? {
+    open fun queryContextAttribute(propertyId: Int): InterfaceContext.pbui_MeetContextInfo? {
         Call.callMethod(
             InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_MEETCONTEXT.number,
             InterfaceMacro.Pb_Method.Pb_METHOD_MEET_INTERFACE_QUERYPROPERTY.number,
@@ -632,22 +707,21 @@ open class BaseJni {
     /**
      * 返回当前服务器毫秒UTC时间戳
      */
-    fun queryCurrentTime(): Long {
+    open fun queryCurrentTime(): Long {
         queryContextAttribute(InterfaceMacro.Pb_ContextPropertyID.Pb_MEETCONTEXT_PROPERTY_UTCMICROSECONDS.number)?.let {
             return it.property64Val / 1000L //微秒转毫秒
         }
         return 0L
     }
 
-
-    fun queryCurrentMeetId(): Int {
+    open fun queryCurrentMeetId(): Int {
         queryContextAttribute(InterfaceMacro.Pb_ContextPropertyID.Pb_MEETCONTEXT_PROPERTY_CURMEETINGID.number)?.let {
             return it.propertyval
         }
         return 0
     }
 
-    fun queryCurrentRoomId(): Int {
+    open fun queryCurrentRoomId(): Int {
         queryContextAttribute(InterfaceMacro.Pb_ContextPropertyID.Pb_MEETCONTEXT_PROPERTY_CURROOMID.number)?.let {
             return it.propertyval
         }
@@ -658,7 +732,7 @@ open class BaseJni {
      * 修改上下文属性
      * @param propertyId [InterfaceMacro.Pb_ContextPropertyID]
      */
-    fun modContextAttribute(propertyId: Int, propertyVal: Int) {
+    open fun modContextAttribute(propertyId: Int, propertyVal: Int) {
         Call.callMethod(
             InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_MEETCONTEXT.number,
             InterfaceMacro.Pb_Method.Pb_METHOD_MEET_INTERFACE_SETPROPERTY.number,
@@ -673,14 +747,21 @@ open class BaseJni {
      * 修改界面状态
      * @param status [InterfaceMacro.Pb_MeetFaceStatus]
      */
-    fun modPageStatus(status: Int) {
+    open fun modPageStatus(status: Int) {
         modContextAttribute(InterfaceMacro.Pb_ContextPropertyID.Pb_MEETCONTEXT_PROPERTY_ROLE.number, status)
+    }
+
+    /**
+     * @param mode 0管理员模式 1常用人员模式 2离线模式
+     */
+    open fun modPageMode(mode: Int) {
+        modContextAttribute(InterfaceMacro.Pb_ContextPropertyID.Pb_MEETCONTEXT_PROPERTY_LOGONMODE.number, mode)
     }
 
     /**
      * 切换当前会议
      */
-    fun toggleMeet(id: Int) {
+    open fun toggleMeet(id: Int) {
         modContextAttribute(InterfaceMacro.Pb_ContextPropertyID.Pb_MEETCONTEXT_PROPERTY_CURMEETINGID.number, id)
     }
 
@@ -692,7 +773,7 @@ open class BaseJni {
      * 查询议程
      * @param type [InterfaceMacro.Pb_AgendaType]
      */
-    fun queryAgenda(type: Int = -0x1000000): InterfaceAgenda.pbui_meetAgenda? {
+    open fun queryAgenda(type: Int = -0x1000000): InterfaceAgenda.pbui_meetAgenda? {
         Call.callMethod(
             InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_MEETAGENDA.number,
             InterfaceMacro.Pb_Method.Pb_METHOD_MEET_INTERFACE_QUERY.number,
@@ -705,7 +786,7 @@ open class BaseJni {
         return null
     }
 
-    fun modFileAgenda(mediaId: Int) {
+    open fun modFileAgenda(mediaId: Int) {
         Call.callMethod(
             InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_MEETAGENDA.number,
             InterfaceMacro.Pb_Method.Pb_METHOD_MEET_INTERFACE_MODIFY.number,
@@ -717,7 +798,7 @@ open class BaseJni {
         )
     }
 
-    fun modTextAgenda(content: String) {
+    open fun modTextAgenda(content: String) {
         Call.callMethod(
             InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_MEETAGENDA.number,
             InterfaceMacro.Pb_Method.Pb_METHOD_MEET_INTERFACE_MODIFY.number,
@@ -729,7 +810,7 @@ open class BaseJni {
         )
     }
 
-    fun addTimeAgenda(item: InterfaceAgenda.pbui_ItemAgendaTimeInfo) {
+    open fun addTimeAgenda(item: InterfaceAgenda.pbui_ItemAgendaTimeInfo) {
         Call.callMethod(
             InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_MEETAGENDA.number,
             InterfaceMacro.Pb_Method.Pb_METHOD_MEET_INTERFACE_ADD.number,
@@ -741,7 +822,7 @@ open class BaseJni {
         )
     }
 
-    fun addTimeAgenda(items: MutableList<InterfaceAgenda.pbui_ItemAgendaTimeInfo>) {
+    open fun addTimeAgenda(items: MutableList<InterfaceAgenda.pbui_ItemAgendaTimeInfo>) {
         Call.callMethod(
             InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_MEETAGENDA.number,
             InterfaceMacro.Pb_Method.Pb_METHOD_MEET_INTERFACE_ADD.number,
@@ -753,7 +834,7 @@ open class BaseJni {
         )
     }
 
-    fun delTimeAgenda(item: InterfaceAgenda.pbui_ItemAgendaTimeInfo) {
+    open fun delTimeAgenda(item: InterfaceAgenda.pbui_ItemAgendaTimeInfo) {
         Call.callMethod(
             InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_MEETAGENDA.number,
             InterfaceMacro.Pb_Method.Pb_METHOD_MEET_INTERFACE_DEL.number,
@@ -765,7 +846,7 @@ open class BaseJni {
         )
     }
 
-    fun delTimeAgenda(items: MutableList<InterfaceAgenda.pbui_ItemAgendaTimeInfo>) {
+    open fun delTimeAgenda(items: MutableList<InterfaceAgenda.pbui_ItemAgendaTimeInfo>) {
         Call.callMethod(
             InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_MEETAGENDA.number,
             InterfaceMacro.Pb_Method.Pb_METHOD_MEET_INTERFACE_DEL.number,
@@ -777,7 +858,7 @@ open class BaseJni {
         )
     }
 
-    fun modTimeAgenda(item: InterfaceAgenda.pbui_ItemAgendaTimeInfo) {
+    open fun modTimeAgenda(item: InterfaceAgenda.pbui_ItemAgendaTimeInfo) {
         Call.callMethod(
             InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_MEETAGENDA.number,
             InterfaceMacro.Pb_Method.Pb_METHOD_MEET_INTERFACE_MODIFY.number,
@@ -789,7 +870,7 @@ open class BaseJni {
         )
     }
 
-    fun modTimeAgendaStatus(item: InterfaceAgenda.pbui_ItemAgendaTimeInfo) {
+    open fun modTimeAgendaStatus(item: InterfaceAgenda.pbui_ItemAgendaTimeInfo) {
         Call.callMethod(
             InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_MEETAGENDA.number,
             InterfaceMacro.Pb_Method.Pb_METHOD_MEET_INTERFACE_SET.number,
@@ -804,7 +885,7 @@ open class BaseJni {
     /**
      * 切换议题顺序
      */
-    fun swapAgenda(id1: Int, id2: Int) {
+    open fun swapAgenda(id1: Int, id2: Int) {
         Call.callMethod(
             InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_MEETAGENDA.number,
             InterfaceMacro.Pb_Method.Pb_METHOD_MEET_INTERFACE_MOVE.number,
@@ -815,7 +896,7 @@ open class BaseJni {
         )
     }
 
-    fun sortAgenda(ids: MutableList<Int>) {
+    open fun sortAgenda(ids: MutableList<Int>) {
         Call.callMethod(
             InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_MEETAGENDA.number,
             InterfaceMacro.Pb_Method.Pb_METHOD_MEET_INTERFACE_SAVE.number,
@@ -832,7 +913,7 @@ open class BaseJni {
      * ```
      *
      */
-    fun backupAgendaFile(meetId: Int, json: String) {
+    open fun backupAgendaFile(meetId: Int, json: String) {
         Call.callMethod(
             InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_MEETDIRECTORY.number,
             InterfaceMacro.Pb_Method.Pb_METHOD_MEET_INTERFACE_DUMP.number,
@@ -847,7 +928,7 @@ open class BaseJni {
     //</editor-fold>
 
     //<editor-fold desc="会议网页">
-    fun queryUrl(): InterfaceBase.pbui_meetUrl? {
+    open fun queryUrl(): InterfaceBase.pbui_meetUrl? {
         Call.callMethod(
             InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_DEFAULTURL.number,
             InterfaceMacro.Pb_Method.Pb_METHOD_MEET_INTERFACE_QUERY.number,
@@ -861,7 +942,7 @@ open class BaseJni {
     /**
      * @param isSetDefault =0当前会议，=1系统全局
      */
-    fun addUrl(item: InterfaceBase.pbui_Item_UrlDetailInfo, isSetDefault: Int = 0) {
+    open fun addUrl(item: InterfaceBase.pbui_Item_UrlDetailInfo, isSetDefault: Int = 0) {
         Call.callMethod(
             InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_DEFAULTURL.number,
             InterfaceMacro.Pb_Method.Pb_METHOD_MEET_INTERFACE_ADD.number,
@@ -872,7 +953,7 @@ open class BaseJni {
         )
     }
 
-    fun modUrl(item: InterfaceBase.pbui_Item_UrlDetailInfo, isSetDefault: Int = 0) {
+    open fun modUrl(item: InterfaceBase.pbui_Item_UrlDetailInfo, isSetDefault: Int = 0) {
         Call.callMethod(
             InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_DEFAULTURL.number,
             InterfaceMacro.Pb_Method.Pb_METHOD_MEET_INTERFACE_MODIFY.number,
@@ -883,7 +964,7 @@ open class BaseJni {
         )
     }
 
-    fun delUrl(item: InterfaceBase.pbui_Item_UrlDetailInfo, isSetDefault: Int = 0) {
+    open fun delUrl(item: InterfaceBase.pbui_Item_UrlDetailInfo, isSetDefault: Int = 0) {
         Call.callMethod(
             InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_DEFAULTURL.number,
             InterfaceMacro.Pb_Method.Pb_METHOD_MEET_INTERFACE_DEL.number,
@@ -896,7 +977,7 @@ open class BaseJni {
     //</editor-fold>
 
     //<editor-fold desc="会议公告">
-    fun queryBulletin(): InterfaceBullet.pbui_BulletDetailInfo? {
+    open fun queryBulletin(): InterfaceBullet.pbui_BulletDetailInfo? {
         Call.callMethod(
             InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_MEETBULLET.number,
             InterfaceMacro.Pb_Method.Pb_METHOD_MEET_INTERFACE_QUERY.number,
@@ -907,7 +988,7 @@ open class BaseJni {
         return null
     }
 
-    fun addBulletin(item: InterfaceBullet.pbui_Item_BulletDetailInfo) {
+    open fun addBulletin(item: InterfaceBullet.pbui_Item_BulletDetailInfo) {
         Call.callMethod(
             InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_MEETBULLET.number,
             InterfaceMacro.Pb_Method.Pb_METHOD_MEET_INTERFACE_ADD.number,
@@ -917,7 +998,7 @@ open class BaseJni {
         )
     }
 
-    fun modBulletin(item: InterfaceBullet.pbui_Item_BulletDetailInfo) {
+    open fun modBulletin(item: InterfaceBullet.pbui_Item_BulletDetailInfo) {
         Call.callMethod(
             InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_MEETBULLET.number,
             InterfaceMacro.Pb_Method.Pb_METHOD_MEET_INTERFACE_MODIFY.number,
@@ -927,7 +1008,7 @@ open class BaseJni {
         )
     }
 
-    fun delBulletin(item: InterfaceBullet.pbui_Item_BulletDetailInfo) {
+    open fun delBulletin(item: InterfaceBullet.pbui_Item_BulletDetailInfo) {
         Call.callMethod(
             InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_MEETBULLET.number,
             InterfaceMacro.Pb_Method.Pb_METHOD_MEET_INTERFACE_DEL.number,
@@ -937,7 +1018,7 @@ open class BaseJni {
         )
     }
 
-    fun startBulletin(item: InterfaceBullet.pbui_Item_BulletDetailInfo, devIds: MutableList<Int> = mutableListOf()) {
+    open fun startBulletin(item: InterfaceBullet.pbui_Item_BulletDetailInfo, devIds: MutableList<Int> = mutableListOf()) {
         Call.callMethod(
             InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_MEETBULLET.number,
             InterfaceMacro.Pb_Method.Pb_METHOD_MEET_INTERFACE_PUBLIST.number,
@@ -948,7 +1029,7 @@ open class BaseJni {
         )
     }
 
-    fun startBulletin(id: Int) {
+    open fun startBulletin(id: Int) {
         Call.callMethod(
             InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_MEETBULLET.number,
             InterfaceMacro.Pb_Method.Pb_METHOD_MEET_INTERFACE_STOP.number,
@@ -960,7 +1041,7 @@ open class BaseJni {
     //</editor-fold>
 
     //<editor-fold desc="管理员">
-    fun queryAdmin(): InterfaceAdmin.pbui_TypeAdminDetailInfo? {
+    open fun queryAdmin(): InterfaceAdmin.pbui_TypeAdminDetailInfo? {
         Call.callMethod(
             InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_ADMIN.number,
             InterfaceMacro.Pb_Method.Pb_METHOD_MEET_INTERFACE_QUERY.number,
@@ -971,7 +1052,7 @@ open class BaseJni {
         return null
     }
 
-    fun addAdmin(item: InterfaceAdmin.pbui_Item_AdminDetailInfo) {
+    open fun addAdmin(item: InterfaceAdmin.pbui_Item_AdminDetailInfo) {
         Call.callMethod(
             InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_ADMIN.number,
             InterfaceMacro.Pb_Method.Pb_METHOD_MEET_INTERFACE_ADD.number,
@@ -981,7 +1062,7 @@ open class BaseJni {
         )
     }
 
-    fun modAdmin(item: InterfaceAdmin.pbui_Item_AdminDetailInfo) {
+    open fun modAdmin(item: InterfaceAdmin.pbui_Item_AdminDetailInfo) {
         Call.callMethod(
             InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_ADMIN.number,
             InterfaceMacro.Pb_Method.Pb_METHOD_MEET_INTERFACE_MODIFY.number,
@@ -991,7 +1072,7 @@ open class BaseJni {
         )
     }
 
-    fun modAdminPwd(name: String, oldPwd: String, newPwd: String) {
+    open fun modAdminPwd(name: String, oldPwd: String, newPwd: String) {
         Call.callMethod(
             InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_ADMIN.number,
             InterfaceMacro.Pb_Method.Pb_METHOD_MEET_INTERFACE_SET.number,
@@ -1003,7 +1084,7 @@ open class BaseJni {
         )
     }
 
-    fun delAdmin(item: InterfaceAdmin.pbui_Item_AdminDetailInfo) {
+    open fun delAdmin(item: InterfaceAdmin.pbui_Item_AdminDetailInfo) {
         Call.callMethod(
             InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_ADMIN.number,
             InterfaceMacro.Pb_Method.Pb_METHOD_MEET_INTERFACE_DEL.number,
@@ -1013,7 +1094,7 @@ open class BaseJni {
         )
     }
 
-    fun delAdmin(items: MutableList<InterfaceAdmin.pbui_Item_AdminDetailInfo>) {
+    open fun delAdmin(items: MutableList<InterfaceAdmin.pbui_Item_AdminDetailInfo>) {
         Call.callMethod(
             InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_ADMIN.number,
             InterfaceMacro.Pb_Method.Pb_METHOD_MEET_INTERFACE_DEL.number,
@@ -1031,7 +1112,7 @@ open class BaseJni {
      * ```
      * @param flag =0 导入前不删除人员，=1 导入前删除人员
      */
-    fun importAdmin(json: String, flag: Int = InterfaceAdmin.Pb_ADMINMUTILFLAG.Pb_MEET_MUTILADMIN_FLAG_DELALL_VALUE) {
+    open fun importAdmin(json: String, flag: Int = InterfaceAdmin.Pb_ADMINMUTILFLAG.Pb_MEET_MUTILADMIN_FLAG_DELALL_VALUE) {
         Call.callMethod(
             InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_ADMIN.number,
             InterfaceMacro.Pb_Method.Pb_METHOD_MEET_INTERFACE_SUBMIT.number,
@@ -1048,7 +1129,7 @@ open class BaseJni {
      * {"data":[{"name":"adminct","phone":"","email":"","comment":"","password":"","adminid":""}]}
      * ```
      */
-    fun batchDelAdmin(json: String) {
+    open fun batchDelAdmin(json: String) {
         Call.callMethod(
             InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_ADMIN.number,
             InterfaceMacro.Pb_Method.Pb_METHOD_MEET_INTERFACE_DELALL.number,
@@ -1064,7 +1145,7 @@ open class BaseJni {
      * @param mode 0管理员登陆 1常用人员登陆 2离线本地模式
      * @param isascill  0=md5字符密码  1=明文密码
      */
-    fun login(name: String, pwd: String, mode: Int = 0, isascill: Int = 1) {
+    open fun login(name: String, pwd: String, mode: Int = 0, isascill: Int = 1) {
         Call.callMethod(
             InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_ADMIN.number,
             InterfaceMacro.Pb_Method.Pb_METHOD_MEET_INTERFACE_LOGON.number,
@@ -1080,7 +1161,7 @@ open class BaseJni {
     //</editor-fold>
 
     //<editor-fold desc="会议管理会场">
-    fun queryRoomByAdmin(adminId: Int): InterfaceAdmin.pbui_Type_MeetManagerRoomDetailInfo? {
+    open fun queryRoomByAdmin(adminId: Int): InterfaceAdmin.pbui_Type_MeetManagerRoomDetailInfo? {
         Call.callMethod(
             InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_MANAGEROOM.number,
             InterfaceMacro.Pb_Method.Pb_METHOD_MEET_INTERFACE_SINGLEQUERYBYID.number,
@@ -1096,7 +1177,7 @@ open class BaseJni {
     /**
      * 保存会议管理员控制的会场
      */
-    fun saveAdminRoom(adminId: Int, roomIds: MutableList<Int>) {
+    open fun saveAdminRoom(adminId: Int, roomIds: MutableList<Int>) {
         Call.callMethod(
             InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_MANAGEROOM.number,
             InterfaceMacro.Pb_Method.Pb_METHOD_MEET_INTERFACE_SAVE.number,
@@ -1113,7 +1194,7 @@ open class BaseJni {
      *  {"save":0,"adminid":[1,2],"roomid":[1,2]}
      * ```
      */
-    fun saveAdminRoom(json: String) {
+    open fun saveAdminRoom(json: String) {
         Call.callMethod(
             InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_MANAGEROOM.number,
             InterfaceMacro.Pb_Method.Pb_METHOD_MEET_INTERFACE_DUMP.number,
@@ -1131,7 +1212,7 @@ open class BaseJni {
     /**
      * 下载文件
      */
-    fun downloadFile(mediaId: Int, filePath: String, userstr: String, onlyfinish: Int = 0, newfile: Int = 1) {
+    open fun downloadFile(mediaId: Int, filePath: String, userstr: String, onlyfinish: Int = 0, newfile: Int = 1) {
         Call.callMethod(
             InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_DOWNLOAD.number,
             InterfaceMacro.Pb_Method.Pb_METHOD_MEET_INTERFACE_ADD.number,
@@ -1148,7 +1229,7 @@ open class BaseJni {
     /**
      * 缓存文件
      */
-    fun cacheFile(dirId: Int, mediaId: Int, userstr: String, onlyfinish: Int = 0, newfile: Int = 1) {
+    open fun cacheFile(dirId: Int, mediaId: Int, userstr: String, onlyfinish: Int = 0, newfile: Int = 1) {
         Call.callMethod(
             InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_DOWNLOAD.number,
             InterfaceMacro.Pb_Method.Pb_METHOD_MEET_INTERFACE_SAVE.number,
@@ -1165,7 +1246,7 @@ open class BaseJni {
     /**
      * 清空下载
      */
-    fun cleanDownload() {
+    open fun cleanDownload() {
         Call.callMethod(
             InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_DOWNLOAD.number,
             InterfaceMacro.Pb_Method.Pb_METHOD_MEET_INTERFACE_CLEAR.number,
@@ -1182,7 +1263,7 @@ open class BaseJni {
      * @param uploadflag [InterfaceMacro.Pb_Upload_Flag]
      * @param dirfileflag [InterfaceFile.Pb_MeetFile_Flag]
      */
-    fun uploadFile(
+    open fun uploadFile(
         dirId: Int,
         fileName: String,
         filePath: String,
@@ -1214,7 +1295,7 @@ open class BaseJni {
     /**
      * 查询常用人员分组
      */
-    fun queryPeopleGroup(): InterfacePerson.pbui_Type_PeopleGroupDetailInfo? {
+    open fun queryPeopleGroup(): InterfacePerson.pbui_Type_PeopleGroupDetailInfo? {
         Call.callMethod(
             InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_PEOPLEGROUP.number,
             InterfaceMacro.Pb_Method.Pb_METHOD_MEET_INTERFACE_QUERY.number,
@@ -1226,7 +1307,7 @@ open class BaseJni {
     /**
      * 添加常用人员分组
      */
-    fun addPeopleGroup(item: InterfacePerson.pbui_Item_PeopleGroupDetailInfo) {
+    open fun addPeopleGroup(item: InterfacePerson.pbui_Item_PeopleGroupDetailInfo) {
         Call.callMethod(
             InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_PEOPLEGROUP.number,
             InterfaceMacro.Pb_Method.Pb_METHOD_MEET_INTERFACE_ADD.number,
@@ -1236,7 +1317,7 @@ open class BaseJni {
         )
     }
 
-    fun modPeopleGroup(item: InterfacePerson.pbui_Item_PeopleGroupDetailInfo) {
+    open fun modPeopleGroup(item: InterfacePerson.pbui_Item_PeopleGroupDetailInfo) {
         Call.callMethod(
             InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_PEOPLEGROUP.number,
             InterfaceMacro.Pb_Method.Pb_METHOD_MEET_INTERFACE_MODIFY.number,
@@ -1249,7 +1330,7 @@ open class BaseJni {
     /**
      * 删除常用参会人分组
      */
-    fun delPeopleGroup(item: InterfacePerson.pbui_Item_PeopleGroupDetailInfo) {
+    open fun delPeopleGroup(item: InterfacePerson.pbui_Item_PeopleGroupDetailInfo) {
         Call.callMethod(
             InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_PEOPLEGROUP.number,
             InterfaceMacro.Pb_Method.Pb_METHOD_MEET_INTERFACE_DEL.number,
@@ -1262,7 +1343,7 @@ open class BaseJni {
 
     //<editor-fold desc="常用人员分组人员">
 
-    fun queryGroupPeople(groupId: Int): InterfacePerson.pbui_Type_PeopleInGroupDetailInfo? {
+    open fun queryGroupPeople(groupId: Int): InterfacePerson.pbui_Type_PeopleInGroupDetailInfo? {
         Call.callMethod(
             InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_PEOPLEGROUPITEM.number,
             InterfaceMacro.Pb_Method.Pb_METHOD_MEET_INTERFACE_QUERY.number,
@@ -1278,7 +1359,7 @@ open class BaseJni {
     /**
      * 添加分组常用参会人
      */
-    fun addGroupPeople(groupId: Int, item: InterfacePerson.pbui_Item_PersonDetailInfo) {
+    open fun addGroupPeople(groupId: Int, item: InterfacePerson.pbui_Item_PersonDetailInfo) {
         Call.callMethod(
             InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_PEOPLEGROUPITEM.number,
             InterfaceMacro.Pb_Method.Pb_METHOD_MEET_INTERFACE_ADD.number,
@@ -1289,7 +1370,7 @@ open class BaseJni {
         )
     }
 
-    fun addGroupPeople(groupId: Int, items: MutableList<InterfacePerson.pbui_Item_PersonDetailInfo>) {
+    open fun addGroupPeople(groupId: Int, items: MutableList<InterfacePerson.pbui_Item_PersonDetailInfo>) {
         Call.callMethod(
             InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_PEOPLEGROUPITEM.number,
             InterfaceMacro.Pb_Method.Pb_METHOD_MEET_INTERFACE_ADD.number,
@@ -1304,7 +1385,7 @@ open class BaseJni {
 
     //<editor-fold desc="常用人员信息">
 
-    fun queryPeople(): InterfacePerson.pbui_Type_PersonDetailInfo? {
+    open fun queryPeople(): InterfacePerson.pbui_Type_PersonDetailInfo? {
         Call.callMethod(
             InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_PEOPLE.number,
             InterfaceMacro.Pb_Method.Pb_METHOD_MEET_INTERFACE_QUERY.number,
@@ -1315,7 +1396,7 @@ open class BaseJni {
         return null
     }
 
-    fun addPeople(item: InterfacePerson.pbui_Item_PersonDetailInfo) {
+    open fun addPeople(item: InterfacePerson.pbui_Item_PersonDetailInfo) {
         Call.callMethod(
             InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_PEOPLE.number,
             InterfaceMacro.Pb_Method.Pb_METHOD_MEET_INTERFACE_ADD.number,
@@ -1325,7 +1406,7 @@ open class BaseJni {
         )
     }
 
-    fun addPeople(items: MutableList<InterfacePerson.pbui_Item_PersonDetailInfo>) {
+    open fun addPeople(items: MutableList<InterfacePerson.pbui_Item_PersonDetailInfo>) {
         Call.callMethod(
             InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_PEOPLE.number,
             InterfaceMacro.Pb_Method.Pb_METHOD_MEET_INTERFACE_ADD.number,
@@ -1335,7 +1416,7 @@ open class BaseJni {
         )
     }
 
-    fun modPeople(item: InterfacePerson.pbui_Item_PersonDetailInfo) {
+    open fun modPeople(item: InterfacePerson.pbui_Item_PersonDetailInfo) {
         Call.callMethod(
             InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_PEOPLE.number,
             InterfaceMacro.Pb_Method.Pb_METHOD_MEET_INTERFACE_MODIFY.number,
@@ -1345,7 +1426,7 @@ open class BaseJni {
         )
     }
 
-    fun delPeople(item: InterfacePerson.pbui_Item_PersonDetailInfo) {
+    open fun delPeople(item: InterfacePerson.pbui_Item_PersonDetailInfo) {
         Call.callMethod(
             InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_PEOPLE.number,
             InterfaceMacro.Pb_Method.Pb_METHOD_MEET_INTERFACE_DEL.number,
@@ -1358,7 +1439,7 @@ open class BaseJni {
     /**
      * 批量删除(开启批量操作时使用)
      */
-    fun batchDelPeople(id: Int) {
+    open fun batchDelPeople(id: Int) {
         Call.callMethod(
             InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_PEOPLE.number,
             InterfaceMacro.Pb_Method.Pb_METHOD_MEET_INTERFACE_DELALL.number,
@@ -1372,7 +1453,7 @@ open class BaseJni {
 
     //<editor-fold desc="参会人员信息">
 
-    fun queryMember(): InterfaceMember.pbui_Type_MemberDetailInfo? {
+    open fun queryMember(): InterfaceMember.pbui_Type_MemberDetailInfo? {
         Call.callMethod(
             InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_MEMBER.number,
             InterfaceMacro.Pb_Method.Pb_METHOD_MEET_INTERFACE_QUERY.number,
@@ -1383,7 +1464,7 @@ open class BaseJni {
         return null
     }
 
-    fun queryMemberById(id: Int): InterfaceMember.pbui_Item_MemberDetailInfo? {
+    open fun queryMemberById(id: Int): InterfaceMember.pbui_Item_MemberDetailInfo? {
         Call.callMethod(
             InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_MEMBER.number,
             InterfaceMacro.Pb_Method.Pb_METHOD_MEET_INTERFACE_SINGLEQUERYBYID.number,
@@ -1398,7 +1479,7 @@ open class BaseJni {
         return null
     }
 
-    fun addMember(item: InterfaceMember.pbui_Item_MemberDetailInfo) {
+    open fun addMember(item: InterfaceMember.pbui_Item_MemberDetailInfo) {
         if (SdkConfig.isBatchOperate) {
             val temps: MutableList<InterfaceMember.pbui_Item_MemberDetailInfo> = mutableListOf(
             )
@@ -1416,7 +1497,7 @@ open class BaseJni {
         }
     }
 
-    fun addMember(items: MutableList<InterfaceMember.pbui_Item_MemberDetailInfo>) {
+    open fun addMember(items: MutableList<InterfaceMember.pbui_Item_MemberDetailInfo>) {
         if (SdkConfig.isBatchOperate) {
             val json = SdkUtil.parseFrom(items)
             batchAddMember(json)
@@ -1439,7 +1520,7 @@ open class BaseJni {
      * "member":[{"name":"陈工 ","company":"xx","job":"xx","phone":"123456","email":"","comment":"","password":"123456","memid":"","devid":"","perm":"","role":""}]}
      * ```
      */
-    fun batchAddMember(json: String, flag: Int = 0) {
+    open fun batchAddMember(json: String, flag: Int = 0) {
         Call.callMethod(
             InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_MEMBER.number,
             InterfaceMacro.Pb_Method.Pb_METHOD_MEET_INTERFACE_SUBMIT.number,
@@ -1450,7 +1531,7 @@ open class BaseJni {
         )
     }
 
-    fun modMember(item: InterfaceMember.pbui_Item_MemberDetailInfo) {
+    open fun modMember(item: InterfaceMember.pbui_Item_MemberDetailInfo) {
         Call.callMethod(
             InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_MEMBER.number,
             InterfaceMacro.Pb_Method.Pb_METHOD_MEET_INTERFACE_MODIFY.number,
@@ -1460,7 +1541,7 @@ open class BaseJni {
         )
     }
 
-    fun delMember(item: InterfaceMember.pbui_Item_MemberDetailInfo) {
+    open fun delMember(item: InterfaceMember.pbui_Item_MemberDetailInfo) {
         Call.callMethod(
             InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_MEMBER.number,
             InterfaceMacro.Pb_Method.Pb_METHOD_MEET_INTERFACE_DEL.number,
@@ -1473,7 +1554,7 @@ open class BaseJni {
     /**
      * 参会人排序
      */
-    fun sortMember(ids: MutableList<Int>) {
+    open fun sortMember(ids: MutableList<Int>) {
         Call.callMethod(
             InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_MEMBER.number,
             InterfaceMacro.Pb_Method.Pb_METHOD_MEET_INTERFACE_CONTROL.number,
@@ -1488,7 +1569,7 @@ open class BaseJni {
      * @param memberrole 需要的参会人权限 [InterfaceMacro.Pb_MemberPermissionPropertyID]
      * @param item 人员id要为0,表示新建参会人
      */
-    fun scanJoinMeet(meetingid: Int, memberrole: Int, item: InterfaceMember.pbui_Item_MemberDetailInfo) {
+    open fun scanJoinMeet(meetingid: Int, memberrole: Int, item: InterfaceMember.pbui_Item_MemberDetailInfo) {
         Call.callMethod(
             InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_MEMBER.number,
             InterfaceMacro.Pb_Method.Pb_METHOD_MEET_INTERFACE_ENTER.number,
@@ -1503,7 +1584,7 @@ open class BaseJni {
     /**
      * @param memberId =0表示本机参会人id
      */
-    fun queryMemberAttribute(propertyid: Int, memberId: Int = 0): InterfaceMember.pbui_Type_MeetMembeProperty? {
+    open fun queryMemberAttribute(propertyid: Int, memberId: Int = 0): InterfaceMember.pbui_Type_MeetMembeProperty? {
         Call.callMethod(
             InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_MEMBER.number,
             InterfaceMacro.Pb_Method.Pb_METHOD_MEET_INTERFACE_QUERYPROPERTY.number,
@@ -1515,21 +1596,21 @@ open class BaseJni {
         return null
     }
 
-    fun queryMemberPhone(memberId: Int): String {
+    open fun queryMemberPhone(memberId: Int): String {
         queryMemberAttribute(InterfaceMacro.Pb_MemberPropertyID.Pb_MEETMEMBER_PROPERTY_PHONE.number, memberId)?.let {
             return it.propertytext.toStringUtf8()
         }
         return ""
     }
 
-    fun queryMemberName(memberId: Int): String {
+    open fun queryMemberName(memberId: Int): String {
         queryMemberAttribute(InterfaceMacro.Pb_MemberPropertyID.Pb_MEETMEMBER_PROPERTY_NAME.number, memberId)?.let {
             return it.propertytext.toStringUtf8()
         }
         return ""
     }
 
-    fun queryMemberDetail(type: Int = 0): InterfaceMember.pbui_Type_MeetMemberDetailInfo? {
+    open fun queryMemberDetail(type: Int = 0): InterfaceMember.pbui_Type_MeetMemberDetailInfo? {
         Call.callMethod(
             InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_MEMBER.number,
             InterfaceMacro.Pb_Method.Pb_METHOD_MEET_INTERFACE_DETAILINFO.number,
@@ -1545,7 +1626,7 @@ open class BaseJni {
      * @param meetId 要加入的会议id
      * @param devId =0表示本机
      */
-    fun fastJoinMeet(meetId: Int, phone: String, devId: Int = 0) {
+    open fun fastJoinMeet(meetId: Int, phone: String, devId: Int = 0) {
         Call.callMethod(
             InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_MEMBER.number,
             InterfaceMacro.Pb_Method.Pb_METHOD_MEET_INTERFACE_START.number,
@@ -1561,7 +1642,7 @@ open class BaseJni {
 
     //<editor-fold desc="参会人权限">
 
-    fun queryMemberPermissions(): InterfaceMember.pbui_Type_MemberPermission? {
+    open fun queryMemberPermissions(): InterfaceMember.pbui_Type_MemberPermission? {
         Call.callMethod(
             InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_MEMBERPERMISSION.number,
             InterfaceMacro.Pb_Method.Pb_METHOD_MEET_INTERFACE_QUERY.number,
@@ -1570,7 +1651,7 @@ open class BaseJni {
         return null
     }
 
-    fun saveMemberPermissions(item: InterfaceMember.pbui_Item_MemberPermission) {
+    open fun saveMemberPermissions(item: InterfaceMember.pbui_Item_MemberPermission) {
         Call.callMethod(
             InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_MEMBERPERMISSION.number,
             InterfaceMacro.Pb_Method.Pb_METHOD_MEET_INTERFACE_SAVE.number,
@@ -1580,7 +1661,7 @@ open class BaseJni {
         )
     }
 
-    fun saveMemberPermissions(items: MutableList<InterfaceMember.pbui_Item_MemberPermission>) {
+    open fun saveMemberPermissions(items: MutableList<InterfaceMember.pbui_Item_MemberPermission>) {
         Call.callMethod(
             InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_MEMBERPERMISSION.number,
             InterfaceMacro.Pb_Method.Pb_METHOD_MEET_INTERFACE_SAVE.number,
@@ -1589,12 +1670,20 @@ open class BaseJni {
                 .build().toByteArray()
         )
     }
-
+    /**
+     * [InterfaceMember.Pb_MemPermProID]
+     */
+    open fun checkMemberPermission(
+        perCode: Int,
+        memberId: Int = localMemberId
+    ): Boolean {
+        return queryMemberPermissionsAttribute(perCode, memberId) == 1
+    }
     /**
      * 查询参会人员权限属性
      * @param propertyid [InterfaceMember.Pb_MemPermProID]
      */
-    fun queryMemberPermissionsAttribute(propertyid: Int, memberId: Int): Int {
+    open fun queryMemberPermissionsAttribute(propertyid: Int, memberId: Int): Int {
         Call.callMethod(
             InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_MEMBERPERMISSION.number,
             InterfaceMacro.Pb_Method.Pb_METHOD_MEET_INTERFACE_QUERYPROPERTY.number,
@@ -1613,7 +1702,7 @@ open class BaseJni {
 
     //<editor-fold desc="设备会议信息">
 
-    fun queryDeviceMeetInfo(): InterfaceDevice.pbui_Type_DeviceFaceShowDetail? {
+    open fun queryDeviceMeetInfo(): InterfaceDevice.pbui_Type_DeviceFaceShowDetail? {
         Call.callMethod(
             InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_DEVICEFACESHOW.number,
             InterfaceMacro.Pb_Method.Pb_METHOD_MEET_INTERFACE_QUERY.number,
@@ -1627,7 +1716,7 @@ open class BaseJni {
     //</editor-fold>
 
     //<editor-fold desc="会议室">
-    fun queryRoom(): InterfaceRoom.pbui_Type_MeetRoomDetailInfo? {
+    open fun queryRoom(): InterfaceRoom.pbui_Type_MeetRoomDetailInfo? {
         Call.callMethod(
             InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_ROOM.number,
             InterfaceMacro.Pb_Method.Pb_METHOD_MEET_INTERFACE_QUERY.number,
@@ -1638,7 +1727,7 @@ open class BaseJni {
         return null
     }
 
-    fun queryRoomById(id: Int): InterfaceRoom.pbui_Item_MeetRoomDetailInfo? {
+    open fun queryRoomById(id: Int): InterfaceRoom.pbui_Item_MeetRoomDetailInfo? {
         Call.callMethod(
             InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_ROOM.number,
             InterfaceMacro.Pb_Method.Pb_METHOD_MEET_INTERFACE_SINGLEQUERYBYID.number,
@@ -1653,7 +1742,7 @@ open class BaseJni {
         return null
     }
 
-    fun addRoom(item: InterfaceRoom.pbui_Item_MeetRoomDetailInfo) {
+    open fun addRoom(item: InterfaceRoom.pbui_Item_MeetRoomDetailInfo) {
         Call.callMethod(
             InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_ROOM.number,
             InterfaceMacro.Pb_Method.Pb_METHOD_MEET_INTERFACE_ADD.number,
@@ -1663,7 +1752,7 @@ open class BaseJni {
         )
     }
 
-    fun modRoom(item: InterfaceRoom.pbui_Item_MeetRoomDetailInfo) {
+    open fun modRoom(item: InterfaceRoom.pbui_Item_MeetRoomDetailInfo) {
         Call.callMethod(
             InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_ROOM.number,
             InterfaceMacro.Pb_Method.Pb_METHOD_MEET_INTERFACE_MODIFY.number,
@@ -1673,7 +1762,7 @@ open class BaseJni {
         )
     }
 
-    fun delRoom(item: InterfaceRoom.pbui_Item_MeetRoomDetailInfo) {
+    open fun delRoom(item: InterfaceRoom.pbui_Item_MeetRoomDetailInfo) {
         Call.callMethod(
             InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_ROOM.number,
             InterfaceMacro.Pb_Method.Pb_METHOD_MEET_INTERFACE_DEL.number,
@@ -1683,7 +1772,7 @@ open class BaseJni {
         )
     }
 
-    fun delRoom(id: Int) {
+    open fun delRoom(id: Int) {
         Call.callMethod(
             InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_ROOM.number,
             InterfaceMacro.Pb_Method.Pb_METHOD_MEET_INTERFACE_DEL.number,
@@ -1693,7 +1782,7 @@ open class BaseJni {
         )
     }
 
-    fun setRoomBg(roomId: Int, mediaId: Int, path: String, userval: Int = 0) {
+    open fun setRoomBg(roomId: Int, mediaId: Int, path: String, userval: Int = 0) {
         Call.callMethod(
             InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_ROOM.number,
             InterfaceMacro.Pb_Method.Pb_METHOD_MEET_INTERFACE_SET.number,
@@ -1709,7 +1798,7 @@ open class BaseJni {
     /**
      * 查询会议室背景图
      */
-    fun queryRoomBackground(roomId: Int): Int {
+    open fun queryRoomBackground(roomId: Int): Int {
         queryRoomAttribute(InterfaceMacro.Pb_MeetRoomPropertyID.Pb_MEETROOM_PROPERTY_BGPHOTOID.number, roomId)?.let {
             InterfaceBase.pbui_CommonInt32uProperty.parseFrom(it)?.let {
                 return it.propertyval
@@ -1722,7 +1811,7 @@ open class BaseJni {
      * 查询会场属性
      * @param propertyid [InterfaceMacro.Pb_MeetRoomPropertyID]
      */
-    fun queryRoomAttribute(propertyid: Int, parameterval: Int, parameterval2: Int = 0): ByteArray? {
+    open fun queryRoomAttribute(propertyid: Int, parameterval: Int, parameterval2: Int = 0): ByteArray? {
         return Call.callMethod(
             InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_ROOM.number,
             InterfaceMacro.Pb_Method.Pb_METHOD_MEET_INTERFACE_QUERYPROPERTY.number,
@@ -1738,7 +1827,7 @@ open class BaseJni {
 
     //<editor-fold desc="会议排位">
 
-    fun modMeetRank(devId: Int, memberId: Int, role: Int) {
+    open fun modMeetRank(devId: Int, memberId: Int, role: Int) {
         modMeetRank(
             InterfaceRoom.pbui_Item_MeetSeatDetailInfo.newBuilder()
                 .setSeatid(devId)
@@ -1748,7 +1837,7 @@ open class BaseJni {
         )
     }
 
-    fun modMeetRank(item: InterfaceRoom.pbui_Item_MeetSeatDetailInfo) {
+    open fun modMeetRank(item: InterfaceRoom.pbui_Item_MeetSeatDetailInfo) {
         Call.callMethod(
             InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_MEETSEAT.number,
             if (SdkConfig.isBatchOperate) InterfaceMacro.Pb_Method.Pb_METHOD_MEET_INTERFACE_SUBMIT.number
@@ -1759,7 +1848,7 @@ open class BaseJni {
         )
     }
 
-    fun modMeetRank(items: MutableList<InterfaceRoom.pbui_Item_MeetSeatDetailInfo>) {
+    open fun modMeetRank(items: MutableList<InterfaceRoom.pbui_Item_MeetSeatDetailInfo>) {
         Call.callMethod(
             InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_MEETSEAT.number,
             if (SdkConfig.isBatchOperate) InterfaceMacro.Pb_Method.Pb_METHOD_MEET_INTERFACE_SUBMIT.number
@@ -1773,7 +1862,7 @@ open class BaseJni {
     /**
      * 绑定参会人
      */
-    fun bindMember(devId: Int, memberId: Int = 0, role: Int = -1) {
+    open fun bindMember(devId: Int, memberId: Int = 0, role: Int = -1) {
         val builder = InterfaceRoom.pbui_Item_MeetSeatDetailInfo.newBuilder()
         if (role != -1) builder.setRole(role)
         Call.callMethod(
@@ -1788,7 +1877,7 @@ open class BaseJni {
     /**
      * 修改参会人角色
      */
-    fun modMemberRole(memberId: Int, memberRole: Int) {
+    open fun modMemberRole(memberId: Int, memberRole: Int) {
         Call.callMethod(
             InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_MEETSEAT.number,
             InterfaceMacro.Pb_Method.Pb_METHOD_MEET_INTERFACE_MODIFY.number,
@@ -1799,7 +1888,7 @@ open class BaseJni {
     }
 
 
-    fun queryMemberIdByDeviceId(id: Int): Int {
+    open fun queryMemberIdByDeviceId(id: Int): Int {
         queryMeetRankAttribute(InterfaceMacro.Pb_MeetSeatPropertyID.Pb_MEETSEAT_PROPERTY_MEMBERID.number, id)?.let {
             InterfaceBase.pbui_CommonInt32uProperty.parseFrom(it)?.let {
                 return it.propertyval
@@ -1808,7 +1897,7 @@ open class BaseJni {
         return 0
     }
 
-    fun queryDeviceIdByMemberId(id: Int): Int {
+    open fun queryDeviceIdByMemberId(id: Int): Int {
         queryMeetRankAttribute(InterfaceMacro.Pb_MeetSeatPropertyID.Pb_MEETSEAT_PROPERTY_SEATID.number, id)?.let {
             InterfaceBase.pbui_CommonInt32uProperty.parseFrom(it)?.let {
                 return it.propertyval
@@ -1817,7 +1906,7 @@ open class BaseJni {
         return 0
     }
 
-    fun queryMemberNameByDeviceId(id: Int): String {
+    open fun queryMemberNameByDeviceId(id: Int): String {
         queryMeetRankAttribute(InterfaceMacro.Pb_MeetSeatPropertyID.Pb_MEETSEAT_PROPERTY_MEMBERNAME.number, id)?.let {
             InterfaceBase.pbui_CommonTextProperty.parseFrom(it)?.let {
                 return it.propertyval.toStringUtf8()
@@ -1826,7 +1915,7 @@ open class BaseJni {
         return ""
     }
 
-    fun queryMemberRoleByMemberId(id: Int): Int {
+    open fun queryMemberRoleByMemberId(id: Int): Int {
         queryMeetRankAttribute(InterfaceMacro.Pb_MeetSeatPropertyID.Pb_MEETSEAT_PROPERTY_ROLEBYMEMBERID.number, id)?.let {
             InterfaceBase.pbui_CommonInt32uProperty.parseFrom(it)?.let {
                 return it.propertyval
@@ -1838,7 +1927,7 @@ open class BaseJni {
     /**
      * 判断参会人是否为秘书、管理员、主持人其中的一个身份
      */
-    fun isAdminRole(memberId: Int): Boolean {
+    open fun isAdminRole(memberId: Int = SdkVars.localMemberId): Boolean {
         val role = queryMemberRoleByMemberId(memberId)
         return (role.flag(InterfaceMacro.Pb_MeetMemberRole.Pb_role_member_compere.number)
                 || role.flag(InterfaceMacro.Pb_MeetMemberRole.Pb_role_member_secretary.number)
@@ -1849,7 +1938,7 @@ open class BaseJni {
      * 查询会议排位属性
      *
      */
-    fun queryMeetRankAttribute(propertyid: Int, parameterval: Int, parameterval2: Int = 0): ByteArray? {
+    open fun queryMeetRankAttribute(propertyid: Int, parameterval: Int, parameterval2: Int = 0): ByteArray? {
         return Call.callMethod(
             InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_MEETSEAT.number,
             InterfaceMacro.Pb_Method.Pb_METHOD_MEET_INTERFACE_QUERYPROPERTY.number,
@@ -1866,7 +1955,7 @@ open class BaseJni {
     //<editor-fold desc="会场设备">
 
 
-    fun addRoomDevice(roomId: Int, devId: Int) {
+    open fun addRoomDevice(roomId: Int, devId: Int) {
         Call.callMethod(
             InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_ROOMDEVICE.number,
             InterfaceMacro.Pb_Method.Pb_METHOD_MEET_INTERFACE_ADD.number,
@@ -1877,7 +1966,7 @@ open class BaseJni {
         )
     }
 
-    fun addRoomDevice(roomId: Int, devIds: MutableList<Int>) {
+    open fun addRoomDevice(roomId: Int, devIds: MutableList<Int>) {
         Call.callMethod(
             InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_ROOMDEVICE.number,
             InterfaceMacro.Pb_Method.Pb_METHOD_MEET_INTERFACE_ADD.number,
@@ -1888,7 +1977,7 @@ open class BaseJni {
         )
     }
 
-    fun delRoomDevice(roomId: Int, devId: Int) {
+    open fun delRoomDevice(roomId: Int, devId: Int) {
         Call.callMethod(
             InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_ROOMDEVICE.number,
             InterfaceMacro.Pb_Method.Pb_METHOD_MEET_INTERFACE_DEL.number,
@@ -1899,7 +1988,7 @@ open class BaseJni {
         )
     }
 
-    fun delRoomDevice(roomId: Int, devIds: MutableList<Int>) {
+    open fun delRoomDevice(roomId: Int, devIds: MutableList<Int>) {
         Call.callMethod(
             InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_ROOMDEVICE.number,
             InterfaceMacro.Pb_Method.Pb_METHOD_MEET_INTERFACE_DEL.number,
@@ -1913,7 +2002,7 @@ open class BaseJni {
     /**
      * 设置会场设备坐标朝向信息 [InterfaceMacro.Pb_DeviceDirection]
      */
-    fun saveRoomDeviceDirection(roomId: Int, items: MutableList<InterfaceRoom.pbui_Item_MeetRoomDevPosInfo>) {
+    open fun saveRoomDeviceDirection(roomId: Int, items: MutableList<InterfaceRoom.pbui_Item_MeetRoomDevPosInfo>) {
         Call.callMethod(
             InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_ROOMDEVICE.number,
             if (SdkConfig.isBatchOperate) InterfaceMacro.Pb_Method.Pb_METHOD_MEET_INTERFACE_SET.number
@@ -1928,7 +2017,7 @@ open class BaseJni {
     /**
      * 查询会场设备排位详细信息
      */
-    fun queryRoomDevice(roomId: Int, flag: Int = 0): InterfaceRoom.pbui_Type_MeetRoomDevSeatDetailInfo? {
+    open fun queryRoomDevice(roomId: Int, flag: Int = 0): InterfaceRoom.pbui_Type_MeetRoomDevSeatDetailInfo? {
         Call.callMethod(
             InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_ROOMDEVICE.number,
             InterfaceMacro.Pb_Method.Pb_METHOD_MEET_INTERFACE_DETAILINFO.number,
@@ -1943,7 +2032,7 @@ open class BaseJni {
     /**
      * 查询会场设备的流通道信息
      */
-    fun queryRoomStreamDevice(roomId: Int): InterfaceVideo.pbui_Type_MeetVideoDetailInfo? {
+    open fun queryRoomStreamDevice(roomId: Int): InterfaceVideo.pbui_Type_MeetVideoDetailInfo? {
         Call.callMethod(
             InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_ROOMDEVICE.number,
             InterfaceMacro.Pb_Method.Pb_METHOD_MEET_INTERFACE_MAKEVIDEO.number,
@@ -1963,7 +2052,7 @@ open class BaseJni {
         return null
     }
 
-    fun checkDeviceInRoom(roomId: Int, devId: Int): Boolean {
+    open fun checkDeviceInRoom(roomId: Int, devId: Int): Boolean {
         queryRoomDevice(roomId)?.let {
             it.itemList.forEach {
                 if (it.devid == devId) {
@@ -1978,7 +2067,7 @@ open class BaseJni {
 
     //<editor-fold desc="会议信息">
 
-    fun queryMeeting(): InterfaceMeet.pbui_Type_MeetMeetInfo? {
+    open fun queryMeeting(): InterfaceMeet.pbui_Type_MeetMeetInfo? {
         Call.callMethod(
             InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_MEETINFO.number,
             InterfaceMacro.Pb_Method.Pb_METHOD_MEET_INTERFACE_QUERY.number,
@@ -1987,7 +2076,7 @@ open class BaseJni {
         return null
     }
 
-    fun queryMeeting(id: Int): InterfaceMeet.pbui_Item_MeetMeetInfo? {
+    open fun queryMeeting(id: Int): InterfaceMeet.pbui_Item_MeetMeetInfo? {
         Call.callMethod(
             InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_MEETINFO.number,
             InterfaceMacro.Pb_Method.Pb_METHOD_MEET_INTERFACE_SINGLEQUERYBYID.number,
@@ -2006,7 +2095,7 @@ open class BaseJni {
      * @param queryflag [InterfaceMeet.pbui_Type_ComplexQueryMeetInfo]
      * @param cacheflag [InterfaceMeet.pbui_Type_ComplexQueryMeetInfo]
      */
-    fun complexQueryMeetInfo(
+    open fun complexQueryMeetInfo(
         queryflag: Int,
         meetingid: Int,
         cacheflag: Long,
@@ -2032,7 +2121,7 @@ open class BaseJni {
         )
     }
 
-    fun addMeet(item: InterfaceMeet.pbui_Item_MeetMeetInfo) {
+    open fun addMeet(item: InterfaceMeet.pbui_Item_MeetMeetInfo) {
         Call.callMethod(
             InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_MEETINFO.number,
             InterfaceMacro.Pb_Method.Pb_METHOD_MEET_INTERFACE_ADD.number,
@@ -2049,7 +2138,7 @@ open class BaseJni {
      * {"name":"会议名称","type":"0","starttime":"","endtime":"","signin_type":"0","managerid":"0","passwd":"","ordername":"","member":[{"name":"陈工","company":"xx","job":"xx","phone":"123456","password":"123456"},{"name":"陈工","company":"xx","job":"xx","phone":"123456","password":"123456"}]}
      * ```
      */
-    fun fastAddMeet(buildtime: Long, roomid: Int, json: String) {
+    open fun fastAddMeet(buildtime: Long, roomid: Int, json: String) {
         Call.callMethod(
             InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_MEETINFO.number,
             InterfaceMacro.Pb_Method.Pb_METHOD_MEET_INTERFACE_ASK.number,
@@ -2061,7 +2150,7 @@ open class BaseJni {
         )
     }
 
-    fun modMeet(item: InterfaceMeet.pbui_Item_MeetMeetInfo) {
+    open fun modMeet(item: InterfaceMeet.pbui_Item_MeetMeetInfo) {
         Call.callMethod(
             InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_MEETINFO.number,
             InterfaceMacro.Pb_Method.Pb_METHOD_MEET_INTERFACE_MODIFY.number,
@@ -2071,7 +2160,7 @@ open class BaseJni {
         )
     }
 
-    fun delMeet(item: InterfaceMeet.pbui_Item_MeetMeetInfo) {
+    open fun delMeet(item: InterfaceMeet.pbui_Item_MeetMeetInfo) {
         Call.callMethod(
             InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_MEETINFO.number,
             InterfaceMacro.Pb_Method.Pb_METHOD_MEET_INTERFACE_DEL.number,
@@ -2081,7 +2170,7 @@ open class BaseJni {
         )
     }
 
-    fun copyMeet(item: InterfaceMeet.pbui_Item_MeetMeetInfo) {
+    open fun copyMeet(item: InterfaceMeet.pbui_Item_MeetMeetInfo) {
         Call.callMethod(
             InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_MEETINFO.number,
             InterfaceMacro.Pb_Method.Pb_METHOD_MEET_INTERFACE_DUMP.number,
@@ -2091,7 +2180,7 @@ open class BaseJni {
         )
     }
 
-    fun modMeetStatus(id: Int, status: Int) {
+    open fun modMeetStatus(id: Int, status: Int) {
         Call.callMethod(
             InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_MEETINFO.number,
             InterfaceMacro.Pb_Method.Pb_METHOD_MEET_INTERFACE_MODIFYSTATUS.number,
@@ -2105,7 +2194,7 @@ open class BaseJni {
     /**
      * 查询离线会议数据
      */
-    fun queryOfflineMeet(): InterfaceMeet.pbui_Type_OfflineMeetInfo? {
+    open fun queryOfflineMeet(): InterfaceMeet.pbui_Type_OfflineMeetInfo? {
         Call.callMethod(
             InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_MEETINFO.number,
             InterfaceMacro.Pb_Method.Pb_METHOD_MEET_INTERFACE_REQUEST.number,
@@ -2114,7 +2203,7 @@ open class BaseJni {
         return null
     }
 
-    fun queryMeetEndTime(id: Int): Long {
+    open fun queryMeetEndTime(id: Int): Long {
         queryMeetAttribute(InterfaceMacro.Pb_MeetPropertyID.Pb_MEET_PROPERTY_ENDTIME.number, id)?.let {
             InterfaceBase.pbui_CommonInt64uProperty.parseFrom(it)?.let {
                 return it.propertyval
@@ -2126,7 +2215,7 @@ open class BaseJni {
     /**
      * 查询会议属性 [InterfaceMacro.Pb_MeetPropertyID]
      */
-    fun queryMeetAttribute(propertyid: Int, parameterval: Int, parameterval2: Int = 0): ByteArray? {
+    open fun queryMeetAttribute(propertyid: Int, parameterval: Int, parameterval2: Int = 0): ByteArray? {
         return Call.callMethod(
             InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_MEETINFO.number,
             InterfaceMacro.Pb_Method.Pb_METHOD_MEET_INTERFACE_QUERYPROPERTY.number,
@@ -2142,7 +2231,7 @@ open class BaseJni {
 
     //<editor-fold desc="会议目录">
 
-    fun queryDir(): InterfaceFile.pbui_Type_MeetDirDetailInfo? {
+    open fun queryDir(): InterfaceFile.pbui_Type_MeetDirDetailInfo? {
         Call.callMethod(
             InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_MEETDIRECTORY.number,
             InterfaceMacro.Pb_Method.Pb_METHOD_MEET_INTERFACE_QUERY.number,
@@ -2151,7 +2240,7 @@ open class BaseJni {
         return null
     }
 
-    fun queryDir(id: Int): InterfaceFile.pbui_Item_MeetDirDetailInfo? {
+    open fun queryDir(id: Int): InterfaceFile.pbui_Item_MeetDirDetailInfo? {
         Call.callMethod(
             InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_MEETDIRECTORY.number,
             InterfaceMacro.Pb_Method.Pb_METHOD_MEET_INTERFACE_SINGLEQUERYBYID.number,
@@ -2166,7 +2255,7 @@ open class BaseJni {
         return null
     }
 
-    fun addDir(item: InterfaceFile.pbui_Item_MeetDirDetailInfo) {
+    open fun addDir(item: InterfaceFile.pbui_Item_MeetDirDetailInfo) {
         Call.callMethod(
             InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_MEETDIRECTORY.number,
             InterfaceMacro.Pb_Method.Pb_METHOD_MEET_INTERFACE_ADD.number,
@@ -2176,7 +2265,7 @@ open class BaseJni {
         )
     }
 
-    fun modDir(item: InterfaceFile.pbui_Item_MeetDirDetailInfo) {
+    open fun modDir(item: InterfaceFile.pbui_Item_MeetDirDetailInfo) {
         Call.callMethod(
             InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_MEETDIRECTORY.number,
             InterfaceMacro.Pb_Method.Pb_METHOD_MEET_INTERFACE_MODIFY.number,
@@ -2186,7 +2275,7 @@ open class BaseJni {
         )
     }
 
-    fun delDir(item: InterfaceFile.pbui_Item_MeetDirDetailInfo) {
+    open fun delDir(item: InterfaceFile.pbui_Item_MeetDirDetailInfo) {
         Call.callMethod(
             InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_MEETDIRECTORY.number,
             InterfaceMacro.Pb_Method.Pb_METHOD_MEET_INTERFACE_DEL.number,
@@ -2199,7 +2288,7 @@ open class BaseJni {
     /**
      * 修改会议目录排序
      */
-    fun sortDir(items: MutableList<InterfaceFile.pbui_Item_MeetingDirPosItem>) {
+    open fun sortDir(items: MutableList<InterfaceFile.pbui_Item_MeetingDirPosItem>) {
         Call.callMethod(
             InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_MEETDIRECTORY.number,
             InterfaceMacro.Pb_Method.Pb_METHOD_MEET_INTERFACE_SET.number,
@@ -2213,7 +2302,7 @@ open class BaseJni {
      * 查询目录属性 int型：[InterfaceBase.pbui_CommonInt32uProperty]
      * 字符串型：[InterfaceBase.pbui_CommonTextProperty]
      */
-    fun queryDirAttribute(propertyid: Int, parameterval: Int, parameterval2: Int = 0): ByteArray? {
+    open fun queryDirAttribute(propertyid: Int, parameterval: Int, parameterval2: Int = 0): ByteArray? {
         return Call.callMethod(
             InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_MEETDIRECTORY.number,
             InterfaceMacro.Pb_Method.Pb_METHOD_MEET_INTERFACE_QUERYPROPERTY.number,
@@ -2229,7 +2318,7 @@ open class BaseJni {
 
     //<editor-fold desc="会议目录权限">
 
-    fun queryDirPermission(dirId: Int): InterfaceFile.pbui_Type_MeetDirRightDetailInfo? {
+    open fun queryDirPermission(dirId: Int): InterfaceFile.pbui_Type_MeetDirRightDetailInfo? {
         Call.callMethod(
             InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_MEETDIRECTORYRIGHT.number,
             InterfaceMacro.Pb_Method.Pb_METHOD_MEET_INTERFACE_QUERY.number,
@@ -2240,7 +2329,7 @@ open class BaseJni {
         return null
     }
 
-    fun saveDirPermission(dirId: Int, memberIds: MutableList<Int>) {
+    open fun saveDirPermission(dirId: Int, memberIds: MutableList<Int>) {
         Call.callMethod(
             InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_MEETDIRECTORYRIGHT.number,
             InterfaceMacro.Pb_Method.Pb_METHOD_MEET_INTERFACE_SAVE.number,
@@ -2254,7 +2343,7 @@ open class BaseJni {
     /**
      * 判断参会人是否在目录黑名单中，在黑名单中则无权限
      */
-    fun isNoDirPermission(dirId: Int, memberId: Int): Boolean {
+    open fun isNoDirPermission(dirId: Int, memberId: Int): Boolean {
         queryDirPermission(dirId)?.let {
             //在黑名单中就无权限
             return it.memberidList.contains(memberId)
@@ -2267,18 +2356,22 @@ open class BaseJni {
 
     //<editor-fold desc="会议目录文件">
 
-    fun queryFile(id: Int): InterfaceFile.pbui_Type_MeetDirFileDetailInfo? {
+    open fun queryFile(id: Int): MutableList<InterfaceFile.pbui_Item_MeetDirFileDetailInfo>? {
         Call.callMethod(
             InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_MEETDIRECTORYFILE.number,
             InterfaceMacro.Pb_Method.Pb_METHOD_MEET_INTERFACE_QUERY.number,
             InterfaceBase.pbui_QueryInfoByID.newBuilder()
                 .setId(id)
                 .build().toByteArray()
-        )?.let { return InterfaceFile.pbui_Type_MeetDirFileDetailInfo.parseFrom(it) }
+        )?.let {
+            InterfaceFile.pbui_Type_MeetDirFileDetailInfo.parseFrom(it)?.let {
+                return it.itemList
+            }
+        }
         return null
     }
 
-    fun addFile(dirId: Int, items: MutableList<InterfaceFile.pbui_Item_MeetDirFileDetailInfo>) {
+    open fun addFile(dirId: Int, items: MutableList<InterfaceFile.pbui_Item_MeetDirFileDetailInfo>) {
         Call.callMethod(
             InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_MEETDIRECTORYFILE.number,
             InterfaceMacro.Pb_Method.Pb_METHOD_MEET_INTERFACE_ADD.number,
@@ -2289,7 +2382,7 @@ open class BaseJni {
         )
     }
 
-    fun modFile(dirId: Int, item: InterfaceFile.pbui_Item_ModMeetDirFile) {
+    open fun modFile(dirId: Int, item: InterfaceFile.pbui_Item_ModMeetDirFile) {
         Call.callMethod(
             InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_MEETDIRECTORYFILE.number,
             InterfaceMacro.Pb_Method.Pb_METHOD_MEET_INTERFACE_MODIFYINFO.number,
@@ -2300,7 +2393,7 @@ open class BaseJni {
         )
     }
 
-    fun sortFile(dirId: Int, mediaIds: MutableList<Int>) {
+    open fun sortFile(dirId: Int, mediaIds: MutableList<Int>) {
         Call.callMethod(
             InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_MEETDIRECTORYFILE.number,
             InterfaceMacro.Pb_Method.Pb_METHOD_MEET_INTERFACE_SET.number,
@@ -2311,7 +2404,7 @@ open class BaseJni {
         )
     }
 
-    fun delFile(dirId: Int, item: InterfaceFile.pbui_Item_MeetDirFileDetailInfo) {
+    open fun delFile(dirId: Int, item: InterfaceFile.pbui_Item_MeetDirFileDetailInfo) {
         Call.callMethod(
             InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_MEETDIRECTORYFILE.number,
             InterfaceMacro.Pb_Method.Pb_METHOD_MEET_INTERFACE_DEL.number,
@@ -2322,7 +2415,7 @@ open class BaseJni {
         )
     }
 
-    fun delFile(dirId: Int, items: MutableList<InterfaceFile.pbui_Item_MeetDirFileDetailInfo>) {
+    open fun delFile(dirId: Int, items: MutableList<InterfaceFile.pbui_Item_MeetDirFileDetailInfo>) {
         Call.callMethod(
             InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_MEETDIRECTORYFILE.number,
             InterfaceMacro.Pb_Method.Pb_METHOD_MEET_INTERFACE_DEL.number,
@@ -2342,7 +2435,7 @@ open class BaseJni {
      * @param pagenum 分页大小 为0表示返回全部
      * @return [InterfaceFile.pbui_TypePageResQueryrFileInfo]
      */
-    fun complexQueryFile(
+    open fun complexQueryFile(
         dirid: Int,
         queryflag: Int,
         role: Int,
@@ -2370,7 +2463,7 @@ open class BaseJni {
         return null
     }
 
-    fun queryFileName(mediaId: Int): String {
+    open fun queryFileName(mediaId: Int): String {
         queryFileAttribute(InterfaceMacro.Pb_MeetFilePropertyID.Pb_MEETFILE_PROPERTY_NAME.number, mediaId)?.let {
             InterfaceBase.pbui_CommonTextProperty.parseFrom(it)?.let {
                 return it.propertyval.toStringUtf8()
@@ -2379,7 +2472,7 @@ open class BaseJni {
         return ""
     }
 
-    fun queryCacheFilePath(dirId: Int, mediaId: Int): String {
+    open fun queryCacheFilePath(dirId: Int, mediaId: Int): String {
         queryFileAttribute(InterfaceMacro.Pb_MeetFilePropertyID.Pb_MEETFILE_PROPERTY_CACHEPATHNAME.number, mediaId, dirId)?.let {
             InterfaceBase.pbui_CommonTextProperty.parseFrom(it)?.let {
                 return it.propertyval.toStringUtf8()
@@ -2388,7 +2481,7 @@ open class BaseJni {
         return ""
     }
 
-    fun checkFileAvailable(mediaId: Int): Boolean {
+    open fun checkFileAvailable(mediaId: Int): Boolean {
         queryFileAttribute(InterfaceMacro.Pb_MeetFilePropertyID.Pb_MEETFILE_PROPERTY_AVAILABLE.number, mediaId)?.let {
             InterfaceBase.pbui_CommonInt32uProperty.parseFrom(it)?.let {
                 return it.propertyval == 1
@@ -2397,7 +2490,7 @@ open class BaseJni {
         return false
     }
 
-    fun queryFileSize(mediaId: Int): Long {
+    open fun queryFileSize(mediaId: Int): Long {
         queryFileAttribute(InterfaceMacro.Pb_MeetFilePropertyID.Pb_MEETFILE_PROPERTY_SIZE.number, mediaId)?.let {
             InterfaceBase.pbui_CommonInt64uProperty.parseFrom(it)?.let {
                 return it.propertyval
@@ -2407,12 +2500,24 @@ open class BaseJni {
     }
 
     /**
+     * @return 单位毫秒
+     */
+    open fun queryFileVideoTime(mediaId: Int): Int {
+        queryFileAttribute(InterfaceMacro.Pb_MeetFilePropertyID.Pb_MEETFILE_PROPERTY_TIME.number, mediaId)?.let {
+            InterfaceBase.pbui_CommonInt32uProperty.parseFrom(it)?.let {
+                return it.propertyval //毫秒
+            }
+        }
+        return 0
+    }
+
+    /**
      * @param propertyid [InterfaceMacro.Pb_MeetFilePropertyID]
      * - [InterfaceBase.pbui_CommonInt64uProperty]
      * - [InterfaceBase.pbui_CommonTextProperty]
      * - [InterfaceBase.pbui_CommonInt32uProperty]
      */
-    fun queryFileAttribute(propertyid: Int, parameterval: Int, parameterval2: Int = 0): ByteArray? {
+    open fun queryFileAttribute(propertyid: Int, parameterval: Int, parameterval2: Int = 0): ByteArray? {
         return Call.callMethod(
             InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_MEETDIRECTORYFILE.number,
             InterfaceMacro.Pb_Method.Pb_METHOD_MEET_INTERFACE_QUERYPROPERTY.number,
@@ -2428,7 +2533,7 @@ open class BaseJni {
 
     //<editor-fold desc="会议视频">
 
-    fun queryVideo(): InterfaceVideo.pbui_Type_MeetVideoDetailInfo? {
+    open fun queryVideo(): InterfaceVideo.pbui_Type_MeetVideoDetailInfo? {
         Call.callMethod(
             InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_MEETVIDEO.number,
             InterfaceMacro.Pb_Method.Pb_METHOD_MEET_INTERFACE_QUERY.number,
@@ -2437,7 +2542,7 @@ open class BaseJni {
         return null
     }
 
-    fun addVideo(item: InterfaceVideo.pbui_Item_MeetVideoDetailInfo) {
+    open fun addVideo(item: InterfaceVideo.pbui_Item_MeetVideoDetailInfo) {
         Call.callMethod(
             InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_MEETVIDEO.number,
             InterfaceMacro.Pb_Method.Pb_METHOD_MEET_INTERFACE_ADD.number,
@@ -2447,7 +2552,7 @@ open class BaseJni {
         )
     }
 
-    fun modVideo(item: InterfaceVideo.pbui_Item_MeetVideoDetailInfo) {
+    open fun modVideo(item: InterfaceVideo.pbui_Item_MeetVideoDetailInfo) {
         Call.callMethod(
             InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_MEETVIDEO.number,
             InterfaceMacro.Pb_Method.Pb_METHOD_MEET_INTERFACE_MODIFY.number,
@@ -2457,7 +2562,7 @@ open class BaseJni {
         )
     }
 
-    fun delVideo(item: InterfaceVideo.pbui_Item_MeetVideoDetailInfo) {
+    open fun delVideo(item: InterfaceVideo.pbui_Item_MeetVideoDetailInfo) {
         Call.callMethod(
             InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_MEETVIDEO.number,
             InterfaceMacro.Pb_Method.Pb_METHOD_MEET_INTERFACE_DEL.number,
@@ -2471,7 +2576,7 @@ open class BaseJni {
 
     //<editor-fold desc="会议桌牌">
 
-    fun queryTable(): InterfaceTablecard.pbui_Type_MeetTableCardDetailInfo? {
+    open fun queryTable(): InterfaceTablecard.pbui_Type_MeetTableCardDetailInfo? {
         Call.callMethod(
             InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_MEETTABLECARD.number,
             InterfaceMacro.Pb_Method.Pb_METHOD_MEET_INTERFACE_QUERY.number,
@@ -2486,7 +2591,7 @@ open class BaseJni {
      * @param mediaId 底图文件id
      * @param items 必须是3个
      */
-    fun modTable(modflag: Int, mediaId: Int, items: MutableList<InterfaceTablecard.pbui_Item_MeetTableCardDetailInfo>) {
+    open fun modTable(modflag: Int, mediaId: Int, items: MutableList<InterfaceTablecard.pbui_Item_MeetTableCardDetailInfo>) {
         Call.callMethod(
             InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_MEETTABLECARD.number,
             InterfaceMacro.Pb_Method.Pb_METHOD_MEET_INTERFACE_MODIFY.number,
@@ -2507,7 +2612,7 @@ open class BaseJni {
      * @param msgtpye 参见 [InterfaceMacro.Pb_MeetIMMSG_TYPE]
      * @param memberIds 为空表示当前会议全部 如果是会议服务类请求为0
      */
-    fun sendMsg(msgtpye: Int, msg: String, memberIds: MutableList<Int>) {
+    open fun sendMsg(msgtpye: Int, msg: String, memberIds: MutableList<Int>) {
         Call.callMethod(
             InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_MEETIM.number,
             InterfaceMacro.Pb_Method.Pb_METHOD_MEET_INTERFACE_SEND.number,
@@ -2523,7 +2628,7 @@ open class BaseJni {
 
     //<editor-fold desc="会议投票信息">
 
-    fun queryVote(): InterfaceVote.pbui_Type_MeetVoteDetailInfo? {
+    open fun queryVote(): InterfaceVote.pbui_Type_MeetVoteDetailInfo? {
         Call.callMethod(
             InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_MEETVOTEINFO.number,
             InterfaceMacro.Pb_Method.Pb_METHOD_MEET_INTERFACE_QUERY.number,
@@ -2532,7 +2637,7 @@ open class BaseJni {
         return null
     }
 
-    fun queryVote(id: Int): InterfaceVote.pbui_Item_MeetVoteDetailInfo? {
+    open fun queryVote(id: Int): InterfaceVote.pbui_Item_MeetVoteDetailInfo? {
         Call.callMethod(
             InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_MEETVOTEINFO.number,
             InterfaceMacro.Pb_Method.Pb_METHOD_MEET_INTERFACE_SINGLEQUERYBYID.number,
@@ -2547,7 +2652,20 @@ open class BaseJni {
 
     //<editor-fold desc="会议发起投票">
 
-    fun addVote(item: InterfaceVote.pbui_Item_MeetOnVotingDetailInfo) {
+    fun queryStartedVote(voteId: Int): InterfaceVote.pbui_Item_MeetOnVotingDetailInfo? {
+        Call.callMethod(
+            InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_MEETONVOTING.number,
+            InterfaceMacro.Pb_Method.Pb_METHOD_MEET_INTERFACE_SINGLEQUERYBYID.number,
+            pbui_QueryInfoByID.newBuilder()
+                .setId(voteId)
+                .build().toByteArray()
+        )?.let {
+            return pbui_Type_MeetOnVotingDetailInfo.parseFrom(it)?.itemList?.get(0)
+        }
+        return null
+    }
+
+    open fun addVote(item: InterfaceVote.pbui_Item_MeetOnVotingDetailInfo) {
         Call.callMethod(
             InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_MEETONVOTING.number,
             InterfaceMacro.Pb_Method.Pb_METHOD_MEET_INTERFACE_ADD.number,
@@ -2557,7 +2675,7 @@ open class BaseJni {
         )
     }
 
-    fun addVote(items: MutableList<InterfaceVote.pbui_Item_MeetOnVotingDetailInfo>) {
+    open fun addVote(items: MutableList<InterfaceVote.pbui_Item_MeetOnVotingDetailInfo>) {
         Call.callMethod(
             InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_MEETONVOTING.number,
             InterfaceMacro.Pb_Method.Pb_METHOD_MEET_INTERFACE_ADD.number,
@@ -2567,7 +2685,7 @@ open class BaseJni {
         )
     }
 
-    fun modVote(item: InterfaceVote.pbui_Item_MeetOnVotingDetailInfo) {
+    open fun modVote(item: InterfaceVote.pbui_Item_MeetOnVotingDetailInfo) {
         Call.callMethod(
             InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_MEETONVOTING.number,
             InterfaceMacro.Pb_Method.Pb_METHOD_MEET_INTERFACE_MODIFY.number,
@@ -2577,7 +2695,7 @@ open class BaseJni {
         )
     }
 
-    fun startVote(
+    open fun startVote(
         voteId: Int,
         seconds: Int,
         memberIds: MutableList<Int>,
@@ -2593,17 +2711,11 @@ open class BaseJni {
         )
     }
 
-    fun delVote(id: Int) {
-        Call.callMethod(
-            InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_MEETONVOTING.number,
-            InterfaceMacro.Pb_Method.Pb_METHOD_MEET_INTERFACE_DEL.number,
-            InterfaceVote.pbui_Type_MeetStopVoteInfo.newBuilder()
-                .addVoteid(id)
-                .build().toByteArray()
-        )
+    open fun delVote(id: Int) {
+        delVote(mutableListOf(id))
     }
 
-    fun delVote(ids: MutableList<Int>) {
+    open fun delVote(ids: MutableList<Int>) {
         Call.callMethod(
             InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_MEETONVOTING.number,
             InterfaceMacro.Pb_Method.Pb_METHOD_MEET_INTERFACE_DEL.number,
@@ -2613,7 +2725,7 @@ open class BaseJni {
         )
     }
 
-    fun startVote(item: InterfaceVote.pbui_ItemVoteStart) {
+    open fun startVote(item: InterfaceVote.pbui_ItemVoteStart) {
         Call.callMethod(
             InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_MEETONVOTING.number,
             InterfaceMacro.Pb_Method.Pb_METHOD_MEET_INTERFACE_START.number,
@@ -2623,17 +2735,21 @@ open class BaseJni {
         )
     }
 
-    fun stopVote(id: Int) {
+    open fun stopVote(id: Int) {
+        stopVote(mutableListOf(id))
+    }
+
+    fun stopVote(ids: List<Int>) {
         Call.callMethod(
             InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_MEETONVOTING.number,
             InterfaceMacro.Pb_Method.Pb_METHOD_MEET_INTERFACE_STOP.number,
             InterfaceVote.pbui_Type_MeetStopVoteInfo.newBuilder()
-                .addVoteid(id)
+                .addAllVoteid(ids)
                 .build().toByteArray()
         )
     }
 
-    fun submitVote(selcnt: Int, voteId: Int, selitem: Int, mark: String) {
+    open fun submitVote(selcnt: Int, voteId: Int, selitem: Int, mark: String) {
         submitVote(
             InterfaceVote.pbui_Item_MeetSubmitVote.newBuilder()
                 .setVoteid(voteId)
@@ -2644,7 +2760,7 @@ open class BaseJni {
         )
     }
 
-    fun submitVote(item: InterfaceVote.pbui_Item_MeetSubmitVote) {
+    open fun submitVote(item: InterfaceVote.pbui_Item_MeetSubmitVote) {
         Call.callMethod(
             InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_MEETONVOTING.number,
             InterfaceMacro.Pb_Method.Pb_METHOD_MEET_INTERFACE_SUBMIT.number,
@@ -2660,7 +2776,7 @@ open class BaseJni {
     /**
      * 查询投票提交人
      */
-    fun queryVoteSubmitter(id: Int): InterfaceVote.pbui_Type_MeetVoteSignInDetailInfo? {
+    open fun queryVoteSubmitter(id: Int): InterfaceVote.pbui_Type_MeetVoteSignInDetailInfo? {
         Call.callMethod(
             InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_MEETVOTESIGNED.number,
             InterfaceMacro.Pb_Method.Pb_METHOD_MEET_INTERFACE_QUERY.number,
@@ -2674,7 +2790,7 @@ open class BaseJni {
     /**
      * @param propertyid [InterfaceMacro.Pb_MeetVotePropertyID]
      */
-    fun queryVoteSubmitterAttribute(propertyid: Int, voteId: Int, memberId: Int): Int {
+    open fun queryVoteSubmitterAttribute(propertyid: Int, voteId: Int, memberId: Int): Int {
         Call.callMethod(
             InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_MEETVOTESIGNED.number,
             InterfaceMacro.Pb_Method.Pb_METHOD_MEET_INTERFACE_QUERYPROPERTY.number,
@@ -2697,7 +2813,7 @@ open class BaseJni {
 
     //<editor-fold desc="会议新投票">
 
-    fun queryNewVote(): InterfaceVote.pbui_Type_MeetNewVoteDetailInfo? {
+    open fun queryNewVote(): InterfaceVote.pbui_Type_MeetNewVoteDetailInfo? {
         Call.callMethod(
             InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_MEETNEWVOTEINFO.number,
             InterfaceMacro.Pb_Method.Pb_METHOD_MEET_INTERFACE_QUERY.number,
@@ -2706,7 +2822,7 @@ open class BaseJni {
         return null
     }
 
-    fun queryNewVote(id: Int): InterfaceVote.pbui_Item_MeetNewVoteDetailInfo? {
+    open fun queryNewVote(id: Int): InterfaceVote.pbui_Item_MeetNewVoteDetailInfo? {
         Call.callMethod(
             InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_MEETNEWVOTEINFO.number,
             InterfaceMacro.Pb_Method.Pb_METHOD_MEET_INTERFACE_SINGLEQUERYBYID.number,
@@ -2725,13 +2841,13 @@ open class BaseJni {
 
     //<editor-fold desc="会议发起新投票">
 
-    fun startNewVote(memberIds: MutableList<Int>, voteId: Int, timeouts: Int, voteFlag: Int) {
+    open fun startNewVote(memberIds: MutableList<Int>, voteId: Int, timeouts: Int, voteFlag: Int) {
         val temps: MutableList<Int> = mutableListOf()
         temps.add(voteId)
         startNewVote(memberIds, temps, timeouts, voteFlag)
     }
 
-    fun startNewVote(memberIds: MutableList<Int>, voteIds: MutableList<Int>, timeouts: Int, voteFlag: Int) {
+    open fun startNewVote(memberIds: MutableList<Int>, voteIds: MutableList<Int>, timeouts: Int, voteFlag: Int) {
         Call.callMethod(
             InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_MEETONNEWVOTING.number,
             InterfaceMacro.Pb_Method.Pb_METHOD_MEET_INTERFACE_START.number,
@@ -2744,7 +2860,7 @@ open class BaseJni {
         )
     }
 
-    fun stopNewVote(ids: MutableList<Int>) {
+    open fun stopNewVote(ids: MutableList<Int>) {
         Call.callMethod(
             InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_MEETONNEWVOTING.number,
             InterfaceMacro.Pb_Method.Pb_METHOD_MEET_INTERFACE_STOP.number,
@@ -2754,7 +2870,7 @@ open class BaseJni {
         )
     }
 
-    fun addNewVote(item: InterfaceVote.pbui_Item_MeetOnNewVotingDetailInfo) {
+    open fun addNewVote(item: InterfaceVote.pbui_Item_MeetOnNewVotingDetailInfo) {
         Call.callMethod(
             InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_MEETONNEWVOTING.number,
             InterfaceMacro.Pb_Method.Pb_METHOD_MEET_INTERFACE_ADD.number,
@@ -2764,7 +2880,7 @@ open class BaseJni {
         )
     }
 
-    fun addNewVote(items: MutableList<InterfaceVote.pbui_Item_MeetOnNewVotingDetailInfo>) {
+    open fun addNewVote(items: MutableList<InterfaceVote.pbui_Item_MeetOnNewVotingDetailInfo>) {
         Call.callMethod(
             InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_MEETONNEWVOTING.number,
             InterfaceMacro.Pb_Method.Pb_METHOD_MEET_INTERFACE_ADD.number,
@@ -2774,7 +2890,7 @@ open class BaseJni {
         )
     }
 
-    fun modNewVote(item: InterfaceVote.pbui_Item_MeetOnNewVotingDetailInfo) {
+    open fun modNewVote(item: InterfaceVote.pbui_Item_MeetOnNewVotingDetailInfo) {
         Call.callMethod(
             InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_MEETONNEWVOTING.number,
             InterfaceMacro.Pb_Method.Pb_METHOD_MEET_INTERFACE_MODIFY.number,
@@ -2784,7 +2900,7 @@ open class BaseJni {
         )
     }
 
-    fun delNewVote(ids: MutableList<Int>) {
+    open fun delNewVote(ids: MutableList<Int>) {
         Call.callMethod(
             InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_MEETONNEWVOTING.number,
             InterfaceMacro.Pb_Method.Pb_METHOD_MEET_INTERFACE_DEL.number,
@@ -2794,7 +2910,7 @@ open class BaseJni {
         )
     }
 
-    fun submitNewVote(item: InterfaceVote.pbui_Item_MeetSubmitNewVote) {
+    open fun submitNewVote(item: InterfaceVote.pbui_Item_MeetSubmitNewVote) {
         Call.callMethod(
             InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_MEETONNEWVOTING.number,
             InterfaceMacro.Pb_Method.Pb_METHOD_MEET_INTERFACE_SUBMIT.number,
@@ -2808,7 +2924,7 @@ open class BaseJni {
 
     //<editor-fold desc="会议新投票人信息">
 
-    fun queryNewVoteSubmitter(id: Int): InterfaceVote.pbui_Type_MeetNewVoteSignInDetailInfo? {
+    open fun queryNewVoteSubmitter(id: Int): InterfaceVote.pbui_Type_MeetNewVoteSignInDetailInfo? {
         Call.callMethod(
             InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_MEETNEWVOTESIGNED.number,
             InterfaceMacro.Pb_Method.Pb_METHOD_MEET_INTERFACE_QUERY.number,
@@ -2824,7 +2940,7 @@ open class BaseJni {
     /**
      * @param propertyid [InterfaceMacro.Pb_MeetVotePropertyID]
      */
-    fun queryNewVoteSubmitterAttribute(propertyid: Int, voteId: Int, memberId: Int): Int {
+    open fun queryNewVoteSubmitterAttribute(propertyid: Int, voteId: Int, memberId: Int): Int {
         Call.callMethod(
             InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_MEETNEWVOTESIGNED.number,
             InterfaceMacro.Pb_Method.Pb_METHOD_MEET_INTERFACE_QUERYPROPERTY.number,
@@ -2844,7 +2960,7 @@ open class BaseJni {
 
     //<editor-fold desc="会议签到">
 
-    fun querySignIn(): InterfaceSignin.pbui_Type_MeetSignInDetailInfo? {
+    open fun querySignIn(): InterfaceSignin.pbui_Type_MeetSignInDetailInfo? {
         Call.callMethod(
             InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_MEETSIGN.number,
             InterfaceMacro.Pb_Method.Pb_METHOD_MEET_INTERFACE_QUERY.number,
@@ -2858,7 +2974,7 @@ open class BaseJni {
      * @param memberIds 为空表示删除指定会议的全部人员签到
      * @param meetId 0表示绑定的会议
      */
-    fun delSignIn(memberIds: MutableList<Int> = mutableListOf(), meetId: Int = 0) {
+    open fun delSignIn(memberIds: MutableList<Int> = mutableListOf(), meetId: Int = 0) {
         Call.callMethod(
             InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_MEETSIGN.number,
             InterfaceMacro.Pb_Method.Pb_METHOD_MEET_INTERFACE_DEL.number,
@@ -2872,7 +2988,7 @@ open class BaseJni {
     /**
      * @param type [InterfaceMacro.Pb_MeetSignType]
      */
-    fun signIn(
+    open fun signIn(
         memberId: Int = 0,
         type: Int = InterfaceMacro.Pb_MeetSignType.Pb_signin_direct.number,
         pwd: String = "",
@@ -2892,6 +3008,23 @@ open class BaseJni {
 
     //</editor-fold>
 
+    //<editor-fold desc="参会人颜色">
+    open fun queryMemberColor(memberId: Int): Int {
+        Call.callMethod(
+            InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_MEMBERCOLOR.number,
+            InterfaceMacro.Pb_Method.Pb_METHOD_MEET_INTERFACE_QUERY.number,
+            null
+        )?.let {
+            InterfaceWhiteboard.pbui_Type_MeetMemberColorDetailInfo.parseFrom(it)?.itemList?.find { it.memberid == memberId }
+                ?.let {
+                    LogUtils.e("参会人颜色 memberId:$memberId,颜色:${it.rgb}")
+                    return it.rgb
+                }
+        }
+        return Color.BLACK
+    }
+    //</editor-fold>
+
     //<editor-fold desc="会议白板">
 
     /**
@@ -2900,7 +3033,7 @@ open class BaseJni {
      * @param medianame 白板操作描述
      * @param srcwbid 发起人的白板标识 取微秒级的时间作标识 白板标识使用
      */
-    fun artBoardControl(
+    open fun artBoardControl(
         flag: Int,
         medianame: String,
         opermemberid: Int,
@@ -2925,7 +3058,7 @@ open class BaseJni {
     /**
      * 同意或拒绝加入白板
      */
-    fun artBoardAgreeRefuse(
+    open fun artBoardAgreeRefuse(
         opermemberid: Int,
         srcmemid: Int,
         srcwbid: Long, agree: Boolean = true
@@ -2945,7 +3078,7 @@ open class BaseJni {
     /**
      * 白板清空记录
      */
-    fun artBoardDelAll(
+    open fun artBoardDelAll(
         opermemberid: Int,
         srcmemid: Int,
         srcwbid: Long,
@@ -2972,7 +3105,7 @@ open class BaseJni {
     /**
      * 白板删除
      */
-    fun artBoardDel(
+    open fun artBoardDel(
         opermemberid: Int,
         srcmemid: Int,
         srcwbid: Long,
@@ -2996,7 +3129,7 @@ open class BaseJni {
         )
     }
 
-    fun artBoardInk(
+    open fun artBoardInk(
         opermemberid: Int,
         srcmemid: Int,
         srcwbid: Long,
@@ -3023,7 +3156,34 @@ open class BaseJni {
         )
     }
 
-    fun artBoardRect(
+    open fun artBoardLine(
+        opermemberid: Int,
+        srcmemid: Int,
+        srcwbid: Long,
+        operid: Int,
+        linesize: Int,
+        argb: Int,
+        utcstamp: Long,
+        inkList: MutableList<PointF>
+    ) {
+        Call.callMethod(
+            InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_WHITEBOARD.number,
+            InterfaceMacro.Pb_Method.Pb_METHOD_MEET_INTERFACE_ADDINK.number,
+            InterfaceWhiteboard.pbui_Type_MeetWhiteBoardInkItem.newBuilder()
+                .setOpermemberid(opermemberid)
+                .setSrcmemid(srcmemid)
+                .setSrcwbid(srcwbid)
+                .setOperid(operid)
+                .setUtcstamp(utcstamp)
+                .setArgb(argb)
+                .setLinesize(linesize)
+                .addAllPinklist(SdkUtil.formatList(inkList))
+                .setFiguretype(InterfaceMacro.Pb_MeetPostilFigureType.Pb_WB_FIGURETYPE_LINE.number)
+                .build().toByteArray()
+        )
+    }
+
+    open fun artBoardRect(
         opermemberid: Int,
         srcmemid: Int,
         srcwbid: Long,
@@ -3050,7 +3210,35 @@ open class BaseJni {
         )
     }
 
-    fun artBoardText(
+
+    open fun artBoardCircle(
+        opermemberid: Int,
+        srcmemid: Int,
+        srcwbid: Long,
+        operid: Int,
+        linesize: Int,
+        argb: Int,
+        utcstamp: Long,
+        list: MutableList<Float>
+    ) {
+        Call.callMethod(
+            InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_WHITEBOARD.number,
+            InterfaceMacro.Pb_Method.Pb_METHOD_MEET_INTERFACE_ADDRECT.number,
+            InterfaceWhiteboard.pbui_Item_MeetWBRectDetail.newBuilder()
+                .setOpermemberid(opermemberid)
+                .setSrcmemid(srcmemid)
+                .setSrcwbid(srcwbid)
+                .setOperid(operid)
+                .setUtcstamp(utcstamp)
+                .setArgb(argb)
+                .setLinesize(linesize)
+                .addAllPt(list)
+                .setFiguretype(InterfaceMacro.Pb_MeetPostilFigureType.Pb_WB_FIGURETYPE_ELLIPSE.number)
+                .build().toByteArray()
+        )
+    }
+
+    open fun artBoardText(
         opermemberid: Int,
         srcmemid: Int,
         srcwbid: Long,
@@ -3085,7 +3273,7 @@ open class BaseJni {
         )
     }
 
-    fun artBoardPicture(
+    open fun artBoardPicture(
         opermemberid: Int,
         srcmemid: Int,
         srcwbid: Long,
@@ -3116,7 +3304,7 @@ open class BaseJni {
 
     //<editor-fold desc="PDF文件多人同时书写">
 
-    fun pdfArtBoardControl(
+    open fun pdfArtBoardControl(
         opermemberid: Int,
         srcmemid: Int,
         srcwbid: Long,
@@ -3142,7 +3330,7 @@ open class BaseJni {
         )
     }
 
-    fun pdfArtBoardAgreeRefuse(
+    open fun pdfArtBoardAgreeRefuse(
         opermemberid: Int,
         srcmemid: Int,
         srcwbid: Long, agree: Boolean = true
@@ -3159,7 +3347,7 @@ open class BaseJni {
         )
     }
 
-    fun pdfArtBoardInk(
+    open fun pdfArtBoardInk(
         opermemberid: Int,
         srcmemid: Int,
         srcwbid: Long,
@@ -3194,7 +3382,7 @@ open class BaseJni {
 
     //<editor-fold desc="会议功能">
 
-    fun queryMeetFunction(): InterfaceMeetfunction.pbui_Type_MeetFunConfigDetailInfo? {
+    open fun queryMeetFunction(): InterfaceMeetfunction.pbui_Type_MeetFunConfigDetailInfo? {
         Call.callMethod(
             InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_FUNCONFIG.number,
             InterfaceMacro.Pb_Method.Pb_METHOD_MEET_INTERFACE_QUERY.number,
@@ -3206,7 +3394,7 @@ open class BaseJni {
     /**
      * @param modflag [InterfaceMeetfunction.Pb_FunCon_ModifyFlag]
      */
-    fun saveMeetFunction(items: MutableList<InterfaceMeetfunction.pbui_Item_MeetFunConfigDetailInfo>, modflag: Int = 0) {
+    open fun saveMeetFunction(items: MutableList<InterfaceMeetfunction.pbui_Item_MeetFunConfigDetailInfo>, modflag: Int = 0) {
         Call.callMethod(
             InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_FUNCONFIG.number,
             InterfaceMacro.Pb_Method.Pb_METHOD_MEET_INTERFACE_SAVE.number,
@@ -3221,13 +3409,13 @@ open class BaseJni {
 
     //<editor-fold desc="停止资源操作">
 
-    fun stopResource(resId: Int, devIds: MutableList<Int>, playflag: Int = 0, triggeruserval: Int = 0) {
+    open fun stopResource(resId: Int, devIds: MutableList<Int>, playflag: Int = 0, triggeruserval: Int = 0) {
         val temps: MutableList<Int> = mutableListOf()
         temps.add(resId)
         stopResource(temps, devIds, playflag, triggeruserval)
     }
 
-    fun stopResource(resId: Int, devId: Int, playflag: Int = 0, triggeruserval: Int = 0) {
+    open fun stopResource(resId: Int, devId: Int, playflag: Int = 0, triggeruserval: Int = 0) {
         Call.callMethod(
             InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_STOPPLAY.number,
             InterfaceMacro.Pb_Method.Pb_METHOD_MEET_INTERFACE_CLOSE.number,
@@ -3243,7 +3431,7 @@ open class BaseJni {
     /**
      * 停止资源操作
      */
-    fun stopResource(resIds: MutableList<Int>, devIds: MutableList<Int>, playflag: Int = 0, triggeruserval: Int = 0) {
+    open fun stopResource(resIds: MutableList<Int>, devIds: MutableList<Int>, playflag: Int = 0, triggeruserval: Int = 0) {
         Call.callMethod(
             InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_STOPPLAY.number,
             InterfaceMacro.Pb_Method.Pb_METHOD_MEET_INTERFACE_CLOSE.number,
@@ -3260,7 +3448,7 @@ open class BaseJni {
 
     //<editor-fold desc="媒体播放">
 
-    fun initialResource(w: Int, h: Int, resId: Int) {
+    open fun initialResource(w: Int, h: Int, resId: Int) {
         Call.callMethod(
             InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_MEDIAPLAY.number,
             InterfaceMacro.Pb_Method.Pb_METHOD_MEET_INTERFACE_INIT.number,
@@ -3274,7 +3462,7 @@ open class BaseJni {
         )
     }
 
-    fun releaseResource(resId: Int) {
+    open fun releaseResource(resId: Int) {
         Call.callMethod(
             InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_MEDIAPLAY.number,
             InterfaceMacro.Pb_Method.Pb_METHOD_MEET_INTERFACE_DESTORY.number,
@@ -3284,7 +3472,7 @@ open class BaseJni {
         )
     }
 
-    fun mediaPlay(resId: Int, mediaId: Int, devId: Int, playflag: Int = 0, pos: Int = 0, triggeruserval: Int = 0) {
+    open fun mediaPlay(resId: Int, mediaId: Int, devId: Int, playflag: Int = 0, pos: Int = 0, triggeruserval: Int = 0) {
         Call.callMethod(
             InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_MEDIAPLAY.number,
             InterfaceMacro.Pb_Method.Pb_METHOD_MEET_INTERFACE_START.number,
@@ -3299,7 +3487,14 @@ open class BaseJni {
         )
     }
 
-    fun mediaPlay(resId: Int, mediaId: Int, devIds: MutableList<Int>, playflag: Int = 0, pos: Int = 0, triggeruserval: Int = 0) {
+    open fun mediaPlay(
+        resId: Int,
+        mediaId: Int,
+        devIds: MutableList<Int>,
+        playflag: Int = 0,
+        pos: Int = 0,
+        triggeruserval: Int = 0
+    ) {
         Call.callMethod(
             InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_MEDIAPLAY.number,
             InterfaceMacro.Pb_Method.Pb_METHOD_MEET_INTERFACE_START.number,
@@ -3314,7 +3509,7 @@ open class BaseJni {
         )
     }
 
-    fun mediaPlayPos(resId: Int, pos: Int, devIds: MutableList<Int>, playflag: Int = 0, triggeruserval: Int = 0) {
+    open fun mediaPlayPos(resId: Int, pos: Int, devIds: MutableList<Int>, playflag: Int = 0, triggeruserval: Int = 0) {
         Call.callMethod(
             InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_MEDIAPLAY.number,
             InterfaceMacro.Pb_Method.Pb_METHOD_MEET_INTERFACE_MOVE.number,
@@ -3328,7 +3523,7 @@ open class BaseJni {
         )
     }
 
-    fun mediaPlayPause(resId: Int, devId: Int) {
+    open fun mediaPlayPause(resId: Int, devId: Int) {
         Call.callMethod(
             InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_MEDIAPLAY.number,
             InterfaceMacro.Pb_Method.Pb_METHOD_MEET_INTERFACE_PAUSE.number,
@@ -3342,7 +3537,7 @@ open class BaseJni {
     /**
      * 播放暂停
      */
-    fun mediaPlayPause(resId: Int, devIds: MutableList<Int>) {
+    open fun mediaPlayPause(resId: Int, devIds: MutableList<Int>) {
         Call.callMethod(
             InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_MEDIAPLAY.number,
             InterfaceMacro.Pb_Method.Pb_METHOD_MEET_INTERFACE_PAUSE.number,
@@ -3356,7 +3551,7 @@ open class BaseJni {
     /**
      * 播放恢复
      */
-    fun mediaPlayRecover(resId: Int, devId: Int) {
+    open fun mediaPlayRecover(resId: Int, devId: Int) {
         Call.callMethod(
             InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_MEDIAPLAY.number,
             InterfaceMacro.Pb_Method.Pb_METHOD_MEET_INTERFACE_PLAY.number,
@@ -3367,7 +3562,7 @@ open class BaseJni {
         )
     }
 
-    fun mediaPlayRecover(resId: Int, devIds: MutableList<Int>) {
+    open fun mediaPlayRecover(resId: Int, devIds: MutableList<Int>) {
         Call.callMethod(
             InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_MEDIAPLAY.number,
             InterfaceMacro.Pb_Method.Pb_METHOD_MEET_INTERFACE_PLAY.number,
@@ -3382,7 +3577,7 @@ open class BaseJni {
 
     //<editor-fold desc="流播放">
 
-    fun streamPlay(srcId: Int, subid: Int, resId: Int, devId: Int, playflag: Int = 0, triggeruserval: Int = 0) {
+    open fun streamPlay(srcId: Int, subid: Int, resId: Int, devId: Int, playflag: Int = 0, triggeruserval: Int = 0) {
         Call.callMethod(
             InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_STREAMPLAY.number,
             InterfaceMacro.Pb_Method.Pb_METHOD_MEET_INTERFACE_START.number,
@@ -3397,7 +3592,14 @@ open class BaseJni {
         )
     }
 
-    fun streamPlay(srcId: Int, subid: Int, resId: Int, devIds: MutableList<Int>, playflag: Int = 0, triggeruserval: Int = 0) {
+    open fun streamPlay(
+        srcId: Int,
+        subid: Int,
+        resId: Int,
+        devIds: MutableList<Int>,
+        playflag: Int = 0,
+        triggeruserval: Int = 0
+    ) {
         Call.callMethod(
             InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_STREAMPLAY.number,
             InterfaceMacro.Pb_Method.Pb_METHOD_MEET_INTERFACE_START.number,
@@ -3412,11 +3614,33 @@ open class BaseJni {
         )
     }
 
+    fun streamPlay(
+        srcId: Int,
+        subid: Int,
+        resIds: MutableList<Int>,
+        devIds: MutableList<Int>,
+        playflag: Int = 0,
+        triggeruserval: Int = 0
+    ) {
+        Call.callMethod(
+            InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_STREAMPLAY.number,
+            InterfaceMacro.Pb_Method.Pb_METHOD_MEET_INTERFACE_START.number,
+            InterfaceStream.pbui_Type_MeetDoStreamPlay.newBuilder()
+                .setSrcdeviceid(srcId)
+                .setSubid(subid)
+                .addAllRes(resIds)
+                .addAllDeviceid(devIds)
+                .setPlayflag(playflag)
+                .setTriggeruserval(triggeruserval)
+                .build().toByteArray()
+        )
+    }
+
     //</editor-fold>
 
     //<editor-fold desc="界面配置">
 
-    fun queryInterfaceConfig(): InterfaceFaceconfig.pbui_Type_FaceConfigInfo? {
+    open fun queryInterfaceConfig(): InterfaceFaceconfig.pbui_Type_FaceConfigInfo? {
         Call.callMethod(
             InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_MEETFACECONFIG.number,
             InterfaceMacro.Pb_Method.Pb_METHOD_MEET_INTERFACE_QUERY.number,
@@ -3425,7 +3649,7 @@ open class BaseJni {
         return null
     }
 
-    fun queryInterfaceConfig(id: Int): InterfaceFaceconfig.pbui_Type_FaceConfigInfo? {
+    open fun queryInterfaceConfig(id: Int): InterfaceFaceconfig.pbui_Type_FaceConfigInfo? {
         Call.callMethod(
             InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_MEETFACECONFIG.number,
             InterfaceMacro.Pb_Method.Pb_METHOD_MEET_INTERFACE_SINGLEQUERYBYID.number,
@@ -3439,7 +3663,7 @@ open class BaseJni {
     /**
      * 参见 [InterfaceFaceconfig.pbui_Type_FaceConfigInfo]
      */
-    fun modInterfaceConfig(bytes: ByteArray) {
+    open fun modInterfaceConfig(bytes: ByteArray) {
         Call.callMethod(
             InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_MEETFACECONFIG.number,
             InterfaceMacro.Pb_Method.Pb_METHOD_MEET_INTERFACE_MODIFY.number,
@@ -3447,7 +3671,7 @@ open class BaseJni {
         )
     }
 
-    fun modInterfaceConfig(item: InterfaceFaceconfig.pbui_Item_FaceTextItemInfo) {
+    open fun modInterfaceConfig(item: InterfaceFaceconfig.pbui_Item_FaceTextItemInfo) {
         modInterfaceConfig(
             InterfaceFaceconfig.pbui_Type_FaceConfigInfo.newBuilder()
                 .addText(item)
@@ -3455,7 +3679,7 @@ open class BaseJni {
         )
     }
 
-    fun modInterfaceConfig(item: InterfaceFaceconfig.pbui_Item_FacePictureItemInfo) {
+    open fun modInterfaceConfig(item: InterfaceFaceconfig.pbui_Item_FacePictureItemInfo) {
         modInterfaceConfig(
             InterfaceFaceconfig.pbui_Type_FaceConfigInfo.newBuilder()
                 .addPicture(item)
@@ -3463,7 +3687,7 @@ open class BaseJni {
         )
     }
 
-    fun modInterfaceConfig(item: InterfaceFaceconfig.pbui_Item_FaceOnlyTextItemInfo) {
+    open fun modInterfaceConfig(item: InterfaceFaceconfig.pbui_Item_FaceOnlyTextItemInfo) {
         modInterfaceConfig(
             InterfaceFaceconfig.pbui_Type_FaceConfigInfo.newBuilder()
                 .addOnlytext(item)
@@ -3475,7 +3699,7 @@ open class BaseJni {
 
     //<editor-fold desc="自定义文件评分投票 Pb_TYPE_MEET_INTERFACE_FILESCOREVOTE">
 
-    fun queryScore(): InterfaceFilescorevote.pbui_Type_UserDefineFileScore? {
+    open fun queryScore(): InterfaceFilescorevote.pbui_Type_UserDefineFileScore? {
         Call.callMethod(
             InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_FILESCOREVOTE.number,
             InterfaceMacro.Pb_Method.Pb_METHOD_MEET_INTERFACE_QUERY.number,
@@ -3484,7 +3708,7 @@ open class BaseJni {
         return null
     }
 
-    fun addScore(items: MutableList<InterfaceFilescorevote.pbui_Type_Item_UserDefineFileScore>) {
+    open fun addScore(items: MutableList<InterfaceFilescorevote.pbui_Type_Item_UserDefineFileScore>) {
         Call.callMethod(
             InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_FILESCOREVOTE.number,
             InterfaceMacro.Pb_Method.Pb_METHOD_MEET_INTERFACE_ADD.number,
@@ -3494,7 +3718,7 @@ open class BaseJni {
         )
     }
 
-    fun modScore(fileid: Int, item: InterfaceFilescorevote.pbui_Type_Item_UserDefineFileScore) {
+    open fun modScore(fileid: Int, item: InterfaceFilescorevote.pbui_Type_Item_UserDefineFileScore) {
         Call.callMethod(
             InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_FILESCOREVOTE.number,
             InterfaceMacro.Pb_Method.Pb_METHOD_MEET_INTERFACE_MODIFY.number,
@@ -3508,20 +3732,26 @@ open class BaseJni {
     /**
      * @param voteflag [InterfaceMacro.Pb_VoteStartFlag]
      */
-    fun startScore(voteid: Int, timeouts: Int, memberIds: MutableList<Int>, voteflag: Int = 0) {
-        Call.callMethod(
-            InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_FILESCOREVOTE.number,
-            InterfaceMacro.Pb_Method.Pb_METHOD_MEET_INTERFACE_START.number,
+    open fun startScore(voteid: Int, timeouts: Int, memberIds: MutableList<Int>, voteflag: Int = 0) {
+        startScore(
             InterfaceFilescorevote.pbui_Type_StartUserDefineFileScore.newBuilder()
                 .addAllMemberid(memberIds)
                 .setVoteid(voteid)
                 .setTimeouts(timeouts)
                 .setVoteflag(voteflag)
-                .build().toByteArray()
+                .build()
         )
     }
 
-    fun delScore(voteid: Int) {
+    open fun startScore(build: InterfaceFilescorevote.pbui_Type_StartUserDefineFileScore) {
+        Call.callMethod(
+            InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_FILESCOREVOTE.number,
+            InterfaceMacro.Pb_Method.Pb_METHOD_MEET_INTERFACE_START.number,
+            build.toByteArray()
+        )
+    }
+
+    open fun delScore(voteid: Int) {
         Call.callMethod(
             InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_FILESCOREVOTE.number,
             InterfaceMacro.Pb_Method.Pb_METHOD_MEET_INTERFACE_DEL.number,
@@ -3531,7 +3761,7 @@ open class BaseJni {
         )
     }
 
-    fun stopScore(voteid: Int) {
+    open fun stopScore(voteid: Int) {
         Call.callMethod(
             InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_FILESCOREVOTE.number,
             InterfaceMacro.Pb_Method.Pb_METHOD_MEET_INTERFACE_STOP.number,
@@ -3543,7 +3773,7 @@ open class BaseJni {
 
     //</editor-fold>
     //<editor-fold desc="自定义文件评分投票记名信息">
-    fun queryScoreSubmmiter(voteId: Int): InterfaceFilescorevote.pbui_Type_UserDefineFileScoreMemberStatistic? {
+    open fun queryScoreSubmmiter(voteId: Int): InterfaceFilescorevote.pbui_Type_UserDefineFileScoreMemberStatistic? {
         Call.callMethod(
             InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_FILESCOREVOTESIGN.number,
             InterfaceMacro.Pb_Method.Pb_METHOD_MEET_INTERFACE_QUERY.number,
@@ -3554,7 +3784,7 @@ open class BaseJni {
         return null
     }
 
-    fun submitScore(voteId: Int, memberId: Int, evaluate: String, allscore: MutableList<Int>) {
+    open fun submitScore(voteId: Int, memberId: Int, evaluate: String, allscore: MutableList<Int>) {
         Call.callMethod(
             InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_FILESCOREVOTESIGN.number,
             InterfaceMacro.Pb_Method.Pb_METHOD_MEET_INTERFACE_SUBMIT.number,
@@ -3566,11 +3796,19 @@ open class BaseJni {
                 .build().toByteArray()
         )
     }
+
+    open fun submitScore(build:InterfaceFilescorevote.pbui_Type_UserDefineFileScoreMemberStatisticNotify) {
+        Call.callMethod(
+            InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_FILESCOREVOTESIGN.number,
+            InterfaceMacro.Pb_Method.Pb_METHOD_MEET_INTERFACE_SUBMIT.number,
+            build.toByteArray()
+        )
+    }
     //</editor-fold>
 
     //<editor-fold desc="会议自定义数据">
 
-    fun queryCustomInfo(id: Int): InterfaceMeetuserdef.pbui_Type_MeetUserdefItemInfo? {
+    open fun queryCustomInfo(id: Int): InterfaceMeetuserdef.pbui_Type_MeetUserdefItemInfo? {
         Call.callMethod(
             InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_MEETUSERDEF.number,
             InterfaceMacro.Pb_Method.Pb_METHOD_MEET_INTERFACE_SINGLEQUERYBYID.number,
@@ -3585,7 +3823,7 @@ open class BaseJni {
         return null
     }
 
-    fun modCustomInfo(id: Int, text: String) {
+    open fun modCustomInfo(id: Int, text: String) {
         Call.callMethod(
             InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_MEETUSERDEF.number,
             InterfaceMacro.Pb_Method.Pb_METHOD_MEET_INTERFACE_MODIFY.number,
@@ -3603,7 +3841,36 @@ open class BaseJni {
 
     //<editor-fold desc="管理员操作日志相关">
 
-    fun querySystemLog(meetId: Int, startTime: Long, endTime: Long) {
+    open fun addFrontSystemLog(operid: Int) {
+        val role = queryMeetRankAttribute(
+            InterfaceMacro.Pb_MeetSeatPropertyID.Pb_MEETSEAT_PROPERTY_ROLEBYMEMBERID.number,
+            localMemberId
+        )?.let {
+            InterfaceBase.pbui_CommonInt32uProperty.parseFrom(it).propertyval
+        } ?: 0
+        val meetId =
+            queryContextAttribute(InterfaceMacro.Pb_ContextPropertyID.Pb_MEETCONTEXT_PROPERTY_CURMEETINGID.number)?.propertyval
+                ?: 0
+        val roomId =
+            queryContextAttribute(InterfaceMacro.Pb_ContextPropertyID.Pb_MEETCONTEXT_PROPERTY_CURROOMID.number)?.propertyval
+                ?: 0
+        val build = pbui_Add_MeetSystemLog.newBuilder()
+            .setPageid(InterfaceSystemlog.PB_SYSTEMLOG_PAGEID.PB_SYSTEMLOG_PAGE_FRONTMAIN.number)
+            .setOperid(operid)
+            .setMeetid(meetId)
+            .setRoomid(roomId)
+            .setDeviceid(localDeviceId)
+            .setUrole(role)
+            .setUid(localMemberId)
+            .build()
+        Call.callMethod(
+            InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_SYSTEMLOG.number,
+            InterfaceMacro.Pb_Method.Pb_METHOD_MEET_INTERFACE_ADD.number,
+            build.toByteArray()
+        )
+    }
+
+    open fun querySystemLog(meetId: Int, startTime: Long, endTime: Long) {
         Call.callMethod(
             InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_SYSTEMLOG.number,
             InterfaceMacro.Pb_Method.Pb_METHOD_MEET_INTERFACE_QUERY.number,
@@ -3615,7 +3882,7 @@ open class BaseJni {
         )
     }
 
-    fun addSystemLog(
+    open fun addSystemLog(
         pageid: Int, operid: Int,
         meetid: Int, roomid: Int,
         deviceid: Int, urole: Int,
@@ -3637,7 +3904,7 @@ open class BaseJni {
         )
     }
 
-    fun addSystemLog(
+    open fun addSystemLog(
         build: InterfaceSystemlog.pbui_Add_MeetSystemLog
     ) {
         Call.callMethod(
@@ -3650,7 +3917,7 @@ open class BaseJni {
 
     //<editor-fold desc="中控生物认证">
 
-    fun registerFace(phone: String, faceImg: ByteString) {
+    open fun registerFace(phone: String, faceImg: ByteString) {
         Call.callMethod(
             InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_ZKIDENTIFY.number,
             InterfaceMacro.Pb_Method.Pb_METHOD_MEET_INTERFACE_MODIFY.number,
@@ -3664,7 +3931,7 @@ open class BaseJni {
     /**
      * 查询已注册的人脸数据，结果是通过变更通知一个一个返回，参见 [InterfaceSignin.pbui_Type_ZKIdentify_QueryReturn]
      */
-    fun queryFace() {
+    open fun queryFace() {
         Call.callMethod(
             InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_ZKIDENTIFY.number,
             InterfaceMacro.Pb_Method.Pb_METHOD_MEET_INTERFACE_QUERY.number,
@@ -3674,7 +3941,7 @@ open class BaseJni {
         )
     }
 
-    fun delFace(phone: String) {
+    open fun delFace(phone: String) {
         Call.callMethod(
             InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_ZKIDENTIFY.number,
             InterfaceMacro.Pb_Method.Pb_METHOD_MEET_INTERFACE_DEL.number,
@@ -3683,6 +3950,34 @@ open class BaseJni {
                 .addPhone(phone.s2b())
                 .build().toByteArray()
         )
+    }
+
+    //</editor-fold>
+
+    //<editor-fold desc="全局字串">
+
+    /**
+     * 根据office文件ID查找所绑定的pdf文件ID
+     *
+     * 查询属性目前只用上了[InterfacePublicinfo.Pb_PublicPropertyId.Pb_PUBLICINFO_PROPERTY_OFFICEBINDID.number]
+     *
+     * @param mediaId office文件ID
+     * @return pdf 文件ID
+     */
+    fun queryBindPdf(mediaid: Int): Int {
+        val build = InterfacePublicinfo.pbui_Type_MeetPublicInfoProperty.newBuilder()
+            .setPropertyid(InterfacePublicinfo.Pb_PublicPropertyId.Pb_PUBLICINFO_PROPERTY_OFFICEBINDID.number)
+            .setParameterval(mediaid)
+            .build()
+        Call.callMethod(
+            InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_PUBLICINFO.number,
+            InterfaceMacro.Pb_Method.Pb_METHOD_MEET_INTERFACE_QUERYPROPERTY.number,
+            build.toByteArray()
+        )?.let {
+            return InterfacePublicinfo.pbui_Type_MeetPublicInfoPropertyVal.parseFrom(it)?.intval
+                ?: 0
+        }
+        return 0
     }
 
     //</editor-fold>

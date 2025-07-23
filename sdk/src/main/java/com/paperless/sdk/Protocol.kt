@@ -1,6 +1,5 @@
 package com.paperless.sdk
 
-import androidx.annotation.IntDef
 import java.lang.annotation.Retention
 import java.lang.annotation.RetentionPolicy
 
@@ -116,11 +115,4 @@ class Protocol {
         const val MIME_VIDEO_MPEG4 = "video/mp4v-es"
         //</editor-fold>
     }
-
-    @IntDef(
-        resource_id_0, resource_id_1, resource_id_2, resource_id_3, resource_id_4, resource_id_5,
-        resource_id_6, resource_id_7, resource_id_8, resource_id_9, resource_id_10, resource_id_11
-    )
-    @Retention(RetentionPolicy.SOURCE)
-    annotation class ResId
 }

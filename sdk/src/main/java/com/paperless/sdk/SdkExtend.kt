@@ -409,3 +409,12 @@ fun Int.formatFunctionName(): String {
         else -> "未识别"
     }
 }
+
+/**
+ * 将数据使用MutableList包装
+ */
+fun Int.toMutableList(): MutableList<Int> {
+    val temps: MutableList<Int> = mutableListOf()
+    temps.add(this)
+    return temps
+}
