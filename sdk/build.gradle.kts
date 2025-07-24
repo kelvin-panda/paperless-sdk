@@ -32,11 +32,11 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
     kotlinOptions {
-        jvmTarget = "11"
+        jvmTarget = "17"
     }
 
 
@@ -70,7 +70,7 @@ afterEvaluate {
             create<MavenPublication>("release") {
                 groupId = "com.gitee.xlk_gitee"
                 artifactId = "sdk-library"
-                version = "1.0.9"
+                version = "1.1.0"
                 from(components["release"])
             }
         }
