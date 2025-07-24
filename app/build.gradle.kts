@@ -56,6 +56,6 @@ dependencies {
     api(libs.eventbus)
     api(libs.utilcodex)
 
-    implementation(libs.paperlessSdk)
-//    api(project(":sdk"))
+//    implementation(libs.paperlessSdk)
+    api(project(":sdk"))
 }

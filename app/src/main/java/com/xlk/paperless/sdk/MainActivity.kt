@@ -37,7 +37,6 @@ class MainActivity : AppCompatActivity() {
             insets
         }
         EventBus.getDefault().register(this)
-        Jni.loadLibrary()
         initConfigFile()
         Jni.initialization(
             InterfaceMacro.Pb_ProgramType.Pb_MEET_PROGRAM_TYPE_MEETCLIENT_VALUE,

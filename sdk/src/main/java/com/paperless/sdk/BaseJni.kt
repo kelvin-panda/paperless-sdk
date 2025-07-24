@@ -51,30 +51,6 @@ import java.util.UUID
  */
 open class BaseJni {
 
-    open fun loadLibrary() {
-        LogUtils.e("loadLibrary start")
-        System.loadLibrary("avcodec-57")
-        System.loadLibrary("avdevice-57")
-        System.loadLibrary("avfilter-6")
-        System.loadLibrary("avformat-57")
-        System.loadLibrary("avutil-55")
-        System.loadLibrary("postproc-54")
-        System.loadLibrary("swresample-2")
-        System.loadLibrary("swscale-4")
-        System.loadLibrary("SDL2")
-        System.loadLibrary("main")
-        System.loadLibrary("NetClient")
-        System.loadLibrary("Codec")
-        System.loadLibrary("ExecProc")
-        System.loadLibrary("Device-OpenSles")
-        System.loadLibrary("meetcoreAnd")
-        System.loadLibrary("PBmeetcoreAnd")
-        System.loadLibrary("meetAnd")
-        System.loadLibrary("native-lib")
-        System.loadLibrary("z")
-        LogUtils.e("loadLibrary end")
-    }
-
     //    @RequiresApi(api = Build.VERSION_CODES.O)
     open fun getUUID(): String {
         val replace = UUID.randomUUID().toString().replace("-", "")

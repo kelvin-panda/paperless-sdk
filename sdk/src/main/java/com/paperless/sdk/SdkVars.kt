@@ -52,9 +52,9 @@ class SdkVars {
         var crash_dir: String = ""
         var system_logcat_dir: String = ""
         var files_dir: String = ""
+        var download_dir: String = ""
         var agenda_dir: String = ""
         var bind_pdf_dir: String = ""
-        var download_dir: String = ""
         //</editor-fold>
 
         //<editor-fold desc="屏幕采集">

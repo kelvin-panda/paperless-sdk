@@ -7,6 +7,7 @@ import com.blankj.utilcode.util.CrashUtils
 import com.blankj.utilcode.util.LogUtils
 import com.blankj.utilcode.util.PathUtils
 import com.blankj.utilcode.util.ScreenUtils
+import com.paperless.sdk.Paperless
 import com.paperless.sdk.SdkVars
 import java.io.File
 
@@ -17,9 +18,8 @@ import java.io.File
 class App : Application() {
     override fun onCreate() {
         super.onCreate()
-        initDirPath()
+        Paperless.init(this)
         CrashUtils.init(SdkVars.crash_dir)
-        initScreenSize()
     }
 
     private fun initScreenSize() {
