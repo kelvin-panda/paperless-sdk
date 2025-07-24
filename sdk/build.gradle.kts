@@ -70,7 +70,7 @@ afterEvaluate {
             create<MavenPublication>("release") {
                 groupId = "com.gitee.xlk_gitee"
                 artifactId = "sdk-library"
-                version = "1.0.7"
+                version = "1.0.8"
                 from(components["release"])
             }
         }

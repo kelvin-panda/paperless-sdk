@@ -39,7 +39,7 @@ class FrameData(
 
     fun setCodecDataBuffer(buf: ByteBuffer) {
         this.codecDataSize = buf.remaining()
-        buf[codecData, 0, this.packetSize]
+        buf[codecData, 0, this.codecDataSize]
     }
 
     fun setCodecDataBytes(bytes: ByteArray) {
