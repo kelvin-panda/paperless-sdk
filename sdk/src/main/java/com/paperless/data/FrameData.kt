@@ -29,12 +29,22 @@ class FrameData(
 
     fun setPacketBuffer(buf: ByteBuffer) {
         this.packetSize = buf.remaining()
-        buf.get(packet, 0, this.packetSize)
+        buf[packet, 0, this.packetSize]
+    }
+
+    fun setPacketBytes(bytes: ByteArray) {
+        System.arraycopy(bytes, 0, packet, 0, bytes.size)
+        packetSize = bytes.size
     }
 
     fun setCodecDataBuffer(buf: ByteBuffer) {
         this.codecDataSize = buf.remaining()
-        buf.get(codecData, 0, this.packetSize)
+        buf[codecData, 0, this.packetSize]
+    }
+
+    fun setCodecDataBytes(bytes: ByteArray) {
+        System.arraycopy(bytes, 0, codecData, 0, bytes.size)
+        codecDataSize = bytes.size
     }
 
     override fun toString(): String {

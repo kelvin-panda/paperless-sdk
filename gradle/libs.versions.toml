@@ -21,7 +21,7 @@ utilcodex = { group = "com.blankj", name = "utilcodex", version = "1.31.1" }
 # 权限请求框架：https://github.com/getActivity/XXPermissions
 xxPermissions = { group = "com.github.getActivity", name = "XXPermissions", version = "23.0" }
 # https://gitee.com/xlk_gitee/paperless_sdk
-paperlessSdk = { group = "com.gitee.xlk_gitee", name = "paperless_sdk", version = "1.0.0" }
+paperlessSdk = { group = "com.gitee.xlk_gitee", name = "paperless_sdk", version = "1.0.6" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

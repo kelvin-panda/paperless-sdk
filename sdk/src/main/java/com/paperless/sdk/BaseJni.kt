@@ -1672,13 +1672,22 @@ open class BaseJni {
     }
 
     /**
-     * [InterfaceMember.Pb_MemPermProID]
+     * 判断参会人是否拥有该权限
+     * @param perCode 权限码：[InterfaceMacro.Pb_MemberPermissionPropertyID]
+     * @return true 有权限
      */
     open fun checkMemberPermission(
         perCode: Int,
         memberId: Int = localMemberId
     ): Boolean {
-        return queryMemberPermissionsAttribute(perCode, memberId) == 1
+        if (isAdminRole(memberId)) return true
+        queryMemberPermissions()?.let {
+            it.itemList.find { it.memberid == memberId }?.let {
+                return it.permission.flag(perCode)
+            }
+        }
+        LogUtils.e("参会人权限查询失败：memberId:$memberId,perCode:$perCode")
+        return false
     }
 
     /**

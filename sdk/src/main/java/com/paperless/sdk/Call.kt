@@ -16,12 +16,12 @@ import java.util.concurrent.LinkedBlockingQueue
 object Call {
 
 
-    private var m_dbuf: ByteBuffer? = null
-    private var m_dexbuf: ByteBuffer? = null
+    lateinit var m_dbuf: ByteBuffer
+    lateinit var m_dexbuf: ByteBuffer
     fun initSetDirectBuf() {
         m_dbuf = ByteBuffer.allocateDirect(SdkVars.frame_size)
         m_dexbuf = ByteBuffer.allocateDirect(SdkVars.frame_codec_size)
-        initDirectBuf(m_dbuf!!, m_dexbuf!!)
+        initDirectBuf(m_dbuf, m_dexbuf)
     }
 
     /**
@@ -269,16 +269,10 @@ object Call {
         pts: Long,
         codecdatalen: Int
     ): Int {
-        if (m_dbuf == null) {
-            m_dbuf = ByteBuffer.allocateDirect(SdkVars.frame_size)
-        }
-        if (m_dexbuf == null) {
-            m_dexbuf = ByteBuffer.allocateDirect(SdkVars.frame_codec_size)
-        }
-        m_dbuf!!.position(0)
-        m_dbuf!!.limit(datalen)
-        m_dexbuf!!.position(0)
-        m_dexbuf!!.limit(codecdatalen)
+        m_dbuf.position(0)
+        m_dbuf.limit(datalen)
+        m_dexbuf.position(0)
+        m_dexbuf.limit(codecdatalen)
         if (res == Protocol.resource_id_0) {
             SdkVars.frame_count++
         }
@@ -300,8 +294,8 @@ object Call {
         frameData.w = w
         frameData.h = h
         frameData.pts = pts
-        frameData.setPacketBuffer(m_dbuf!!)
-        frameData.setCodecDataBuffer(m_dexbuf!!)
+        frameData.setPacketBuffer(m_dbuf)
+        frameData.setCodecDataBuffer(m_dexbuf)
         //saveLocal(frameData.bytes)
         if (!decodeQueue.offer(frameData)) {
             //添加失败就把最旧的数据删除后再添加
