@@ -18,7 +18,7 @@ android {
             cmake {
                 cppFlags("-frtti -fexceptions")
                 //,"arm64-v8a"
-                abiFilters("armeabi-v7a")
+                abiFilters("armeabi-v7a", "arm64-v8a")
                 //arguments '-DANDROID_STL=c++_shared'
                 //arguments '-DANDROID_STL=gnu_stl'
             }
@@ -43,7 +43,7 @@ android {
     sourceSets {
         getByName("main") {
             jniLibs.srcDirs("src/main/jniLibs")
-            jni.setSrcDirs(emptyList<String>())
+//            jni.setSrcDirs(emptyList<String>())
         }
     }
 
@@ -57,8 +57,8 @@ android {
         abi {
             isEnable = true // 启用 ABI 拆分
             reset() // 重置所有配置项到默认状态
-            include("armeabi-v7a") //,'arm64-v8a' // 指定要包含的 ABI
-            isUniversalApk = false //不生成包含所有 ABI 的单一 APK
+            include("armeabi-v7a", "arm64-v8a") //,'arm64-v8a' // 指定要包含的 ABI
+            isUniversalApk = true //不生成包含所有 ABI 的单一 APK
         }
     }
 }
@@ -70,7 +70,7 @@ afterEvaluate {
             create<MavenPublication>("release") {
                 groupId = "com.gitee.xlk_gitee"
                 artifactId = "sdk-library"
-                version = "1.1.0"
+                version = "1.2.0"
                 from(components["release"])
             }
         }

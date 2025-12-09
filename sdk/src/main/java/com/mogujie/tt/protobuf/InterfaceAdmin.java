@@ -175,7 +175,7 @@ public final class InterfaceAdmin {
     /**
      * @deprecated Use {@link #forNumber(int)} instead.
      */
-    @Deprecated
+    @java.lang.Deprecated
     public static Pb_AdminRight valueOf(int value) {
       return forNumber(value);
     }
@@ -380,7 +380,7 @@ public final class InterfaceAdmin {
     /**
      * @deprecated Use {@link #forNumber(int)} instead.
      */
-    @Deprecated
+    @java.lang.Deprecated
     public static Pb_AdminPropertyId valueOf(int value) {
       return forNumber(value);
     }
@@ -462,7 +462,7 @@ public final class InterfaceAdmin {
     /**
      * @deprecated Use {@link #forNumber(int)} instead.
      */
-    @Deprecated
+    @java.lang.Deprecated
     public static Pb_ADMINMUTILFLAG valueOf(int value) {
       return forNumber(value);
     }
@@ -785,60 +785,60 @@ public final class InterfaceAdmin {
       return size;
     }
 
-    public static pbui_Item_AdminDetailInfo parseFrom(
+    public static com.mogujie.tt.protobuf.InterfaceAdmin.pbui_Item_AdminDetailInfo parseFrom(
         com.google.protobuf.ByteString data)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return com.google.protobuf.GeneratedMessageLite.parseFrom(
           DEFAULT_INSTANCE, data);
     }
-    public static pbui_Item_AdminDetailInfo parseFrom(
+    public static com.mogujie.tt.protobuf.InterfaceAdmin.pbui_Item_AdminDetailInfo parseFrom(
         com.google.protobuf.ByteString data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return com.google.protobuf.GeneratedMessageLite.parseFrom(
           DEFAULT_INSTANCE, data, extensionRegistry);
     }
-    public static pbui_Item_AdminDetailInfo parseFrom(byte[] data)
+    public static com.mogujie.tt.protobuf.InterfaceAdmin.pbui_Item_AdminDetailInfo parseFrom(byte[] data)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return com.google.protobuf.GeneratedMessageLite.parseFrom(
           DEFAULT_INSTANCE, data);
     }
-    public static pbui_Item_AdminDetailInfo parseFrom(
+    public static com.mogujie.tt.protobuf.InterfaceAdmin.pbui_Item_AdminDetailInfo parseFrom(
         byte[] data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return com.google.protobuf.GeneratedMessageLite.parseFrom(
           DEFAULT_INSTANCE, data, extensionRegistry);
     }
-    public static pbui_Item_AdminDetailInfo parseFrom(java.io.InputStream input)
+    public static com.mogujie.tt.protobuf.InterfaceAdmin.pbui_Item_AdminDetailInfo parseFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageLite.parseFrom(
           DEFAULT_INSTANCE, input);
     }
-    public static pbui_Item_AdminDetailInfo parseFrom(
+    public static com.mogujie.tt.protobuf.InterfaceAdmin.pbui_Item_AdminDetailInfo parseFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageLite.parseFrom(
           DEFAULT_INSTANCE, input, extensionRegistry);
     }
-    public static pbui_Item_AdminDetailInfo parseDelimitedFrom(java.io.InputStream input)
+    public static com.mogujie.tt.protobuf.InterfaceAdmin.pbui_Item_AdminDetailInfo parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
       return parseDelimitedFrom(DEFAULT_INSTANCE, input);
     }
-    public static pbui_Item_AdminDetailInfo parseDelimitedFrom(
+    public static com.mogujie.tt.protobuf.InterfaceAdmin.pbui_Item_AdminDetailInfo parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
       return parseDelimitedFrom(DEFAULT_INSTANCE, input, extensionRegistry);
     }
-    public static pbui_Item_AdminDetailInfo parseFrom(
+    public static com.mogujie.tt.protobuf.InterfaceAdmin.pbui_Item_AdminDetailInfo parseFrom(
         com.google.protobuf.CodedInputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageLite.parseFrom(
           DEFAULT_INSTANCE, input);
     }
-    public static pbui_Item_AdminDetailInfo parseFrom(
+    public static com.mogujie.tt.protobuf.InterfaceAdmin.pbui_Item_AdminDetailInfo parseFrom(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
@@ -849,7 +849,7 @@ public final class InterfaceAdmin {
     public static Builder newBuilder() {
       return DEFAULT_INSTANCE.toBuilder();
     }
-    public static Builder newBuilder(pbui_Item_AdminDetailInfo prototype) {
+    public static Builder newBuilder(com.mogujie.tt.protobuf.InterfaceAdmin.pbui_Item_AdminDetailInfo prototype) {
       return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
     }
 
@@ -858,9 +858,9 @@ public final class InterfaceAdmin {
      */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessageLite.Builder<
-          pbui_Item_AdminDetailInfo, Builder> implements
+          com.mogujie.tt.protobuf.InterfaceAdmin.pbui_Item_AdminDetailInfo, Builder> implements
         // @@protoc_insertion_point(builder_implements:pbui_Item_AdminDetailInfo)
-        pbui_Item_AdminDetailInfoOrBuilder {
+        com.mogujie.tt.protobuf.InterfaceAdmin.pbui_Item_AdminDetailInfoOrBuilder {
       // Construct using com.mogujie.tt.protobuf.InterfaceAdmin.pbui_Item_AdminDetailInfo.newBuilder()
       private Builder() {
         super(DEFAULT_INSTANCE);
@@ -1032,11 +1032,11 @@ public final class InterfaceAdmin {
       // @@protoc_insertion_point(builder_scope:pbui_Item_AdminDetailInfo)
     }
     protected final Object dynamicMethod(
-        MethodToInvoke method,
+        com.google.protobuf.GeneratedMessageLite.MethodToInvoke method,
         Object arg0, Object arg1) {
       switch (method) {
         case NEW_MUTABLE_INSTANCE: {
-          return new pbui_Item_AdminDetailInfo();
+          return new com.mogujie.tt.protobuf.InterfaceAdmin.pbui_Item_AdminDetailInfo();
         }
         case IS_INITIALIZED: {
           return DEFAULT_INSTANCE;
@@ -1049,7 +1049,7 @@ public final class InterfaceAdmin {
         }
         case VISIT: {
           Visitor visitor = (Visitor) arg0;
-          pbui_Item_AdminDetailInfo other = (pbui_Item_AdminDetailInfo) arg1;
+          com.mogujie.tt.protobuf.InterfaceAdmin.pbui_Item_AdminDetailInfo other = (com.mogujie.tt.protobuf.InterfaceAdmin.pbui_Item_AdminDetailInfo) arg1;
           adminid_ = visitor.visitInt(adminid_ != 0, adminid_,
               other.adminid_ != 0, other.adminid_);
           adminname_ = visitor.visitByteString(adminname_ != com.google.protobuf.ByteString.EMPTY, adminname_,
@@ -1062,7 +1062,7 @@ public final class InterfaceAdmin {
               other.phone_ != com.google.protobuf.ByteString.EMPTY, other.phone_);
           email_ = visitor.visitByteString(email_ != com.google.protobuf.ByteString.EMPTY, email_,
               other.email_ != com.google.protobuf.ByteString.EMPTY, other.email_);
-          if (visitor == MergeFromVisitor
+          if (visitor == com.google.protobuf.GeneratedMessageLite.MergeFromVisitor
               .INSTANCE) {
           }
           return this;
@@ -1131,7 +1131,7 @@ public final class InterfaceAdmin {
           return DEFAULT_INSTANCE;
         }
         case GET_PARSER: {
-          if (PARSER == null) {    synchronized (pbui_Item_AdminDetailInfo.class) {
+          if (PARSER == null) {    synchronized (com.mogujie.tt.protobuf.InterfaceAdmin.pbui_Item_AdminDetailInfo.class) {
               if (PARSER == null) {
                 PARSER = new DefaultInstanceBasedParser(DEFAULT_INSTANCE);
               }
@@ -1145,13 +1145,13 @@ public final class InterfaceAdmin {
 
 
     // @@protoc_insertion_point(class_scope:pbui_Item_AdminDetailInfo)
-    private static final pbui_Item_AdminDetailInfo DEFAULT_INSTANCE;
+    private static final com.mogujie.tt.protobuf.InterfaceAdmin.pbui_Item_AdminDetailInfo DEFAULT_INSTANCE;
     static {
       DEFAULT_INSTANCE = new pbui_Item_AdminDetailInfo();
       DEFAULT_INSTANCE.makeImmutable();
     }
 
-    public static pbui_Item_AdminDetailInfo getDefaultInstance() {
+    public static com.mogujie.tt.protobuf.InterfaceAdmin.pbui_Item_AdminDetailInfo getDefaultInstance() {
       return DEFAULT_INSTANCE;
     }
 
@@ -1173,7 +1173,7 @@ public final class InterfaceAdmin {
      *
      * <code>repeated .pbui_Item_AdminDetailInfo item = 1;</code>
      */
-    java.util.List<pbui_Item_AdminDetailInfo>
+    java.util.List<com.mogujie.tt.protobuf.InterfaceAdmin.pbui_Item_AdminDetailInfo> 
         getItemList();
     /**
      * <pre>
@@ -1182,7 +1182,7 @@ public final class InterfaceAdmin {
      *
      * <code>repeated .pbui_Item_AdminDetailInfo item = 1;</code>
      */
-    pbui_Item_AdminDetailInfo getItem(int index);
+    com.mogujie.tt.protobuf.InterfaceAdmin.pbui_Item_AdminDetailInfo getItem(int index);
     /**
      * <pre>
      * 
@@ -1211,7 +1211,7 @@ public final class InterfaceAdmin {
       item_ = emptyProtobufList();
     }
     public static final int ITEM_FIELD_NUMBER = 1;
-    private com.google.protobuf.Internal.ProtobufList<pbui_Item_AdminDetailInfo> item_;
+    private com.google.protobuf.Internal.ProtobufList<com.mogujie.tt.protobuf.InterfaceAdmin.pbui_Item_AdminDetailInfo> item_;
     /**
      * <pre>
      * 
@@ -1219,7 +1219,7 @@ public final class InterfaceAdmin {
      *
      * <code>repeated .pbui_Item_AdminDetailInfo item = 1;</code>
      */
-    public java.util.List<pbui_Item_AdminDetailInfo> getItemList() {
+    public java.util.List<com.mogujie.tt.protobuf.InterfaceAdmin.pbui_Item_AdminDetailInfo> getItemList() {
       return item_;
     }
     /**
@@ -1229,7 +1229,7 @@ public final class InterfaceAdmin {
      *
      * <code>repeated .pbui_Item_AdminDetailInfo item = 1;</code>
      */
-    public java.util.List<? extends pbui_Item_AdminDetailInfoOrBuilder>
+    public java.util.List<? extends com.mogujie.tt.protobuf.InterfaceAdmin.pbui_Item_AdminDetailInfoOrBuilder> 
         getItemOrBuilderList() {
       return item_;
     }
@@ -1250,7 +1250,7 @@ public final class InterfaceAdmin {
      *
      * <code>repeated .pbui_Item_AdminDetailInfo item = 1;</code>
      */
-    public pbui_Item_AdminDetailInfo getItem(int index) {
+    public com.mogujie.tt.protobuf.InterfaceAdmin.pbui_Item_AdminDetailInfo getItem(int index) {
       return item_.get(index);
     }
     /**
@@ -1260,7 +1260,7 @@ public final class InterfaceAdmin {
      *
      * <code>repeated .pbui_Item_AdminDetailInfo item = 1;</code>
      */
-    public pbui_Item_AdminDetailInfoOrBuilder getItemOrBuilder(
+    public com.mogujie.tt.protobuf.InterfaceAdmin.pbui_Item_AdminDetailInfoOrBuilder getItemOrBuilder(
         int index) {
       return item_.get(index);
     }
@@ -1279,7 +1279,7 @@ public final class InterfaceAdmin {
      * <code>repeated .pbui_Item_AdminDetailInfo item = 1;</code>
      */
     private void setItem(
-        int index, pbui_Item_AdminDetailInfo value) {
+        int index, com.mogujie.tt.protobuf.InterfaceAdmin.pbui_Item_AdminDetailInfo value) {
       if (value == null) {
         throw new NullPointerException();
       }
@@ -1294,7 +1294,7 @@ public final class InterfaceAdmin {
      * <code>repeated .pbui_Item_AdminDetailInfo item = 1;</code>
      */
     private void setItem(
-        int index, pbui_Item_AdminDetailInfo.Builder builderForValue) {
+        int index, com.mogujie.tt.protobuf.InterfaceAdmin.pbui_Item_AdminDetailInfo.Builder builderForValue) {
       ensureItemIsMutable();
       item_.set(index, builderForValue.build());
     }
@@ -1305,7 +1305,7 @@ public final class InterfaceAdmin {
      *
      * <code>repeated .pbui_Item_AdminDetailInfo item = 1;</code>
      */
-    private void addItem(pbui_Item_AdminDetailInfo value) {
+    private void addItem(com.mogujie.tt.protobuf.InterfaceAdmin.pbui_Item_AdminDetailInfo value) {
       if (value == null) {
         throw new NullPointerException();
       }
@@ -1320,7 +1320,7 @@ public final class InterfaceAdmin {
      * <code>repeated .pbui_Item_AdminDetailInfo item = 1;</code>
      */
     private void addItem(
-        int index, pbui_Item_AdminDetailInfo value) {
+        int index, com.mogujie.tt.protobuf.InterfaceAdmin.pbui_Item_AdminDetailInfo value) {
       if (value == null) {
         throw new NullPointerException();
       }
@@ -1335,7 +1335,7 @@ public final class InterfaceAdmin {
      * <code>repeated .pbui_Item_AdminDetailInfo item = 1;</code>
      */
     private void addItem(
-        pbui_Item_AdminDetailInfo.Builder builderForValue) {
+        com.mogujie.tt.protobuf.InterfaceAdmin.pbui_Item_AdminDetailInfo.Builder builderForValue) {
       ensureItemIsMutable();
       item_.add(builderForValue.build());
     }
@@ -1347,7 +1347,7 @@ public final class InterfaceAdmin {
      * <code>repeated .pbui_Item_AdminDetailInfo item = 1;</code>
      */
     private void addItem(
-        int index, pbui_Item_AdminDetailInfo.Builder builderForValue) {
+        int index, com.mogujie.tt.protobuf.InterfaceAdmin.pbui_Item_AdminDetailInfo.Builder builderForValue) {
       ensureItemIsMutable();
       item_.add(index, builderForValue.build());
     }
@@ -1359,7 +1359,7 @@ public final class InterfaceAdmin {
      * <code>repeated .pbui_Item_AdminDetailInfo item = 1;</code>
      */
     private void addAllItem(
-        Iterable<? extends pbui_Item_AdminDetailInfo> values) {
+        java.lang.Iterable<? extends com.mogujie.tt.protobuf.InterfaceAdmin.pbui_Item_AdminDetailInfo> values) {
       ensureItemIsMutable();
       com.google.protobuf.AbstractMessageLite.addAll(
           values, item_);
@@ -1406,60 +1406,60 @@ public final class InterfaceAdmin {
       return size;
     }
 
-    public static pbui_TypeAdminDetailInfo parseFrom(
+    public static com.mogujie.tt.protobuf.InterfaceAdmin.pbui_TypeAdminDetailInfo parseFrom(
         com.google.protobuf.ByteString data)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return com.google.protobuf.GeneratedMessageLite.parseFrom(
           DEFAULT_INSTANCE, data);
     }
-    public static pbui_TypeAdminDetailInfo parseFrom(
+    public static com.mogujie.tt.protobuf.InterfaceAdmin.pbui_TypeAdminDetailInfo parseFrom(
         com.google.protobuf.ByteString data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return com.google.protobuf.GeneratedMessageLite.parseFrom(
           DEFAULT_INSTANCE, data, extensionRegistry);
     }
-    public static pbui_TypeAdminDetailInfo parseFrom(byte[] data)
+    public static com.mogujie.tt.protobuf.InterfaceAdmin.pbui_TypeAdminDetailInfo parseFrom(byte[] data)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return com.google.protobuf.GeneratedMessageLite.parseFrom(
           DEFAULT_INSTANCE, data);
     }
-    public static pbui_TypeAdminDetailInfo parseFrom(
+    public static com.mogujie.tt.protobuf.InterfaceAdmin.pbui_TypeAdminDetailInfo parseFrom(
         byte[] data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return com.google.protobuf.GeneratedMessageLite.parseFrom(
           DEFAULT_INSTANCE, data, extensionRegistry);
     }
-    public static pbui_TypeAdminDetailInfo parseFrom(java.io.InputStream input)
+    public static com.mogujie.tt.protobuf.InterfaceAdmin.pbui_TypeAdminDetailInfo parseFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageLite.parseFrom(
           DEFAULT_INSTANCE, input);
     }
-    public static pbui_TypeAdminDetailInfo parseFrom(
+    public static com.mogujie.tt.protobuf.InterfaceAdmin.pbui_TypeAdminDetailInfo parseFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageLite.parseFrom(
           DEFAULT_INSTANCE, input, extensionRegistry);
     }
-    public static pbui_TypeAdminDetailInfo parseDelimitedFrom(java.io.InputStream input)
+    public static com.mogujie.tt.protobuf.InterfaceAdmin.pbui_TypeAdminDetailInfo parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
       return parseDelimitedFrom(DEFAULT_INSTANCE, input);
     }
-    public static pbui_TypeAdminDetailInfo parseDelimitedFrom(
+    public static com.mogujie.tt.protobuf.InterfaceAdmin.pbui_TypeAdminDetailInfo parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
       return parseDelimitedFrom(DEFAULT_INSTANCE, input, extensionRegistry);
     }
-    public static pbui_TypeAdminDetailInfo parseFrom(
+    public static com.mogujie.tt.protobuf.InterfaceAdmin.pbui_TypeAdminDetailInfo parseFrom(
         com.google.protobuf.CodedInputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageLite.parseFrom(
           DEFAULT_INSTANCE, input);
     }
-    public static pbui_TypeAdminDetailInfo parseFrom(
+    public static com.mogujie.tt.protobuf.InterfaceAdmin.pbui_TypeAdminDetailInfo parseFrom(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
@@ -1470,7 +1470,7 @@ public final class InterfaceAdmin {
     public static Builder newBuilder() {
       return DEFAULT_INSTANCE.toBuilder();
     }
-    public static Builder newBuilder(pbui_TypeAdminDetailInfo prototype) {
+    public static Builder newBuilder(com.mogujie.tt.protobuf.InterfaceAdmin.pbui_TypeAdminDetailInfo prototype) {
       return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
     }
 
@@ -1486,9 +1486,9 @@ public final class InterfaceAdmin {
      */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessageLite.Builder<
-          pbui_TypeAdminDetailInfo, Builder> implements
+          com.mogujie.tt.protobuf.InterfaceAdmin.pbui_TypeAdminDetailInfo, Builder> implements
         // @@protoc_insertion_point(builder_implements:pbui_TypeAdminDetailInfo)
-        pbui_TypeAdminDetailInfoOrBuilder {
+        com.mogujie.tt.protobuf.InterfaceAdmin.pbui_TypeAdminDetailInfoOrBuilder {
       // Construct using com.mogujie.tt.protobuf.InterfaceAdmin.pbui_TypeAdminDetailInfo.newBuilder()
       private Builder() {
         super(DEFAULT_INSTANCE);
@@ -1502,7 +1502,7 @@ public final class InterfaceAdmin {
        *
        * <code>repeated .pbui_Item_AdminDetailInfo item = 1;</code>
        */
-      public java.util.List<pbui_Item_AdminDetailInfo> getItemList() {
+      public java.util.List<com.mogujie.tt.protobuf.InterfaceAdmin.pbui_Item_AdminDetailInfo> getItemList() {
         return java.util.Collections.unmodifiableList(
             instance.getItemList());
       }
@@ -1522,7 +1522,7 @@ public final class InterfaceAdmin {
        *
        * <code>repeated .pbui_Item_AdminDetailInfo item = 1;</code>
        */
-      public pbui_Item_AdminDetailInfo getItem(int index) {
+      public com.mogujie.tt.protobuf.InterfaceAdmin.pbui_Item_AdminDetailInfo getItem(int index) {
         return instance.getItem(index);
       }
       /**
@@ -1533,7 +1533,7 @@ public final class InterfaceAdmin {
        * <code>repeated .pbui_Item_AdminDetailInfo item = 1;</code>
        */
       public Builder setItem(
-          int index, pbui_Item_AdminDetailInfo value) {
+          int index, com.mogujie.tt.protobuf.InterfaceAdmin.pbui_Item_AdminDetailInfo value) {
         copyOnWrite();
         instance.setItem(index, value);
         return this;
@@ -1546,7 +1546,7 @@ public final class InterfaceAdmin {
        * <code>repeated .pbui_Item_AdminDetailInfo item = 1;</code>
        */
       public Builder setItem(
-          int index, pbui_Item_AdminDetailInfo.Builder builderForValue) {
+          int index, com.mogujie.tt.protobuf.InterfaceAdmin.pbui_Item_AdminDetailInfo.Builder builderForValue) {
         copyOnWrite();
         instance.setItem(index, builderForValue);
         return this;
@@ -1558,7 +1558,7 @@ public final class InterfaceAdmin {
        *
        * <code>repeated .pbui_Item_AdminDetailInfo item = 1;</code>
        */
-      public Builder addItem(pbui_Item_AdminDetailInfo value) {
+      public Builder addItem(com.mogujie.tt.protobuf.InterfaceAdmin.pbui_Item_AdminDetailInfo value) {
         copyOnWrite();
         instance.addItem(value);
         return this;
@@ -1571,7 +1571,7 @@ public final class InterfaceAdmin {
        * <code>repeated .pbui_Item_AdminDetailInfo item = 1;</code>
        */
       public Builder addItem(
-          int index, pbui_Item_AdminDetailInfo value) {
+          int index, com.mogujie.tt.protobuf.InterfaceAdmin.pbui_Item_AdminDetailInfo value) {
         copyOnWrite();
         instance.addItem(index, value);
         return this;
@@ -1584,7 +1584,7 @@ public final class InterfaceAdmin {
        * <code>repeated .pbui_Item_AdminDetailInfo item = 1;</code>
        */
       public Builder addItem(
-          pbui_Item_AdminDetailInfo.Builder builderForValue) {
+          com.mogujie.tt.protobuf.InterfaceAdmin.pbui_Item_AdminDetailInfo.Builder builderForValue) {
         copyOnWrite();
         instance.addItem(builderForValue);
         return this;
@@ -1597,7 +1597,7 @@ public final class InterfaceAdmin {
        * <code>repeated .pbui_Item_AdminDetailInfo item = 1;</code>
        */
       public Builder addItem(
-          int index, pbui_Item_AdminDetailInfo.Builder builderForValue) {
+          int index, com.mogujie.tt.protobuf.InterfaceAdmin.pbui_Item_AdminDetailInfo.Builder builderForValue) {
         copyOnWrite();
         instance.addItem(index, builderForValue);
         return this;
@@ -1610,7 +1610,7 @@ public final class InterfaceAdmin {
        * <code>repeated .pbui_Item_AdminDetailInfo item = 1;</code>
        */
       public Builder addAllItem(
-          Iterable<? extends pbui_Item_AdminDetailInfo> values) {
+          java.lang.Iterable<? extends com.mogujie.tt.protobuf.InterfaceAdmin.pbui_Item_AdminDetailInfo> values) {
         copyOnWrite();
         instance.addAllItem(values);
         return this;
@@ -1643,11 +1643,11 @@ public final class InterfaceAdmin {
       // @@protoc_insertion_point(builder_scope:pbui_TypeAdminDetailInfo)
     }
     protected final Object dynamicMethod(
-        MethodToInvoke method,
+        com.google.protobuf.GeneratedMessageLite.MethodToInvoke method,
         Object arg0, Object arg1) {
       switch (method) {
         case NEW_MUTABLE_INSTANCE: {
-          return new pbui_TypeAdminDetailInfo();
+          return new com.mogujie.tt.protobuf.InterfaceAdmin.pbui_TypeAdminDetailInfo();
         }
         case IS_INITIALIZED: {
           return DEFAULT_INSTANCE;
@@ -1661,9 +1661,9 @@ public final class InterfaceAdmin {
         }
         case VISIT: {
           Visitor visitor = (Visitor) arg0;
-          pbui_TypeAdminDetailInfo other = (pbui_TypeAdminDetailInfo) arg1;
+          com.mogujie.tt.protobuf.InterfaceAdmin.pbui_TypeAdminDetailInfo other = (com.mogujie.tt.protobuf.InterfaceAdmin.pbui_TypeAdminDetailInfo) arg1;
           item_= visitor.visitList(item_, other.item_);
-          if (visitor == MergeFromVisitor
+          if (visitor == com.google.protobuf.GeneratedMessageLite.MergeFromVisitor
               .INSTANCE) {
           }
           return this;
@@ -1693,7 +1693,7 @@ public final class InterfaceAdmin {
                         com.google.protobuf.GeneratedMessageLite.mutableCopy(item_);
                   }
                   item_.add(
-                      input.readMessage(pbui_Item_AdminDetailInfo.parser(), extensionRegistry));
+                      input.readMessage(com.mogujie.tt.protobuf.InterfaceAdmin.pbui_Item_AdminDetailInfo.parser(), extensionRegistry));
                   break;
                 }
               }
@@ -1711,7 +1711,7 @@ public final class InterfaceAdmin {
           return DEFAULT_INSTANCE;
         }
         case GET_PARSER: {
-          if (PARSER == null) {    synchronized (pbui_TypeAdminDetailInfo.class) {
+          if (PARSER == null) {    synchronized (com.mogujie.tt.protobuf.InterfaceAdmin.pbui_TypeAdminDetailInfo.class) {
               if (PARSER == null) {
                 PARSER = new DefaultInstanceBasedParser(DEFAULT_INSTANCE);
               }
@@ -1725,13 +1725,13 @@ public final class InterfaceAdmin {
 
 
     // @@protoc_insertion_point(class_scope:pbui_TypeAdminDetailInfo)
-    private static final pbui_TypeAdminDetailInfo DEFAULT_INSTANCE;
+    private static final com.mogujie.tt.protobuf.InterfaceAdmin.pbui_TypeAdminDetailInfo DEFAULT_INSTANCE;
     static {
       DEFAULT_INSTANCE = new pbui_TypeAdminDetailInfo();
       DEFAULT_INSTANCE.makeImmutable();
     }
 
-    public static pbui_TypeAdminDetailInfo getDefaultInstance() {
+    public static com.mogujie.tt.protobuf.InterfaceAdmin.pbui_TypeAdminDetailInfo getDefaultInstance() {
       return DEFAULT_INSTANCE;
     }
 
@@ -1941,60 +1941,60 @@ public final class InterfaceAdmin {
       return size;
     }
 
-    public static pbui_Type_AdminModifyPwd parseFrom(
+    public static com.mogujie.tt.protobuf.InterfaceAdmin.pbui_Type_AdminModifyPwd parseFrom(
         com.google.protobuf.ByteString data)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return com.google.protobuf.GeneratedMessageLite.parseFrom(
           DEFAULT_INSTANCE, data);
     }
-    public static pbui_Type_AdminModifyPwd parseFrom(
+    public static com.mogujie.tt.protobuf.InterfaceAdmin.pbui_Type_AdminModifyPwd parseFrom(
         com.google.protobuf.ByteString data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return com.google.protobuf.GeneratedMessageLite.parseFrom(
           DEFAULT_INSTANCE, data, extensionRegistry);
     }
-    public static pbui_Type_AdminModifyPwd parseFrom(byte[] data)
+    public static com.mogujie.tt.protobuf.InterfaceAdmin.pbui_Type_AdminModifyPwd parseFrom(byte[] data)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return com.google.protobuf.GeneratedMessageLite.parseFrom(
           DEFAULT_INSTANCE, data);
     }
-    public static pbui_Type_AdminModifyPwd parseFrom(
+    public static com.mogujie.tt.protobuf.InterfaceAdmin.pbui_Type_AdminModifyPwd parseFrom(
         byte[] data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return com.google.protobuf.GeneratedMessageLite.parseFrom(
           DEFAULT_INSTANCE, data, extensionRegistry);
     }
-    public static pbui_Type_AdminModifyPwd parseFrom(java.io.InputStream input)
+    public static com.mogujie.tt.protobuf.InterfaceAdmin.pbui_Type_AdminModifyPwd parseFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageLite.parseFrom(
           DEFAULT_INSTANCE, input);
     }
-    public static pbui_Type_AdminModifyPwd parseFrom(
+    public static com.mogujie.tt.protobuf.InterfaceAdmin.pbui_Type_AdminModifyPwd parseFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageLite.parseFrom(
           DEFAULT_INSTANCE, input, extensionRegistry);
     }
-    public static pbui_Type_AdminModifyPwd parseDelimitedFrom(java.io.InputStream input)
+    public static com.mogujie.tt.protobuf.InterfaceAdmin.pbui_Type_AdminModifyPwd parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
       return parseDelimitedFrom(DEFAULT_INSTANCE, input);
     }
-    public static pbui_Type_AdminModifyPwd parseDelimitedFrom(
+    public static com.mogujie.tt.protobuf.InterfaceAdmin.pbui_Type_AdminModifyPwd parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
       return parseDelimitedFrom(DEFAULT_INSTANCE, input, extensionRegistry);
     }
-    public static pbui_Type_AdminModifyPwd parseFrom(
+    public static com.mogujie.tt.protobuf.InterfaceAdmin.pbui_Type_AdminModifyPwd parseFrom(
         com.google.protobuf.CodedInputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageLite.parseFrom(
           DEFAULT_INSTANCE, input);
     }
-    public static pbui_Type_AdminModifyPwd parseFrom(
+    public static com.mogujie.tt.protobuf.InterfaceAdmin.pbui_Type_AdminModifyPwd parseFrom(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
@@ -2005,7 +2005,7 @@ public final class InterfaceAdmin {
     public static Builder newBuilder() {
       return DEFAULT_INSTANCE.toBuilder();
     }
-    public static Builder newBuilder(pbui_Type_AdminModifyPwd prototype) {
+    public static Builder newBuilder(com.mogujie.tt.protobuf.InterfaceAdmin.pbui_Type_AdminModifyPwd prototype) {
       return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
     }
 
@@ -2021,9 +2021,9 @@ public final class InterfaceAdmin {
      */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessageLite.Builder<
-          pbui_Type_AdminModifyPwd, Builder> implements
+          com.mogujie.tt.protobuf.InterfaceAdmin.pbui_Type_AdminModifyPwd, Builder> implements
         // @@protoc_insertion_point(builder_implements:pbui_Type_AdminModifyPwd)
-        pbui_Type_AdminModifyPwdOrBuilder {
+        com.mogujie.tt.protobuf.InterfaceAdmin.pbui_Type_AdminModifyPwdOrBuilder {
       // Construct using com.mogujie.tt.protobuf.InterfaceAdmin.pbui_Type_AdminModifyPwd.newBuilder()
       private Builder() {
         super(DEFAULT_INSTANCE);
@@ -2138,11 +2138,11 @@ public final class InterfaceAdmin {
       // @@protoc_insertion_point(builder_scope:pbui_Type_AdminModifyPwd)
     }
     protected final Object dynamicMethod(
-        MethodToInvoke method,
+        com.google.protobuf.GeneratedMessageLite.MethodToInvoke method,
         Object arg0, Object arg1) {
       switch (method) {
         case NEW_MUTABLE_INSTANCE: {
-          return new pbui_Type_AdminModifyPwd();
+          return new com.mogujie.tt.protobuf.InterfaceAdmin.pbui_Type_AdminModifyPwd();
         }
         case IS_INITIALIZED: {
           return DEFAULT_INSTANCE;
@@ -2155,14 +2155,14 @@ public final class InterfaceAdmin {
         }
         case VISIT: {
           Visitor visitor = (Visitor) arg0;
-          pbui_Type_AdminModifyPwd other = (pbui_Type_AdminModifyPwd) arg1;
+          com.mogujie.tt.protobuf.InterfaceAdmin.pbui_Type_AdminModifyPwd other = (com.mogujie.tt.protobuf.InterfaceAdmin.pbui_Type_AdminModifyPwd) arg1;
           adminname_ = visitor.visitByteString(adminname_ != com.google.protobuf.ByteString.EMPTY, adminname_,
               other.adminname_ != com.google.protobuf.ByteString.EMPTY, other.adminname_);
           adminoldpwd_ = visitor.visitByteString(adminoldpwd_ != com.google.protobuf.ByteString.EMPTY, adminoldpwd_,
               other.adminoldpwd_ != com.google.protobuf.ByteString.EMPTY, other.adminoldpwd_);
           adminnewpwd_ = visitor.visitByteString(adminnewpwd_ != com.google.protobuf.ByteString.EMPTY, adminnewpwd_,
               other.adminnewpwd_ != com.google.protobuf.ByteString.EMPTY, other.adminnewpwd_);
-          if (visitor == MergeFromVisitor
+          if (visitor == com.google.protobuf.GeneratedMessageLite.MergeFromVisitor
               .INSTANCE) {
           }
           return this;
@@ -2216,7 +2216,7 @@ public final class InterfaceAdmin {
           return DEFAULT_INSTANCE;
         }
         case GET_PARSER: {
-          if (PARSER == null) {    synchronized (pbui_Type_AdminModifyPwd.class) {
+          if (PARSER == null) {    synchronized (com.mogujie.tt.protobuf.InterfaceAdmin.pbui_Type_AdminModifyPwd.class) {
               if (PARSER == null) {
                 PARSER = new DefaultInstanceBasedParser(DEFAULT_INSTANCE);
               }
@@ -2230,13 +2230,13 @@ public final class InterfaceAdmin {
 
 
     // @@protoc_insertion_point(class_scope:pbui_Type_AdminModifyPwd)
-    private static final pbui_Type_AdminModifyPwd DEFAULT_INSTANCE;
+    private static final com.mogujie.tt.protobuf.InterfaceAdmin.pbui_Type_AdminModifyPwd DEFAULT_INSTANCE;
     static {
       DEFAULT_INSTANCE = new pbui_Type_AdminModifyPwd();
       DEFAULT_INSTANCE.makeImmutable();
     }
 
-    public static pbui_Type_AdminModifyPwd getDefaultInstance() {
+    public static com.mogujie.tt.protobuf.InterfaceAdmin.pbui_Type_AdminModifyPwd getDefaultInstance() {
       return DEFAULT_INSTANCE;
     }
 
@@ -2492,60 +2492,60 @@ public final class InterfaceAdmin {
       return size;
     }
 
-    public static pbui_Type_AdminLogon parseFrom(
+    public static com.mogujie.tt.protobuf.InterfaceAdmin.pbui_Type_AdminLogon parseFrom(
         com.google.protobuf.ByteString data)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return com.google.protobuf.GeneratedMessageLite.parseFrom(
           DEFAULT_INSTANCE, data);
     }
-    public static pbui_Type_AdminLogon parseFrom(
+    public static com.mogujie.tt.protobuf.InterfaceAdmin.pbui_Type_AdminLogon parseFrom(
         com.google.protobuf.ByteString data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return com.google.protobuf.GeneratedMessageLite.parseFrom(
           DEFAULT_INSTANCE, data, extensionRegistry);
     }
-    public static pbui_Type_AdminLogon parseFrom(byte[] data)
+    public static com.mogujie.tt.protobuf.InterfaceAdmin.pbui_Type_AdminLogon parseFrom(byte[] data)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return com.google.protobuf.GeneratedMessageLite.parseFrom(
           DEFAULT_INSTANCE, data);
     }
-    public static pbui_Type_AdminLogon parseFrom(
+    public static com.mogujie.tt.protobuf.InterfaceAdmin.pbui_Type_AdminLogon parseFrom(
         byte[] data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return com.google.protobuf.GeneratedMessageLite.parseFrom(
           DEFAULT_INSTANCE, data, extensionRegistry);
     }
-    public static pbui_Type_AdminLogon parseFrom(java.io.InputStream input)
+    public static com.mogujie.tt.protobuf.InterfaceAdmin.pbui_Type_AdminLogon parseFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageLite.parseFrom(
           DEFAULT_INSTANCE, input);
     }
-    public static pbui_Type_AdminLogon parseFrom(
+    public static com.mogujie.tt.protobuf.InterfaceAdmin.pbui_Type_AdminLogon parseFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageLite.parseFrom(
           DEFAULT_INSTANCE, input, extensionRegistry);
     }
-    public static pbui_Type_AdminLogon parseDelimitedFrom(java.io.InputStream input)
+    public static com.mogujie.tt.protobuf.InterfaceAdmin.pbui_Type_AdminLogon parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
       return parseDelimitedFrom(DEFAULT_INSTANCE, input);
     }
-    public static pbui_Type_AdminLogon parseDelimitedFrom(
+    public static com.mogujie.tt.protobuf.InterfaceAdmin.pbui_Type_AdminLogon parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
       return parseDelimitedFrom(DEFAULT_INSTANCE, input, extensionRegistry);
     }
-    public static pbui_Type_AdminLogon parseFrom(
+    public static com.mogujie.tt.protobuf.InterfaceAdmin.pbui_Type_AdminLogon parseFrom(
         com.google.protobuf.CodedInputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageLite.parseFrom(
           DEFAULT_INSTANCE, input);
     }
-    public static pbui_Type_AdminLogon parseFrom(
+    public static com.mogujie.tt.protobuf.InterfaceAdmin.pbui_Type_AdminLogon parseFrom(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
@@ -2556,7 +2556,7 @@ public final class InterfaceAdmin {
     public static Builder newBuilder() {
       return DEFAULT_INSTANCE.toBuilder();
     }
-    public static Builder newBuilder(pbui_Type_AdminLogon prototype) {
+    public static Builder newBuilder(com.mogujie.tt.protobuf.InterfaceAdmin.pbui_Type_AdminLogon prototype) {
       return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
     }
 
@@ -2571,9 +2571,9 @@ public final class InterfaceAdmin {
      */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessageLite.Builder<
-          pbui_Type_AdminLogon, Builder> implements
+          com.mogujie.tt.protobuf.InterfaceAdmin.pbui_Type_AdminLogon, Builder> implements
         // @@protoc_insertion_point(builder_implements:pbui_Type_AdminLogon)
-        pbui_Type_AdminLogonOrBuilder {
+        com.mogujie.tt.protobuf.InterfaceAdmin.pbui_Type_AdminLogonOrBuilder {
       // Construct using com.mogujie.tt.protobuf.InterfaceAdmin.pbui_Type_AdminLogon.newBuilder()
       private Builder() {
         super(DEFAULT_INSTANCE);
@@ -2723,11 +2723,11 @@ public final class InterfaceAdmin {
       // @@protoc_insertion_point(builder_scope:pbui_Type_AdminLogon)
     }
     protected final Object dynamicMethod(
-        MethodToInvoke method,
+        com.google.protobuf.GeneratedMessageLite.MethodToInvoke method,
         Object arg0, Object arg1) {
       switch (method) {
         case NEW_MUTABLE_INSTANCE: {
-          return new pbui_Type_AdminLogon();
+          return new com.mogujie.tt.protobuf.InterfaceAdmin.pbui_Type_AdminLogon();
         }
         case IS_INITIALIZED: {
           return DEFAULT_INSTANCE;
@@ -2740,7 +2740,7 @@ public final class InterfaceAdmin {
         }
         case VISIT: {
           Visitor visitor = (Visitor) arg0;
-          pbui_Type_AdminLogon other = (pbui_Type_AdminLogon) arg1;
+          com.mogujie.tt.protobuf.InterfaceAdmin.pbui_Type_AdminLogon other = (com.mogujie.tt.protobuf.InterfaceAdmin.pbui_Type_AdminLogon) arg1;
           isascill_ = visitor.visitInt(isascill_ != 0, isascill_,
               other.isascill_ != 0, other.isascill_);
           adminname_ = visitor.visitByteString(adminname_ != com.google.protobuf.ByteString.EMPTY, adminname_,
@@ -2749,7 +2749,7 @@ public final class InterfaceAdmin {
               other.adminpwd_ != com.google.protobuf.ByteString.EMPTY, other.adminpwd_);
           logonmode_ = visitor.visitInt(logonmode_ != 0, logonmode_,
               other.logonmode_ != 0, other.logonmode_);
-          if (visitor == MergeFromVisitor
+          if (visitor == com.google.protobuf.GeneratedMessageLite.MergeFromVisitor
               .INSTANCE) {
           }
           return this;
@@ -2808,7 +2808,7 @@ public final class InterfaceAdmin {
           return DEFAULT_INSTANCE;
         }
         case GET_PARSER: {
-          if (PARSER == null) {    synchronized (pbui_Type_AdminLogon.class) {
+          if (PARSER == null) {    synchronized (com.mogujie.tt.protobuf.InterfaceAdmin.pbui_Type_AdminLogon.class) {
               if (PARSER == null) {
                 PARSER = new DefaultInstanceBasedParser(DEFAULT_INSTANCE);
               }
@@ -2822,13 +2822,13 @@ public final class InterfaceAdmin {
 
 
     // @@protoc_insertion_point(class_scope:pbui_Type_AdminLogon)
-    private static final pbui_Type_AdminLogon DEFAULT_INSTANCE;
+    private static final com.mogujie.tt.protobuf.InterfaceAdmin.pbui_Type_AdminLogon DEFAULT_INSTANCE;
     static {
       DEFAULT_INSTANCE = new pbui_Type_AdminLogon();
       DEFAULT_INSTANCE.makeImmutable();
     }
 
-    public static pbui_Type_AdminLogon getDefaultInstance() {
+    public static com.mogujie.tt.protobuf.InterfaceAdmin.pbui_Type_AdminLogon getDefaultInstance() {
       return DEFAULT_INSTANCE;
     }
 
@@ -3166,60 +3166,60 @@ public final class InterfaceAdmin {
       return size;
     }
 
-    public static pbui_Type_AdminLogonStatus parseFrom(
+    public static com.mogujie.tt.protobuf.InterfaceAdmin.pbui_Type_AdminLogonStatus parseFrom(
         com.google.protobuf.ByteString data)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return com.google.protobuf.GeneratedMessageLite.parseFrom(
           DEFAULT_INSTANCE, data);
     }
-    public static pbui_Type_AdminLogonStatus parseFrom(
+    public static com.mogujie.tt.protobuf.InterfaceAdmin.pbui_Type_AdminLogonStatus parseFrom(
         com.google.protobuf.ByteString data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return com.google.protobuf.GeneratedMessageLite.parseFrom(
           DEFAULT_INSTANCE, data, extensionRegistry);
     }
-    public static pbui_Type_AdminLogonStatus parseFrom(byte[] data)
+    public static com.mogujie.tt.protobuf.InterfaceAdmin.pbui_Type_AdminLogonStatus parseFrom(byte[] data)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return com.google.protobuf.GeneratedMessageLite.parseFrom(
           DEFAULT_INSTANCE, data);
     }
-    public static pbui_Type_AdminLogonStatus parseFrom(
+    public static com.mogujie.tt.protobuf.InterfaceAdmin.pbui_Type_AdminLogonStatus parseFrom(
         byte[] data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return com.google.protobuf.GeneratedMessageLite.parseFrom(
           DEFAULT_INSTANCE, data, extensionRegistry);
     }
-    public static pbui_Type_AdminLogonStatus parseFrom(java.io.InputStream input)
+    public static com.mogujie.tt.protobuf.InterfaceAdmin.pbui_Type_AdminLogonStatus parseFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageLite.parseFrom(
           DEFAULT_INSTANCE, input);
     }
-    public static pbui_Type_AdminLogonStatus parseFrom(
+    public static com.mogujie.tt.protobuf.InterfaceAdmin.pbui_Type_AdminLogonStatus parseFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageLite.parseFrom(
           DEFAULT_INSTANCE, input, extensionRegistry);
     }
-    public static pbui_Type_AdminLogonStatus parseDelimitedFrom(java.io.InputStream input)
+    public static com.mogujie.tt.protobuf.InterfaceAdmin.pbui_Type_AdminLogonStatus parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
       return parseDelimitedFrom(DEFAULT_INSTANCE, input);
     }
-    public static pbui_Type_AdminLogonStatus parseDelimitedFrom(
+    public static com.mogujie.tt.protobuf.InterfaceAdmin.pbui_Type_AdminLogonStatus parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
       return parseDelimitedFrom(DEFAULT_INSTANCE, input, extensionRegistry);
     }
-    public static pbui_Type_AdminLogonStatus parseFrom(
+    public static com.mogujie.tt.protobuf.InterfaceAdmin.pbui_Type_AdminLogonStatus parseFrom(
         com.google.protobuf.CodedInputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageLite.parseFrom(
           DEFAULT_INSTANCE, input);
     }
-    public static pbui_Type_AdminLogonStatus parseFrom(
+    public static com.mogujie.tt.protobuf.InterfaceAdmin.pbui_Type_AdminLogonStatus parseFrom(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
@@ -3230,7 +3230,7 @@ public final class InterfaceAdmin {
     public static Builder newBuilder() {
       return DEFAULT_INSTANCE.toBuilder();
     }
-    public static Builder newBuilder(pbui_Type_AdminLogonStatus prototype) {
+    public static Builder newBuilder(com.mogujie.tt.protobuf.InterfaceAdmin.pbui_Type_AdminLogonStatus prototype) {
       return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
     }
 
@@ -3245,9 +3245,9 @@ public final class InterfaceAdmin {
      */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessageLite.Builder<
-          pbui_Type_AdminLogonStatus, Builder> implements
+          com.mogujie.tt.protobuf.InterfaceAdmin.pbui_Type_AdminLogonStatus, Builder> implements
         // @@protoc_insertion_point(builder_implements:pbui_Type_AdminLogonStatus)
-        pbui_Type_AdminLogonStatusOrBuilder {
+        com.mogujie.tt.protobuf.InterfaceAdmin.pbui_Type_AdminLogonStatusOrBuilder {
       // Construct using com.mogujie.tt.protobuf.InterfaceAdmin.pbui_Type_AdminLogonStatus.newBuilder()
       private Builder() {
         super(DEFAULT_INSTANCE);
@@ -3455,11 +3455,11 @@ public final class InterfaceAdmin {
       // @@protoc_insertion_point(builder_scope:pbui_Type_AdminLogonStatus)
     }
     protected final Object dynamicMethod(
-        MethodToInvoke method,
+        com.google.protobuf.GeneratedMessageLite.MethodToInvoke method,
         Object arg0, Object arg1) {
       switch (method) {
         case NEW_MUTABLE_INSTANCE: {
-          return new pbui_Type_AdminLogonStatus();
+          return new com.mogujie.tt.protobuf.InterfaceAdmin.pbui_Type_AdminLogonStatus();
         }
         case IS_INITIALIZED: {
           return DEFAULT_INSTANCE;
@@ -3472,7 +3472,7 @@ public final class InterfaceAdmin {
         }
         case VISIT: {
           Visitor visitor = (Visitor) arg0;
-          pbui_Type_AdminLogonStatus other = (pbui_Type_AdminLogonStatus) arg1;
+          com.mogujie.tt.protobuf.InterfaceAdmin.pbui_Type_AdminLogonStatus other = (com.mogujie.tt.protobuf.InterfaceAdmin.pbui_Type_AdminLogonStatus) arg1;
           err_ = visitor.visitInt(err_ != 0, err_,
               other.err_ != 0, other.err_);
           sessionid_ = visitor.visitInt(sessionid_ != 0, sessionid_,
@@ -3485,7 +3485,7 @@ public final class InterfaceAdmin {
               other.errnums_ != 0, other.errnums_);
           lockseconds_ = visitor.visitInt(lockseconds_ != 0, lockseconds_,
               other.lockseconds_ != 0, other.lockseconds_);
-          if (visitor == MergeFromVisitor
+          if (visitor == com.google.protobuf.GeneratedMessageLite.MergeFromVisitor
               .INSTANCE) {
           }
           return this;
@@ -3554,7 +3554,7 @@ public final class InterfaceAdmin {
           return DEFAULT_INSTANCE;
         }
         case GET_PARSER: {
-          if (PARSER == null) {    synchronized (pbui_Type_AdminLogonStatus.class) {
+          if (PARSER == null) {    synchronized (com.mogujie.tt.protobuf.InterfaceAdmin.pbui_Type_AdminLogonStatus.class) {
               if (PARSER == null) {
                 PARSER = new DefaultInstanceBasedParser(DEFAULT_INSTANCE);
               }
@@ -3568,13 +3568,13 @@ public final class InterfaceAdmin {
 
 
     // @@protoc_insertion_point(class_scope:pbui_Type_AdminLogonStatus)
-    private static final pbui_Type_AdminLogonStatus DEFAULT_INSTANCE;
+    private static final com.mogujie.tt.protobuf.InterfaceAdmin.pbui_Type_AdminLogonStatus DEFAULT_INSTANCE;
     static {
       DEFAULT_INSTANCE = new pbui_Type_AdminLogonStatus();
       DEFAULT_INSTANCE.makeImmutable();
     }
 
-    public static pbui_Type_AdminLogonStatus getDefaultInstance() {
+    public static com.mogujie.tt.protobuf.InterfaceAdmin.pbui_Type_AdminLogonStatus getDefaultInstance() {
       return DEFAULT_INSTANCE;
     }
 
@@ -3605,7 +3605,7 @@ public final class InterfaceAdmin {
      *
      * <code>repeated fixed32 roomid = 2;</code>
      */
-    java.util.List<Integer> getRoomidList();
+    java.util.List<java.lang.Integer> getRoomidList();
     /**
      * <pre>
      *会场ID
@@ -3685,7 +3685,7 @@ public final class InterfaceAdmin {
      *
      * <code>repeated fixed32 roomid = 2;</code>
      */
-    public java.util.List<Integer>
+    public java.util.List<java.lang.Integer>
         getRoomidList() {
       return roomid_;
     }
@@ -3746,7 +3746,7 @@ public final class InterfaceAdmin {
      * <code>repeated fixed32 roomid = 2;</code>
      */
     private void addAllRoomid(
-        Iterable<? extends Integer> values) {
+        java.lang.Iterable<? extends java.lang.Integer> values) {
       ensureRoomidIsMutable();
       com.google.protobuf.AbstractMessageLite.addAll(
           values, roomid_);
@@ -3792,60 +3792,60 @@ public final class InterfaceAdmin {
       return size;
     }
 
-    public static pbui_Type_MeetManagerRoomDetailInfo parseFrom(
+    public static com.mogujie.tt.protobuf.InterfaceAdmin.pbui_Type_MeetManagerRoomDetailInfo parseFrom(
         com.google.protobuf.ByteString data)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return com.google.protobuf.GeneratedMessageLite.parseFrom(
           DEFAULT_INSTANCE, data);
     }
-    public static pbui_Type_MeetManagerRoomDetailInfo parseFrom(
+    public static com.mogujie.tt.protobuf.InterfaceAdmin.pbui_Type_MeetManagerRoomDetailInfo parseFrom(
         com.google.protobuf.ByteString data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return com.google.protobuf.GeneratedMessageLite.parseFrom(
           DEFAULT_INSTANCE, data, extensionRegistry);
     }
-    public static pbui_Type_MeetManagerRoomDetailInfo parseFrom(byte[] data)
+    public static com.mogujie.tt.protobuf.InterfaceAdmin.pbui_Type_MeetManagerRoomDetailInfo parseFrom(byte[] data)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return com.google.protobuf.GeneratedMessageLite.parseFrom(
           DEFAULT_INSTANCE, data);
     }
-    public static pbui_Type_MeetManagerRoomDetailInfo parseFrom(
+    public static com.mogujie.tt.protobuf.InterfaceAdmin.pbui_Type_MeetManagerRoomDetailInfo parseFrom(
         byte[] data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return com.google.protobuf.GeneratedMessageLite.parseFrom(
           DEFAULT_INSTANCE, data, extensionRegistry);
     }
-    public static pbui_Type_MeetManagerRoomDetailInfo parseFrom(java.io.InputStream input)
+    public static com.mogujie.tt.protobuf.InterfaceAdmin.pbui_Type_MeetManagerRoomDetailInfo parseFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageLite.parseFrom(
           DEFAULT_INSTANCE, input);
     }
-    public static pbui_Type_MeetManagerRoomDetailInfo parseFrom(
+    public static com.mogujie.tt.protobuf.InterfaceAdmin.pbui_Type_MeetManagerRoomDetailInfo parseFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageLite.parseFrom(
           DEFAULT_INSTANCE, input, extensionRegistry);
     }
-    public static pbui_Type_MeetManagerRoomDetailInfo parseDelimitedFrom(java.io.InputStream input)
+    public static com.mogujie.tt.protobuf.InterfaceAdmin.pbui_Type_MeetManagerRoomDetailInfo parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
       return parseDelimitedFrom(DEFAULT_INSTANCE, input);
     }
-    public static pbui_Type_MeetManagerRoomDetailInfo parseDelimitedFrom(
+    public static com.mogujie.tt.protobuf.InterfaceAdmin.pbui_Type_MeetManagerRoomDetailInfo parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
       return parseDelimitedFrom(DEFAULT_INSTANCE, input, extensionRegistry);
     }
-    public static pbui_Type_MeetManagerRoomDetailInfo parseFrom(
+    public static com.mogujie.tt.protobuf.InterfaceAdmin.pbui_Type_MeetManagerRoomDetailInfo parseFrom(
         com.google.protobuf.CodedInputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageLite.parseFrom(
           DEFAULT_INSTANCE, input);
     }
-    public static pbui_Type_MeetManagerRoomDetailInfo parseFrom(
+    public static com.mogujie.tt.protobuf.InterfaceAdmin.pbui_Type_MeetManagerRoomDetailInfo parseFrom(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
@@ -3856,7 +3856,7 @@ public final class InterfaceAdmin {
     public static Builder newBuilder() {
       return DEFAULT_INSTANCE.toBuilder();
     }
-    public static Builder newBuilder(pbui_Type_MeetManagerRoomDetailInfo prototype) {
+    public static Builder newBuilder(com.mogujie.tt.protobuf.InterfaceAdmin.pbui_Type_MeetManagerRoomDetailInfo prototype) {
       return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
     }
 
@@ -3871,9 +3871,9 @@ public final class InterfaceAdmin {
      */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessageLite.Builder<
-          pbui_Type_MeetManagerRoomDetailInfo, Builder> implements
+          com.mogujie.tt.protobuf.InterfaceAdmin.pbui_Type_MeetManagerRoomDetailInfo, Builder> implements
         // @@protoc_insertion_point(builder_implements:pbui_Type_MeetManagerRoomDetailInfo)
-        pbui_Type_MeetManagerRoomDetailInfoOrBuilder {
+        com.mogujie.tt.protobuf.InterfaceAdmin.pbui_Type_MeetManagerRoomDetailInfoOrBuilder {
       // Construct using com.mogujie.tt.protobuf.InterfaceAdmin.pbui_Type_MeetManagerRoomDetailInfo.newBuilder()
       private Builder() {
         super(DEFAULT_INSTANCE);
@@ -3922,7 +3922,7 @@ public final class InterfaceAdmin {
        *
        * <code>repeated fixed32 roomid = 2;</code>
        */
-      public java.util.List<Integer>
+      public java.util.List<java.lang.Integer>
           getRoomidList() {
         return java.util.Collections.unmodifiableList(
             instance.getRoomidList());
@@ -3980,7 +3980,7 @@ public final class InterfaceAdmin {
        * <code>repeated fixed32 roomid = 2;</code>
        */
       public Builder addAllRoomid(
-          Iterable<? extends Integer> values) {
+          java.lang.Iterable<? extends java.lang.Integer> values) {
         copyOnWrite();
         instance.addAllRoomid(values);
         return this;
@@ -4001,11 +4001,11 @@ public final class InterfaceAdmin {
       // @@protoc_insertion_point(builder_scope:pbui_Type_MeetManagerRoomDetailInfo)
     }
     protected final Object dynamicMethod(
-        MethodToInvoke method,
+        com.google.protobuf.GeneratedMessageLite.MethodToInvoke method,
         Object arg0, Object arg1) {
       switch (method) {
         case NEW_MUTABLE_INSTANCE: {
-          return new pbui_Type_MeetManagerRoomDetailInfo();
+          return new com.mogujie.tt.protobuf.InterfaceAdmin.pbui_Type_MeetManagerRoomDetailInfo();
         }
         case IS_INITIALIZED: {
           return DEFAULT_INSTANCE;
@@ -4019,11 +4019,11 @@ public final class InterfaceAdmin {
         }
         case VISIT: {
           Visitor visitor = (Visitor) arg0;
-          pbui_Type_MeetManagerRoomDetailInfo other = (pbui_Type_MeetManagerRoomDetailInfo) arg1;
+          com.mogujie.tt.protobuf.InterfaceAdmin.pbui_Type_MeetManagerRoomDetailInfo other = (com.mogujie.tt.protobuf.InterfaceAdmin.pbui_Type_MeetManagerRoomDetailInfo) arg1;
           mgrid_ = visitor.visitInt(mgrid_ != 0, mgrid_,
               other.mgrid_ != 0, other.mgrid_);
           roomid_= visitor.visitIntList(roomid_, other.roomid_);
-          if (visitor == MergeFromVisitor
+          if (visitor == com.google.protobuf.GeneratedMessageLite.MergeFromVisitor
               .INSTANCE) {
             bitField0_ |= other.bitField0_;
           }
@@ -4090,7 +4090,7 @@ public final class InterfaceAdmin {
           return DEFAULT_INSTANCE;
         }
         case GET_PARSER: {
-          if (PARSER == null) {    synchronized (pbui_Type_MeetManagerRoomDetailInfo.class) {
+          if (PARSER == null) {    synchronized (com.mogujie.tt.protobuf.InterfaceAdmin.pbui_Type_MeetManagerRoomDetailInfo.class) {
               if (PARSER == null) {
                 PARSER = new DefaultInstanceBasedParser(DEFAULT_INSTANCE);
               }
@@ -4104,13 +4104,13 @@ public final class InterfaceAdmin {
 
 
     // @@protoc_insertion_point(class_scope:pbui_Type_MeetManagerRoomDetailInfo)
-    private static final pbui_Type_MeetManagerRoomDetailInfo DEFAULT_INSTANCE;
+    private static final com.mogujie.tt.protobuf.InterfaceAdmin.pbui_Type_MeetManagerRoomDetailInfo DEFAULT_INSTANCE;
     static {
       DEFAULT_INSTANCE = new pbui_Type_MeetManagerRoomDetailInfo();
       DEFAULT_INSTANCE.makeImmutable();
     }
 
-    public static pbui_Type_MeetManagerRoomDetailInfo getDefaultInstance() {
+    public static com.mogujie.tt.protobuf.InterfaceAdmin.pbui_Type_MeetManagerRoomDetailInfo getDefaultInstance() {
       return DEFAULT_INSTANCE;
     }
 
@@ -4305,60 +4305,60 @@ public final class InterfaceAdmin {
       return size;
     }
 
-    public static pbui_Type_AdminPropertyQuery parseFrom(
+    public static com.mogujie.tt.protobuf.InterfaceAdmin.pbui_Type_AdminPropertyQuery parseFrom(
         com.google.protobuf.ByteString data)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return com.google.protobuf.GeneratedMessageLite.parseFrom(
           DEFAULT_INSTANCE, data);
     }
-    public static pbui_Type_AdminPropertyQuery parseFrom(
+    public static com.mogujie.tt.protobuf.InterfaceAdmin.pbui_Type_AdminPropertyQuery parseFrom(
         com.google.protobuf.ByteString data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return com.google.protobuf.GeneratedMessageLite.parseFrom(
           DEFAULT_INSTANCE, data, extensionRegistry);
     }
-    public static pbui_Type_AdminPropertyQuery parseFrom(byte[] data)
+    public static com.mogujie.tt.protobuf.InterfaceAdmin.pbui_Type_AdminPropertyQuery parseFrom(byte[] data)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return com.google.protobuf.GeneratedMessageLite.parseFrom(
           DEFAULT_INSTANCE, data);
     }
-    public static pbui_Type_AdminPropertyQuery parseFrom(
+    public static com.mogujie.tt.protobuf.InterfaceAdmin.pbui_Type_AdminPropertyQuery parseFrom(
         byte[] data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return com.google.protobuf.GeneratedMessageLite.parseFrom(
           DEFAULT_INSTANCE, data, extensionRegistry);
     }
-    public static pbui_Type_AdminPropertyQuery parseFrom(java.io.InputStream input)
+    public static com.mogujie.tt.protobuf.InterfaceAdmin.pbui_Type_AdminPropertyQuery parseFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageLite.parseFrom(
           DEFAULT_INSTANCE, input);
     }
-    public static pbui_Type_AdminPropertyQuery parseFrom(
+    public static com.mogujie.tt.protobuf.InterfaceAdmin.pbui_Type_AdminPropertyQuery parseFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageLite.parseFrom(
           DEFAULT_INSTANCE, input, extensionRegistry);
     }
-    public static pbui_Type_AdminPropertyQuery parseDelimitedFrom(java.io.InputStream input)
+    public static com.mogujie.tt.protobuf.InterfaceAdmin.pbui_Type_AdminPropertyQuery parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
       return parseDelimitedFrom(DEFAULT_INSTANCE, input);
     }
-    public static pbui_Type_AdminPropertyQuery parseDelimitedFrom(
+    public static com.mogujie.tt.protobuf.InterfaceAdmin.pbui_Type_AdminPropertyQuery parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
       return parseDelimitedFrom(DEFAULT_INSTANCE, input, extensionRegistry);
     }
-    public static pbui_Type_AdminPropertyQuery parseFrom(
+    public static com.mogujie.tt.protobuf.InterfaceAdmin.pbui_Type_AdminPropertyQuery parseFrom(
         com.google.protobuf.CodedInputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageLite.parseFrom(
           DEFAULT_INSTANCE, input);
     }
-    public static pbui_Type_AdminPropertyQuery parseFrom(
+    public static com.mogujie.tt.protobuf.InterfaceAdmin.pbui_Type_AdminPropertyQuery parseFrom(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
@@ -4369,7 +4369,7 @@ public final class InterfaceAdmin {
     public static Builder newBuilder() {
       return DEFAULT_INSTANCE.toBuilder();
     }
-    public static Builder newBuilder(pbui_Type_AdminPropertyQuery prototype) {
+    public static Builder newBuilder(com.mogujie.tt.protobuf.InterfaceAdmin.pbui_Type_AdminPropertyQuery prototype) {
       return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
     }
 
@@ -4382,9 +4382,9 @@ public final class InterfaceAdmin {
      */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessageLite.Builder<
-          pbui_Type_AdminPropertyQuery, Builder> implements
+          com.mogujie.tt.protobuf.InterfaceAdmin.pbui_Type_AdminPropertyQuery, Builder> implements
         // @@protoc_insertion_point(builder_implements:pbui_Type_AdminPropertyQuery)
-        pbui_Type_AdminPropertyQueryOrBuilder {
+        com.mogujie.tt.protobuf.InterfaceAdmin.pbui_Type_AdminPropertyQueryOrBuilder {
       // Construct using com.mogujie.tt.protobuf.InterfaceAdmin.pbui_Type_AdminPropertyQuery.newBuilder()
       private Builder() {
         super(DEFAULT_INSTANCE);
@@ -4499,11 +4499,11 @@ public final class InterfaceAdmin {
       // @@protoc_insertion_point(builder_scope:pbui_Type_AdminPropertyQuery)
     }
     protected final Object dynamicMethod(
-        MethodToInvoke method,
+        com.google.protobuf.GeneratedMessageLite.MethodToInvoke method,
         Object arg0, Object arg1) {
       switch (method) {
         case NEW_MUTABLE_INSTANCE: {
-          return new pbui_Type_AdminPropertyQuery();
+          return new com.mogujie.tt.protobuf.InterfaceAdmin.pbui_Type_AdminPropertyQuery();
         }
         case IS_INITIALIZED: {
           return DEFAULT_INSTANCE;
@@ -4516,14 +4516,14 @@ public final class InterfaceAdmin {
         }
         case VISIT: {
           Visitor visitor = (Visitor) arg0;
-          pbui_Type_AdminPropertyQuery other = (pbui_Type_AdminPropertyQuery) arg1;
+          com.mogujie.tt.protobuf.InterfaceAdmin.pbui_Type_AdminPropertyQuery other = (com.mogujie.tt.protobuf.InterfaceAdmin.pbui_Type_AdminPropertyQuery) arg1;
           propertyid_ = visitor.visitInt(propertyid_ != 0, propertyid_,
               other.propertyid_ != 0, other.propertyid_);
           adminid_ = visitor.visitInt(adminid_ != 0, adminid_,
               other.adminid_ != 0, other.adminid_);
           parameterval_ = visitor.visitInt(parameterval_ != 0, parameterval_,
               other.parameterval_ != 0, other.parameterval_);
-          if (visitor == MergeFromVisitor
+          if (visitor == com.google.protobuf.GeneratedMessageLite.MergeFromVisitor
               .INSTANCE) {
           }
           return this;
@@ -4577,7 +4577,7 @@ public final class InterfaceAdmin {
           return DEFAULT_INSTANCE;
         }
         case GET_PARSER: {
-          if (PARSER == null) {    synchronized (pbui_Type_AdminPropertyQuery.class) {
+          if (PARSER == null) {    synchronized (com.mogujie.tt.protobuf.InterfaceAdmin.pbui_Type_AdminPropertyQuery.class) {
               if (PARSER == null) {
                 PARSER = new DefaultInstanceBasedParser(DEFAULT_INSTANCE);
               }
@@ -4591,13 +4591,13 @@ public final class InterfaceAdmin {
 
 
     // @@protoc_insertion_point(class_scope:pbui_Type_AdminPropertyQuery)
-    private static final pbui_Type_AdminPropertyQuery DEFAULT_INSTANCE;
+    private static final com.mogujie.tt.protobuf.InterfaceAdmin.pbui_Type_AdminPropertyQuery DEFAULT_INSTANCE;
     static {
       DEFAULT_INSTANCE = new pbui_Type_AdminPropertyQuery();
       DEFAULT_INSTANCE.makeImmutable();
     }
 
-    public static pbui_Type_AdminPropertyQuery getDefaultInstance() {
+    public static com.mogujie.tt.protobuf.InterfaceAdmin.pbui_Type_AdminPropertyQuery getDefaultInstance() {
       return DEFAULT_INSTANCE;
     }
 
@@ -4745,60 +4745,60 @@ public final class InterfaceAdmin {
       return size;
     }
 
-    public static pbui_Type_AdminPropertyQueryReturn parseFrom(
+    public static com.mogujie.tt.protobuf.InterfaceAdmin.pbui_Type_AdminPropertyQueryReturn parseFrom(
         com.google.protobuf.ByteString data)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return com.google.protobuf.GeneratedMessageLite.parseFrom(
           DEFAULT_INSTANCE, data);
     }
-    public static pbui_Type_AdminPropertyQueryReturn parseFrom(
+    public static com.mogujie.tt.protobuf.InterfaceAdmin.pbui_Type_AdminPropertyQueryReturn parseFrom(
         com.google.protobuf.ByteString data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return com.google.protobuf.GeneratedMessageLite.parseFrom(
           DEFAULT_INSTANCE, data, extensionRegistry);
     }
-    public static pbui_Type_AdminPropertyQueryReturn parseFrom(byte[] data)
+    public static com.mogujie.tt.protobuf.InterfaceAdmin.pbui_Type_AdminPropertyQueryReturn parseFrom(byte[] data)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return com.google.protobuf.GeneratedMessageLite.parseFrom(
           DEFAULT_INSTANCE, data);
     }
-    public static pbui_Type_AdminPropertyQueryReturn parseFrom(
+    public static com.mogujie.tt.protobuf.InterfaceAdmin.pbui_Type_AdminPropertyQueryReturn parseFrom(
         byte[] data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return com.google.protobuf.GeneratedMessageLite.parseFrom(
           DEFAULT_INSTANCE, data, extensionRegistry);
     }
-    public static pbui_Type_AdminPropertyQueryReturn parseFrom(java.io.InputStream input)
+    public static com.mogujie.tt.protobuf.InterfaceAdmin.pbui_Type_AdminPropertyQueryReturn parseFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageLite.parseFrom(
           DEFAULT_INSTANCE, input);
     }
-    public static pbui_Type_AdminPropertyQueryReturn parseFrom(
+    public static com.mogujie.tt.protobuf.InterfaceAdmin.pbui_Type_AdminPropertyQueryReturn parseFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageLite.parseFrom(
           DEFAULT_INSTANCE, input, extensionRegistry);
     }
-    public static pbui_Type_AdminPropertyQueryReturn parseDelimitedFrom(java.io.InputStream input)
+    public static com.mogujie.tt.protobuf.InterfaceAdmin.pbui_Type_AdminPropertyQueryReturn parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
       return parseDelimitedFrom(DEFAULT_INSTANCE, input);
     }
-    public static pbui_Type_AdminPropertyQueryReturn parseDelimitedFrom(
+    public static com.mogujie.tt.protobuf.InterfaceAdmin.pbui_Type_AdminPropertyQueryReturn parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
       return parseDelimitedFrom(DEFAULT_INSTANCE, input, extensionRegistry);
     }
-    public static pbui_Type_AdminPropertyQueryReturn parseFrom(
+    public static com.mogujie.tt.protobuf.InterfaceAdmin.pbui_Type_AdminPropertyQueryReturn parseFrom(
         com.google.protobuf.CodedInputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageLite.parseFrom(
           DEFAULT_INSTANCE, input);
     }
-    public static pbui_Type_AdminPropertyQueryReturn parseFrom(
+    public static com.mogujie.tt.protobuf.InterfaceAdmin.pbui_Type_AdminPropertyQueryReturn parseFrom(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
@@ -4809,7 +4809,7 @@ public final class InterfaceAdmin {
     public static Builder newBuilder() {
       return DEFAULT_INSTANCE.toBuilder();
     }
-    public static Builder newBuilder(pbui_Type_AdminPropertyQueryReturn prototype) {
+    public static Builder newBuilder(com.mogujie.tt.protobuf.InterfaceAdmin.pbui_Type_AdminPropertyQueryReturn prototype) {
       return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
     }
 
@@ -4822,9 +4822,9 @@ public final class InterfaceAdmin {
      */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessageLite.Builder<
-          pbui_Type_AdminPropertyQueryReturn, Builder> implements
+          com.mogujie.tt.protobuf.InterfaceAdmin.pbui_Type_AdminPropertyQueryReturn, Builder> implements
         // @@protoc_insertion_point(builder_implements:pbui_Type_AdminPropertyQueryReturn)
-        pbui_Type_AdminPropertyQueryReturnOrBuilder {
+        com.mogujie.tt.protobuf.InterfaceAdmin.pbui_Type_AdminPropertyQueryReturnOrBuilder {
       // Construct using com.mogujie.tt.protobuf.InterfaceAdmin.pbui_Type_AdminPropertyQueryReturn.newBuilder()
       private Builder() {
         super(DEFAULT_INSTANCE);
@@ -4904,11 +4904,11 @@ public final class InterfaceAdmin {
       // @@protoc_insertion_point(builder_scope:pbui_Type_AdminPropertyQueryReturn)
     }
     protected final Object dynamicMethod(
-        MethodToInvoke method,
+        com.google.protobuf.GeneratedMessageLite.MethodToInvoke method,
         Object arg0, Object arg1) {
       switch (method) {
         case NEW_MUTABLE_INSTANCE: {
-          return new pbui_Type_AdminPropertyQueryReturn();
+          return new com.mogujie.tt.protobuf.InterfaceAdmin.pbui_Type_AdminPropertyQueryReturn();
         }
         case IS_INITIALIZED: {
           return DEFAULT_INSTANCE;
@@ -4921,12 +4921,12 @@ public final class InterfaceAdmin {
         }
         case VISIT: {
           Visitor visitor = (Visitor) arg0;
-          pbui_Type_AdminPropertyQueryReturn other = (pbui_Type_AdminPropertyQueryReturn) arg1;
+          com.mogujie.tt.protobuf.InterfaceAdmin.pbui_Type_AdminPropertyQueryReturn other = (com.mogujie.tt.protobuf.InterfaceAdmin.pbui_Type_AdminPropertyQueryReturn) arg1;
           propertyval_ = visitor.visitInt(propertyval_ != 0, propertyval_,
               other.propertyval_ != 0, other.propertyval_);
           propertytext_ = visitor.visitByteString(propertytext_ != com.google.protobuf.ByteString.EMPTY, propertytext_,
               other.propertytext_ != com.google.protobuf.ByteString.EMPTY, other.propertytext_);
-          if (visitor == MergeFromVisitor
+          if (visitor == com.google.protobuf.GeneratedMessageLite.MergeFromVisitor
               .INSTANCE) {
           }
           return this;
@@ -4975,7 +4975,7 @@ public final class InterfaceAdmin {
           return DEFAULT_INSTANCE;
         }
         case GET_PARSER: {
-          if (PARSER == null) {    synchronized (pbui_Type_AdminPropertyQueryReturn.class) {
+          if (PARSER == null) {    synchronized (com.mogujie.tt.protobuf.InterfaceAdmin.pbui_Type_AdminPropertyQueryReturn.class) {
               if (PARSER == null) {
                 PARSER = new DefaultInstanceBasedParser(DEFAULT_INSTANCE);
               }
@@ -4989,13 +4989,13 @@ public final class InterfaceAdmin {
 
 
     // @@protoc_insertion_point(class_scope:pbui_Type_AdminPropertyQueryReturn)
-    private static final pbui_Type_AdminPropertyQueryReturn DEFAULT_INSTANCE;
+    private static final com.mogujie.tt.protobuf.InterfaceAdmin.pbui_Type_AdminPropertyQueryReturn DEFAULT_INSTANCE;
     static {
       DEFAULT_INSTANCE = new pbui_Type_AdminPropertyQueryReturn();
       DEFAULT_INSTANCE.makeImmutable();
     }
 
-    public static pbui_Type_AdminPropertyQueryReturn getDefaultInstance() {
+    public static com.mogujie.tt.protobuf.InterfaceAdmin.pbui_Type_AdminPropertyQueryReturn getDefaultInstance() {
       return DEFAULT_INSTANCE;
     }
 
@@ -5193,60 +5193,60 @@ public final class InterfaceAdmin {
       return size;
     }
 
-    public static pbui_Type_MutilAdminOper parseFrom(
+    public static com.mogujie.tt.protobuf.InterfaceAdmin.pbui_Type_MutilAdminOper parseFrom(
         com.google.protobuf.ByteString data)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return com.google.protobuf.GeneratedMessageLite.parseFrom(
           DEFAULT_INSTANCE, data);
     }
-    public static pbui_Type_MutilAdminOper parseFrom(
+    public static com.mogujie.tt.protobuf.InterfaceAdmin.pbui_Type_MutilAdminOper parseFrom(
         com.google.protobuf.ByteString data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return com.google.protobuf.GeneratedMessageLite.parseFrom(
           DEFAULT_INSTANCE, data, extensionRegistry);
     }
-    public static pbui_Type_MutilAdminOper parseFrom(byte[] data)
+    public static com.mogujie.tt.protobuf.InterfaceAdmin.pbui_Type_MutilAdminOper parseFrom(byte[] data)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return com.google.protobuf.GeneratedMessageLite.parseFrom(
           DEFAULT_INSTANCE, data);
     }
-    public static pbui_Type_MutilAdminOper parseFrom(
+    public static com.mogujie.tt.protobuf.InterfaceAdmin.pbui_Type_MutilAdminOper parseFrom(
         byte[] data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return com.google.protobuf.GeneratedMessageLite.parseFrom(
           DEFAULT_INSTANCE, data, extensionRegistry);
     }
-    public static pbui_Type_MutilAdminOper parseFrom(java.io.InputStream input)
+    public static com.mogujie.tt.protobuf.InterfaceAdmin.pbui_Type_MutilAdminOper parseFrom(java.io.InputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageLite.parseFrom(
           DEFAULT_INSTANCE, input);
     }
-    public static pbui_Type_MutilAdminOper parseFrom(
+    public static com.mogujie.tt.protobuf.InterfaceAdmin.pbui_Type_MutilAdminOper parseFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageLite.parseFrom(
           DEFAULT_INSTANCE, input, extensionRegistry);
     }
-    public static pbui_Type_MutilAdminOper parseDelimitedFrom(java.io.InputStream input)
+    public static com.mogujie.tt.protobuf.InterfaceAdmin.pbui_Type_MutilAdminOper parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
       return parseDelimitedFrom(DEFAULT_INSTANCE, input);
     }
-    public static pbui_Type_MutilAdminOper parseDelimitedFrom(
+    public static com.mogujie.tt.protobuf.InterfaceAdmin.pbui_Type_MutilAdminOper parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
       return parseDelimitedFrom(DEFAULT_INSTANCE, input, extensionRegistry);
     }
-    public static pbui_Type_MutilAdminOper parseFrom(
+    public static com.mogujie.tt.protobuf.InterfaceAdmin.pbui_Type_MutilAdminOper parseFrom(
         com.google.protobuf.CodedInputStream input)
         throws java.io.IOException {
       return com.google.protobuf.GeneratedMessageLite.parseFrom(
           DEFAULT_INSTANCE, input);
     }
-    public static pbui_Type_MutilAdminOper parseFrom(
+    public static com.mogujie.tt.protobuf.InterfaceAdmin.pbui_Type_MutilAdminOper parseFrom(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
@@ -5257,7 +5257,7 @@ public final class InterfaceAdmin {
     public static Builder newBuilder() {
       return DEFAULT_INSTANCE.toBuilder();
     }
-    public static Builder newBuilder(pbui_Type_MutilAdminOper prototype) {
+    public static Builder newBuilder(com.mogujie.tt.protobuf.InterfaceAdmin.pbui_Type_MutilAdminOper prototype) {
       return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
     }
 
@@ -5272,9 +5272,9 @@ public final class InterfaceAdmin {
      */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessageLite.Builder<
-          pbui_Type_MutilAdminOper, Builder> implements
+          com.mogujie.tt.protobuf.InterfaceAdmin.pbui_Type_MutilAdminOper, Builder> implements
         // @@protoc_insertion_point(builder_implements:pbui_Type_MutilAdminOper)
-        pbui_Type_MutilAdminOperOrBuilder {
+        com.mogujie.tt.protobuf.InterfaceAdmin.pbui_Type_MutilAdminOperOrBuilder {
       // Construct using com.mogujie.tt.protobuf.InterfaceAdmin.pbui_Type_MutilAdminOper.newBuilder()
       private Builder() {
         super(DEFAULT_INSTANCE);
@@ -5390,11 +5390,11 @@ public final class InterfaceAdmin {
       // @@protoc_insertion_point(builder_scope:pbui_Type_MutilAdminOper)
     }
     protected final Object dynamicMethod(
-        MethodToInvoke method,
+        com.google.protobuf.GeneratedMessageLite.MethodToInvoke method,
         Object arg0, Object arg1) {
       switch (method) {
         case NEW_MUTABLE_INSTANCE: {
-          return new pbui_Type_MutilAdminOper();
+          return new com.mogujie.tt.protobuf.InterfaceAdmin.pbui_Type_MutilAdminOper();
         }
         case IS_INITIALIZED: {
           return DEFAULT_INSTANCE;
@@ -5407,12 +5407,12 @@ public final class InterfaceAdmin {
         }
         case VISIT: {
           Visitor visitor = (Visitor) arg0;
-          pbui_Type_MutilAdminOper other = (pbui_Type_MutilAdminOper) arg1;
+          com.mogujie.tt.protobuf.InterfaceAdmin.pbui_Type_MutilAdminOper other = (com.mogujie.tt.protobuf.InterfaceAdmin.pbui_Type_MutilAdminOper) arg1;
           flag_ = visitor.visitInt(flag_ != 0, flag_,
               other.flag_ != 0, other.flag_);
           json_ = visitor.visitByteString(json_ != com.google.protobuf.ByteString.EMPTY, json_,
               other.json_ != com.google.protobuf.ByteString.EMPTY, other.json_);
-          if (visitor == MergeFromVisitor
+          if (visitor == com.google.protobuf.GeneratedMessageLite.MergeFromVisitor
               .INSTANCE) {
           }
           return this;
@@ -5461,7 +5461,7 @@ public final class InterfaceAdmin {
           return DEFAULT_INSTANCE;
         }
         case GET_PARSER: {
-          if (PARSER == null) {    synchronized (pbui_Type_MutilAdminOper.class) {
+          if (PARSER == null) {    synchronized (com.mogujie.tt.protobuf.InterfaceAdmin.pbui_Type_MutilAdminOper.class) {
               if (PARSER == null) {
                 PARSER = new DefaultInstanceBasedParser(DEFAULT_INSTANCE);
               }
@@ -5475,13 +5475,13 @@ public final class InterfaceAdmin {
 
 
     // @@protoc_insertion_point(class_scope:pbui_Type_MutilAdminOper)
-    private static final pbui_Type_MutilAdminOper DEFAULT_INSTANCE;
+    private static final com.mogujie.tt.protobuf.InterfaceAdmin.pbui_Type_MutilAdminOper DEFAULT_INSTANCE;
     static {
       DEFAULT_INSTANCE = new pbui_Type_MutilAdminOper();
       DEFAULT_INSTANCE.makeImmutable();
     }
 
-    public static pbui_Type_MutilAdminOper getDefaultInstance() {
+    public static com.mogujie.tt.protobuf.InterfaceAdmin.pbui_Type_MutilAdminOper getDefaultInstance() {
       return DEFAULT_INSTANCE;
     }
 

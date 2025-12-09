@@ -1,6 +1,11 @@
 package com.xlk.paperless.sdk
 
+import android.content.Intent
 import android.os.Bundle
+import android.widget.Button
+import android.widget.CheckBox
+import android.widget.EditText
+import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
@@ -14,20 +19,39 @@ import com.mogujie.tt.protobuf.InterfaceDevice
 import com.mogujie.tt.protobuf.InterfaceMacro
 import com.mogujie.tt.protobuf.InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_DEVICEINFO_VALUE
 import com.mogujie.tt.protobuf.InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_DEVICEVALIDATE_VALUE
+import com.mogujie.tt.protobuf.InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_MEDIAPLAY_VALUE
 import com.mogujie.tt.protobuf.InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_READY_VALUE
+import com.mogujie.tt.protobuf.InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_STREAMPLAY_VALUE
+import com.mogujie.tt.protobuf.InterfacePlaymedia
+import com.mogujie.tt.protobuf.InterfaceStream
 import com.paperless.bus.EventBusMessage
+import com.paperless.player.DecodeQueue
 import com.paperless.sdk.Call
-import com.paperless.sdk.SdkVars
-import com.paperless.sdk.SdkVars.Companion.localDeviceId
+import com.paperless.sdk.MAIN_TYPE_BITMASK
+import com.paperless.sdk.MEDIA_FILE_TYPE_AUDIO
+import com.paperless.sdk.MEDIA_FILE_TYPE_RECORD
+import com.paperless.sdk.MEDIA_FILE_TYPE_VIDEO
 import com.paperless.sdk.Protocol
 import com.paperless.sdk.ProtocolTool
+import com.paperless.sdk.SUB_TYPE_BITMASK
+import com.paperless.sdk.SdkVars
+import com.paperless.sdk.SdkVars.Companion.localDeviceId
 import com.paperless.util.IniUtil
 import org.greenrobot.eventbus.EventBus
 import org.greenrobot.eventbus.Subscribe
 import org.greenrobot.eventbus.ThreadMode
 import java.io.File
+import kotlin.system.exitProcess
 
 class MainActivity : AppCompatActivity() {
+
+    private val onBackPressedCallback = object : OnBackPressedCallback(true) {
+        override fun handleOnBackPressed() {
+            finishAffinity()
+            exitProcess(0)
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -37,6 +61,64 @@ class MainActivity : AppCompatActivity() {
             insets
         }
         EventBus.getDefault().register(this)
+        val id_0 = findViewById<CheckBox>(R.id.id_0)
+        val id_1 = findViewById<CheckBox>(R.id.id_1)
+        val id_2 = findViewById<CheckBox>(R.id.id_2)
+        val id_3 = findViewById<CheckBox>(R.id.id_3)
+        val id_4 = findViewById<CheckBox>(R.id.id_4)
+        val edt_device_id = findViewById<EditText>(R.id.edt_device_id)
+        val edt_media_id = findViewById<EditText>(R.id.edt_media_id)
+        findViewById<Button>(R.id.btn1).setOnClickListener {
+            startActivity(Intent(this, ControlViewActivity::class.java))
+        }
+        findViewById<Button>(R.id.btn_page).setOnClickListener {
+            //切换到会议界面
+            Jni.modPageStatus(InterfaceMacro.Pb_MeetFaceStatus.Pb_MemState_MemFace_VALUE)
+        }
+        findViewById<Button>(R.id.btn_split).setOnClickListener {
+            startActivity(Intent(this, SplitPlayActivity::class.java))
+        }
+        findViewById<Button>(R.id.btn_1).setOnClickListener {
+            val temp = mutableListOf<Int>()
+            if (id_0.isChecked) temp.add(0)
+            if (id_1.isChecked) temp.add(1)
+            if (id_2.isChecked) temp.add(2)
+            if (id_3.isChecked) temp.add(3)
+            if (id_4.isChecked) temp.add(4)
+            Jni.mediaPlay(temp, 654311472, localDeviceId)
+        }
+        findViewById<Button>(R.id.btn_2).setOnClickListener {
+            val temp = mutableListOf<Int>()
+            if (id_0.isChecked) temp.add(0)
+            if (id_1.isChecked) temp.add(1)
+            if (id_2.isChecked) temp.add(2)
+            if (id_3.isChecked) temp.add(3)
+            if (id_4.isChecked) temp.add(4)
+            Jni.mediaPlay(temp, 654311464, localDeviceId)
+        }
+        findViewById<Button>(R.id.btn_3).setOnClickListener {
+            val str = edt_media_id.text.toString()
+            val id = Integer.parseInt(str)
+            val temp = mutableListOf<Int>()
+            if (id_0.isChecked) temp.add(0)
+            if (id_1.isChecked) temp.add(1)
+            if (id_2.isChecked) temp.add(2)
+            if (id_3.isChecked) temp.add(3)
+            if (id_4.isChecked) temp.add(4)
+            Jni.mediaPlay(temp, id, localDeviceId)
+        }
+        findViewById<Button>(R.id.btn_stream_play).setOnClickListener {
+            val temp = mutableListOf<Int>()
+            if (id_0.isChecked) temp.add(0)
+            if (id_1.isChecked) temp.add(1)
+            if (id_2.isChecked) temp.add(2)
+            if (id_3.isChecked) temp.add(3)
+            if (id_4.isChecked) temp.add(4)
+            val str = edt_device_id.text.toString()
+            val id = Integer.parseInt(str)
+            Jni.streamPlay(id, 2, temp, localDeviceId)
+        }
+        onBackPressedDispatcher.addCallback(this, onBackPressedCallback)
         initConfigFile()
         Jni.initialization(
             InterfaceMacro.Pb_ProgramType.Pb_MEET_PROGRAM_TYPE_MEETCLIENT_VALUE,
@@ -175,27 +257,78 @@ class MainActivity : AppCompatActivity() {
                     LogUtils.e("平台初始化结果 连接上的区域服务器ID=${info.areaid}")
                     Call.initAndCapture(0, Protocol.channel_screen)
                     Call.initAndCapture(0, Protocol.channel_camera)
+                    Jni.initialResource(SdkVars.screen_width, SdkVars.screen_height, 0)
+                    Jni.initialResource(SdkVars.screen_width, SdkVars.screen_height, 1)
+                    Jni.initialResource(SdkVars.screen_width, SdkVars.screen_height, 2)
+                    Jni.initialResource(SdkVars.screen_width, SdkVars.screen_height, 3)
+                    Jni.initialResource(SdkVars.screen_width, SdkVars.screen_height, 4)
                 }
             }
-            //管理员
-//            Pb_TYPE_MEET_INTERFACE_ADMIN_VALUE -> {
-//                if (msg.method == InterfaceMacro.Pb_Method.Pb_METHOD_MEET_INTERFACE_LOGON_VALUE) {
-//                    InterfaceAdmin.pbui_Type_AdminLogonStatus.parseFrom(msg.data)?.let {
-//                        loginResult(it)
-//                    }
-//                }
-//            }
-
+            // 设备寄存器
             Pb_TYPE_MEET_INTERFACE_DEVICEINFO_VALUE -> {
                 val info = InterfaceDevice.pbui_Type_MeetDeviceBaseInfo.parseFrom(msg.data)
                 LogUtils.e("设备寄存器 deviceid:${info.deviceid},attribid:${info.attribid},localDeviceId:$localDeviceId")
-
             }
+            // 媒体播放
+            Pb_TYPE_MEET_INTERFACE_MEDIAPLAY_VALUE -> {
+                InterfacePlaymedia.pbui_Type_MeetMediaPlay.parseFrom(msg.data)?.let {
+                    val isMandatory =
+                        it.triggeruserval == InterfaceMacro.Pb_TriggerUsedef.Pb_MEETFILE_PUSH_FLAG_FORCEMODE_VALUE
+                    val type = it.mediaid and MAIN_TYPE_BITMASK.toInt()
+                    val subType = it.mediaid and SUB_TYPE_BITMASK
+                    if (type == MEDIA_FILE_TYPE_AUDIO
+                        || type == MEDIA_FILE_TYPE_VIDEO
+                        || type == MEDIA_FILE_TYPE_RECORD
+                    ) {
+                        DecodeQueue.cleanup(it.res)
+                        if (it.res == 0) {
+                            startActivity(Intent(this, ControlViewActivity::class.java).apply {
+                                putExtra("type", Pb_TYPE_MEET_INTERFACE_MEDIAPLAY_VALUE)
+                                putExtra("isMandatory", isMandatory)
+                                putExtra("createdeviceid", it.createdeviceid)
+                                putExtra("mediaid", it.mediaid)
+                            })
+                        }
+                    }
+                }
+            }
+            // 流播放
+            Pb_TYPE_MEET_INTERFACE_STREAMPLAY_VALUE -> {
+                InterfaceStream.pbui_Type_MeetStreamPlay.parseFrom(msg.data)?.let {
+                    val isMandatory =
+                        it.triggeruserval == InterfaceMacro.Pb_TriggerUsedef.Pb_MEETFILE_PUSH_FLAG_FORCEMODE_VALUE
+                    DecodeQueue.cleanup(it.res)
+                    if (it.res == 0) {
+                        startActivity(Intent(this, ControlViewActivity::class.java).apply {
+                            putExtra("type", Pb_TYPE_MEET_INTERFACE_STREAMPLAY_VALUE)
+                            putExtra("isMandatory", isMandatory)
+                            putExtra("createdeviceid", it.createdeviceid)
+                            putExtra("deviceid", it.deviceid)
+                            putExtra("subid", it.subid)
+                        })
+                    }
+                }
+            }
+        }
+    }
+
+    override fun onStart() {
+        super.onStart()
+        LogUtils.i("onStart: ")
+        if (!EventBus.getDefault().isRegistered(this)) {
+            EventBus.getDefault().register(this)
+        }
+    }
+
+    override fun onStop() {
+        super.onStop()
+        LogUtils.i("onStop: ")
+        if (EventBus.getDefault().isRegistered(this)) {
+            EventBus.getDefault().unregister(this)
         }
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        EventBus.getDefault().unregister(this)
     }
 }

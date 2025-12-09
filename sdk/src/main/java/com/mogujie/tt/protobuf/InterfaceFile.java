@@ -294,6 +294,85 @@ public final class InterfaceFile {
     // @@protoc_insertion_point(enum_scope:Pb_MeetFile_Flag)
   }
 
+  /**
+   * <pre>
+   *单独设置文件权限 20251121
+   * </pre>
+   *
+   * Protobuf enum {@code Pb_MeetFileAccess_Flag}
+   */
+  public enum Pb_MeetFileAccess_Flag
+      implements com.google.protobuf.Internal.EnumLite {
+    /**
+     * <code>Pb_MEET_MODIFY_FILEACCESS_FLAG_ZERO = 0;</code>
+     */
+    Pb_MEET_MODIFY_FILEACCESS_FLAG_ZERO(0),
+    /**
+     * <pre>
+     *保存前先清空
+     * </pre>
+     *
+     * <code>Pb_MEET_MODIFY_FILEACCESS_FLAG_CLEAR = 1;</code>
+     */
+    Pb_MEET_MODIFY_FILEACCESS_FLAG_CLEAR(1),
+    UNRECOGNIZED(-1),
+    ;
+
+    /**
+     * <code>Pb_MEET_MODIFY_FILEACCESS_FLAG_ZERO = 0;</code>
+     */
+    public static final int Pb_MEET_MODIFY_FILEACCESS_FLAG_ZERO_VALUE = 0;
+    /**
+     * <pre>
+     *保存前先清空
+     * </pre>
+     *
+     * <code>Pb_MEET_MODIFY_FILEACCESS_FLAG_CLEAR = 1;</code>
+     */
+    public static final int Pb_MEET_MODIFY_FILEACCESS_FLAG_CLEAR_VALUE = 1;
+
+
+    public final int getNumber() {
+      return value;
+    }
+
+    /**
+     * @deprecated Use {@link #forNumber(int)} instead.
+     */
+    @java.lang.Deprecated
+    public static Pb_MeetFileAccess_Flag valueOf(int value) {
+      return forNumber(value);
+    }
+
+    public static Pb_MeetFileAccess_Flag forNumber(int value) {
+      switch (value) {
+        case 0: return Pb_MEET_MODIFY_FILEACCESS_FLAG_ZERO;
+        case 1: return Pb_MEET_MODIFY_FILEACCESS_FLAG_CLEAR;
+        default: return null;
+      }
+    }
+
+    public static com.google.protobuf.Internal.EnumLiteMap<Pb_MeetFileAccess_Flag>
+        internalGetValueMap() {
+      return internalValueMap;
+    }
+    private static final com.google.protobuf.Internal.EnumLiteMap<
+        Pb_MeetFileAccess_Flag> internalValueMap =
+          new com.google.protobuf.Internal.EnumLiteMap<Pb_MeetFileAccess_Flag>() {
+            public Pb_MeetFileAccess_Flag findValueByNumber(int number) {
+              return Pb_MeetFileAccess_Flag.forNumber(number);
+            }
+          };
+
+    private final int value;
+
+    private Pb_MeetFileAccess_Flag(int value) {
+      this.value = value;
+    }
+
+    // @@protoc_insertion_point(enum_scope:Pb_MeetFileAccess_Flag)
+  }
+
   public interface pbui_Item_MeetDirDetailInfoOrBuilder extends
       // @@protoc_insertion_point(interface_extends:pbui_Item_MeetDirDetailInfo)
       com.google.protobuf.MessageLiteOrBuilder {
@@ -4830,6 +4909,15 @@ public final class InterfaceFile {
      * <code>optional fixed32 encryptlevel = 6;</code>
      */
     int getEncryptlevel();
+
+    /**
+     * <pre>
+     *时间 毫秒
+     * </pre>
+     *
+     * <code>optional fixed32 mstime = 7;</code>
+     */
+    int getMstime();
   }
   /**
    * <pre>
@@ -5059,6 +5147,41 @@ public final class InterfaceFile {
       encryptlevel_ = 0;
     }
 
+    public static final int MSTIME_FIELD_NUMBER = 7;
+    private int mstime_;
+    /**
+     * <pre>
+     *时间 毫秒
+     * </pre>
+     *
+     * <code>optional fixed32 mstime = 7;</code>
+     */
+    public int getMstime() {
+      return mstime_;
+    }
+    /**
+     * <pre>
+     *时间 毫秒
+     * </pre>
+     *
+     * <code>optional fixed32 mstime = 7;</code>
+     */
+    private void setMstime(int value) {
+      
+      mstime_ = value;
+    }
+    /**
+     * <pre>
+     *时间 毫秒
+     * </pre>
+     *
+     * <code>optional fixed32 mstime = 7;</code>
+     */
+    private void clearMstime() {
+      
+      mstime_ = 0;
+    }
+
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
       if (mediaid_ != 0) {
@@ -5078,6 +5201,9 @@ public final class InterfaceFile {
       }
       if (encryptlevel_ != 0) {
         output.writeFixed32(6, encryptlevel_);
+      }
+      if (mstime_ != 0) {
+        output.writeFixed32(7, mstime_);
       }
     }
 
@@ -5109,6 +5235,10 @@ public final class InterfaceFile {
       if (encryptlevel_ != 0) {
         size += com.google.protobuf.CodedOutputStream
           .computeFixed32Size(6, encryptlevel_);
+      }
+      if (mstime_ != 0) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeFixed32Size(7, mstime_);
       }
       memoizedSerializedSize = size;
       return size;
@@ -5410,6 +5540,41 @@ public final class InterfaceFile {
         return this;
       }
 
+      /**
+       * <pre>
+       *时间 毫秒
+       * </pre>
+       *
+       * <code>optional fixed32 mstime = 7;</code>
+       */
+      public int getMstime() {
+        return instance.getMstime();
+      }
+      /**
+       * <pre>
+       *时间 毫秒
+       * </pre>
+       *
+       * <code>optional fixed32 mstime = 7;</code>
+       */
+      public Builder setMstime(int value) {
+        copyOnWrite();
+        instance.setMstime(value);
+        return this;
+      }
+      /**
+       * <pre>
+       *时间 毫秒
+       * </pre>
+       *
+       * <code>optional fixed32 mstime = 7;</code>
+       */
+      public Builder clearMstime() {
+        copyOnWrite();
+        instance.clearMstime();
+        return this;
+      }
+
       // @@protoc_insertion_point(builder_scope:pbui_Item_ModMeetDirFile)
     }
     protected final Object dynamicMethod(
@@ -5443,6 +5608,8 @@ public final class InterfaceFile {
               other.voteid_ != 0, other.voteid_);
           encryptlevel_ = visitor.visitInt(encryptlevel_ != 0, encryptlevel_,
               other.encryptlevel_ != 0, other.encryptlevel_);
+          mstime_ = visitor.visitInt(mstime_ != 0, mstime_,
+              other.mstime_ != 0, other.mstime_);
           if (visitor == com.google.protobuf.GeneratedMessageLite.MergeFromVisitor
               .INSTANCE) {
           }
@@ -5495,6 +5662,11 @@ public final class InterfaceFile {
                 case 53: {
 
                   encryptlevel_ = input.readFixed32();
+                  break;
+                }
+                case 61: {
+
+                  mstime_ = input.readFixed32();
                   break;
                 }
               }
@@ -14041,6 +14213,949 @@ public final class InterfaceFile {
     private static volatile com.google.protobuf.Parser<pbui_Type_DelFileEvaluate> PARSER;
 
     public static com.google.protobuf.Parser<pbui_Type_DelFileEvaluate> parser() {
+      return DEFAULT_INSTANCE.getParserForType();
+    }
+  }
+
+  public interface pbui_Type_QueryFileAccessDetailInfoOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:pbui_Type_QueryFileAccessDetailInfo)
+      com.google.protobuf.MessageLiteOrBuilder {
+
+    /**
+     * <code>optional fixed32 fileid = 1;</code>
+     */
+    int getFileid();
+
+    /**
+     * <pre>
+     *查询时返回
+     * </pre>
+     *
+     * <code>repeated fixed32 memids = 2;</code>
+     */
+    java.util.List<java.lang.Integer> getMemidsList();
+    /**
+     * <pre>
+     *查询时返回
+     * </pre>
+     *
+     * <code>repeated fixed32 memids = 2;</code>
+     */
+    int getMemidsCount();
+    /**
+     * <pre>
+     *查询时返回
+     * </pre>
+     *
+     * <code>repeated fixed32 memids = 2;</code>
+     */
+    int getMemids(int index);
+  }
+  /**
+   * <pre>
+   *会议文件权限
+   *type: TYPE_MEET_INTERFACE_FILEACCESS
+   *method: QUERY
+   * </pre>
+   *
+   * Protobuf type {@code pbui_Type_QueryFileAccessDetailInfo}
+   */
+  public  static final class pbui_Type_QueryFileAccessDetailInfo extends
+      com.google.protobuf.GeneratedMessageLite<
+          pbui_Type_QueryFileAccessDetailInfo, pbui_Type_QueryFileAccessDetailInfo.Builder> implements
+      // @@protoc_insertion_point(message_implements:pbui_Type_QueryFileAccessDetailInfo)
+      pbui_Type_QueryFileAccessDetailInfoOrBuilder {
+    private pbui_Type_QueryFileAccessDetailInfo() {
+      memids_ = emptyIntList();
+    }
+    private int bitField0_;
+    public static final int FILEID_FIELD_NUMBER = 1;
+    private int fileid_;
+    /**
+     * <code>optional fixed32 fileid = 1;</code>
+     */
+    public int getFileid() {
+      return fileid_;
+    }
+    /**
+     * <code>optional fixed32 fileid = 1;</code>
+     */
+    private void setFileid(int value) {
+      
+      fileid_ = value;
+    }
+    /**
+     * <code>optional fixed32 fileid = 1;</code>
+     */
+    private void clearFileid() {
+      
+      fileid_ = 0;
+    }
+
+    public static final int MEMIDS_FIELD_NUMBER = 2;
+    private com.google.protobuf.Internal.IntList memids_;
+    /**
+     * <pre>
+     *查询时返回
+     * </pre>
+     *
+     * <code>repeated fixed32 memids = 2;</code>
+     */
+    public java.util.List<java.lang.Integer>
+        getMemidsList() {
+      return memids_;
+    }
+    /**
+     * <pre>
+     *查询时返回
+     * </pre>
+     *
+     * <code>repeated fixed32 memids = 2;</code>
+     */
+    public int getMemidsCount() {
+      return memids_.size();
+    }
+    /**
+     * <pre>
+     *查询时返回
+     * </pre>
+     *
+     * <code>repeated fixed32 memids = 2;</code>
+     */
+    public int getMemids(int index) {
+      return memids_.getInt(index);
+    }
+    private void ensureMemidsIsMutable() {
+      if (!memids_.isModifiable()) {
+        memids_ =
+            com.google.protobuf.GeneratedMessageLite.mutableCopy(memids_);
+       }
+    }
+    /**
+     * <pre>
+     *查询时返回
+     * </pre>
+     *
+     * <code>repeated fixed32 memids = 2;</code>
+     */
+    private void setMemids(
+        int index, int value) {
+      ensureMemidsIsMutable();
+      memids_.setInt(index, value);
+    }
+    /**
+     * <pre>
+     *查询时返回
+     * </pre>
+     *
+     * <code>repeated fixed32 memids = 2;</code>
+     */
+    private void addMemids(int value) {
+      ensureMemidsIsMutable();
+      memids_.addInt(value);
+    }
+    /**
+     * <pre>
+     *查询时返回
+     * </pre>
+     *
+     * <code>repeated fixed32 memids = 2;</code>
+     */
+    private void addAllMemids(
+        java.lang.Iterable<? extends java.lang.Integer> values) {
+      ensureMemidsIsMutable();
+      com.google.protobuf.AbstractMessageLite.addAll(
+          values, memids_);
+    }
+    /**
+     * <pre>
+     *查询时返回
+     * </pre>
+     *
+     * <code>repeated fixed32 memids = 2;</code>
+     */
+    private void clearMemids() {
+      memids_ = emptyIntList();
+    }
+
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      getSerializedSize();
+      if (fileid_ != 0) {
+        output.writeFixed32(1, fileid_);
+      }
+      for (int i = 0; i < memids_.size(); i++) {
+        output.writeFixed32(2, memids_.getInt(i));
+      }
+    }
+
+    public int getSerializedSize() {
+      int size = memoizedSerializedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (fileid_ != 0) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeFixed32Size(1, fileid_);
+      }
+      {
+        int dataSize = 0;
+        dataSize = 4 * getMemidsList().size();
+        size += dataSize;
+        size += 1 * getMemidsList().size();
+      }
+      memoizedSerializedSize = size;
+      return size;
+    }
+
+    public static com.mogujie.tt.protobuf.InterfaceFile.pbui_Type_QueryFileAccessDetailInfo parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return com.google.protobuf.GeneratedMessageLite.parseFrom(
+          DEFAULT_INSTANCE, data);
+    }
+    public static com.mogujie.tt.protobuf.InterfaceFile.pbui_Type_QueryFileAccessDetailInfo parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return com.google.protobuf.GeneratedMessageLite.parseFrom(
+          DEFAULT_INSTANCE, data, extensionRegistry);
+    }
+    public static com.mogujie.tt.protobuf.InterfaceFile.pbui_Type_QueryFileAccessDetailInfo parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return com.google.protobuf.GeneratedMessageLite.parseFrom(
+          DEFAULT_INSTANCE, data);
+    }
+    public static com.mogujie.tt.protobuf.InterfaceFile.pbui_Type_QueryFileAccessDetailInfo parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return com.google.protobuf.GeneratedMessageLite.parseFrom(
+          DEFAULT_INSTANCE, data, extensionRegistry);
+    }
+    public static com.mogujie.tt.protobuf.InterfaceFile.pbui_Type_QueryFileAccessDetailInfo parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageLite.parseFrom(
+          DEFAULT_INSTANCE, input);
+    }
+    public static com.mogujie.tt.protobuf.InterfaceFile.pbui_Type_QueryFileAccessDetailInfo parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageLite.parseFrom(
+          DEFAULT_INSTANCE, input, extensionRegistry);
+    }
+    public static com.mogujie.tt.protobuf.InterfaceFile.pbui_Type_QueryFileAccessDetailInfo parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return parseDelimitedFrom(DEFAULT_INSTANCE, input);
+    }
+    public static com.mogujie.tt.protobuf.InterfaceFile.pbui_Type_QueryFileAccessDetailInfo parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return parseDelimitedFrom(DEFAULT_INSTANCE, input, extensionRegistry);
+    }
+    public static com.mogujie.tt.protobuf.InterfaceFile.pbui_Type_QueryFileAccessDetailInfo parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageLite.parseFrom(
+          DEFAULT_INSTANCE, input);
+    }
+    public static com.mogujie.tt.protobuf.InterfaceFile.pbui_Type_QueryFileAccessDetailInfo parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageLite.parseFrom(
+          DEFAULT_INSTANCE, input, extensionRegistry);
+    }
+
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(com.mogujie.tt.protobuf.InterfaceFile.pbui_Type_QueryFileAccessDetailInfo prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+
+    /**
+     * <pre>
+     *会议文件权限
+     *type: TYPE_MEET_INTERFACE_FILEACCESS
+     *method: QUERY
+     * </pre>
+     *
+     * Protobuf type {@code pbui_Type_QueryFileAccessDetailInfo}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageLite.Builder<
+          com.mogujie.tt.protobuf.InterfaceFile.pbui_Type_QueryFileAccessDetailInfo, Builder> implements
+        // @@protoc_insertion_point(builder_implements:pbui_Type_QueryFileAccessDetailInfo)
+        com.mogujie.tt.protobuf.InterfaceFile.pbui_Type_QueryFileAccessDetailInfoOrBuilder {
+      // Construct using com.mogujie.tt.protobuf.InterfaceFile.pbui_Type_QueryFileAccessDetailInfo.newBuilder()
+      private Builder() {
+        super(DEFAULT_INSTANCE);
+      }
+
+
+      /**
+       * <code>optional fixed32 fileid = 1;</code>
+       */
+      public int getFileid() {
+        return instance.getFileid();
+      }
+      /**
+       * <code>optional fixed32 fileid = 1;</code>
+       */
+      public Builder setFileid(int value) {
+        copyOnWrite();
+        instance.setFileid(value);
+        return this;
+      }
+      /**
+       * <code>optional fixed32 fileid = 1;</code>
+       */
+      public Builder clearFileid() {
+        copyOnWrite();
+        instance.clearFileid();
+        return this;
+      }
+
+      /**
+       * <pre>
+       *查询时返回
+       * </pre>
+       *
+       * <code>repeated fixed32 memids = 2;</code>
+       */
+      public java.util.List<java.lang.Integer>
+          getMemidsList() {
+        return java.util.Collections.unmodifiableList(
+            instance.getMemidsList());
+      }
+      /**
+       * <pre>
+       *查询时返回
+       * </pre>
+       *
+       * <code>repeated fixed32 memids = 2;</code>
+       */
+      public int getMemidsCount() {
+        return instance.getMemidsCount();
+      }
+      /**
+       * <pre>
+       *查询时返回
+       * </pre>
+       *
+       * <code>repeated fixed32 memids = 2;</code>
+       */
+      public int getMemids(int index) {
+        return instance.getMemids(index);
+      }
+      /**
+       * <pre>
+       *查询时返回
+       * </pre>
+       *
+       * <code>repeated fixed32 memids = 2;</code>
+       */
+      public Builder setMemids(
+          int index, int value) {
+        copyOnWrite();
+        instance.setMemids(index, value);
+        return this;
+      }
+      /**
+       * <pre>
+       *查询时返回
+       * </pre>
+       *
+       * <code>repeated fixed32 memids = 2;</code>
+       */
+      public Builder addMemids(int value) {
+        copyOnWrite();
+        instance.addMemids(value);
+        return this;
+      }
+      /**
+       * <pre>
+       *查询时返回
+       * </pre>
+       *
+       * <code>repeated fixed32 memids = 2;</code>
+       */
+      public Builder addAllMemids(
+          java.lang.Iterable<? extends java.lang.Integer> values) {
+        copyOnWrite();
+        instance.addAllMemids(values);
+        return this;
+      }
+      /**
+       * <pre>
+       *查询时返回
+       * </pre>
+       *
+       * <code>repeated fixed32 memids = 2;</code>
+       */
+      public Builder clearMemids() {
+        copyOnWrite();
+        instance.clearMemids();
+        return this;
+      }
+
+      // @@protoc_insertion_point(builder_scope:pbui_Type_QueryFileAccessDetailInfo)
+    }
+    protected final Object dynamicMethod(
+        com.google.protobuf.GeneratedMessageLite.MethodToInvoke method,
+        Object arg0, Object arg1) {
+      switch (method) {
+        case NEW_MUTABLE_INSTANCE: {
+          return new com.mogujie.tt.protobuf.InterfaceFile.pbui_Type_QueryFileAccessDetailInfo();
+        }
+        case IS_INITIALIZED: {
+          return DEFAULT_INSTANCE;
+        }
+        case MAKE_IMMUTABLE: {
+          memids_.makeImmutable();
+          return null;
+        }
+        case NEW_BUILDER: {
+          return new Builder();
+        }
+        case VISIT: {
+          Visitor visitor = (Visitor) arg0;
+          com.mogujie.tt.protobuf.InterfaceFile.pbui_Type_QueryFileAccessDetailInfo other = (com.mogujie.tt.protobuf.InterfaceFile.pbui_Type_QueryFileAccessDetailInfo) arg1;
+          fileid_ = visitor.visitInt(fileid_ != 0, fileid_,
+              other.fileid_ != 0, other.fileid_);
+          memids_= visitor.visitIntList(memids_, other.memids_);
+          if (visitor == com.google.protobuf.GeneratedMessageLite.MergeFromVisitor
+              .INSTANCE) {
+            bitField0_ |= other.bitField0_;
+          }
+          return this;
+        }
+        case MERGE_FROM_STREAM: {
+          com.google.protobuf.CodedInputStream input =
+              (com.google.protobuf.CodedInputStream) arg0;
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry =
+              (com.google.protobuf.ExtensionRegistryLite) arg1;
+          try {
+            boolean done = false;
+            while (!done) {
+              int tag = input.readTag();
+              switch (tag) {
+                case 0:
+                  done = true;
+                  break;
+                default: {
+                  if (!input.skipField(tag)) {
+                    done = true;
+                  }
+                  break;
+                }
+                case 13: {
+
+                  fileid_ = input.readFixed32();
+                  break;
+                }
+                case 21: {
+                  if (!memids_.isModifiable()) {
+                    memids_ =
+                        com.google.protobuf.GeneratedMessageLite.mutableCopy(memids_);
+                  }
+                  memids_.addInt(input.readFixed32());
+                  break;
+                }
+                case 18: {
+                  int length = input.readRawVarint32();
+                  int limit = input.pushLimit(length);
+                  if (!memids_.isModifiable() && input.getBytesUntilLimit() > 0) {
+                    final int currentSize = memids_.size();
+                    memids_ = memids_.mutableCopyWithCapacity(
+                        currentSize + (length/4));
+                  }
+                  while (input.getBytesUntilLimit() > 0) {
+                    memids_.addInt(input.readFixed32());
+                  }
+                  input.popLimit(limit);
+                  break;
+                }
+              }
+            }
+          } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+            throw new RuntimeException(e.setUnfinishedMessage(this));
+          } catch (java.io.IOException e) {
+            throw new RuntimeException(
+                new com.google.protobuf.InvalidProtocolBufferException(
+                    e.getMessage()).setUnfinishedMessage(this));
+          } finally {
+          }
+        }
+        case GET_DEFAULT_INSTANCE: {
+          return DEFAULT_INSTANCE;
+        }
+        case GET_PARSER: {
+          if (PARSER == null) {    synchronized (com.mogujie.tt.protobuf.InterfaceFile.pbui_Type_QueryFileAccessDetailInfo.class) {
+              if (PARSER == null) {
+                PARSER = new DefaultInstanceBasedParser(DEFAULT_INSTANCE);
+              }
+            }
+          }
+          return PARSER;
+        }
+      }
+      throw new UnsupportedOperationException();
+    }
+
+
+    // @@protoc_insertion_point(class_scope:pbui_Type_QueryFileAccessDetailInfo)
+    private static final com.mogujie.tt.protobuf.InterfaceFile.pbui_Type_QueryFileAccessDetailInfo DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new pbui_Type_QueryFileAccessDetailInfo();
+      DEFAULT_INSTANCE.makeImmutable();
+    }
+
+    public static com.mogujie.tt.protobuf.InterfaceFile.pbui_Type_QueryFileAccessDetailInfo getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static volatile com.google.protobuf.Parser<pbui_Type_QueryFileAccessDetailInfo> PARSER;
+
+    public static com.google.protobuf.Parser<pbui_Type_QueryFileAccessDetailInfo> parser() {
+      return DEFAULT_INSTANCE.getParserForType();
+    }
+  }
+
+  public interface pbui_Type_ModFileAccessDetailInfoOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:pbui_Type_ModFileAccessDetailInfo)
+      com.google.protobuf.MessageLiteOrBuilder {
+
+    /**
+     * <pre>
+     *参见Pb_MeetFileAccess_Flag
+     * </pre>
+     *
+     * <code>optional fixed32 flag = 1;</code>
+     */
+    int getFlag();
+
+    /**
+     * <pre>
+     *{
+     *"data":[
+     *{"fileid":"0x6b0000001","mem":[{"id":1},{"id":2}]},
+     *{"fileid":"0x6b0000003","mem":[{"id":1},{"id":2}]},
+     *]
+     *}
+     * </pre>
+     *
+     * <code>optional bytes json = 2;</code>
+     */
+    com.google.protobuf.ByteString getJson();
+  }
+  /**
+   * <pre>
+   *type: TYPE_MEET_INTERFACE_FILEACCESS
+   *method: mod
+   * </pre>
+   *
+   * Protobuf type {@code pbui_Type_ModFileAccessDetailInfo}
+   */
+  public  static final class pbui_Type_ModFileAccessDetailInfo extends
+      com.google.protobuf.GeneratedMessageLite<
+          pbui_Type_ModFileAccessDetailInfo, pbui_Type_ModFileAccessDetailInfo.Builder> implements
+      // @@protoc_insertion_point(message_implements:pbui_Type_ModFileAccessDetailInfo)
+      pbui_Type_ModFileAccessDetailInfoOrBuilder {
+    private pbui_Type_ModFileAccessDetailInfo() {
+      json_ = com.google.protobuf.ByteString.EMPTY;
+    }
+    public static final int FLAG_FIELD_NUMBER = 1;
+    private int flag_;
+    /**
+     * <pre>
+     *参见Pb_MeetFileAccess_Flag
+     * </pre>
+     *
+     * <code>optional fixed32 flag = 1;</code>
+     */
+    public int getFlag() {
+      return flag_;
+    }
+    /**
+     * <pre>
+     *参见Pb_MeetFileAccess_Flag
+     * </pre>
+     *
+     * <code>optional fixed32 flag = 1;</code>
+     */
+    private void setFlag(int value) {
+      
+      flag_ = value;
+    }
+    /**
+     * <pre>
+     *参见Pb_MeetFileAccess_Flag
+     * </pre>
+     *
+     * <code>optional fixed32 flag = 1;</code>
+     */
+    private void clearFlag() {
+      
+      flag_ = 0;
+    }
+
+    public static final int JSON_FIELD_NUMBER = 2;
+    private com.google.protobuf.ByteString json_;
+    /**
+     * <pre>
+     *{
+     *"data":[
+     *{"fileid":"0x6b0000001","mem":[{"id":1},{"id":2}]},
+     *{"fileid":"0x6b0000003","mem":[{"id":1},{"id":2}]},
+     *]
+     *}
+     * </pre>
+     *
+     * <code>optional bytes json = 2;</code>
+     */
+    public com.google.protobuf.ByteString getJson() {
+      return json_;
+    }
+    /**
+     * <pre>
+     *{
+     *"data":[
+     *{"fileid":"0x6b0000001","mem":[{"id":1},{"id":2}]},
+     *{"fileid":"0x6b0000003","mem":[{"id":1},{"id":2}]},
+     *]
+     *}
+     * </pre>
+     *
+     * <code>optional bytes json = 2;</code>
+     */
+    private void setJson(com.google.protobuf.ByteString value) {
+      if (value == null) {
+    throw new NullPointerException();
+  }
+  
+      json_ = value;
+    }
+    /**
+     * <pre>
+     *{
+     *"data":[
+     *{"fileid":"0x6b0000001","mem":[{"id":1},{"id":2}]},
+     *{"fileid":"0x6b0000003","mem":[{"id":1},{"id":2}]},
+     *]
+     *}
+     * </pre>
+     *
+     * <code>optional bytes json = 2;</code>
+     */
+    private void clearJson() {
+      
+      json_ = getDefaultInstance().getJson();
+    }
+
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      if (flag_ != 0) {
+        output.writeFixed32(1, flag_);
+      }
+      if (!json_.isEmpty()) {
+        output.writeBytes(2, json_);
+      }
+    }
+
+    public int getSerializedSize() {
+      int size = memoizedSerializedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (flag_ != 0) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeFixed32Size(1, flag_);
+      }
+      if (!json_.isEmpty()) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBytesSize(2, json_);
+      }
+      memoizedSerializedSize = size;
+      return size;
+    }
+
+    public static com.mogujie.tt.protobuf.InterfaceFile.pbui_Type_ModFileAccessDetailInfo parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return com.google.protobuf.GeneratedMessageLite.parseFrom(
+          DEFAULT_INSTANCE, data);
+    }
+    public static com.mogujie.tt.protobuf.InterfaceFile.pbui_Type_ModFileAccessDetailInfo parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return com.google.protobuf.GeneratedMessageLite.parseFrom(
+          DEFAULT_INSTANCE, data, extensionRegistry);
+    }
+    public static com.mogujie.tt.protobuf.InterfaceFile.pbui_Type_ModFileAccessDetailInfo parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return com.google.protobuf.GeneratedMessageLite.parseFrom(
+          DEFAULT_INSTANCE, data);
+    }
+    public static com.mogujie.tt.protobuf.InterfaceFile.pbui_Type_ModFileAccessDetailInfo parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return com.google.protobuf.GeneratedMessageLite.parseFrom(
+          DEFAULT_INSTANCE, data, extensionRegistry);
+    }
+    public static com.mogujie.tt.protobuf.InterfaceFile.pbui_Type_ModFileAccessDetailInfo parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageLite.parseFrom(
+          DEFAULT_INSTANCE, input);
+    }
+    public static com.mogujie.tt.protobuf.InterfaceFile.pbui_Type_ModFileAccessDetailInfo parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageLite.parseFrom(
+          DEFAULT_INSTANCE, input, extensionRegistry);
+    }
+    public static com.mogujie.tt.protobuf.InterfaceFile.pbui_Type_ModFileAccessDetailInfo parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return parseDelimitedFrom(DEFAULT_INSTANCE, input);
+    }
+    public static com.mogujie.tt.protobuf.InterfaceFile.pbui_Type_ModFileAccessDetailInfo parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return parseDelimitedFrom(DEFAULT_INSTANCE, input, extensionRegistry);
+    }
+    public static com.mogujie.tt.protobuf.InterfaceFile.pbui_Type_ModFileAccessDetailInfo parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageLite.parseFrom(
+          DEFAULT_INSTANCE, input);
+    }
+    public static com.mogujie.tt.protobuf.InterfaceFile.pbui_Type_ModFileAccessDetailInfo parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageLite.parseFrom(
+          DEFAULT_INSTANCE, input, extensionRegistry);
+    }
+
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(com.mogujie.tt.protobuf.InterfaceFile.pbui_Type_ModFileAccessDetailInfo prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+
+    /**
+     * <pre>
+     *type: TYPE_MEET_INTERFACE_FILEACCESS
+     *method: mod
+     * </pre>
+     *
+     * Protobuf type {@code pbui_Type_ModFileAccessDetailInfo}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageLite.Builder<
+          com.mogujie.tt.protobuf.InterfaceFile.pbui_Type_ModFileAccessDetailInfo, Builder> implements
+        // @@protoc_insertion_point(builder_implements:pbui_Type_ModFileAccessDetailInfo)
+        com.mogujie.tt.protobuf.InterfaceFile.pbui_Type_ModFileAccessDetailInfoOrBuilder {
+      // Construct using com.mogujie.tt.protobuf.InterfaceFile.pbui_Type_ModFileAccessDetailInfo.newBuilder()
+      private Builder() {
+        super(DEFAULT_INSTANCE);
+      }
+
+
+      /**
+       * <pre>
+       *参见Pb_MeetFileAccess_Flag
+       * </pre>
+       *
+       * <code>optional fixed32 flag = 1;</code>
+       */
+      public int getFlag() {
+        return instance.getFlag();
+      }
+      /**
+       * <pre>
+       *参见Pb_MeetFileAccess_Flag
+       * </pre>
+       *
+       * <code>optional fixed32 flag = 1;</code>
+       */
+      public Builder setFlag(int value) {
+        copyOnWrite();
+        instance.setFlag(value);
+        return this;
+      }
+      /**
+       * <pre>
+       *参见Pb_MeetFileAccess_Flag
+       * </pre>
+       *
+       * <code>optional fixed32 flag = 1;</code>
+       */
+      public Builder clearFlag() {
+        copyOnWrite();
+        instance.clearFlag();
+        return this;
+      }
+
+      /**
+       * <pre>
+       *{
+       *"data":[
+       *{"fileid":"0x6b0000001","mem":[{"id":1},{"id":2}]},
+       *{"fileid":"0x6b0000003","mem":[{"id":1},{"id":2}]},
+       *]
+       *}
+       * </pre>
+       *
+       * <code>optional bytes json = 2;</code>
+       */
+      public com.google.protobuf.ByteString getJson() {
+        return instance.getJson();
+      }
+      /**
+       * <pre>
+       *{
+       *"data":[
+       *{"fileid":"0x6b0000001","mem":[{"id":1},{"id":2}]},
+       *{"fileid":"0x6b0000003","mem":[{"id":1},{"id":2}]},
+       *]
+       *}
+       * </pre>
+       *
+       * <code>optional bytes json = 2;</code>
+       */
+      public Builder setJson(com.google.protobuf.ByteString value) {
+        copyOnWrite();
+        instance.setJson(value);
+        return this;
+      }
+      /**
+       * <pre>
+       *{
+       *"data":[
+       *{"fileid":"0x6b0000001","mem":[{"id":1},{"id":2}]},
+       *{"fileid":"0x6b0000003","mem":[{"id":1},{"id":2}]},
+       *]
+       *}
+       * </pre>
+       *
+       * <code>optional bytes json = 2;</code>
+       */
+      public Builder clearJson() {
+        copyOnWrite();
+        instance.clearJson();
+        return this;
+      }
+
+      // @@protoc_insertion_point(builder_scope:pbui_Type_ModFileAccessDetailInfo)
+    }
+    protected final Object dynamicMethod(
+        com.google.protobuf.GeneratedMessageLite.MethodToInvoke method,
+        Object arg0, Object arg1) {
+      switch (method) {
+        case NEW_MUTABLE_INSTANCE: {
+          return new com.mogujie.tt.protobuf.InterfaceFile.pbui_Type_ModFileAccessDetailInfo();
+        }
+        case IS_INITIALIZED: {
+          return DEFAULT_INSTANCE;
+        }
+        case MAKE_IMMUTABLE: {
+          return null;
+        }
+        case NEW_BUILDER: {
+          return new Builder();
+        }
+        case VISIT: {
+          Visitor visitor = (Visitor) arg0;
+          com.mogujie.tt.protobuf.InterfaceFile.pbui_Type_ModFileAccessDetailInfo other = (com.mogujie.tt.protobuf.InterfaceFile.pbui_Type_ModFileAccessDetailInfo) arg1;
+          flag_ = visitor.visitInt(flag_ != 0, flag_,
+              other.flag_ != 0, other.flag_);
+          json_ = visitor.visitByteString(json_ != com.google.protobuf.ByteString.EMPTY, json_,
+              other.json_ != com.google.protobuf.ByteString.EMPTY, other.json_);
+          if (visitor == com.google.protobuf.GeneratedMessageLite.MergeFromVisitor
+              .INSTANCE) {
+          }
+          return this;
+        }
+        case MERGE_FROM_STREAM: {
+          com.google.protobuf.CodedInputStream input =
+              (com.google.protobuf.CodedInputStream) arg0;
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry =
+              (com.google.protobuf.ExtensionRegistryLite) arg1;
+          try {
+            boolean done = false;
+            while (!done) {
+              int tag = input.readTag();
+              switch (tag) {
+                case 0:
+                  done = true;
+                  break;
+                default: {
+                  if (!input.skipField(tag)) {
+                    done = true;
+                  }
+                  break;
+                }
+                case 13: {
+
+                  flag_ = input.readFixed32();
+                  break;
+                }
+                case 18: {
+
+                  json_ = input.readBytes();
+                  break;
+                }
+              }
+            }
+          } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+            throw new RuntimeException(e.setUnfinishedMessage(this));
+          } catch (java.io.IOException e) {
+            throw new RuntimeException(
+                new com.google.protobuf.InvalidProtocolBufferException(
+                    e.getMessage()).setUnfinishedMessage(this));
+          } finally {
+          }
+        }
+        case GET_DEFAULT_INSTANCE: {
+          return DEFAULT_INSTANCE;
+        }
+        case GET_PARSER: {
+          if (PARSER == null) {    synchronized (com.mogujie.tt.protobuf.InterfaceFile.pbui_Type_ModFileAccessDetailInfo.class) {
+              if (PARSER == null) {
+                PARSER = new DefaultInstanceBasedParser(DEFAULT_INSTANCE);
+              }
+            }
+          }
+          return PARSER;
+        }
+      }
+      throw new UnsupportedOperationException();
+    }
+
+
+    // @@protoc_insertion_point(class_scope:pbui_Type_ModFileAccessDetailInfo)
+    private static final com.mogujie.tt.protobuf.InterfaceFile.pbui_Type_ModFileAccessDetailInfo DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new pbui_Type_ModFileAccessDetailInfo();
+      DEFAULT_INSTANCE.makeImmutable();
+    }
+
+    public static com.mogujie.tt.protobuf.InterfaceFile.pbui_Type_ModFileAccessDetailInfo getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static volatile com.google.protobuf.Parser<pbui_Type_ModFileAccessDetailInfo> PARSER;
+
+    public static com.google.protobuf.Parser<pbui_Type_ModFileAccessDetailInfo> parser() {
       return DEFAULT_INSTANCE.getParserForType();
     }
   }

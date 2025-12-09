@@ -8,7 +8,7 @@
 #ifndef WALLET_NET_H_
 #define WALLET_NET_H_
 #include <jni.h>
-//#include "helpers.h"
+#include "helpers.h"
 
 #ifndef LOGI
 #include <android/log.h>

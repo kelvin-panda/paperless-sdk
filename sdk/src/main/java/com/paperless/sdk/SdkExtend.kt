@@ -22,6 +22,13 @@ fun Int.flag(value: Int): Boolean {
     return (this and value) == value
 }
 
+/**
+ * 异或操作  260 xor 256 = 4
+ */
+fun Int.xor(value: Int): Int {
+    return this xor value
+}
+
 fun ByteString.format2Bitmap(): Bitmap {
     return BitmapFactory.decodeByteArray(this.toByteArray(), 0, this.toByteArray().size)
 }
@@ -337,6 +344,13 @@ fun Int.voteStatus() = when (this) {
     else -> "未开始"
 }
 //</editor-fold>
+
+/**
+ * 播放通知中判断是否强制
+ */
+fun Int.isMandatory(): Boolean {
+    return this == InterfaceMacro.Pb_TriggerUsedef.Pb_MEETFILE_PUSH_FLAG_FORCEMODE_VALUE
+}
 
 /**
  * 是否外部打开文档

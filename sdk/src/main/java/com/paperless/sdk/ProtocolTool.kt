@@ -154,41 +154,32 @@ object ProtocolTool {
 //        return getTypeFace(typeface, fontFlag)
 //    }
 
+    /**
+     * 界面状态相关的fontFlag
+     */
     fun getTypeFace(typeface: Typeface?, fontFlag: Int): Typeface {
-        return when (fontFlag) {
-            InterfaceMacro.Pb_MeetFaceFontFlag.Pb_MEET_FONTFLAG_BOLD_VALUE -> {
-                if (typeface != null) Typeface.create(
+        return if (fontFlag.flag(InterfaceMacro.Pb_MeetFaceFontFlag.Pb_MEET_FONTFLAG_BOLD_VALUE)) {
+            if (typeface != null) {
+                Typeface.create(
                     typeface,
                     Typeface.BOLD
-                ) else Typeface.defaultFromStyle(
+                )
+            } else {
+                Typeface.defaultFromStyle(
                     Typeface.BOLD
                 )
             }
-
-            InterfaceMacro.Pb_MeetFaceFontFlag.Pb_MEET_FONTFLAG_LEAN_VALUE -> {
-                if (typeface != null) Typeface.create(
+        } else {
+            if (typeface != null) {
+                Typeface.create(
                     typeface,
-                    Typeface.ITALIC
-                ) else Typeface.defaultFromStyle(
-                    Typeface.ITALIC
+                    Typeface.NORMAL
+                )
+            } else {
+                Typeface.defaultFromStyle(
+                    Typeface.NORMAL
                 )
             }
-
-            InterfaceMacro.Pb_MeetFaceFontFlag.Pb_MEET_FONTFLAG_UNDERLINE_VALUE -> {
-                if (typeface != null) Typeface.create(
-                    typeface,
-                    Typeface.BOLD_ITALIC
-                ) else Typeface.defaultFromStyle(
-                    Typeface.BOLD_ITALIC
-                )
-            }
-
-            else -> if (typeface != null) Typeface.create(
-                typeface,
-                Typeface.NORMAL
-            ) else Typeface.defaultFromStyle(
-                Typeface.NORMAL
-            )
         }
     }
 

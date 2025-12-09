@@ -1351,6 +1351,14 @@ public final class InterfaceMacro {
     Pb_TYPE_MEET_INTERFACE_DBSERACH(80),
     /**
      * <pre>
+     *文件权限
+     * </pre>
+     *
+     * <code>Pb_TYPE_MEET_INTERFACE_FILEACCESS = 81;</code>
+     */
+    Pb_TYPE_MEET_INTERFACE_FILEACCESS(81),
+    /**
+     * <pre>
      *退出释放资源
      * </pre>
      *
@@ -2018,6 +2026,14 @@ public final class InterfaceMacro {
     public static final int Pb_TYPE_MEET_INTERFACE_DBSERACH_VALUE = 80;
     /**
      * <pre>
+     *文件权限
+     * </pre>
+     *
+     * <code>Pb_TYPE_MEET_INTERFACE_FILEACCESS = 81;</code>
+     */
+    public static final int Pb_TYPE_MEET_INTERFACE_FILEACCESS_VALUE = 81;
+    /**
+     * <pre>
      *退出释放资源
      * </pre>
      *
@@ -2129,6 +2145,7 @@ public final class InterfaceMacro {
         case 78: return Pb_TYPE_MEET_INTERFACE_SEATPLANMEM;
         case 79: return Pb_TYPE_MEET_INTERFACE_STREAMSAVE;
         case 80: return Pb_TYPE_MEET_INTERFACE_DBSERACH;
+        case 81: return Pb_TYPE_MEET_INTERFACE_FILEACCESS;
         case 999: return Pb_TYPE_MEET_INTERFACE_EXITENV;
         case 1000: return Pb_TYPE_MEET_INTERFACE_WEBSESSIONID;
         default: return null;
@@ -5932,6 +5949,14 @@ public final class InterfaceMacro {
      * <code>Pb_MEETCONTEXT_PROPERTY_VOLUMN = 35;</code>
      */
     Pb_MEETCONTEXT_PROPERTY_VOLUMN(35),
+    /**
+     * <pre>
+     *获取当前设备 query(string)
+     * </pre>
+     *
+     * <code>Pb_MEETCONTEXT_PROPERTY_DEVICEKEY = 36;</code>
+     */
+    Pb_MEETCONTEXT_PROPERTY_DEVICEKEY(36),
     UNRECOGNIZED(-1),
     ;
 
@@ -6219,6 +6244,14 @@ public final class InterfaceMacro {
      * <code>Pb_MEETCONTEXT_PROPERTY_VOLUMN = 35;</code>
      */
     public static final int Pb_MEETCONTEXT_PROPERTY_VOLUMN_VALUE = 35;
+    /**
+     * <pre>
+     *获取当前设备 query(string)
+     * </pre>
+     *
+     * <code>Pb_MEETCONTEXT_PROPERTY_DEVICEKEY = 36;</code>
+     */
+    public static final int Pb_MEETCONTEXT_PROPERTY_DEVICEKEY_VALUE = 36;
 
 
     public final int getNumber() {
@@ -6271,6 +6304,7 @@ public final class InterfaceMacro {
         case 33: return Pb_MEETCONTEXT_PROPERTY_PROTOVERSION;
         case 34: return Pb_MEETCONTEXT_PROPERTY_DUMPSTACK;
         case 35: return Pb_MEETCONTEXT_PROPERTY_VOLUMN;
+        case 36: return Pb_MEETCONTEXT_PROPERTY_DEVICEKEY;
         default: return null;
       }
     }
@@ -9507,6 +9541,30 @@ public final class InterfaceMacro {
      * <code>Pb_role_sever = 17;</code>
      */
     Pb_role_sever(17),
+    /**
+     * <pre>
+     *第三方系统
+     * </pre>
+     *
+     * <code>Pb_role_oa = 18;</code>
+     */
+    Pb_role_oa(18),
+    /**
+     * <pre>
+     *列席人员
+     * </pre>
+     *
+     * <code>Pb_role_liexi = 19;</code>
+     */
+    Pb_role_liexi(19),
+    /**
+     * <pre>
+     *汇报人员
+     * </pre>
+     *
+     * <code>Pb_role_report = 20;</code>
+     */
+    Pb_role_report(20),
     UNRECOGNIZED(-1),
     ;
 
@@ -9574,6 +9632,30 @@ public final class InterfaceMacro {
      * <code>Pb_role_sever = 17;</code>
      */
     public static final int Pb_role_sever_VALUE = 17;
+    /**
+     * <pre>
+     *第三方系统
+     * </pre>
+     *
+     * <code>Pb_role_oa = 18;</code>
+     */
+    public static final int Pb_role_oa_VALUE = 18;
+    /**
+     * <pre>
+     *列席人员
+     * </pre>
+     *
+     * <code>Pb_role_liexi = 19;</code>
+     */
+    public static final int Pb_role_liexi_VALUE = 19;
+    /**
+     * <pre>
+     *汇报人员
+     * </pre>
+     *
+     * <code>Pb_role_report = 20;</code>
+     */
+    public static final int Pb_role_report_VALUE = 20;
 
 
     public final int getNumber() {
@@ -9598,6 +9680,9 @@ public final class InterfaceMacro {
         case 9: return Pb_role_admin;
         case 16: return Pb_role_root;
         case 17: return Pb_role_sever;
+        case 18: return Pb_role_oa;
+        case 19: return Pb_role_liexi;
+        case 20: return Pb_role_report;
         default: return null;
       }
     }
@@ -10056,6 +10141,14 @@ public final class InterfaceMacro {
      * <code>Pb_MEETFILE_PROPERTY_CACHEPATHNAME = 7;</code>
      */
     Pb_MEETFILE_PROPERTY_CACHEPATHNAME(7),
+    /**
+     * <pre>
+     *文件对应的权限 query(fixed32) 1表示有权限
+     * </pre>
+     *
+     * <code>Pb_MEETFILE_PROPERTY_FILEACCESS = 8;</code>
+     */
+    Pb_MEETFILE_PROPERTY_FILEACCESS(8),
     UNRECOGNIZED(-1),
     ;
 
@@ -10119,6 +10212,14 @@ public final class InterfaceMacro {
      * <code>Pb_MEETFILE_PROPERTY_CACHEPATHNAME = 7;</code>
      */
     public static final int Pb_MEETFILE_PROPERTY_CACHEPATHNAME_VALUE = 7;
+    /**
+     * <pre>
+     *文件对应的权限 query(fixed32) 1表示有权限
+     * </pre>
+     *
+     * <code>Pb_MEETFILE_PROPERTY_FILEACCESS = 8;</code>
+     */
+    public static final int Pb_MEETFILE_PROPERTY_FILEACCESS_VALUE = 8;
 
 
     public final int getNumber() {
@@ -10143,6 +10244,7 @@ public final class InterfaceMacro {
         case 5: return Pb_MEETFILE_PROPERTY_AVAILABLE;
         case 6: return Pb_MEETFILE_PROPERTY_FILEMD5;
         case 7: return Pb_MEETFILE_PROPERTY_CACHEPATHNAME;
+        case 8: return Pb_MEETFILE_PROPERTY_FILEACCESS;
         default: return null;
       }
     }

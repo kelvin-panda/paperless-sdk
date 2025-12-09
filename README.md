@@ -9,8 +9,8 @@
         abi {
             isEnable = true // 启用 ABI 拆分
             reset() // 重置所有配置项到默认状态
-            include("armeabi-v7a") //,'arm64-v8a' // 指定要包含的 ABI
-            isUniversalApk = false //不生成包含所有 ABI 的单一 APK
+            include("armeabi-v7a","arm64-v8a") //,'arm64-v8a' // 指定要包含的 ABI
+            isUniversalApk = true //不生成包含所有 ABI 的单一 APK
         }
     }
 ```

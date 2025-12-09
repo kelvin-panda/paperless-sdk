@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="ItemButtonStyle">
+        <item name="android:background">@drawable/item_button_bg</item>
+        <item name="android:layout_width">60dp</item>
+        <item name="android:layout_height">30dp</item>
+        <item name="android:textColor">@color/item_button_color</item>
+    </style>
+</resources>

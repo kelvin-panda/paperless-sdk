@@ -1,0 +1,42 @@
+package com.paperless.player.controller.listener
+
+/**
+ *  @author : Administrator
+ *  created on 2025/9/18 17:59
+ */
+interface ControlCallback {
+    /**
+     * 进度拖动
+     */
+    fun seekTo(progress: Int)
+
+    /**
+     * 开始或恢复
+     */
+    fun start()
+
+    /**
+     * 暂停播放
+     */
+    fun pause()
+
+    /**
+     * 控制界面点击返回按钮
+     */
+    fun onBack()
+
+    /**
+     * 调整亮度
+     */
+    fun onBrightnessSlide(percent: Float)
+
+    /**
+     * 截图
+     */
+    fun capture()
+
+    /**
+     * 同屏
+     */
+    fun sameScreen()
+}

@@ -196,6 +196,7 @@
 #define TYPE_MEET_INTERFACE_SEATPLANMEM  78 //席位方案
 #define TYPE_MEET_INTERFACE_STREAMSAVE 79 //流录制
 #define TYPE_MEET_INTERFACE_DBSERACH 80 //数据库查询
+#define TYPE_MEET_INTERFACE_FILEACCESS 81 //文件权限
 
 //注：这里所有的字符串都约定为utf8编码
 #define DEFAULT_SMALLNAME_MAXLEN   64 //默认短名称长度
@@ -1742,9 +1743,12 @@ typedef struct
 }Type_DeviceControl, *pDeviceControl;
 
 //operval1 升降控制类别标志
-#define MEET_LIFT_FLAG_MACHICE 0x00000001 //选择升降机类别
-#define MEET_LIFT_FLAG_MIC     0x00000002 //选择升降话筒类别
-#define MEET_LIFT_FLAG_DESK	  0x00000004 //选择升降桌牌类别
+#define MEET_LIFT_FLAG_MACHICE			0x00000001 //选择升降机类别
+#define MEET_LIFT_FLAG_MIC				0x00000002 //选择升降话筒类别
+#define MEET_LIFT_FLAG_DESK				0x00000004 //选择升降桌牌类别
+#define MEET_LIFT_FLAG_PRESIDENTMIC		0x00000008 //选择升降主席话筒类别 MEET_LIFT_FLAG_MIC|MEET_LIFT_FLAG_PRESIDENTMIC
+#define MEET_LIFT_FLAG_PRESIDENT2MIC	0x00000010 //主席主席话筒全关类别 MEET_LIFT_FLAG_MIC|MEET_LIFT_FLAG_PRESIDENT2MIC
+#define MEET_LIFT_FLAG_MICMASK			0x0000001A //话筒掩码
 
 //TYPE_MEET_INTERFACE_DEVICEINFO
 //method: control
@@ -3249,7 +3253,7 @@ typedef struct
 #endif
 	int32u			uploaderid; //上传者ID
 	int8u			uploader_role; //上传者角色
-	int32u			mstime;//时间 毫秒
+	int32u			mstime;//时间 毫秒 为0表示不修改
 	int64u			size;//大小 字节
 	int32u			attrib;//文件属性
 	int32u			filepos;// 文件序号
@@ -3264,6 +3268,39 @@ typedef struct
 	int32u   dirid;
 	int32u	 num; //
 }Type_MeetDirFileDetailInfo, *pType_MeetDirFileDetailInfo;
+
+#define MEET_MODIFY_FILEACCESS_FLAG_CLEAR 0x00000001 //保存前先清空
+//会议文件权限
+//type: TYPE_MEET_INTERFACE_FILEACCESS
+//method: QUERY
+typedef struct
+{
+	Type_HeaderInfo hdr;
+
+	int32u   fileid;
+	int32u	 memnum; //
+	//int32u   memid[memnum];
+}Type_QueryFileAccessDetailInfo, *pType_QueryFileAccessDetailInfo;
+
+//type: TYPE_MEET_INTERFACE_FILEACCESS
+//method: mod
+typedef struct
+{
+	Type_HeaderInfo hdr;
+
+	int32u  flag;//MEET_MODIFY_FILEACCESS_FLAG_CLEAR
+	int32u  jsonlen;//
+
+	//char    json[];
+	/*
+	{
+	"data":[
+	{"fileid":"0x6b0000001","mem":[{"id":1},{"id":2}]},
+	{"fileid":"0x6b0000003","mem":[{"id":1},{"id":2}]},
+	]
+	}
+	*/
+}Type_ModFileAccessDetailInfo, *pType_ModFileAccessDetailInfo;
 
 //有新的录音文件媒体文件通知
 //type:TYPE_MEET_INTERFACE_MEETDIRECTORYFILE
@@ -3287,6 +3324,7 @@ typedef struct
 #define MEETFILE_PROPERTY_AVAILABLE 5 //文件是否可用 query 不存在返回ERROR_MEET_INTERFACE_NOFIND
 #define MEETFILE_PROPERTY_FILEMD5  6 //文件对应的md5值 query(text：32个字节)
 #define MEETFILE_PROPERTY_CACHEPATHNAME  7 //文件对应的缓存路径 query(text：字节)
+#define MEETFILE_PROPERTY_FILEACCESS  8 //文件对应的权限 query(fixed32) 1表示有权限
 
 //method: queryproperty
 typedef struct
@@ -3336,6 +3374,8 @@ typedef struct
 	char			name[DEFAULT_FILENAME_LENG]; //文件名称
 #endif
 	int32u			attrib;//文件属性 参见 owbash.h MEET_FILEATTRIB_BACKGROUND 定义
+	int32u			mstime;//时间 毫秒 为0表示不修改
+
 }Item_ModMeetDirFile, *pItem_ModMeetDirFile;
 
 //type:TYPE_MEET_INTERFACE_MEETDIRECTORYFILE
@@ -5379,6 +5419,7 @@ typedef struct
 
 #define MEET_FACEID_PROJECTIVE_CUSTOMTITLE1 117  //投影自定义标题
 #define MEET_FACEID_PROJECTIVE_AgendaInfo   118  //议题
+#define MEET_FACEID_PROJECTIVE_LOGO_SIZEGEO		119 //投影logo的位置-大小 text
 
 #define MEET_FACEID_MAXNUM   125  //最大值
 

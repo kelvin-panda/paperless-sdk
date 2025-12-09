@@ -2,6 +2,7 @@ package com.paperless.sdk
 
 import android.app.Application.WINDOW_SERVICE
 import android.content.Context
+import android.os.Build
 import android.util.DisplayMetrics
 import android.view.WindowManager
 import com.blankj.utilcode.util.LogUtils
@@ -43,8 +44,10 @@ object Paperless {
         System.loadLibrary("postproc-54")
         System.loadLibrary("swresample-2")
         System.loadLibrary("swscale-4")
-        System.loadLibrary("SDL2")
-        System.loadLibrary("main")
+        if (Build.CPU_ABI == "armeabi-v7a") {
+            System.loadLibrary("SDL2")
+            System.loadLibrary("main")
+        }
         System.loadLibrary("NetClient")
         System.loadLibrary("Codec")
         System.loadLibrary("ExecProc")
