@@ -96,6 +96,7 @@ class MainActivity : AppCompatActivity() {
             if (id_4.isChecked) temp.add(4)
             Jni.mediaPlay(temp, 654311464, localDeviceId)
         }
+        //播放媒体文件
         findViewById<Button>(R.id.btn_3).setOnClickListener {
             val str = edt_media_id.text.toString()
             val id = Integer.parseInt(str)

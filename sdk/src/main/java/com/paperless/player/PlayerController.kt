@@ -125,7 +125,7 @@ class PlayerController(
     }
 
     fun start() {
-        LogUtils.i(TAG, "start ${!isPlaying()} ")
+        LogUtils.i(TAG, "start ${isPlaying()} ")
         if (isPlaying()) {
             return
         }
@@ -205,8 +205,8 @@ class PlayerController(
 
         override fun run() {
             // 设置线程优先级
-            android.os.Process.setThreadPriority(threadPriority.get())
-            LogUtils.i(TAG, "DecodeThread started with priority: ${threadPriority.get()}")
+//            android.os.Process.setThreadPriority(threadPriority.get())
+            LogUtils.i(TAG, "DecodeThread started with priority: ${threadPriority.get()},${isPlaying()},${isInterrupted}")
 
             while (isPlaying() && !isInterrupted) {
                 try {
@@ -214,6 +214,7 @@ class PlayerController(
                     if (frameData == null) {
                         // 无帧可处理，短暂休眠
                         sleep(noFrameSleepTime)
+                        LogUtils.i(TAG, "无帧可处理，短暂休眠")
                         continue
                     }
 

@@ -313,7 +313,7 @@ object Call {
         if (Pb_Type.Pb_TYPE_MEET_INTERFACE_UPDATE_VALUE == type) {
             Bus.postSticky(type, method, data)
         } else {
-            Bus.post(type, method, data)
+            Bus.post(type = type, method = method, data = data)
         }
         return 0
     }

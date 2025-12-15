@@ -35,7 +35,7 @@ class PlayActivity : AppCompatActivity() {
 
         //<editor-fold desc="VideoGLSurfaceView方式">
 
-        //videoGLSurfaceView = findViewById(R.id.videoGLSurfaceView)
+//        videoGLSurfaceView = findViewById(R.id.videoGLSurfaceView)
 //        videoGLSurfaceView = VideoGLSurfaceView(this)
 //        setContentView(videoGLSurfaceView)
 //        playerController = PlayerController(0)
