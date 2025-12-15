@@ -248,7 +248,7 @@ object Call {
         return 0
     }
 
-    fun callback_directvideodecode1(
+    fun callback_directvideodecode(
         isKeyframe: Int,
         res: Int,
         codecid: Int,
@@ -362,7 +362,7 @@ object Call {
         return 0
     }
 
-    fun callback_directvideodecode(
+    fun callback_directvideodecode1(
         isKeyframe: Int,
         res: Int,
         codecid: Int,
