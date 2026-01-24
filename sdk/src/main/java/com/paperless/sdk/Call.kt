@@ -125,6 +125,17 @@ object Call {
         rowStride: Int
     ): Int
 
+    external fun FFmpegRGBToNV12(
+        mode: Int,
+        src: ByteBuffer,
+        dst: ByteBuffer,
+        srcW: Int,
+        srcH: Int,
+        dstW: Int,
+        dstH: Int,
+        rowStride: Int
+    ): Int
+
     external fun RGBToNV12EX(
         src: ByteBuffer,
         dst: ByteBuffer,
@@ -203,19 +214,28 @@ object Call {
      */
     external fun crashinit(mode: Int, name: String?)
 
-    var COLOR_FORMAT = 0
+    var COLOR_FORMAT = 1
     fun callback(type: Int, oper: Int): Int {
         when (oper) {
+            //pixel format
             1 -> {
                 return if (type == 2) 1 else 0
             }
-
+            //width
             2 -> {
-                return if (type == 2) SdkVars.record_width else SdkVars.camera_width
+                return if (type == 2) {
+                    LogUtils.e("SdkVars.record_width: " + SdkVars.record_width);
+                    SdkVars.record_width
+                } else {
+                    SdkVars.camera_width
+                }
             }
-
+            //height
             3 -> {
-                return if (type == 2) SdkVars.record_height else SdkVars.camera_height
+                return if (type == 2) {
+                    LogUtils.e("SdkVars.record_height: " + SdkVars.record_height);
+                    SdkVars.record_height
+                } else SdkVars.camera_height
             }
             // start capture
             4 -> {
@@ -248,53 +268,6 @@ object Call {
         return 0
     }
 
-    fun callback_directvideodecode(
-        isKeyframe: Int,
-        res: Int,
-        codecid: Int,
-        w: Int,
-        h: Int,
-        datalen: Int,
-        pts: Long,
-        codecdatalen: Int
-    ): Int {
-        m_dbuf.position(0)
-        m_dbuf.limit(datalen)
-        m_dexbuf.position(0)
-        m_dexbuf.limit(codecdatalen)
-        if (res == Protocol.resource_id_0) {
-            SdkVars.frame_count++
-        }
-        var decodeQueue = SdkVars.decodeMap[res]
-        if (decodeQueue == null) {
-            LogUtils.e("player_log", "新建 LinkedBlockingQueue<FrameData>")
-            val value = LinkedBlockingQueue<FrameData>(SdkVars.CAPACITY)
-            SdkVars.decodeMap.put(res, value)
-            decodeQueue = value
-        }
-        var frameData = SdkVars.frameDataPool.poll()
-        if (frameData == null) {
-            frameData = FrameData()
-            LogUtils.e("player_log", "新建对象 size=${decodeQueue.size}")
-        }
-        frameData.isKeyFrame = isKeyframe
-        frameData.res = res
-        frameData.codecid = codecid
-        frameData.w = w
-        frameData.h = h
-        frameData.pts = pts
-        frameData.setPacketBuffer(m_dbuf)
-        frameData.setCodecDataBuffer(m_dexbuf)
-        if (!decodeQueue.offer(frameData)) {
-            //添加失败就把最旧的数据删除后再添加
-            if (decodeQueue.poll() != null) {
-                val offer = decodeQueue.offer(frameData)
-                LogUtils.e("player_log", "添加失败就把最旧的数据删除后再添加，offer=$offer")
-            }
-        }
-        return 0
-    }
-
     fun callback_startdisplay(res: Int): Int {
         return 0
     }
@@ -316,6 +289,100 @@ object Call {
             Bus.post(type = type, method = method, data = data)
         }
         return 0
+    }
+
+    fun callback_directvideodecode(
+        isKeyframe: Int,
+        res: Int,
+        codecid: Int,
+        w: Int,
+        h: Int,
+        datalen: Int,
+        pts: Long,
+        codecdatalen: Int
+    ): Int {
+        if (SdkConfig.isDebugPlayer) {
+            debugPlayer(isKeyframe, res, codecid, w, h, datalen, pts, codecdatalen)
+        } else {
+            m_dbuf.position(0)
+            m_dbuf.limit(datalen)
+            m_dexbuf.position(0)
+            m_dexbuf.limit(codecdatalen)
+            if (res == Protocol.resource_id_0) {
+                SdkVars.frame_count++
+            }
+            var decodeQueue = SdkVars.decodeMap[res]
+            if (decodeQueue == null) {
+                LogUtils.e("player_log", "新建 LinkedBlockingQueue<FrameData>")
+                val value = LinkedBlockingQueue<FrameData>(SdkVars.CAPACITY)
+                SdkVars.decodeMap.put(res, value)
+                decodeQueue = value
+            }
+            var frameData = SdkVars.frameDataPool.poll()
+            if (frameData == null) {
+                frameData = FrameData()
+                LogUtils.e("player_log", "新建对象 size=${decodeQueue.size}")
+            }
+            frameData.isKeyFrame = isKeyframe
+            frameData.res = res
+            frameData.codecid = codecid
+            frameData.w = w
+            frameData.h = h
+            frameData.pts = pts
+            frameData.setPacketBuffer(m_dbuf)
+            frameData.setCodecDataBuffer(m_dexbuf)
+            if (!decodeQueue.offer(frameData)) {
+                //添加失败就把最旧的数据删除后再添加
+                if (decodeQueue.poll() != null) {
+                    val offer = decodeQueue.offer(frameData)
+                    LogUtils.e("player_log", "添加失败就把最旧的数据删除后再添加，offer=$offer")
+                }
+            }
+        }
+        return 0
+    }
+
+    fun debugPlayer(
+        isKeyframe: Int,
+        res: Int,
+        codecid: Int,
+        w: Int,
+        h: Int,
+        datalen: Int,
+        pts: Long,
+        codecdatalen: Int
+    ) {
+        m_dbuf.position(0)
+        m_dbuf.limit(datalen)
+        m_dexbuf.position(0)
+        m_dexbuf.limit(codecdatalen)
+        // 优化内存使用对象池
+        val frameData = FrameDataPool.obtain()
+        frameData.isKeyFrame = isKeyframe
+        frameData.res = res
+        frameData.codecid = codecid
+        frameData.w = w
+        frameData.h = h
+        frameData.pts = pts
+        frameData.setPacketBuffer(m_dbuf)
+        frameData.setCodecDataBuffer(m_dexbuf)
+        if (res == 0) {
+            receivedCount++
+            if (lastReceivedTime == 0L) {
+                lastReceivedTime = System.currentTimeMillis()
+            } else if (System.currentTimeMillis() - lastReceivedTime >= 1000L) {
+                lastReceivedTime = System.currentTimeMillis()
+                Bus.post(BusType.fps, obj = receivedCount)
+                receivedCount = 0
+            }
+        }
+        // 记录接收帧的数量
+        PerformanceMonitor.logFrameReceived(frameData.res)
+        // 放入到待处理解码的集合中
+        if (!DecodeQueue.offer(res, frameData)) {
+            // 队列已满，尝试移除最旧的非关键帧
+            DecodeQueue.remove(frameData)
+        }
     }
 
     private var lastReceivedTime = 0L
@@ -361,49 +428,4 @@ object Call {
         }
         return 0
     }
-
-    fun callback_directvideodecode1(
-        isKeyframe: Int,
-        res: Int,
-        codecid: Int,
-        w: Int,
-        h: Int,
-        datalen: Int,
-        pts: Long,
-        codecdatalen: Int
-    ): Int {
-        m_dbuf.position(0)
-        m_dbuf.limit(datalen)
-        m_dexbuf.position(0)
-        m_dexbuf.limit(codecdatalen)
-        // 优化内存使用对象池
-        val frameData = FrameDataPool.obtain()
-        frameData.isKeyFrame = isKeyframe
-        frameData.res = res
-        frameData.codecid = codecid
-        frameData.w = w
-        frameData.h = h
-        frameData.pts = pts
-        frameData.setPacketBuffer(m_dbuf)
-        frameData.setCodecDataBuffer(m_dexbuf)
-        if (res == 0) {
-            receivedCount++
-            if (lastReceivedTime == 0L) {
-                lastReceivedTime = System.currentTimeMillis()
-            } else if (System.currentTimeMillis() - lastReceivedTime >= 1000L) {
-                lastReceivedTime = System.currentTimeMillis()
-                Bus.post(BusType.fps, obj = receivedCount)
-                receivedCount = 0
-            }
-        }
-        // 记录接收帧的数量
-        PerformanceMonitor.logFrameReceived(frameData.res)
-        // 放入到待处理解码的集合中
-        if (!DecodeQueue.offer(res, frameData)) {
-            // 队列已满，尝试移除最旧的非关键帧
-            DecodeQueue.remove(frameData)
-        }
-        return 0
-    }
-
 }

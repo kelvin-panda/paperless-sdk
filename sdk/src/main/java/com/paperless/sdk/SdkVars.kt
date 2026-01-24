@@ -67,7 +67,7 @@ class SdkVars {
         var record_width: Int = 0
         var record_height: Int = 0
         var dpi: Int = 120
-        var bitrate: Int = 500 * 1000
+        var bitrate: Int = 5000 * 1000
         var frameRate: Int = 25// bits/sec
         var iframeInterval: Int = 2
         //</editor-fold>

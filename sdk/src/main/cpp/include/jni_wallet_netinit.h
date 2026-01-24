@@ -81,6 +81,7 @@ int jni_AndroidDevice_ARGBToNV12(JNIEnv *env, jobject thiz, jobject dbuf, jobjec
 //�ɹ�����outdbuf�����ݴ�С��ʧ�ܷ���0
 //�߼�argb-->I420-->I420SCALE-->I4202NV12
 int jni_AndroidDevice_RGBToNV12(JNIEnv *env, jobject thiz, int rgbmode, jobject dbuf, jobject outdbuf, jint srcwidth, jint srcheight, jint dstwidth, jint dstheight,jint rowStride);
+int jni_AndroidDevice_FFmpegRGBToNV12(JNIEnv *env, jobject thiz, int rgbmode, jobject dbuf, jobject outdbuf, jint srcwidth, jint srcheight, jint dstwidth, jint dstheight,jint rowStride);
 //�߼�argb-->argbSCALE-->argb2NV12
 int jni_AndroidDevice_RGBToNV12EX(JNIEnv *env, jobject thiz, jobject dbuf, jobject outdbuf, jint srcwidth, jint srcheight, jint dstwidth, jint dstheight);
 jbyteArray jni_AndroidDevice_RGBToNV12BA(JNIEnv *env, jobject thiz, int rgbmode, jbyteArray pdata, jint srcwidth, jint srcheight, jint dstwidth, jint dstheight);

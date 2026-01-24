@@ -4,11 +4,13 @@ import android.app.Application.WINDOW_SERVICE
 import android.content.Context
 import android.os.Build
 import android.util.DisplayMetrics
+import android.util.Size
 import android.view.WindowManager
 import com.blankj.utilcode.util.LogUtils
 import com.blankj.utilcode.util.PathUtils
 import com.blankj.utilcode.util.ScreenUtils
 import com.paperless.data.FrameData
+import com.paperless.util.CodecUtil
 import java.io.File
 import java.util.concurrent.LinkedBlockingQueue
 
@@ -22,6 +24,7 @@ object Paperless {
         loadLibrary()
         initDefaultDecodeMap()
         initScreenSize(context)
+        initScreenRecordParameter()
         initDirPath(context)
     }
 
@@ -76,6 +79,13 @@ object Paperless {
         SdkVars.screen_height = ScreenUtils.getScreenHeight()
         SdkVars.dpi = metric.densityDpi
         LogUtils.e("屏幕宽高：${SdkVars.screen_width} x ${SdkVars.screen_height},dpi:${SdkVars.dpi}")
+    }
+
+    private fun initScreenRecordParameter() {
+        val encodeSize: Size = CodecUtil.getEncodeSize(SdkVars.screen_width, SdkVars.screen_height, 1)
+        SdkVars.record_width = encodeSize.width
+        SdkVars.record_height = encodeSize.height
+        LogUtils.e("屏幕采集宽高：${SdkVars.record_width} x ${SdkVars.record_height}")
     }
 
     private fun initDirPath(context: Context) {

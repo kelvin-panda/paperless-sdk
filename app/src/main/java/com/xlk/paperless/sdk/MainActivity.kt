@@ -1,22 +1,31 @@
 package com.xlk.paperless.sdk
 
 import android.content.Intent
+import android.media.projection.MediaProjectionManager
+import android.os.Build
 import android.os.Bundle
 import android.widget.Button
 import android.widget.CheckBox
 import android.widget.EditText
+import android.widget.TextView
 import androidx.activity.OnBackPressedCallback
+import androidx.activity.result.ActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import com.blankj.utilcode.util.AppUtils
 import com.blankj.utilcode.util.DeviceUtils
 import com.blankj.utilcode.util.FileUtils
 import com.blankj.utilcode.util.LogUtils
 import com.blankj.utilcode.util.ResourceUtils
 import com.blankj.utilcode.util.ToastUtils
+import com.hjq.permissions.XXPermissions
+import com.hjq.permissions.permission.PermissionLists
 import com.mogujie.tt.protobuf.InterfaceBase
 import com.mogujie.tt.protobuf.InterfaceDevice
 import com.mogujie.tt.protobuf.InterfaceMacro
+import com.mogujie.tt.protobuf.InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_DEVICEFACESHOW_VALUE
 import com.mogujie.tt.protobuf.InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_DEVICEINFO_VALUE
 import com.mogujie.tt.protobuf.InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_DEVICEVALIDATE_VALUE
 import com.mogujie.tt.protobuf.InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_MEDIAPLAY_VALUE
@@ -24,6 +33,7 @@ import com.mogujie.tt.protobuf.InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_REA
 import com.mogujie.tt.protobuf.InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_STREAMPLAY_VALUE
 import com.mogujie.tt.protobuf.InterfacePlaymedia
 import com.mogujie.tt.protobuf.InterfaceStream
+import com.paperless.bus.BusType
 import com.paperless.bus.EventBusMessage
 import com.paperless.player.DecodeQueue
 import com.paperless.sdk.Call
@@ -32,11 +42,13 @@ import com.paperless.sdk.MEDIA_FILE_TYPE_AUDIO
 import com.paperless.sdk.MEDIA_FILE_TYPE_RECORD
 import com.paperless.sdk.MEDIA_FILE_TYPE_VIDEO
 import com.paperless.sdk.Protocol
+import com.paperless.sdk.Protocol.Companion.resource_id_0
 import com.paperless.sdk.ProtocolTool
 import com.paperless.sdk.SUB_TYPE_BITMASK
 import com.paperless.sdk.SdkVars
 import com.paperless.sdk.SdkVars.Companion.localDeviceId
 import com.paperless.util.IniUtil
+import com.xlk.paperless.sdk.service.ForegroundService
 import org.greenrobot.eventbus.EventBus
 import org.greenrobot.eventbus.Subscribe
 import org.greenrobot.eventbus.ThreadMode
@@ -44,11 +56,38 @@ import java.io.File
 import kotlin.system.exitProcess
 
 class MainActivity : AppCompatActivity() {
-
+    lateinit var edtIp: EditText
+    lateinit var edtPort: EditText
+    lateinit var tvOnline: TextView
+    lateinit var tvDevId: TextView
+    lateinit var tvDevName: TextView
+    lateinit var tvMemberName: TextView
     private val onBackPressedCallback = object : OnBackPressedCallback(true) {
         override fun handleOnBackPressed() {
             finishAffinity()
             exitProcess(0)
+        }
+    }
+
+    private val applyScreenRecorder = registerForActivityResult<Intent, ActivityResult>(
+        ActivityResultContracts.StartActivityForResult()
+    ) { result: ActivityResult? ->
+        if (result != null) {
+            if (result.resultCode == RESULT_OK) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    startForegroundService(Intent(this@MainActivity, ForegroundService::class.java)
+                        .apply {
+                            putExtra("intent_extra_code", result.resultCode)
+                            putExtra("intent_extra_data", result.data)
+                        })
+                } else {
+                    startService(Intent(this@MainActivity, ForegroundService::class.java)
+                        .apply {
+                            putExtra("intent_extra_code", result.resultCode)
+                            putExtra("intent_extra_data", result.data)
+                        })
+                }
+            }
         }
     }
 
@@ -61,6 +100,19 @@ class MainActivity : AppCompatActivity() {
             insets
         }
         EventBus.getDefault().register(this)
+        applyPermissions()
+        edtIp = findViewById<EditText>(R.id.edtIp)
+        edtPort = findViewById<EditText>(R.id.edtPort)
+        findViewById<Button>(R.id.btnModify).setOnClickListener {
+            IniUtil.loadFile(SdkVars.root_dir + "client.ini")
+            IniUtil.ip = edtIp.text.toString()
+            IniUtil.port = edtPort.text.toString()
+            AppUtils.relaunchApp(true)
+        }
+        tvOnline = findViewById<TextView>(R.id.tvOnline)
+        tvDevId = findViewById<TextView>(R.id.tvDevId)
+        tvDevName = findViewById<TextView>(R.id.tvDevName)
+        tvMemberName = findViewById<TextView>(R.id.tvMemberName)
         val id_0 = findViewById<CheckBox>(R.id.id_0)
         val id_1 = findViewById<CheckBox>(R.id.id_1)
         val id_2 = findViewById<CheckBox>(R.id.id_2)
@@ -68,36 +120,20 @@ class MainActivity : AppCompatActivity() {
         val id_4 = findViewById<CheckBox>(R.id.id_4)
         val edt_device_id = findViewById<EditText>(R.id.edt_device_id)
         val edt_media_id = findViewById<EditText>(R.id.edt_media_id)
-        findViewById<Button>(R.id.btn1).setOnClickListener {
+        findViewById<Button>(R.id.btnPlayPage).setOnClickListener {
             startActivity(Intent(this, ControlViewActivity::class.java))
         }
+        val edt_page_code = findViewById<EditText>(R.id.edt_page_code)
         findViewById<Button>(R.id.btn_page).setOnClickListener {
-            //切换到会议界面
-            Jni.modPageStatus(InterfaceMacro.Pb_MeetFaceStatus.Pb_MemState_MemFace_VALUE)
+            //InterfaceMacro.Pb_MeetFaceStatus.Pb_MemState_MemFace_VALUE
+            val pageCode = Integer.parseInt(edt_page_code.text.toString())
+            Jni.modPageStatus(pageCode)
         }
         findViewById<Button>(R.id.btn_split).setOnClickListener {
             startActivity(Intent(this, SplitPlayActivity::class.java))
         }
-        findViewById<Button>(R.id.btn_1).setOnClickListener {
-            val temp = mutableListOf<Int>()
-            if (id_0.isChecked) temp.add(0)
-            if (id_1.isChecked) temp.add(1)
-            if (id_2.isChecked) temp.add(2)
-            if (id_3.isChecked) temp.add(3)
-            if (id_4.isChecked) temp.add(4)
-            Jni.mediaPlay(temp, 654311472, localDeviceId)
-        }
-        findViewById<Button>(R.id.btn_2).setOnClickListener {
-            val temp = mutableListOf<Int>()
-            if (id_0.isChecked) temp.add(0)
-            if (id_1.isChecked) temp.add(1)
-            if (id_2.isChecked) temp.add(2)
-            if (id_3.isChecked) temp.add(3)
-            if (id_4.isChecked) temp.add(4)
-            Jni.mediaPlay(temp, 654311464, localDeviceId)
-        }
         //播放媒体文件
-        findViewById<Button>(R.id.btn_3).setOnClickListener {
+        findViewById<Button>(R.id.btn_play_media).setOnClickListener {
             val str = edt_media_id.text.toString()
             val id = Integer.parseInt(str)
             val temp = mutableListOf<Int>()
@@ -125,6 +161,46 @@ class MainActivity : AppCompatActivity() {
             InterfaceMacro.Pb_ProgramType.Pb_MEET_PROGRAM_TYPE_MEETCLIENT_VALUE,
             SdkVars.root_dir + "client.ini", DeviceUtils.getUniqueDeviceId(), 4, 0
         )
+        val edt_dst_id = findViewById<EditText>(R.id.edt_dst_id)
+        findViewById<Button>(R.id.btn_start_record).setOnClickListener {
+            val dstDevId = Integer.parseInt(edt_dst_id.text.toString())
+            Jni.streamPlay(localDeviceId, 2, resource_id_0, dstDevId)
+        }
+        findViewById<Button>(R.id.btn_stop_record).setOnClickListener {
+            val dstDevId = Integer.parseInt(edt_dst_id.text.toString())
+            Jni.stopResource(0, dstDevId, resource_id_0, 0)
+        }
+    }
+
+    private fun afterSysInitial() {
+        Call.initAndCapture(0, Protocol.channel_screen)
+        Call.initAndCapture(0, Protocol.channel_camera)
+        Jni.initialResource(SdkVars.screen_width, SdkVars.screen_height, 0)
+        Jni.initialResource(SdkVars.screen_width, SdkVars.screen_height, 1)
+        Jni.initialResource(SdkVars.screen_width, SdkVars.screen_height, 2)
+        Jni.initialResource(SdkVars.screen_width, SdkVars.screen_height, 3)
+        Jni.initialResource(SdkVars.screen_width, SdkVars.screen_height, 4)
+        //修改本机界面状态
+        Jni.modPageStatus(InterfaceMacro.Pb_MeetFaceStatus.Pb_MemState_MainFace_VALUE)
+        queryDeviceMeetInfo()
+    }
+
+    private fun queryDeviceMeetInfo() {
+        var memberName = ""
+        Jni.queryDeviceMeetInfo()?.let {
+            memberName = it.membername.toStringUtf8()
+        }
+        tvMemberName.text = memberName
+    }
+
+    private fun applyPermissions() {
+        XXPermissions.with(this)
+            .permission(PermissionLists.getReadPhoneStatePermission())
+            .permission(PermissionLists.getPostNotificationsPermission())
+            .permission(PermissionLists.getRecordAudioPermission())
+            .request { grantedList, deniedList ->
+
+            }
     }
 
     private fun initConfigFile() {
@@ -181,6 +257,8 @@ class MainActivity : AppCompatActivity() {
             IniUtil.configDir = SdkVars.root_dir
             IniUtil.mediaDir = SdkVars.root_dir + "mediadir" + File.separator
             IniUtil.store()
+            edtIp.setText(ip)
+            edtPort.setText(port)
         }
         FileUtils.delete(SdkVars.root_dir + "client.dev")
         ResourceUtils.copyFileFromAssets("client.dev", SdkVars.root_dir + "client.dev")
@@ -213,6 +291,7 @@ class MainActivity : AppCompatActivity() {
                             1 -> {
                                 LogUtils.e("设备ID：$code")
                                 localDeviceId = code
+                                tvDevId.text = "$code(0x${Integer.toHexString(code)})"
                             }
 
                             2 -> {
@@ -256,19 +335,21 @@ class MainActivity : AppCompatActivity() {
                 if (msg.method == InterfaceMacro.Pb_Method.Pb_METHOD_MEET_INTERFACE_NOTIFY_VALUE) {
                     val info = InterfaceBase.pbui_Ready.parseFrom(msg.data)
                     LogUtils.e("平台初始化结果 连接上的区域服务器ID=${info.areaid}")
-                    Call.initAndCapture(0, Protocol.channel_screen)
-                    Call.initAndCapture(0, Protocol.channel_camera)
-                    Jni.initialResource(SdkVars.screen_width, SdkVars.screen_height, 0)
-                    Jni.initialResource(SdkVars.screen_width, SdkVars.screen_height, 1)
-                    Jni.initialResource(SdkVars.screen_width, SdkVars.screen_height, 2)
-                    Jni.initialResource(SdkVars.screen_width, SdkVars.screen_height, 3)
-                    Jni.initialResource(SdkVars.screen_width, SdkVars.screen_height, 4)
+                    afterSysInitial()
                 }
             }
             // 设备寄存器
             Pb_TYPE_MEET_INTERFACE_DEVICEINFO_VALUE -> {
                 val info = InterfaceDevice.pbui_Type_MeetDeviceBaseInfo.parseFrom(msg.data)
                 LogUtils.e("设备寄存器 deviceid:${info.deviceid},attribid:${info.attribid},localDeviceId:$localDeviceId")
+                //寄存器id 0:net status  50:res status  63:base info
+                if (info.deviceid == localDeviceId) {
+                    if (info.attribid == 0) {
+                        updateOnLineStatus()
+                    } else if (info.attribid == 63) {
+                        updateDeviceName()
+                    }
+                }
             }
             // 媒体播放
             Pb_TYPE_MEET_INTERFACE_MEDIAPLAY_VALUE -> {
@@ -310,7 +391,28 @@ class MainActivity : AppCompatActivity() {
                     }
                 }
             }
+            //设备会议信息
+            Pb_TYPE_MEET_INTERFACE_DEVICEFACESHOW_VALUE->{
+                queryDeviceMeetInfo()
+            }
+
+            BusType.capture_start -> {
+                val mediaProjectionManager = getSystemService(MEDIA_PROJECTION_SERVICE) as MediaProjectionManager
+                applyScreenRecorder.launch(mediaProjectionManager.createScreenCaptureIntent())
+            }
+
+            BusType.capture_stop -> {
+                stopService(Intent(this, ForegroundService::class.java))
+            }
         }
+    }
+
+    private fun updateDeviceName() {
+        tvDevName.text = Jni.queryDeviceNameById(localDeviceId)
+    }
+
+    private fun updateOnLineStatus() {
+        tvOnline.text = if (Jni.isOnline(localDeviceId)) "在线" else "离线"
     }
 
     override fun onStart() {
@@ -327,9 +429,5 @@ class MainActivity : AppCompatActivity() {
         if (EventBus.getDefault().isRegistered(this)) {
             EventBus.getDefault().unregister(this)
         }
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
     }
 }

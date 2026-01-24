@@ -1130,4 +1130,95 @@ Java_com_paperless_sdk_Call_RGBToNV12EX(JNIEnv *env, jobject thiz, jobject dbuf,
 
     return barray;
 }
+
+
+int SwitchRGBPixfmt(int rgbmode)
+{
+    int infmt = -1;
+    switch (rgbmode)
+    {
+        case 0://(abgr in memory)
+            infmt = AD_PIX_FMT_ABGR;
+            break;
+        case 2://(argb in memory)
+            infmt = AD_PIX_FMT_ARGB;
+            break;
+        case 3://(rgba in memory)
+            infmt = AD_PIX_FMT_RGBA;
+            break;
+        case 4://(bgr in memory)
+            infmt = AD_PIX_FMT_BGR24;
+            break;
+        case 5://(rgb in memory)
+            infmt = AD_PIX_FMT_RGB24;
+            break;
+        default:
+            infmt = -1;
+            break;
+    }
+    return infmt;
+}
+
+extern "C" JNIEXPORT int JNICALL
+Java_com_paperless_sdk_Call_FFmpegRGBToNV12(JNIEnv *env, jobject thiz,int rgbmode, jobject dbuf, jobject outdbuf,
+                                                              jint srcwidth, jint srcheight, jint dstwidth, jint dstheight, jint rowslide)
+{
+    meetcore_crashtrace_reset();
+    meetcore_crashtrace_smartpushex("%s", __FUNCTION__);
+
+    void* ppixconvert = NULL;
+    int ret = 0;
+    int8u *jBuf = (int8u *)(env->GetDirectBufferAddress(dbuf));
+    int8u *jyuvBuf = (int8u *)(env->GetDirectBufferAddress(outdbuf));
+    do
+    {
+        if (dstheight <= 0 || dstwidth <= 0)
+        {
+            dstwidth = srcwidth;
+            dstheight = srcheight;
+        }
+        if (jBuf == NULL || jyuvBuf == NULL)
+        {
+            LOGI("-%s line:%d param is empty!\n", __FUNCTION__, __LINE__);
+            break;
+        }
+
+        if (rowslide <= 0)
+            rowslide = srcwidth * 4;
+
+        int infmt = SwitchRGBPixfmt(rgbmode), outfmt = AD_PIX_FMT_NV12;
+        if (infmt == -1)
+        {
+            LOGI("-%s line:%d rgbmode:%d not support!\n", __FUNCTION__, __LINE__, rgbmode);
+            break;
+        }
+
+        ppixconvert = AndroidDevice_video_convertinit(dstwidth, dstheight, outfmt, srcwidth, srcheight,infmt);
+        if (ppixconvert == NULL)
+        {
+            LOGI("-%s line:%d Init ffmpeg convert failed,rgbmode:%d!\n", __FUNCTION__, __LINE__, rgbmode);
+            break;
+        }
+
+        int8u*  inbuf[AD_MAX_PIX_LINESIZE] = { 0 };
+        int*     ptmpoutlinesize = NULL;
+        int8u**  ptmpout = NULL;
+        int      inlinesize[AD_MAX_PIX_LINESIZE] = { 0 };
+
+        inbuf[0] = jBuf;
+        inlinesize[0] = rowslide;
+        if (0 != AndroidDevice_video_convertex(ppixconvert, jyuvBuf, inbuf, inlinesize))
+        {
+            LOGI("-%s line:%d do ffmpeg convert failed,rgbmode:%d, rowslide:%d[%d,%d]-->[%d,%d]!\n", __FUNCTION__, __LINE__, rgbmode, rowslide, srcwidth, srcheight, dstwidth, dstheight);
+            break;
+        }
+
+        ret = dstwidth * dstheight * 3 / 2;
+    } while (0);
+
+    if (ppixconvert)
+        AndroidDevice_video_convertfree(ppixconvert);
+    return ret;
+}
+
 //</editor-fold>

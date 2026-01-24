@@ -50,10 +50,6 @@ if (IS_ARMEABI_V7A)
     set_target_properties(z PROPERTIES IMPORTED_LOCATION ${CMAKE_SOURCE_DIR}/../nativeLibs/${ANDROID_ABI}/libz.a)
 else ()
     message("========= CMakeLists set_target_properties:${ANDROID_ABI} libGetLinuxId.a and libParseClient.a =========")
-    add_library(GetLinuxId STATIC IMPORTED)
-    set_target_properties(GetLinuxId PROPERTIES IMPORTED_LOCATION ${CMAKE_SOURCE_DIR}/../nativeLibs/${ANDROID_ABI}/libGetLinuxId.a)
-    add_library(ParseClient STATIC IMPORTED)
-    set_target_properties(ParseClient PROPERTIES IMPORTED_LOCATION ${CMAKE_SOURCE_DIR}/../nativeLibs/${ANDROID_ABI}/libParseClient.a)
 endif ()
 
 # 查找系统上的log库，并将结果保存在变量log-lib中
@@ -86,7 +82,4 @@ if (IS_ARMEABI_V7A)
     # 链接SDL2、main动态库和z静态库到native-lib
     target_link_libraries(native-lib SDL2 main z)
 else ()
-    message("========= CMakeLists sdk target_link_libraries:libGetLinuxId.a libParseClient.a =========")
-    # 链接GetLinuxId和ParseClient静态库到native-lib
-    target_link_libraries(native-lib GetLinuxId ParseClient)
 endif ()
