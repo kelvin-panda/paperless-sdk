@@ -125,16 +125,16 @@ object Call {
         rowStride: Int
     ): Int
 
-    external fun FFmpegRGBToNV12(
-        mode: Int,
-        src: ByteBuffer,
-        dst: ByteBuffer,
-        srcW: Int,
-        srcH: Int,
-        dstW: Int,
-        dstH: Int,
-        rowStride: Int
-    ): Int
+//    external fun FFmpegRGBToNV12(
+//        mode: Int,
+//        src: ByteBuffer,
+//        dst: ByteBuffer,
+//        srcW: Int,
+//        srcH: Int,
+//        dstW: Int,
+//        dstH: Int,
+//        rowStride: Int
+//    ): Int
 
     external fun RGBToNV12EX(
         src: ByteBuffer,
