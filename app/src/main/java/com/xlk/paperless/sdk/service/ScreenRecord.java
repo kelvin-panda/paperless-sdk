@@ -113,12 +113,24 @@ public class ScreenRecord {
     }
 
     private final ImageReader.OnImageAvailableListener listener = new ImageReader.OnImageAvailableListener() {
+        long lasttime = System.currentTimeMillis();
+        long firstMs = 0;
+        final long intervalMs = 1000 / SdkVars.Companion.getFrameRate();
+
         @Override
         public void onImageAvailable(ImageReader reader) {
             Image image = null;
             try {
                 image = reader.acquireLatestImage();
                 if (image != null) {
+                    if (firstMs == 0) {
+                        firstMs = System.currentTimeMillis();
+                    }
+                    if (System.currentTimeMillis() - firstMs >= 3000 && System.currentTimeMillis() - lasttime <= intervalMs) {
+                        image.close();
+                        return;
+                    }
+                    lasttime = System.currentTimeMillis();
                     // 处理采集到的图像
                     processImage(image);
                 }
@@ -158,7 +170,6 @@ public class ScreenRecord {
         //</editor-fold>
         this.rowStride = rowStride;
 
-        Log.d(TAG, "ScreenRecord.processImage format:" + image.getFormat() + ",buffer.capacity():" + buffer.capacity());
         if (a == null) {
             a = new byte[buffer.capacity()];
             LogUtils.e("ScreenRecord.processImage: 新建对象a");
@@ -216,7 +227,7 @@ public class ScreenRecord {
         LogUtils.e(TAG, "pushFrame: start");
         new Thread(() -> {
             try {
-                LogUtils.e(TAG, "run: 开始推送数据");
+                LogUtils.e(TAG, "开始推送数据");
                 byte[] lastFramePacket = null;
                 long frame_added_interval_setting = 1000 / SdkVars.Companion.getFrameRate();
                 long lastTime = 0;
@@ -227,12 +238,17 @@ public class ScreenRecord {
                 while (mIsRunning) {
                     byte[] frame = decodeQueue.poll();
                     //<editor-fold desc="丢帧与补帧">
-                    if (frame == null && System.currentTimeMillis() - lastTime > frame_added_interval_setting) {
+                    if (frame == null && System.currentTimeMillis() - lastTime > frame_added_interval_setting * 0.75) {
                         //LogUtils.e("pushFrame: 补帧");
                         frame = lastFramePacket;
                     } else if (frame != null && System.currentTimeMillis() - lastTime < frame_added_interval_setting) {
                         lastFramePacket = frame;
                         //LogUtils.e("pushFrame: 丢帧");
+                        try {
+                            framePoll.release(frame);
+                        } catch (IllegalStateException e) {
+
+                        }
                         frame = null;
                     }
                     //</editor-fold>
@@ -254,12 +270,7 @@ public class ScreenRecord {
 
                         }
 
-//                    ByteBuffer byteBuffer = RGBtoNV12Converter.convertRGB24ToNV12(srcBuff, screen_width, screen_height, width, height);
-//                    dstLength = byteBuffer.capacity();
-                        long l = System.currentTimeMillis();
-//                        dstLength = Call.INSTANCE.FFmpegRGBToNV12(3, srcBuff, dstBuff, screen_width, screen_height, SdkVars.Companion.getRecord_width(), SdkVars.Companion.getRecord_height(), rowStride);
                         dstLength = Call.INSTANCE.RGBToNV12(3, srcBuff, dstBuff, screen_width, screen_height, SdkVars.Companion.getRecord_width(), SdkVars.Companion.getRecord_height(), rowStride);
-                        LogUtils.e(TAG, "pushFrame:耗时= " + (System.currentTimeMillis() - l) + "," + dstBuff);
                         dstBuff.position(0);
                         dstBuff.limit(dstLength);
 
@@ -267,7 +278,6 @@ public class ScreenRecord {
                         if (inputBufferIndex >= 0) {
                             ByteBuffer inputBuffer = mMediaCodec.getInputBuffer(inputBufferIndex);
                             inputBuffer.clear();
-                            LogUtils.e(TAG, "pushFrame: " + inputBuffer);
                             inputBuffer.put(dstBuff);
                             mMediaCodec.queueInputBuffer(inputBufferIndex, 0, dstBuff.limit(), System.nanoTime() / 1000L, 0);
                         }

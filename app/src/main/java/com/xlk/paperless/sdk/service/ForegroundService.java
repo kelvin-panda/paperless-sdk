@@ -8,9 +8,18 @@ import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ServiceInfo;
+import android.graphics.Color;
+import android.graphics.PixelFormat;
 import android.os.Build;
+import android.os.Handler;
 import android.os.IBinder;
+import android.os.Looper;
+import android.util.DisplayMetrics;
 import android.util.Log;
+import android.view.Gravity;
+import android.view.WindowManager;
+import android.widget.FrameLayout;
+import android.widget.TextView;
 
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
@@ -18,15 +27,20 @@ import androidx.core.app.NotificationCompat;
 
 import com.blankj.utilcode.util.LogUtils;
 import com.xlk.paperless.sdk.R;
+import com.xlk.paperless.sdk.helper.AppNetworkMonitor;
 
 /**
  * @author : Administrator
  * created on 2025/12/19 17:17
  */
-public class ForegroundService extends Service {
+public class ForegroundService extends Service implements AppNetworkMonitor.NetworkInfoListener {
     private static final String TAG = "ForegroundService";
     private NotificationManager mManager;
     private ScreenRecord record;
+    private TextView mTextView;
+    private AppNetworkMonitor networkMonitor;
+    private WindowManager windowManager;
+    private Handler uiHandler = new Handler(Looper.getMainLooper());
 
     @Nullable
     @Override
@@ -45,6 +59,15 @@ public class ForegroundService extends Service {
             mManager.cancelAll();
             mManager = null;
         }
+        if (windowManager != null) {
+            windowManager.removeView(mTextView);
+            windowManager = null;
+        }
+        if (networkMonitor != null) {
+            networkMonitor.stopMonitoring();
+            networkMonitor = null;
+        }
+        uiHandler.removeCallbacksAndMessages(null);
         super.onDestroy();
     }
 
@@ -68,7 +91,42 @@ public class ForegroundService extends Service {
     @Override
     public void onCreate() {
         Log.d(TAG, "ForegroundService.onCreate: ");
+        //networkSpeedWindow();
         super.onCreate();
+    }
+
+    private void networkSpeedWindow() {
+        windowManager = (WindowManager) getSystemService(WINDOW_SERVICE);
+        windowManager.getDefaultDisplay().getWidth();
+        windowManager.getDefaultDisplay().getHeight();
+        DisplayMetrics metrics = new DisplayMetrics();
+        windowManager.getDefaultDisplay().getMetrics(metrics);
+        WindowManager.LayoutParams params = new WindowManager.LayoutParams();
+        params.flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
+                | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
+                // 加上这句话悬浮窗不拦截事件
+                | WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE;
+        if (Build.VERSION.SDK_INT >= O) {//8.0新特性
+            params.type = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
+        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            params.type = WindowManager.LayoutParams.TYPE_PHONE;//总是出现在应用程序窗口之上
+        } else {
+            params.type = WindowManager.LayoutParams.TYPE_SYSTEM_ALERT;//总是出现在应用程序窗口之上
+        }
+        params.format = PixelFormat.RGBA_8888;
+        params.gravity = Gravity.START | Gravity.TOP;
+        params.width = FrameLayout.LayoutParams.WRAP_CONTENT;
+        params.height = FrameLayout.LayoutParams.WRAP_CONTENT;
+        params.x = 100;
+        params.y = metrics.heightPixels - 200;
+
+        mTextView = new TextView(this);
+        mTextView.setTextColor(Color.argb(200, 255, 255, 255));
+        mTextView.setBackgroundColor(Color.argb(80, 0, 0, 0));
+        windowManager.addView(mTextView, params);
+
+        networkMonitor = new AppNetworkMonitor(this);
+        networkMonitor.startMonitoring(this);
     }
 
     @RequiresApi(api = O)
@@ -108,5 +166,21 @@ public class ForegroundService extends Service {
             mManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         }
         return mManager;
+    }
+
+    @Override
+    public void onNetworkInfoUpdated(long totalBytes, long downloadSpeed, long uploadSpeed) {
+        uiHandler.post(() -> {
+            String msg = "总流量: " + AppNetworkMonitor.formatTraffic(totalBytes)
+                    + "\n" + "下载: " + AppNetworkMonitor.formatSpeed(downloadSpeed)
+                    + "\n" + "上传: " + AppNetworkMonitor.formatSpeed(uploadSpeed);
+            LogUtils.e(TAG, "onNetworkInfoUpdated: " + msg);
+            mTextView.setText(msg);
+        });
+    }
+
+    @Override
+    public void onSessionTrafficUpdated(long sessionBytes) {
+        LogUtils.e(TAG, "onSessionTrafficUpdated 本屏流量: " + AppNetworkMonitor.formatTraffic(sessionBytes));
     }
 }

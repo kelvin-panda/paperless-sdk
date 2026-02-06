@@ -9,9 +9,13 @@
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
 
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" /> <!-- 悬浮窗 -->
     <!-- 如果使用网络推送 -->
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <!-- 流量统计权限（Android 5.0+需要） -->
+    <uses-permission android:name="android.permission.PACKAGE_USAGE_STATS"
+        tools:ignore="ProtectedPermissions" />
 
     <application
         android:name=".App"
@@ -48,6 +52,21 @@
 
         <service
             android:name="com.xlk.paperless.sdk.service.ForegroundService"
+            android:enabled="true"
+            android:exported="true"
+            android:foregroundServiceType="mediaProjection"/>
+        <service
+            android:name="com.xlk.paperless.sdk.screen.ScreenRecordService"
+            android:enabled="true"
+            android:exported="true"
+            android:foregroundServiceType="mediaProjection"/>
+        <service
+            android:name="com.xlk.paperless.sdk.service.ScreenShareService"
+            android:enabled="true"
+            android:exported="true"
+            android:foregroundServiceType="mediaProjection"/>
+        <service
+            android:name="com.xlk.paperless.sdk.screen.sync.SyncScreenRecord"
             android:enabled="true"
             android:exported="true"
             android:foregroundServiceType="mediaProjection"/>

@@ -1,12 +1,25 @@
 package com.xlk.paperless.sdk
 
+import android.app.AppOpsManager
+import android.content.ComponentName
+import android.content.Context
 import android.content.Intent
+import android.content.ServiceConnection
+import android.graphics.Color
+import android.graphics.PixelFormat
 import android.media.projection.MediaProjectionManager
 import android.os.Build
+import android.os.Build.VERSION_CODES
 import android.os.Bundle
+import android.os.IBinder
+import android.provider.Settings.ACTION_USAGE_ACCESS_SETTINGS
+import android.util.DisplayMetrics
+import android.view.Gravity
+import android.view.WindowManager
 import android.widget.Button
 import android.widget.CheckBox
 import android.widget.EditText
+import android.widget.FrameLayout
 import android.widget.TextView
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.ActivityResult
@@ -48,7 +61,11 @@ import com.paperless.sdk.SUB_TYPE_BITMASK
 import com.paperless.sdk.SdkVars
 import com.paperless.sdk.SdkVars.Companion.localDeviceId
 import com.paperless.util.IniUtil
+import com.xlk.paperless.sdk.helper.AppNetworkMonitor
+import com.xlk.paperless.sdk.screen.ScreenRecordService
+import com.xlk.paperless.sdk.screen.sync.SyncScreenRecord
 import com.xlk.paperless.sdk.service.ForegroundService
+import com.xlk.paperless.sdk.service.ScreenShareService
 import org.greenrobot.eventbus.EventBus
 import org.greenrobot.eventbus.Subscribe
 import org.greenrobot.eventbus.ThreadMode
@@ -62,10 +79,89 @@ class MainActivity : AppCompatActivity() {
     lateinit var tvDevId: TextView
     lateinit var tvDevName: TextView
     lateinit var tvMemberName: TextView
+
+    var networkMonitor: AppNetworkMonitor? = null
+    var mTextView: TextView? = null
+
     private val onBackPressedCallback = object : OnBackPressedCallback(true) {
         override fun handleOnBackPressed() {
             finishAffinity()
             exitProcess(0)
+        }
+    }
+
+    private var mRecordService: ScreenRecordService? = null
+    private var resultCode: Int = 0
+    private var resultData: Intent? = null
+    private var mIsBound: Boolean = false
+
+    private val mConnection: ServiceConnection = object : ServiceConnection {
+        override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
+            val binder: ScreenRecordService.LocalBinder = service as ScreenRecordService.LocalBinder
+            mRecordService = binder.service
+            LogUtils.d("onServiceConnected:${mRecordService != null}")
+            mIsBound = true
+            mRecordService?.setCallback(object : ScreenRecordService.ServiceCallback {
+                override fun onServiceStarted() {
+                    // 服务启动成功
+                    LogUtils.d("服务启动成功")
+                }
+
+                override fun onServiceStopped() {
+                    // 服务停止
+                    LogUtils.d("服务停止")
+//                    val dstDevId = Integer.parseInt(edt_dst_id.text.toString())
+                    Jni.stopResource(0, 17858581, resource_id_0, 0)
+                }
+
+                override fun onRecordingStarted() {
+                    // 录制开始
+                    LogUtils.d("录制开始")
+                }
+
+                override fun onRecordingStopped() {
+                    // 录制停止
+                    LogUtils.d("录制停止")
+                }
+
+                override fun onRecordingPaused() {
+                    // 录制暂停
+                    LogUtils.d("录制暂停")
+                }
+
+                override fun onRecordingResumed() {
+                    // 录制恢复
+                    LogUtils.d("录制恢复")
+                }
+
+                override fun onError(error: String?) {
+                    // 错误处理
+                    LogUtils.d("错误处理")
+                }
+
+                override fun onRecordingProgress(frames: Int) {
+                    // 录制进度
+                    LogUtils.d("录制进度：$frames")
+                }
+
+                override fun onRecordingStateChanged(isRecording: Boolean) {
+                    // 录制状态变化
+                    LogUtils.d("录制状态变化：$isRecording")
+                }
+            })
+            if (resultCode != 0 && resultData != null) {
+                // 开始录制
+                mRecordService?.startRecording(resultCode, resultData)
+                // 重置，避免重复启动
+                resultCode = 0
+                resultData = null
+            }
+        }
+
+        override fun onServiceDisconnected(name: ComponentName?) {
+            LogUtils.d("onServiceDisconnected")
+            mIsBound = false
+            mRecordService = null
         }
     }
 
@@ -74,20 +170,69 @@ class MainActivity : AppCompatActivity() {
     ) { result: ActivityResult? ->
         if (result != null) {
             if (result.resultCode == RESULT_OK) {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                    startForegroundService(Intent(this@MainActivity, ForegroundService::class.java)
-                        .apply {
-                            putExtra("intent_extra_code", result.resultCode)
-                            putExtra("intent_extra_data", result.data)
-                        })
-                } else {
-                    startService(Intent(this@MainActivity, ForegroundService::class.java)
-                        .apply {
-                            putExtra("intent_extra_code", result.resultCode)
-                            putExtra("intent_extra_data", result.data)
-                        })
-                }
+                // 绑定服务
+//                val serviceIntent = Intent(this, ScreenRecordService::class.java)
+//                bindService(serviceIntent, mConnection, Context.BIND_AUTO_CREATE)
+//                LogUtils.d("进行绑定服务")
+//                resultCode = result.resultCode
+//                resultData = result.data
+
+//                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+//                    startForegroundService(
+//                        Intent(this@MainActivity, ForegroundService::class.java)
+//                            .apply {
+//                                putExtra("intent_extra_code", result.resultCode)
+//                                putExtra("intent_extra_data", result.data)
+//                            })
+//                } else {
+//                    startService(
+//                        Intent(this@MainActivity, ForegroundService::class.java)
+//                            .apply {
+//                                putExtra("intent_extra_code", result.resultCode)
+//                                putExtra("intent_extra_data", result.data)
+//                            })
+//                }
+
+//                val intent = Intent(this@MainActivity, ScreenShareService::class.java)
+//                    .apply {
+//                        setAction(ScreenShareService.ACTION_START)
+//                        putExtra(ScreenShareService.EXTRA_RESULT_CODE, result.resultCode)
+//                        putExtra(ScreenShareService.EXTRA_RESULT_DATA, result.data)
+//                        putExtra(ScreenShareService.EXTRA_WIDTH, SdkVars.record_width)
+//                        putExtra(ScreenShareService.EXTRA_HEIGHT, SdkVars.record_height)
+//                        putExtra(ScreenShareService.EXTRA_FRAME_RATE, SdkVars.frameRate)
+//                        putExtra(ScreenShareService.EXTRA_BITRATE, SdkVars.bitrate)
+//                        putExtra(ScreenShareService.EXTRA_IFRAME_INTERVAL, SdkVars.iframeInterval)
+//                        putExtra(ScreenShareService.EXTRA_DPI, SdkVars.dpi)
+//                    }
+//                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+//                    startForegroundService(intent)
+//                } else {
+//                    startService(intent)
+//                }
+
+                launchService(result.resultCode, result.data!!)
             }
+        }
+    }
+
+    private fun launchService(resultCode: Int, data: Intent) {
+        val intent = Intent(this@MainActivity, ScreenShareService::class.java)
+            .apply {
+                setAction(ScreenShareService.ACTION_START)
+                putExtra(ScreenShareService.EXTRA_RESULT_CODE, resultCode)
+                putExtra(ScreenShareService.EXTRA_RESULT_DATA, data)
+                putExtra(ScreenShareService.EXTRA_WIDTH, SdkVars.record_width)
+                putExtra(ScreenShareService.EXTRA_HEIGHT, SdkVars.record_height)
+                putExtra(ScreenShareService.EXTRA_FRAME_RATE, SdkVars.frameRate)
+                putExtra(ScreenShareService.EXTRA_BITRATE, SdkVars.bitrate)
+                putExtra(ScreenShareService.EXTRA_IFRAME_INTERVAL, SdkVars.iframeInterval)
+                putExtra(ScreenShareService.EXTRA_DPI, SdkVars.dpi)
+            }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            startForegroundService(intent)
+        } else {
+            startService(intent)
         }
     }
 
@@ -101,6 +246,7 @@ class MainActivity : AppCompatActivity() {
         }
         EventBus.getDefault().register(this)
         applyPermissions()
+        checkUsageStatsPermission()
         edtIp = findViewById<EditText>(R.id.edtIp)
         edtPort = findViewById<EditText>(R.id.edtPort)
         findViewById<Button>(R.id.btnModify).setOnClickListener {
@@ -108,6 +254,9 @@ class MainActivity : AppCompatActivity() {
             IniUtil.ip = edtIp.text.toString()
             IniUtil.port = edtPort.text.toString()
             AppUtils.relaunchApp(true)
+        }
+        findViewById<Button>(R.id.btn_network).setOnClickListener {
+            networkSpeedWindow()
         }
         tvOnline = findViewById<TextView>(R.id.tvOnline)
         tvDevId = findViewById<TextView>(R.id.tvDevId)
@@ -120,6 +269,7 @@ class MainActivity : AppCompatActivity() {
         val id_4 = findViewById<CheckBox>(R.id.id_4)
         val edt_device_id = findViewById<EditText>(R.id.edt_device_id)
         val edt_media_id = findViewById<EditText>(R.id.edt_media_id)
+
         findViewById<Button>(R.id.btnPlayPage).setOnClickListener {
             startActivity(Intent(this, ControlViewActivity::class.java))
         }
@@ -131,6 +281,14 @@ class MainActivity : AppCompatActivity() {
         }
         findViewById<Button>(R.id.btn_split).setOnClickListener {
             startActivity(Intent(this, SplitPlayActivity::class.java))
+        }
+        //下载文件
+        findViewById<Button>(R.id.btn_download_media).setOnClickListener {
+            val str = edt_media_id.text.toString()
+            val id = Integer.parseInt(str)
+            val fileName = Jni.queryFileName(id)
+            val filePath = cacheDir.absolutePath + File.separator + fileName
+            Jni.downloadFile(id, filePath, "")
         }
         //播放媒体文件
         findViewById<Button>(R.id.btn_play_media).setOnClickListener {
@@ -161,14 +319,94 @@ class MainActivity : AppCompatActivity() {
             InterfaceMacro.Pb_ProgramType.Pb_MEET_PROGRAM_TYPE_MEETCLIENT_VALUE,
             SdkVars.root_dir + "client.ini", DeviceUtils.getUniqueDeviceId(), 4, 0
         )
+
+        val edt_record_width = findViewById<EditText>(R.id.edt_record_width)
+        val edt_record_height = findViewById<EditText>(R.id.edt_record_height)
+        val edt_bitrate = findViewById<EditText>(R.id.edt_bitrate)
+        val edt_framerate = findViewById<EditText>(R.id.edt_framerate)
+        val edt_i_frame_interval = findViewById<EditText>(R.id.edt_i_frame_interval)
+
         val edt_dst_id = findViewById<EditText>(R.id.edt_dst_id)
         findViewById<Button>(R.id.btn_start_record).setOnClickListener {
+            val w = Integer.parseInt(edt_record_width.text.toString())
+            val h = Integer.parseInt(edt_record_height.text.toString())
+            val bitrate = Integer.parseInt(edt_bitrate.text.toString())
+            val framerate = Integer.parseInt(edt_framerate.text.toString())
+            val i = Integer.parseInt(edt_i_frame_interval.text.toString())
+            SdkVars.record_width = w
+            SdkVars.record_height = h
+            SdkVars.bitrate = bitrate * 1000
+            SdkVars.frameRate = framerate
+            SdkVars.iframeInterval = i
+
             val dstDevId = Integer.parseInt(edt_dst_id.text.toString())
             Jni.streamPlay(localDeviceId, 2, resource_id_0, dstDevId)
         }
         findViewById<Button>(R.id.btn_stop_record).setOnClickListener {
             val dstDevId = Integer.parseInt(edt_dst_id.text.toString())
             Jni.stopResource(0, dstDevId, resource_id_0, 0)
+        }
+    }
+
+    private fun networkSpeedWindow() {
+        windowManager!!.defaultDisplay.width
+        windowManager!!.defaultDisplay.height
+        val metrics = DisplayMetrics()
+        windowManager!!.defaultDisplay.getMetrics(metrics)
+        val params = WindowManager.LayoutParams()
+        params.flags = (WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
+                or WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL // 加上这句话悬浮窗不拦截事件
+                or WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE)
+        if (Build.VERSION.SDK_INT >= VERSION_CODES.O) { //8.0新特性
+            params.type = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY
+        } else if (Build.VERSION.SDK_INT >= VERSION_CODES.M) {
+            params.type = WindowManager.LayoutParams.TYPE_PHONE //总是出现在应用程序窗口之上
+        } else {
+            params.type = WindowManager.LayoutParams.TYPE_SYSTEM_ALERT //总是出现在应用程序窗口之上
+        }
+        params.format = PixelFormat.RGBA_8888
+        params.gravity = Gravity.START or Gravity.TOP
+        params.width = FrameLayout.LayoutParams.WRAP_CONTENT
+        params.height = FrameLayout.LayoutParams.WRAP_CONTENT
+        params.x = 50
+        params.y = metrics.heightPixels - 300
+        mTextView = TextView(this)
+        mTextView!!.setTextColor(Color.argb(200, 255, 255, 255))
+        mTextView!!.setBackgroundColor(Color.argb(80, 0, 0, 0))
+        windowManager!!.addView(mTextView, params)
+
+        networkMonitor = AppNetworkMonitor(this)
+        networkMonitor!!.startMonitoring(object : AppNetworkMonitor.NetworkInfoListener {
+            override fun onNetworkInfoUpdated(totalBytes: Long, downloadSpeed: Long, uploadSpeed: Long) {
+                runOnUiThread {
+                    val msg = ("总流量: " + AppNetworkMonitor.formatTraffic(totalBytes)
+                            + "\n" + "下载: " + AppNetworkMonitor.formatSpeed(downloadSpeed)
+                            + "\n" + "上传: " + AppNetworkMonitor.formatSpeed(uploadSpeed))
+                    LogUtils.e("onNetworkInfoUpdated: $msg")
+                    mTextView?.text = msg
+                }
+            }
+
+            override fun onSessionTrafficUpdated(sessionBytes: Long) {
+                LogUtils.d(
+                    "onSessionTrafficUpdated 本屏流量: " + AppNetworkMonitor.formatTraffic(sessionBytes)
+                )
+            }
+        })
+    }
+
+    // 检查并请求权限
+    private fun checkUsageStatsPermission() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            val appOps: AppOpsManager = getSystemService(Context.APP_OPS_SERVICE) as AppOpsManager
+            val mode = appOps.checkOpNoThrow(
+                AppOpsManager.OPSTR_GET_USAGE_STATS,
+                android.os.Process.myUid(), packageName
+            )
+            if (mode != AppOpsManager.MODE_ALLOWED) {
+                val intent = Intent(ACTION_USAGE_ACCESS_SETTINGS)
+                startActivity(intent);
+            }
         }
     }
 
@@ -198,6 +436,7 @@ class MainActivity : AppCompatActivity() {
             .permission(PermissionLists.getReadPhoneStatePermission())
             .permission(PermissionLists.getPostNotificationsPermission())
             .permission(PermissionLists.getRecordAudioPermission())
+            .permission(PermissionLists.getSystemAlertWindowPermission())
             .request { grantedList, deniedList ->
 
             }
@@ -341,7 +580,6 @@ class MainActivity : AppCompatActivity() {
             // 设备寄存器
             Pb_TYPE_MEET_INTERFACE_DEVICEINFO_VALUE -> {
                 val info = InterfaceDevice.pbui_Type_MeetDeviceBaseInfo.parseFrom(msg.data)
-                LogUtils.e("设备寄存器 deviceid:${info.deviceid},attribid:${info.attribid},localDeviceId:$localDeviceId")
                 //寄存器id 0:net status  50:res status  63:base info
                 if (info.deviceid == localDeviceId) {
                     if (info.attribid == 0) {
@@ -392,7 +630,7 @@ class MainActivity : AppCompatActivity() {
                 }
             }
             //设备会议信息
-            Pb_TYPE_MEET_INTERFACE_DEVICEFACESHOW_VALUE->{
+            Pb_TYPE_MEET_INTERFACE_DEVICEFACESHOW_VALUE -> {
                 queryDeviceMeetInfo()
             }
 
@@ -402,7 +640,10 @@ class MainActivity : AppCompatActivity() {
             }
 
             BusType.capture_stop -> {
-                stopService(Intent(this, ForegroundService::class.java))
+//                stopService(Intent(this, ForegroundService::class.java))
+                stopService(Intent(this, ScreenShareService::class.java).apply {
+                    setAction(ScreenShareService.ACTION_STOP)
+                })
             }
         }
     }
@@ -429,5 +670,17 @@ class MainActivity : AppCompatActivity() {
         if (EventBus.getDefault().isRegistered(this)) {
             EventBus.getDefault().unregister(this)
         }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        if (mIsBound) {
+            unbindService(mConnection)
+            mIsBound = false;
+        }
+        windowManager?.removeView(mTextView)
+        mTextView = null
+        networkMonitor?.stopMonitoring()
+        networkMonitor = null
     }
 }

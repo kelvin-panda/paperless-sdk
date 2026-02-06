@@ -62,6 +62,10 @@ object DecodeQueue {
         return getQueue(resId).poll()
     }
 
+    fun getSize(resId: Int): Int {
+        return getQueue(resId).size
+    }
+
     fun cleanup(resId: Int) {
         getQueue(resId).clear()
     }

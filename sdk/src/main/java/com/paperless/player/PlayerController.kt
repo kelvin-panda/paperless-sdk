@@ -214,7 +214,7 @@ class PlayerController(
                     if (frameData == null) {
                         // 无帧可处理，短暂休眠
                         sleep(noFrameSleepTime)
-                        LogUtils.i(TAG, "无帧可处理，短暂休眠")
+//                        LogUtils.i(TAG, "无帧可处理，短暂休眠")
                         continue
                     }
 

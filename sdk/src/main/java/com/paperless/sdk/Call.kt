@@ -1,5 +1,6 @@
 package com.paperless.sdk
 
+import android.util.Log
 import com.blankj.utilcode.util.LogUtils
 import com.mogujie.tt.protobuf.InterfaceMacro
 import com.mogujie.tt.protobuf.InterfaceMacro.Pb_Type
@@ -379,8 +380,12 @@ object Call {
         // 记录接收帧的数量
         PerformanceMonitor.logFrameReceived(frameData.res)
         // 放入到待处理解码的集合中
-        if (!DecodeQueue.offer(res, frameData)) {
+        if (DecodeQueue.offer(res, frameData)) {
+            //把帧数据添加进队列中
+            Log.d("", "debugPlayer: 把帧数据添加进队列中 ${DecodeQueue.getSize(res)}")
+        } else {
             // 队列已满，尝试移除最旧的非关键帧
+            Log.d("", "debugPlayer: 队列已满，尝试移除最旧的非关键帧")
             DecodeQueue.remove(frameData)
         }
     }
