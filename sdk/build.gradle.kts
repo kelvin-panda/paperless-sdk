@@ -61,6 +61,12 @@ android {
             isUniversalApk = true //不生成包含所有 ABI 的单一 APK
         }
     }
+
+    publishing {
+        singleVariant("release") {
+            withSourcesJar()
+        }
+    }
 }
 //https://github.com/jitpack/android-example
 // 使用afterEvaluate确保在项目评估完成后获取组件
@@ -71,7 +77,7 @@ afterEvaluate {
                 groupId = "com.gitee.xlk_gitee"
                 artifactId = "sdk-library"
                 //定义：大更新.库更新.java层更新
-                version = "1.3.3"
+                version = "1.3.4"
                 from(components["release"])
             }
         }

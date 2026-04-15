@@ -253,6 +253,7 @@ class MainActivity : AppCompatActivity() {
             IniUtil.loadFile(SdkVars.root_dir + "client.ini")
             IniUtil.ip = edtIp.text.toString()
             IniUtil.port = edtPort.text.toString()
+            IniUtil.store()
             AppUtils.relaunchApp(true)
         }
         findViewById<Button>(R.id.btn_network).setOnClickListener {
