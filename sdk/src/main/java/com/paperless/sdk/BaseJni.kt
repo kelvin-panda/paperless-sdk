@@ -264,6 +264,20 @@ open class BaseJni {
     }
 
     /**
+     * 获取设备是否外部打开文件
+     */
+    fun isExternalOpen(deviceId: Int = SdkVars.localDeviceId): Boolean {
+        queryDeviceProperty(
+            deviceId,
+            InterfaceMacro.Pb_MeetDevicePropertyID.Pb_MEETDEVICE_PROPERTY_DEVICEFLAG.number
+        )?.let {
+            InterfaceDevice.pbui_DeviceInt32uProperty.parseFrom(it)?.let {
+                return it.propertyval.flag(InterfaceMacro.Pb_MeetDeviceFlag.Pb_MEETDEVICE_FLAG_OPENOUTSIDE_VALUE)
+            }
+        }
+        return false
+    }
+    /**
      * 判断设备是否在线
      */
     open fun isOnline(devId: Int = SdkVars.localDeviceId): Boolean {
@@ -2343,6 +2357,10 @@ open class BaseJni {
         )
     }
 
+    open fun hasDirPermission(dirId: Int, memberId: Int): Boolean {
+        return !isNoDirPermission(dirId, memberId)
+    }
+
     /**
      * 判断参会人是否在目录黑名单中，在黑名单中则无权限
      */
@@ -2528,6 +2546,52 @@ open class BaseJni {
                 .setPropertyid(propertyid)
                 .setParameterval(parameterval)
                 .setParameterval2(parameterval2)
+                .build().toByteArray()
+        )
+    }
+
+    //</editor-fold>
+
+    //<editor-fold desc="会议目录文件权限">
+
+    open fun hasFilePermission(mediaId: Int, memberId: Int): Boolean {
+        return !isNoFilePermission(mediaId, memberId)
+    }
+
+    open fun isNoFilePermission(mediaId: Int, memberId: Int): Boolean {
+        queryFilePermission(mediaId)?.let {
+            //在黑名单中就无权限
+            return it.memidsList.contains(memberId)
+        }
+        //目录没有黑名单，或黑名单中不包括该参会人id
+        return false
+    }
+
+    open fun queryFilePermission(mediaId: Int): InterfaceFile.pbui_Type_QueryFileAccessDetailInfo? {
+        Call.callMethod(
+            Pb_Type.Pb_TYPE_MEET_INTERFACE_FILEACCESS.number,
+            Pb_Method.Pb_METHOD_MEET_INTERFACE_QUERY.number,
+            InterfaceBase.pbui_QueryInfoByID.newBuilder()
+                .setId(mediaId)
+                .build().toByteArray()
+        )?.let { return InterfaceFile.pbui_Type_QueryFileAccessDetailInfo.parseFrom(it) }
+        return null
+    }
+
+    /**
+     * @param json {"data":[{"fileid":"0x6b0000001","mem":[{"id":1},{"id":2}]},{"fileid":"0x6b0000003","mem":[{"id":1},{"id":2}]}]}
+     * @param flag InterfaceFile.Pb_MeetFileAccess_Flag
+     */
+    open fun saveFilePermission(
+        json: String,
+        flag: Int = InterfaceFile.Pb_MeetFileAccess_Flag.Pb_MEET_MODIFY_FILEACCESS_FLAG_ZERO_VALUE
+    ) {
+        Call.callMethod(
+            Pb_Type.Pb_TYPE_MEET_INTERFACE_FILEACCESS.number,
+            Pb_Method.Pb_METHOD_MEET_INTERFACE_SAVE.number,
+            InterfaceFile.pbui_Type_ModFileAccessDetailInfo.newBuilder()
+                .setFlag(flag)
+                .setJson(json.s2b())
                 .build().toByteArray()
         )
     }

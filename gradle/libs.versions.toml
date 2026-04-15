@@ -23,8 +23,7 @@ eventbus = { group = "org.greenrobot", name = "eventbus", version = "3.3.1" }
 utilcodex = { group = "com.blankj", name = "utilcodex", version = "1.31.1" }
 # 权限请求框架：https://github.com/getActivity/XXPermissions
 xxPermissions = { group = "com.github.getActivity", name = "XXPermissions", version = "28.0" }
-# https://gitee.com/xlk_gitee/paperless_sdk
-paperlessSdk = { group = "com.gitee.xlk_gitee", name = "paperless_sdk", version = "1.0.6" }
+
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
 androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }

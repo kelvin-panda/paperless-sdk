@@ -1,6 +1,6 @@
 [![](https://jitpack.io/v/com.gitee.xlk_gitee/paperless_sdk.svg)](https://jitpack.io/#com.gitee.xlk_gitee/paperless_sdk)
 
-
+# 使用
 调用方`app/build.gradle`配置
 
 ```kotlin
@@ -32,3 +32,7 @@ object Jni :BaseJni(){
 }
 ```
 
+# 版本日志
+## v1.3.5
+- 添加文件独立权限的接口
+- 添加外部打开文档的判断接口
