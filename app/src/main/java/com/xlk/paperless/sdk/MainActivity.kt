@@ -78,10 +78,14 @@ class MainActivity : AppCompatActivity() {
     lateinit var tvOnline: TextView
     lateinit var tvDevId: TextView
     lateinit var tvDevName: TextView
+    lateinit var tvMemberId: TextView
     lateinit var tvMemberName: TextView
+    lateinit var edtType: EditText
+    lateinit var edtCacheId: EditText
 
     var networkMonitor: AppNetworkMonitor? = null
     var mTextView: TextView? = null
+    lateinit var tvShowBlackList: TextView
 
     private val onBackPressedCallback = object : OnBackPressedCallback(true) {
         override fun handleOnBackPressed() {
@@ -262,6 +266,7 @@ class MainActivity : AppCompatActivity() {
         tvOnline = findViewById<TextView>(R.id.tvOnline)
         tvDevId = findViewById<TextView>(R.id.tvDevId)
         tvDevName = findViewById<TextView>(R.id.tvDevName)
+        tvMemberId = findViewById<TextView>(R.id.tvMemberId)
         tvMemberName = findViewById<TextView>(R.id.tvMemberName)
         val id_0 = findViewById<CheckBox>(R.id.id_0)
         val id_1 = findViewById<CheckBox>(R.id.id_1)
@@ -283,6 +288,14 @@ class MainActivity : AppCompatActivity() {
         findViewById<Button>(R.id.btn_split).setOnClickListener {
             startActivity(Intent(this, SplitPlayActivity::class.java))
         }
+
+        //缓存数据
+        edtType = findViewById<EditText>(R.id.edtType)
+        edtCacheId = findViewById<EditText>(R.id.edtCacheId)
+        findViewById<Button>(R.id.btnCacheData).setOnClickListener {
+            Jni.cache(edtType.text.toString().toInt(), edtCacheId.text.toString().toInt())
+        }
+
         //下载文件
         findViewById<Button>(R.id.btn_download_media).setOnClickListener {
             val str = edt_media_id.text.toString()
@@ -347,6 +360,40 @@ class MainActivity : AppCompatActivity() {
             val dstDevId = Integer.parseInt(edt_dst_id.text.toString())
             Jni.stopResource(0, dstDevId, resource_id_0, 0)
         }
+
+        //<editor-fold desc="目录与文件黑名单查询">
+        tvShowBlackList = findViewById<TextView>(R.id.tvShowBlackList)
+        findViewById<Button>(R.id.btnDirBlackList).setOnClickListener {
+            val sb = StringBuilder()
+            sb.append("无权限目录：")
+            Jni.queryDir()?.let {
+                it.itemList.forEach {
+                    if (Jni.isNoDirPermission(it.id, SdkVars.localMemberId)) {
+                        sb.append("\n").append(it.name.toStringUtf8())
+                    }
+                }
+            }
+            LogUtils.d(sb.toString())
+            tvShowBlackList.text = sb.toString()
+        }
+        findViewById<Button>(R.id.btnFileBlackList).setOnClickListener {
+            val sb = StringBuilder()
+            sb.append("无权限文件：")
+            Jni.queryDir()?.let {
+                it.itemList.forEach {
+                    Jni.queryFile(it.id)?.let {
+                        it.forEach {
+                            if (Jni.isNoFilePermission(it.mediaid, SdkVars.localMemberId)) {
+                                sb.append("\n").append(it.name.toStringUtf8())
+                            }
+                        }
+                    }
+                }
+            }
+            LogUtils.d(sb.toString())
+            tvShowBlackList.text = sb.toString()
+        }
+        //</editor-fold>
     }
 
     private fun networkSpeedWindow() {
@@ -426,10 +473,14 @@ class MainActivity : AppCompatActivity() {
 
     private fun queryDeviceMeetInfo() {
         var memberName = ""
+        var memberId = 0
         Jni.queryDeviceMeetInfo()?.let {
             memberName = it.membername.toStringUtf8()
+            memberId = it.memberid
         }
+        SdkVars.localMemberId = memberId
         tvMemberName.text = memberName
+        tvMemberId.text = "$memberId"
     }
 
     private fun applyPermissions() {

@@ -41,6 +41,13 @@
                 android:text="-" />
 
             <TextView
+                android:id="@+id/tvMemberId"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="10dp"
+                android:text="-" />
+
+            <TextView
                 android:id="@+id/tvMemberName"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -95,6 +102,34 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="修改界面状态" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <EditText
+                android:id="@+id/edtType"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:inputType="number"
+                android:text="1" />
+
+            <EditText
+                android:id="@+id/edtCacheId"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:inputType="number"
+                android:text="0" />
+
+            <Button
+                android:id="@+id/btnCacheData"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="缓存数据" />
         </LinearLayout>
 
 
@@ -183,6 +218,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="播放媒体文件" />
+
             <Button
                 android:id="@+id/btn_download_media"
                 android:layout_width="wrap_content"
@@ -289,6 +325,38 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="结束同屏" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <Button
+                    android:id="@+id/btnDirBlackList"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="查询目录黑名单" />
+
+                <Button
+                    android:id="@+id/btnFileBlackList"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="查询文件黑名单" />
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/tvShowBlackList"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                tools:text="受到了法律的是客服" />
         </LinearLayout>
     </LinearLayout>
 </ScrollView>
