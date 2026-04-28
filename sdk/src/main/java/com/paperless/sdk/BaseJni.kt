@@ -2484,6 +2484,15 @@ open class BaseJni {
         return null
     }
 
+    fun queryFileMd5(mediaId: Int): String? {
+        queryFileAttribute(InterfaceMacro.Pb_MeetFilePropertyID.Pb_MEETFILE_PROPERTY_FILEMD5.number, mediaId)?.let {
+            InterfaceBase.pbui_CommonTextProperty.parseFrom(it)?.let {
+                return it.propertyval.toStringUtf8()
+            }
+        }
+        return null
+    }
+
     open fun queryFileName(mediaId: Int): String {
         queryFileAttribute(InterfaceMacro.Pb_MeetFilePropertyID.Pb_MEETFILE_PROPERTY_NAME.number, mediaId)?.let {
             InterfaceBase.pbui_CommonTextProperty.parseFrom(it)?.let {

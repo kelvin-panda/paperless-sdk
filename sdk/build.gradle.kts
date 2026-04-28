@@ -16,11 +16,20 @@ android {
 
         externalNativeBuild {
             cmake {
-                cppFlags("-frtti -fexceptions")
-                //,"arm64-v8a"
+                // C++ 编译器参数
+                // -frtti: 启用运行时类型信息 (RTTI)，支持 dynamic_cast 和 typeid 操作符
+                // -Wl,<options>: 将逗号分隔的 <options> 直接传递给链接器。这是一个重要的高级功能，
+                //      比如 -Wl,-z,max-page-size=16384 就是告诉链接器将库的内存对齐（alignment）设置为 16KB
+                cppFlags("-frtti -fexceptions -Wl,-z,max-page-size=16384")
                 abiFilters("armeabi-v7a", "arm64-v8a")
-                //arguments '-DANDROID_STL=c++_shared'
-                //arguments '-DANDROID_STL=gnu_stl'
+
+                // CMake 系统参数 通过 -D 定义 CMake 变量来修改 NDK 工具链的行为
+                // -DANDROID_STL=c++_shared
+                //      选择链接的 C++ 标准库，例如 c++_shared (推荐) 或 c++_static
+                // -DANDROID_SUPPORT_FLEXIBLE_PAGE_SIZES=ON
+                //      显式告诉 CMake 支持可变页面大小（NDK r23+ 推荐）
+                //      版本较旧（r23 以下），可以用这行替代：-DANDROID_PAGE_SIZE=16384
+                arguments += listOf("-DANDROID_SUPPORT_FLEXIBLE_PAGE_SIZES=ON", "-DANDROID_STL=c++_shared")
             }
         }
     }
@@ -43,7 +52,6 @@ android {
     sourceSets {
         getByName("main") {
             jniLibs.srcDirs("src/main/jniLibs")
-//            jni.setSrcDirs(emptyList<String>())
         }
     }
 
@@ -77,15 +85,15 @@ afterEvaluate {
                 groupId = "com.gitee.xlk_gitee"
                 artifactId = "sdk-library"
                 //定义：大更新.库更新.java层更新
-                version = "1.3.6"
+                version = "1.3.7"
                 from(components["release"])
             }
         }
     }
 }
 dependencies {
-    api("com.blankj:utilcodex:1.31.1")
-    api("org.greenrobot:eventbus:3.3.1")
+    api(libs.utilcodex)
+    api(libs.eventbus)
     api(files("libs/ini4j-0.5.2.jar"))
     api(files("libs/protobuf-java-3.3.0.jar"))
 }
