@@ -37,7 +37,6 @@ import com.xlk.paperless.sdk.R;
 
 import java.nio.ByteBuffer;
 import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -45,7 +44,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * created on 2026/2/5 16:39
  */
 public class ScreenShareService extends Service {
-    private static final String TAG = "ScreenShareService";
+    private static final String TAG = "H265ScreenShareService";
 
     // 通知相关
     private static final String CHANNEL_ID = "screen_record_channel";
@@ -72,7 +71,6 @@ public class ScreenShareService extends Service {
 
     public static Pools.SynchronizedPool<byte[]> framePoll = new Pools.SynchronizedPool<>(2);
     public static ArrayBlockingQueue<byte[]> decodeQueue = new ArrayBlockingQueue<>(2);
-
 
     private MediaCodec mMediaCodec;
     private final MediaCodec.BufferInfo bufferInfo = new MediaCodec.BufferInfo();

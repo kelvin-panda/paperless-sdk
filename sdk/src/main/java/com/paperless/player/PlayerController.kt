@@ -288,7 +288,7 @@ class PlayerController(
             // 释放旧的解码器
             mediaCodec?.stop()
             mediaCodec?.release()
-            val mimeType = getMimeType(configFrame.codecid)
+            val mimeType = MIME_VIDEO_HEVC;//getMimeType(configFrame.codecid)
             mediaCodec = MediaCodec.createDecoderByType(mimeType)
             val format = MediaFormat.createVideoFormat(mimeType, configFrame.w, configFrame.h)
             if (configFrame.codecDataSize > 0) {

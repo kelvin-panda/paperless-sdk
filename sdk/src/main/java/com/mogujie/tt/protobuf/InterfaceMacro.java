@@ -1359,6 +1359,30 @@ public final class InterfaceMacro {
     Pb_TYPE_MEET_INTERFACE_FILEACCESS(81),
     /**
      * <pre>
+     * 复合全局自定义数据
+     * </pre>
+     *
+     * <code>Pb_TYPE_MEET_INTERFACE_COMPLEXPUBLICUSERDEF = 82;</code>
+     */
+    Pb_TYPE_MEET_INTERFACE_COMPLEXPUBLICUSERDEF(82),
+    /**
+     * <pre>
+     * 复合会议自定义数据
+     * </pre>
+     *
+     * <code>Pb_TYPE_MEET_INTERFACE_COMPLEXMEETUSERDEF = 83;</code>
+     */
+    Pb_TYPE_MEET_INTERFACE_COMPLEXMEETUSERDEF(83),
+    /**
+     * <pre>
+     * 新系统日志
+     * </pre>
+     *
+     * <code>Pb_TYPE_MEET_INTERFACE_NEWSYSLOG = 84;</code>
+     */
+    Pb_TYPE_MEET_INTERFACE_NEWSYSLOG(84),
+    /**
+     * <pre>
      *退出释放资源
      * </pre>
      *
@@ -2034,6 +2058,30 @@ public final class InterfaceMacro {
     public static final int Pb_TYPE_MEET_INTERFACE_FILEACCESS_VALUE = 81;
     /**
      * <pre>
+     * 复合全局自定义数据
+     * </pre>
+     *
+     * <code>Pb_TYPE_MEET_INTERFACE_COMPLEXPUBLICUSERDEF = 82;</code>
+     */
+    public static final int Pb_TYPE_MEET_INTERFACE_COMPLEXPUBLICUSERDEF_VALUE = 82;
+    /**
+     * <pre>
+     * 复合会议自定义数据
+     * </pre>
+     *
+     * <code>Pb_TYPE_MEET_INTERFACE_COMPLEXMEETUSERDEF = 83;</code>
+     */
+    public static final int Pb_TYPE_MEET_INTERFACE_COMPLEXMEETUSERDEF_VALUE = 83;
+    /**
+     * <pre>
+     * 新系统日志
+     * </pre>
+     *
+     * <code>Pb_TYPE_MEET_INTERFACE_NEWSYSLOG = 84;</code>
+     */
+    public static final int Pb_TYPE_MEET_INTERFACE_NEWSYSLOG_VALUE = 84;
+    /**
+     * <pre>
      *退出释放资源
      * </pre>
      *
@@ -2146,6 +2194,9 @@ public final class InterfaceMacro {
         case 79: return Pb_TYPE_MEET_INTERFACE_STREAMSAVE;
         case 80: return Pb_TYPE_MEET_INTERFACE_DBSERACH;
         case 81: return Pb_TYPE_MEET_INTERFACE_FILEACCESS;
+        case 82: return Pb_TYPE_MEET_INTERFACE_COMPLEXPUBLICUSERDEF;
+        case 83: return Pb_TYPE_MEET_INTERFACE_COMPLEXMEETUSERDEF;
+        case 84: return Pb_TYPE_MEET_INTERFACE_NEWSYSLOG;
         case 999: return Pb_TYPE_MEET_INTERFACE_EXITENV;
         case 1000: return Pb_TYPE_MEET_INTERFACE_WEBSESSIONID;
         default: return null;
@@ -5089,6 +5140,14 @@ public final class InterfaceMacro {
      * <code>Pb_MEETDEVICE_PROPERTY_STYLE = 22;</code>
      */
     Pb_MEETDEVICE_PROPERTY_STYLE(22),
+    /**
+     * <pre>
+     *查询设备的播放资源音量属性值 query / (paramterval传入资源索引0-11 propertyval int32u) 0-100 
+     * </pre>
+     *
+     * <code>Pb_MEETDEVICE_PROPERTY_VOLUMN = 23;</code>
+     */
+    Pb_MEETDEVICE_PROPERTY_VOLUMN(23),
     UNRECOGNIZED(-1),
     ;
 
@@ -5272,6 +5331,14 @@ public final class InterfaceMacro {
      * <code>Pb_MEETDEVICE_PROPERTY_STYLE = 22;</code>
      */
     public static final int Pb_MEETDEVICE_PROPERTY_STYLE_VALUE = 22;
+    /**
+     * <pre>
+     *查询设备的播放资源音量属性值 query / (paramterval传入资源索引0-11 propertyval int32u) 0-100 
+     * </pre>
+     *
+     * <code>Pb_MEETDEVICE_PROPERTY_VOLUMN = 23;</code>
+     */
+    public static final int Pb_MEETDEVICE_PROPERTY_VOLUMN_VALUE = 23;
 
 
     public final int getNumber() {
@@ -5311,6 +5378,7 @@ public final class InterfaceMacro {
         case 20: return Pb_MEETDEVICE_PROPERTY_PARENTDEVICE;
         case 21: return Pb_MEETDEVICE_PROPERTY_CHECKCHANNLEON;
         case 22: return Pb_MEETDEVICE_PROPERTY_STYLE;
+        case 23: return Pb_MEETDEVICE_PROPERTY_VOLUMN;
         default: return null;
       }
     }
@@ -6811,6 +6879,102 @@ public final class InterfaceMacro {
      * <code>Pb_DEVICECONTORL_LIFTMICCLOSE = 15;</code>
      */
     Pb_DEVICECONTORL_LIFTMICCLOSE(15),
+    /**
+     * <pre>
+     *&#47;/隐藏投影签到信息
+     * </pre>
+     *
+     * <code>Pb_DEVICECONTORL_CHECKIN = 16;</code>
+     */
+    Pb_DEVICECONTORL_CHECKIN(16),
+    /**
+     * <pre>
+     *上升开机
+     * </pre>
+     *
+     * <code>Pb_DEVICECONTORL_LIFTON = 17;</code>
+     */
+    Pb_DEVICECONTORL_LIFTON(17),
+    /**
+     * <pre>
+     *上升关机
+     * </pre>
+     *
+     * <code>Pb_DEVICECONTORL_LIFTOFF = 18;</code>
+     */
+    Pb_DEVICECONTORL_LIFTOFF(18),
+    /**
+     * <pre>
+     *翻转15
+     * </pre>
+     *
+     * <code>Pb_DEVICECONTORL_RATOTE15 = 19;</code>
+     */
+    Pb_DEVICECONTORL_RATOTE15(19),
+    /**
+     * <pre>
+     *翻转30
+     * </pre>
+     *
+     * <code>Pb_DEVICECONTORL_RATOTE30 = 20;</code>
+     */
+    Pb_DEVICECONTORL_RATOTE30(20),
+    /**
+     * <pre>
+     *面板启用
+     * </pre>
+     *
+     * <code>Pb_DEVICECONTORL_PANELENABLE = 21;</code>
+     */
+    Pb_DEVICECONTORL_PANELENABLE(21),
+    /**
+     * <pre>
+     *面板禁用
+     * </pre>
+     *
+     * <code>Pb_DEVICECONTORL_PANELDISABLE = 22;</code>
+     */
+    Pb_DEVICECONTORL_PANELDISABLE(22),
+    /**
+     * <pre>
+     *切换hdmi1
+     * </pre>
+     *
+     * <code>Pb_DEVICECONTORL_SWITCHHDMI1 = 23;</code>
+     */
+    Pb_DEVICECONTORL_SWITCHHDMI1(23),
+    /**
+     * <pre>
+     *切换hdmi2
+     * </pre>
+     *
+     * <code>Pb_DEVICECONTORL_SWITCHHDMI2 = 24;</code>
+     */
+    Pb_DEVICECONTORL_SWITCHHDMI2(24),
+    /**
+     * <pre>
+     *翻转速度
+     * </pre>
+     *
+     * <code>Pb_DEVICECONTORL_ROTATESPEED = 25;</code>
+     */
+    Pb_DEVICECONTORL_ROTATESPEED(25),
+    /**
+     * <pre>
+     *升降速度
+     * </pre>
+     *
+     * <code>Pb_DEVICECONTORL_LIFTSPEED = 26;</code>
+     */
+    Pb_DEVICECONTORL_LIFTSPEED(26),
+    /**
+     * <pre>
+     *翻转指定角度
+     * </pre>
+     *
+     * <code>Pb_DEVICECONTORL_RATATEANGLE = 27;</code>
+     */
+    Pb_DEVICECONTORL_RATATEANGLE(27),
     UNRECOGNIZED(-1),
     ;
 
@@ -6938,6 +7102,102 @@ public final class InterfaceMacro {
      * <code>Pb_DEVICECONTORL_LIFTMICCLOSE = 15;</code>
      */
     public static final int Pb_DEVICECONTORL_LIFTMICCLOSE_VALUE = 15;
+    /**
+     * <pre>
+     *&#47;/隐藏投影签到信息
+     * </pre>
+     *
+     * <code>Pb_DEVICECONTORL_CHECKIN = 16;</code>
+     */
+    public static final int Pb_DEVICECONTORL_CHECKIN_VALUE = 16;
+    /**
+     * <pre>
+     *上升开机
+     * </pre>
+     *
+     * <code>Pb_DEVICECONTORL_LIFTON = 17;</code>
+     */
+    public static final int Pb_DEVICECONTORL_LIFTON_VALUE = 17;
+    /**
+     * <pre>
+     *上升关机
+     * </pre>
+     *
+     * <code>Pb_DEVICECONTORL_LIFTOFF = 18;</code>
+     */
+    public static final int Pb_DEVICECONTORL_LIFTOFF_VALUE = 18;
+    /**
+     * <pre>
+     *翻转15
+     * </pre>
+     *
+     * <code>Pb_DEVICECONTORL_RATOTE15 = 19;</code>
+     */
+    public static final int Pb_DEVICECONTORL_RATOTE15_VALUE = 19;
+    /**
+     * <pre>
+     *翻转30
+     * </pre>
+     *
+     * <code>Pb_DEVICECONTORL_RATOTE30 = 20;</code>
+     */
+    public static final int Pb_DEVICECONTORL_RATOTE30_VALUE = 20;
+    /**
+     * <pre>
+     *面板启用
+     * </pre>
+     *
+     * <code>Pb_DEVICECONTORL_PANELENABLE = 21;</code>
+     */
+    public static final int Pb_DEVICECONTORL_PANELENABLE_VALUE = 21;
+    /**
+     * <pre>
+     *面板禁用
+     * </pre>
+     *
+     * <code>Pb_DEVICECONTORL_PANELDISABLE = 22;</code>
+     */
+    public static final int Pb_DEVICECONTORL_PANELDISABLE_VALUE = 22;
+    /**
+     * <pre>
+     *切换hdmi1
+     * </pre>
+     *
+     * <code>Pb_DEVICECONTORL_SWITCHHDMI1 = 23;</code>
+     */
+    public static final int Pb_DEVICECONTORL_SWITCHHDMI1_VALUE = 23;
+    /**
+     * <pre>
+     *切换hdmi2
+     * </pre>
+     *
+     * <code>Pb_DEVICECONTORL_SWITCHHDMI2 = 24;</code>
+     */
+    public static final int Pb_DEVICECONTORL_SWITCHHDMI2_VALUE = 24;
+    /**
+     * <pre>
+     *翻转速度
+     * </pre>
+     *
+     * <code>Pb_DEVICECONTORL_ROTATESPEED = 25;</code>
+     */
+    public static final int Pb_DEVICECONTORL_ROTATESPEED_VALUE = 25;
+    /**
+     * <pre>
+     *升降速度
+     * </pre>
+     *
+     * <code>Pb_DEVICECONTORL_LIFTSPEED = 26;</code>
+     */
+    public static final int Pb_DEVICECONTORL_LIFTSPEED_VALUE = 26;
+    /**
+     * <pre>
+     *翻转指定角度
+     * </pre>
+     *
+     * <code>Pb_DEVICECONTORL_RATATEANGLE = 27;</code>
+     */
+    public static final int Pb_DEVICECONTORL_RATATEANGLE_VALUE = 27;
 
 
     public final int getNumber() {
@@ -6970,6 +7230,18 @@ public final class InterfaceMacro {
         case 13: return Pb_DEVICECONTORL_MONITORPOWER_OFF;
         case 14: return Pb_DEVICECONTORL_LIFTMICOPEN;
         case 15: return Pb_DEVICECONTORL_LIFTMICCLOSE;
+        case 16: return Pb_DEVICECONTORL_CHECKIN;
+        case 17: return Pb_DEVICECONTORL_LIFTON;
+        case 18: return Pb_DEVICECONTORL_LIFTOFF;
+        case 19: return Pb_DEVICECONTORL_RATOTE15;
+        case 20: return Pb_DEVICECONTORL_RATOTE30;
+        case 21: return Pb_DEVICECONTORL_PANELENABLE;
+        case 22: return Pb_DEVICECONTORL_PANELDISABLE;
+        case 23: return Pb_DEVICECONTORL_SWITCHHDMI1;
+        case 24: return Pb_DEVICECONTORL_SWITCHHDMI2;
+        case 25: return Pb_DEVICECONTORL_ROTATESPEED;
+        case 26: return Pb_DEVICECONTORL_LIFTSPEED;
+        case 27: return Pb_DEVICECONTORL_RATATEANGLE;
         default: return null;
       }
     }
@@ -8328,6 +8600,14 @@ public final class InterfaceMacro {
      * <code>Pb_memperm_record = 64;</code>
      */
     Pb_memperm_record(64),
+    /**
+     * <pre>
+     *投票查看权限 
+     * </pre>
+     *
+     * <code>Pb_memperm_lookvote = 128;</code>
+     */
+    Pb_memperm_lookvote(128),
     UNRECOGNIZED(-1),
     ;
 
@@ -8391,6 +8671,14 @@ public final class InterfaceMacro {
      * <code>Pb_memperm_record = 64;</code>
      */
     public static final int Pb_memperm_record_VALUE = 64;
+    /**
+     * <pre>
+     *投票查看权限 
+     * </pre>
+     *
+     * <code>Pb_memperm_lookvote = 128;</code>
+     */
+    public static final int Pb_memperm_lookvote_VALUE = 128;
 
 
     public final int getNumber() {
@@ -8415,6 +8703,7 @@ public final class InterfaceMacro {
         case 16: return Pb_memperm_vote;
         case 32: return Pb_memperm_postilview;
         case 64: return Pb_memperm_record;
+        case 128: return Pb_memperm_lookvote;
         default: return null;
       }
     }
@@ -13678,6 +13967,38 @@ public final class InterfaceMacro {
      * <code>Pb_MEET_FACEID_PROJECTIVE_SIGN_OUT = 115;</code>
      */
     Pb_MEET_FACEID_PROJECTIVE_SIGN_OUT(115),
+    /**
+     * <pre>
+     * 投影显示开会(当天)日期,格式：2022年1月2日
+     * </pre>
+     *
+     * <code>Pb_MEET_FACEID_PROJECTIVE_DATE = 116;</code>
+     */
+    Pb_MEET_FACEID_PROJECTIVE_DATE(116),
+    /**
+     * <pre>
+     *投影自定义标题
+     * </pre>
+     *
+     * <code>Pb_MEET_FACEID_PROJECTIVE_CUSTOMTITLE1 = 117;</code>
+     */
+    Pb_MEET_FACEID_PROJECTIVE_CUSTOMTITLE1(117),
+    /**
+     * <pre>
+     *议题
+     * </pre>
+     *
+     * <code>Pb_MEET_FACEID_PROJECTIVE_AgendaInfo = 118;</code>
+     */
+    Pb_MEET_FACEID_PROJECTIVE_AgendaInfo(118),
+    /**
+     * <pre>
+     *投影logo的位置-大小 text
+     * </pre>
+     *
+     * <code>Pb_MEET_FACEID_PROJECTIVE_LOGO_SIZEGEO = 119;</code>
+     */
+    Pb_MEET_FACEID_PROJECTIVE_LOGO_SIZEGEO(119),
     UNRECOGNIZED(-1),
     ;
 
@@ -14033,6 +14354,38 @@ public final class InterfaceMacro {
      * <code>Pb_MEET_FACEID_PROJECTIVE_SIGN_OUT = 115;</code>
      */
     public static final int Pb_MEET_FACEID_PROJECTIVE_SIGN_OUT_VALUE = 115;
+    /**
+     * <pre>
+     * 投影显示开会(当天)日期,格式：2022年1月2日
+     * </pre>
+     *
+     * <code>Pb_MEET_FACEID_PROJECTIVE_DATE = 116;</code>
+     */
+    public static final int Pb_MEET_FACEID_PROJECTIVE_DATE_VALUE = 116;
+    /**
+     * <pre>
+     *投影自定义标题
+     * </pre>
+     *
+     * <code>Pb_MEET_FACEID_PROJECTIVE_CUSTOMTITLE1 = 117;</code>
+     */
+    public static final int Pb_MEET_FACEID_PROJECTIVE_CUSTOMTITLE1_VALUE = 117;
+    /**
+     * <pre>
+     *议题
+     * </pre>
+     *
+     * <code>Pb_MEET_FACEID_PROJECTIVE_AgendaInfo = 118;</code>
+     */
+    public static final int Pb_MEET_FACEID_PROJECTIVE_AgendaInfo_VALUE = 118;
+    /**
+     * <pre>
+     *投影logo的位置-大小 text
+     * </pre>
+     *
+     * <code>Pb_MEET_FACEID_PROJECTIVE_LOGO_SIZEGEO = 119;</code>
+     */
+    public static final int Pb_MEET_FACEID_PROJECTIVE_LOGO_SIZEGEO_VALUE = 119;
 
 
     public final int getNumber() {
@@ -14094,6 +14447,10 @@ public final class InterfaceMacro {
         case 113: return Pb_MEET_FACEID_PROJECTIVE_SIGN_ALL;
         case 114: return Pb_MEET_FACEID_PROJECTIVE_SIGN_IN;
         case 115: return Pb_MEET_FACEID_PROJECTIVE_SIGN_OUT;
+        case 116: return Pb_MEET_FACEID_PROJECTIVE_DATE;
+        case 117: return Pb_MEET_FACEID_PROJECTIVE_CUSTOMTITLE1;
+        case 118: return Pb_MEET_FACEID_PROJECTIVE_AgendaInfo;
+        case 119: return Pb_MEET_FACEID_PROJECTIVE_LOGO_SIZEGEO;
         default: return null;
       }
     }

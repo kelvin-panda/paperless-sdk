@@ -66,6 +66,16 @@
             android:exported="true"
             android:foregroundServiceType="mediaProjection"/>
         <service
+            android:name="com.xlk.paperless.sdk.screen.mode1.H265ScreenShareService"
+            android:enabled="true"
+            android:exported="true"
+            android:foregroundServiceType="mediaProjection"/>
+        <service
+            android:name="com.xlk.paperless.sdk.screen.mode2.H265ImageReaderService"
+            android:enabled="true"
+            android:exported="true"
+            android:foregroundServiceType="mediaProjection"/>
+        <service
             android:name="com.xlk.paperless.sdk.screen.sync.SyncScreenRecord"
             android:enabled="true"
             android:exported="true"

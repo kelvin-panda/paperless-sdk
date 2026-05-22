@@ -53,7 +53,7 @@ object PerformanceMonitor {
         private fun logReceived() {
             LogUtils.d(
                 TAG,
-                "resId: $resId Received frames: $receivedFrames , Dropped frames: ${droppedFrames > 0} $droppedFrames"
+                "resId: $resId Received frames: $receivedFrames , Dropped frames: $droppedFrames"
             )
         }
 

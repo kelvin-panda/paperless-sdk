@@ -714,14 +714,14 @@ class PlayerControlView(context: Context, attrs: AttributeSet? = null) : FrameLa
     }
 
     private fun startDismissControlViewTimer() {
-        cancelDismissControlViewTimer()
-        mPostDismiss = true
-        postDelayed(dismissControlTask, mDismissControlTime)
+//        cancelDismissControlViewTimer()
+//        mPostDismiss = true
+//        postDelayed(dismissControlTask, mDismissControlTime)
     }
 
     private fun cancelDismissControlViewTimer() {
-        mPostDismiss = false
-        removeCallbacks(dismissControlTask)
+//        mPostDismiss = false
+//        removeCallbacks(dismissControlTask)
     }
 
     //</editor-fold>

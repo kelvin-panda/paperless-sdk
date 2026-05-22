@@ -6,6 +6,7 @@ import android.os.Build
 import com.blankj.utilcode.util.LogUtils
 import com.blankj.utilcode.util.SPUtils
 import com.google.protobuf.ByteString
+import com.google.protobuf.InvalidProtocolBufferException
 import com.mogujie.tt.protobuf.InterfaceAdmin
 import com.mogujie.tt.protobuf.InterfaceAgenda
 import com.mogujie.tt.protobuf.InterfaceBase
@@ -20,17 +21,23 @@ import com.mogujie.tt.protobuf.InterfaceFile
 import com.mogujie.tt.protobuf.InterfaceFilescorevote
 import com.mogujie.tt.protobuf.InterfaceIM
 import com.mogujie.tt.protobuf.InterfaceMacro
-import com.mogujie.tt.protobuf.InterfaceMacro.Pb_Type
 import com.mogujie.tt.protobuf.InterfaceMacro.Pb_Method
+import com.mogujie.tt.protobuf.InterfaceMacro.Pb_Type
 import com.mogujie.tt.protobuf.InterfaceMeet
 import com.mogujie.tt.protobuf.InterfaceMeetfunction
 import com.mogujie.tt.protobuf.InterfaceMeetuserdef
+import com.mogujie.tt.protobuf.InterfaceMeetuserdef.pbui_Item_ComplexMeetInfo
+import com.mogujie.tt.protobuf.InterfaceMeetuserdef.pbui_Type_QueComplexMeetInfo
+import com.mogujie.tt.protobuf.InterfaceMeetuserdef.pbui_Type_SingleQueComplexMeetInfo
 import com.mogujie.tt.protobuf.InterfaceMember
 import com.mogujie.tt.protobuf.InterfacePerson
 import com.mogujie.tt.protobuf.InterfacePlaymedia
 import com.mogujie.tt.protobuf.InterfacePublicinfo
+import com.mogujie.tt.protobuf.InterfacePublicinfo.pbui_Type_QueComplexPubInfo
+import com.mogujie.tt.protobuf.InterfacePublicinfo.pbui_Type_SingleQueComplexPubInfo
 import com.mogujie.tt.protobuf.InterfaceRoom
 import com.mogujie.tt.protobuf.InterfaceSignin
+import com.mogujie.tt.protobuf.InterfaceStatistic
 import com.mogujie.tt.protobuf.InterfaceStop
 import com.mogujie.tt.protobuf.InterfaceStream
 import com.mogujie.tt.protobuf.InterfaceSystemlog
@@ -4112,4 +4119,245 @@ open class BaseJni {
     }
 
     //</editor-fold>
+
+    //<editor-fold desc="会议统计相关">
+
+    /**
+     * @param meetingId 会议id =0表示当前会议
+     */
+    fun queryMeetingStatistic(meetingId: Int) {
+        Call.callMethod(
+            Pb_Type.Pb_TYPE_MEET_INTERFACE_MEETSTATISTIC.number,
+            Pb_Method.Pb_METHOD_MEET_INTERFACE_QUERY.number,
+            InterfaceStatistic.pbui_Type_MeetDoReqStatistic.newBuilder()
+                .setMeetingid(meetingId)
+                .build().toByteArray()
+        )
+    }
+
+    /**
+     * 查询会议详细统计
+     * @param meetid 如果指定meetid会忽略roomid和时间字段匹配
+     * @param markid
+     * @param json 格式：`{"ver":1,"meetid":1,"roomid":1,"start":"123145645","end":"123145645"}`
+     *
+     * - 返回时的json格式
+     * ```json
+     * {"totalpages":"100","totalduration":"180000","meetnum":23,"data":[{"meetid":1,"name":"text","roomid":1,"starttime":"4236892000","endtime":"42368972000","duration":"7200","devicenum":20,"memnum":20,"signnum":18,"filenum":41,"filesize":"8989898989","totalpages":"860","streamcnt":1,"screencnt":1,"filecnt":1,"chatcount":1,"servicecnt":1,"wbopencnt":1,"wbusecnt":1,"votecnt":1,"electioncnt":1,"questioncnt":1,"bulletcnt":1}]}
+     * ```
+     */
+    fun queryMeetingStatisticDetail(meetid: Int, markid: Long, json: String) {
+        Call.callMethod(
+            Pb_Type.Pb_TYPE_MEET_INTERFACE_MEETSTATISTIC.number,
+            Pb_Method.Pb_METHOD_MEET_INTERFACE_DETAILINFO.number,
+            InterfaceBase.pbui_Type_SmartJsonProtol.newBuilder()
+                .setMeetid(meetid)
+                .setMarkid(markid)
+                .setJson(json.s2b())
+                .build().toByteArray()
+        )
+    }
+
+    /**
+     * 查询会议统计
+     * fixed32 quartertype=1;//参见 Pb_MeetStatisticFlag 定义
+     * //统计时间段
+     * fixed32 startyear=2; //
+     * fixed32 startmonth=3; ////按月查询才有效
+     * fixed32 endyear=4; //
+     * fixed32 endmonth=5; ////按月查询才有效
+     *
+     */
+    fun queryMeetingStatisticByMonth(quarterType: Int, startyear: Int, startMonth: Int, endyear: Int, endMonth: Int) {
+        Call.callMethod(
+            Pb_Type.Pb_TYPE_MEET_INTERFACE_MEETSTATISTIC.number,
+            Pb_Method.Pb_METHOD_MEET_INTERFACE_ASK.number,
+            InterfaceStatistic.pbui_Type_QueryQuarterStatistic.newBuilder()
+                .setQuartertype(quarterType)
+                .setStartyear(startyear)
+                .setStartmonth(startMonth)
+                .setEndyear(endyear)
+                .setEndmonth(endMonth)
+                .build().toByteArray()
+        );
+    }
+
+    //</editor-fold>
+
+
+    //<editor-fold desc="复合全局自定义数据相关\20260424">
+    /**
+     * 复合查询全局自定义数据
+     *
+     * @param typ [InterfacePublicinfo.PB_COMPLEX_PUBLIC_TYP.PB_COMPLEX_PUBLIC_TYP_ADMIN_VALUE]
+     * @param id  根据 typ 输入需要的值
+     * @return [InterfacePublicinfo.pbui_Type_QueComplexPubInfo]
+     */
+    fun complexQueryGlobalCustomData(typ: Int, id: Int): pbui_Type_QueComplexPubInfo? {
+        val bytes: ByteArray? = Call.callMethod(
+            Pb_Type.Pb_TYPE_MEET_INTERFACE_COMPLEXPUBLICUSERDEF.getNumber(),
+            Pb_Method.Pb_METHOD_MEET_INTERFACE_QUERY.getNumber(),
+            pbui_Type_QueComplexPubInfo.newBuilder()
+                .setTyp(typ)
+                .setId1(id)
+                .addItem(
+                    InterfacePublicinfo.pbui_Item_ComplexPubInfo.newBuilder()
+                        .setDataid(InterfacePublicinfo.Pb_CMX_PUBFILE_DATAID.Pb_CMX_PUBFILE_DATAID_BASE_VALUE)
+                        .build()
+                )
+                .build().toByteArray()
+        )
+        if (bytes != null) {
+            try {
+                return pbui_Type_QueComplexPubInfo.parseFrom(bytes)
+            } catch (e: InvalidProtocolBufferException) {
+                throw java.lang.RuntimeException(e)
+            }
+        }
+        return null
+    }
+
+    /**
+     * 复合修改全局自定义数据
+     *
+     * @param meetid 会议id
+     * @param json   <json>{"item":[{"agendaid":1,"status":1},{"agendaid":2,"status":0}]}</json>
+     */
+    fun complexModifyGlobalCustomData(meetid: Int, json: String) {
+        Call.callMethod(
+            Pb_Type.Pb_TYPE_MEET_INTERFACE_COMPLEXPUBLICUSERDEF.getNumber(),
+            Pb_Method.Pb_METHOD_MEET_INTERFACE_MODIFY.getNumber(),
+            InterfaceBase.pbui_Type_SmartJsonProtol.newBuilder()
+                .setMeetid(meetid)
+                .setMarkid(System.currentTimeMillis()) //utc微秒数或者其它用户的标识ID
+                .setJson(json.s2b())
+                .build().toByteArray()
+        )
+    }
+
+    /**
+     * 复合指定查询全局自定义数据
+     *
+     * @param typ    [InterfacePublicinfo.PB_COMPLEX_PUBLIC_TYP.PB_COMPLEX_PUBLIC_TYP_ADMIN_VALUE]
+     * @param id     根据 typ 输入需要的值
+     * @param dataid
+     * @param text
+     * @return [InterfacePublicinfo.pbui_Type_SingleQueComplexPubInfo]
+     */
+    fun complexQueryGlobalCustomDataBy(typ: Int, id: Int, dataid: Int, text: String): pbui_Type_SingleQueComplexPubInfo? {
+        val bytes: ByteArray? = Call.callMethod(
+            Pb_Type.Pb_TYPE_MEET_INTERFACE_COMPLEXPUBLICUSERDEF.getNumber(),
+            Pb_Method.Pb_METHOD_MEET_INTERFACE_SINGLEQUERYBYID.getNumber(),
+            pbui_Type_SingleQueComplexPubInfo.newBuilder()
+                .setTyp(typ)
+                .setId1(id)
+                .setDataid(dataid)
+                .setPtext(text.s2b())
+                .build().toByteArray()
+        )
+        if (bytes != null) {
+            try {
+                return pbui_Type_SingleQueComplexPubInfo.parseFrom(bytes)
+            } catch (e: InvalidProtocolBufferException) {
+                throw java.lang.RuntimeException(e)
+            }
+        }
+        return null
+    }
+    //</editor-fold>
+
+    //<editor-fold desc="复合会议自定义数据相关\20260424">
+    /**
+     *
+     * 复合查询会议自定义数据
+     *
+     * @param typ
+     * @param id1
+     * @param id2
+     * @param id3
+     * @param item
+     * @return
+     */
+    fun complexQueryMeetCustomData(
+        typ: Int,
+        id1: Int,
+        id2: Int,
+        id3: Int,
+        item: pbui_Item_ComplexMeetInfo?
+    ): pbui_Type_QueComplexMeetInfo? {
+        val bytes: ByteArray? = Call.callMethod(
+            Pb_Type.Pb_TYPE_MEET_INTERFACE_COMPLEXMEETUSERDEF.getNumber(),
+            Pb_Method.Pb_METHOD_MEET_INTERFACE_QUERY.getNumber(),
+            pbui_Type_QueComplexMeetInfo.newBuilder()
+                .setTyp(typ)
+                .setId1(id1)
+                .setId2(id2)
+                .setId3(id3)
+                .addItem(item)
+                .build().toByteArray()
+        )
+        if (bytes != null) {
+            try {
+                return pbui_Type_QueComplexMeetInfo.parseFrom(bytes)
+            } catch (e: InvalidProtocolBufferException) {
+                throw RuntimeException(e)
+            }
+        }
+        return null
+    }
+
+
+    /**
+     * 复合修改会议自定义数据
+     *
+     * @param meetid 会议id
+     * @param json   <json>{"item":[{"agendaid":1,"status":1},{"agendaid":2,"status":0}]}</json>
+     */
+    fun complexModifyMeetCustomData(meetid: Int, json: String) {
+        Call.callMethod(
+            Pb_Type.Pb_TYPE_MEET_INTERFACE_COMPLEXMEETUSERDEF.getNumber(),
+            Pb_Method.Pb_METHOD_MEET_INTERFACE_MODIFY.getNumber(),
+            InterfaceBase.pbui_Type_SmartJsonProtol.newBuilder()
+                .setMeetid(meetid)
+                .setMarkid(System.currentTimeMillis()) //utc微秒数或者其它用户的标识ID
+                .setJson(json.s2b())
+                .build().toByteArray()
+        )
+    }
+
+    /**
+     * 复合指定查询会议自定义数据
+     */
+    fun complexQueryMeetCustomDataBy(
+        typ: Int,
+        id1: Int,
+        id2: Int,
+        id3: Int,
+        dataid: Int,
+        text: String
+    ): pbui_Type_SingleQueComplexMeetInfo? {
+        val bytes: ByteArray? = Call.callMethod(
+            Pb_Type.Pb_TYPE_MEET_INTERFACE_COMPLEXMEETUSERDEF.getNumber(),
+            Pb_Method.Pb_METHOD_MEET_INTERFACE_SINGLEQUERYBYID.getNumber(),
+            pbui_Type_SingleQueComplexMeetInfo.newBuilder()
+                .setTyp(typ)
+                .setId1(id1)
+                .setId2(id2)
+                .setId3(id3)
+                .setDataid(dataid)
+                .setPtext(text.s2b())
+                .build().toByteArray()
+        )
+        if (bytes != null) {
+            try {
+                return pbui_Type_SingleQueComplexMeetInfo.parseFrom(bytes)
+            } catch (e: InvalidProtocolBufferException) {
+                throw RuntimeException(e)
+            }
+        }
+        return null
+    }
+    //</editor-fold>
+
+
 }

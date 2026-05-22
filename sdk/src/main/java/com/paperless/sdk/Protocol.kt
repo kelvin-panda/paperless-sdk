@@ -1,8 +1,5 @@
 package com.paperless.sdk
 
-import java.lang.annotation.Retention
-import java.lang.annotation.RetentionPolicy
-
 /**
  * ## 存放sdk的协议值，与其他端是通用的
  *  @author : Administrator

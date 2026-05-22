@@ -197,9 +197,15 @@ Type_FastCreateMeet METHOD_MEET_INTERFACE_SUBMIT
 "dev":[
 {
 "id":"0x110000",//设备id
+"speed":"128k/s",
+"cpu":"36%",
+"memory":"4/8 G",
 "dy":20,//剩余电量百分比
 "kj":"50",//已经使用的存储空间百分比
 "wifi":"",//当前的wifi名称
+"uper":50,//升级包下载进度
+"uerr":0,//升级状态码 参见meetinterface_type.h MEET_UPDATE_STATUS_IDLE
+"umsg":"",//升级状态日志信息
 "time":"75897562"//utc 秒
 },
 {
@@ -207,6 +213,9 @@ Type_FastCreateMeet METHOD_MEET_INTERFACE_SUBMIT
 "dy":26,//剩余电量百分比
 "kj":"55",//已经使用的存储空间百分比
 "wifi":"",//当前的wifi名称
+"uper":50,//升级包下载进度
+"uerr":0,//升级状态码 参见meetinterface_type.h MEET_UPDATE_STATUS_IDLE
+"umsg":"",//升级状态日志信息
 "time":"75897599"//utc 秒
 }
 ]
@@ -251,7 +260,7 @@ Type_FastCreateMeet METHOD_MEET_INTERFACE_SUBMIT
 ///end//////////////////////////////////////////////////////////////////////
 
 ///start//////////////////////////////////////////////////////////////////////
-//SmartJsonProtol 批量添加文件到目录 add on 20250612
+//SmartJsonProtol 批量修改可控会场 add on 20250612
 //type=TYPE_MEET_INTERFACE_MANAGEROOM
 //methon=METHOD_MEET_INTERFACE_DUMP
 /*
@@ -261,5 +270,20 @@ Type_FastCreateMeet METHOD_MEET_INTERFACE_SUBMIT
 "roomid":[1,2]//数组为空或者字段不存在则表示执行清空可控会场
 }
  */
+///end//////////////////////////////////////////////////////////////////////
+
+///start//////////////////////////////////////////////////////////////////////
+//SmartJsonProtol 参会人员文件自定义数据协议 add on 20250619
+//type=TYPE_MEET_INTERFACE_MANAGEROOM
+//methon=METHOD_MEET_INTERFACE_DUMP
+/*
+{
+"opentime":"123456789",//文件打开的时间 utc秒
+"tag":["good","bad"],//用户给文件加的标签
+"opinion":"这个方案非常好",//文件评价
+"score":"9.5",//文件评分
+"mark":0//表示文件是否设置了收藏
+}
+*/
 ///end//////////////////////////////////////////////////////////////////////
 #endif

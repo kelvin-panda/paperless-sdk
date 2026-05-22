@@ -87,6 +87,822 @@ public final class InterfaceMeetuserdef {
     // @@protoc_insertion_point(enum_scope:Pb_MeetUserDefFlag)
   }
 
+  /**
+   * <pre>
+   *&#47;////////comlexmeetuserdef///////////////////////////////////////////////////////////////
+   * </pre>
+   *
+   * Protobuf enum {@code PB_COMPLEX_MEET_FLAG}
+   */
+  public enum PB_COMPLEX_MEET_FLAG
+      implements com.google.protobuf.Internal.EnumLite {
+    /**
+     * <code>PB_COMPLEX_MEET_FLAG_ZERO = 0;</code>
+     */
+    PB_COMPLEX_MEET_FLAG_ZERO(0),
+    /**
+     * <pre>
+     *表示清空再修改，否则就是更新
+     * </pre>
+     *
+     * <code>PB_COMPLEX_MEET_FLAG_CLEARSAVE = 1;</code>
+     */
+    PB_COMPLEX_MEET_FLAG_CLEARSAVE(1),
+    UNRECOGNIZED(-1),
+    ;
+
+    /**
+     * <code>PB_COMPLEX_MEET_FLAG_ZERO = 0;</code>
+     */
+    public static final int PB_COMPLEX_MEET_FLAG_ZERO_VALUE = 0;
+    /**
+     * <pre>
+     *表示清空再修改，否则就是更新
+     * </pre>
+     *
+     * <code>PB_COMPLEX_MEET_FLAG_CLEARSAVE = 1;</code>
+     */
+    public static final int PB_COMPLEX_MEET_FLAG_CLEARSAVE_VALUE = 1;
+
+
+    public final int getNumber() {
+      return value;
+    }
+
+    /**
+     * @deprecated Use {@link #forNumber(int)} instead.
+     */
+    @java.lang.Deprecated
+    public static PB_COMPLEX_MEET_FLAG valueOf(int value) {
+      return forNumber(value);
+    }
+
+    public static PB_COMPLEX_MEET_FLAG forNumber(int value) {
+      switch (value) {
+        case 0: return PB_COMPLEX_MEET_FLAG_ZERO;
+        case 1: return PB_COMPLEX_MEET_FLAG_CLEARSAVE;
+        default: return null;
+      }
+    }
+
+    public static com.google.protobuf.Internal.EnumLiteMap<PB_COMPLEX_MEET_FLAG>
+        internalGetValueMap() {
+      return internalValueMap;
+    }
+    private static final com.google.protobuf.Internal.EnumLiteMap<
+        PB_COMPLEX_MEET_FLAG> internalValueMap =
+          new com.google.protobuf.Internal.EnumLiteMap<PB_COMPLEX_MEET_FLAG>() {
+            public PB_COMPLEX_MEET_FLAG findValueByNumber(int number) {
+              return PB_COMPLEX_MEET_FLAG.forNumber(number);
+            }
+          };
+
+    private final int value;
+
+    private PB_COMPLEX_MEET_FLAG(int value) {
+      this.value = value;
+    }
+
+    // @@protoc_insertion_point(enum_scope:PB_COMPLEX_MEET_FLAG)
+  }
+
+  /**
+   * <pre>
+   *会根据typ和id1，在删除指定的id1时会关联删除这些自定义数据
+   *typ最大值不能超过255
+   *datid最大值不能超过255
+   * </pre>
+   *
+   * Protobuf enum {@code Pb_COMPLEX_MEET_TYP}
+   */
+  public enum Pb_COMPLEX_MEET_TYP
+      implements com.google.protobuf.Internal.EnumLite {
+    /**
+     * <code>Pb_COMPLEX_MEET_TYP_ZERO = 0;</code>
+     */
+    Pb_COMPLEX_MEET_TYP_ZERO(0),
+    /**
+     * <pre>
+     *&#47;typ=1指参会人员,id1是人员id，id2=0,id3=0
+     * </pre>
+     *
+     * <code>Pb_COMPLEX_MEET_TYP_MEMBER = 1;</code>
+     */
+    Pb_COMPLEX_MEET_TYP_MEMBER(1),
+    /**
+     * <pre>
+     *typ=2指议题,id1是议题id，id2=0,id3=0
+     * </pre>
+     *
+     * <code>Pb_COMPLEX_MEET_TYP_AGENDA = 2;</code>
+     */
+    Pb_COMPLEX_MEET_TYP_AGENDA(2),
+    /**
+     * <pre>
+     *typ=3指目录,id1是目录id，id2=0,id3=0
+     * </pre>
+     *
+     * <code>Pb_COMPLEX_MEET_TYP_DIR = 3;</code>
+     */
+    Pb_COMPLEX_MEET_TYP_DIR(3),
+    /**
+     * <pre>
+     *typ=4指目录文件,id1是目录id，id2=文件id,id3=0
+     * </pre>
+     *
+     * <code>Pb_COMPLEX_MEET_TYP_FILE = 4;</code>
+     */
+    Pb_COMPLEX_MEET_TYP_FILE(4),
+    /**
+     * <pre>
+     *typ=5指参会人文件,id1是参会人员id，id2=目录id,id3=文件id
+     * </pre>
+     *
+     * <code>Pb_COMPLEX_MEET_TYP_MEMFILE = 5;</code>
+     */
+    Pb_COMPLEX_MEET_TYP_MEMFILE(5),
+    /**
+     * <pre>
+     *typ=6指投票,id1是投票id，id2=0,id3=0
+     * </pre>
+     *
+     * <code>Pb_COMPLEX_MEET_TYP_VOTE = 6;</code>
+     */
+    Pb_COMPLEX_MEET_TYP_VOTE(6),
+    /**
+     * <pre>
+     *typ=6指新投票,id1是投票id，id2=0,id3=0
+     * </pre>
+     *
+     * <code>Pb_COMPLEX_MEET_TYP_NEWVOTE = 7;</code>
+     */
+    Pb_COMPLEX_MEET_TYP_NEWVOTE(7),
+    UNRECOGNIZED(-1),
+    ;
+
+    /**
+     * <code>Pb_COMPLEX_MEET_TYP_ZERO = 0;</code>
+     */
+    public static final int Pb_COMPLEX_MEET_TYP_ZERO_VALUE = 0;
+    /**
+     * <pre>
+     *&#47;typ=1指参会人员,id1是人员id，id2=0,id3=0
+     * </pre>
+     *
+     * <code>Pb_COMPLEX_MEET_TYP_MEMBER = 1;</code>
+     */
+    public static final int Pb_COMPLEX_MEET_TYP_MEMBER_VALUE = 1;
+    /**
+     * <pre>
+     *typ=2指议题,id1是议题id，id2=0,id3=0
+     * </pre>
+     *
+     * <code>Pb_COMPLEX_MEET_TYP_AGENDA = 2;</code>
+     */
+    public static final int Pb_COMPLEX_MEET_TYP_AGENDA_VALUE = 2;
+    /**
+     * <pre>
+     *typ=3指目录,id1是目录id，id2=0,id3=0
+     * </pre>
+     *
+     * <code>Pb_COMPLEX_MEET_TYP_DIR = 3;</code>
+     */
+    public static final int Pb_COMPLEX_MEET_TYP_DIR_VALUE = 3;
+    /**
+     * <pre>
+     *typ=4指目录文件,id1是目录id，id2=文件id,id3=0
+     * </pre>
+     *
+     * <code>Pb_COMPLEX_MEET_TYP_FILE = 4;</code>
+     */
+    public static final int Pb_COMPLEX_MEET_TYP_FILE_VALUE = 4;
+    /**
+     * <pre>
+     *typ=5指参会人文件,id1是参会人员id，id2=目录id,id3=文件id
+     * </pre>
+     *
+     * <code>Pb_COMPLEX_MEET_TYP_MEMFILE = 5;</code>
+     */
+    public static final int Pb_COMPLEX_MEET_TYP_MEMFILE_VALUE = 5;
+    /**
+     * <pre>
+     *typ=6指投票,id1是投票id，id2=0,id3=0
+     * </pre>
+     *
+     * <code>Pb_COMPLEX_MEET_TYP_VOTE = 6;</code>
+     */
+    public static final int Pb_COMPLEX_MEET_TYP_VOTE_VALUE = 6;
+    /**
+     * <pre>
+     *typ=6指新投票,id1是投票id，id2=0,id3=0
+     * </pre>
+     *
+     * <code>Pb_COMPLEX_MEET_TYP_NEWVOTE = 7;</code>
+     */
+    public static final int Pb_COMPLEX_MEET_TYP_NEWVOTE_VALUE = 7;
+
+
+    public final int getNumber() {
+      return value;
+    }
+
+    /**
+     * @deprecated Use {@link #forNumber(int)} instead.
+     */
+    @java.lang.Deprecated
+    public static Pb_COMPLEX_MEET_TYP valueOf(int value) {
+      return forNumber(value);
+    }
+
+    public static Pb_COMPLEX_MEET_TYP forNumber(int value) {
+      switch (value) {
+        case 0: return Pb_COMPLEX_MEET_TYP_ZERO;
+        case 1: return Pb_COMPLEX_MEET_TYP_MEMBER;
+        case 2: return Pb_COMPLEX_MEET_TYP_AGENDA;
+        case 3: return Pb_COMPLEX_MEET_TYP_DIR;
+        case 4: return Pb_COMPLEX_MEET_TYP_FILE;
+        case 5: return Pb_COMPLEX_MEET_TYP_MEMFILE;
+        case 6: return Pb_COMPLEX_MEET_TYP_VOTE;
+        case 7: return Pb_COMPLEX_MEET_TYP_NEWVOTE;
+        default: return null;
+      }
+    }
+
+    public static com.google.protobuf.Internal.EnumLiteMap<Pb_COMPLEX_MEET_TYP>
+        internalGetValueMap() {
+      return internalValueMap;
+    }
+    private static final com.google.protobuf.Internal.EnumLiteMap<
+        Pb_COMPLEX_MEET_TYP> internalValueMap =
+          new com.google.protobuf.Internal.EnumLiteMap<Pb_COMPLEX_MEET_TYP>() {
+            public Pb_COMPLEX_MEET_TYP findValueByNumber(int number) {
+              return Pb_COMPLEX_MEET_TYP.forNumber(number);
+            }
+          };
+
+    private final int value;
+
+    private Pb_COMPLEX_MEET_TYP(int value) {
+      this.value = value;
+    }
+
+    // @@protoc_insertion_point(enum_scope:Pb_COMPLEX_MEET_TYP)
+  }
+
+  /**
+   * <pre>
+   *约定各typ下的dataid=1用于存放基本信息
+   *typ=COMPLEX_MEET_TYP_MEMBER
+   * </pre>
+   *
+   * Protobuf enum {@code Pb_CMX_MEET_MEM_DATAID}
+   */
+  public enum Pb_CMX_MEET_MEM_DATAID
+      implements com.google.protobuf.Internal.EnumLite {
+    /**
+     * <code>Pb_CMX_MEET_MEM_DATAID_ZERO = 0;</code>
+     */
+    Pb_CMX_MEET_MEM_DATAID_ZERO(0),
+    /**
+     * <pre>
+     *目录文件的基本信息
+     * </pre>
+     *
+     * <code>Pb_CMX_MEET_MEM_DATAID_BASE = 1;</code>
+     */
+    Pb_CMX_MEET_MEM_DATAID_BASE(1),
+    UNRECOGNIZED(-1),
+    ;
+
+    /**
+     * <code>Pb_CMX_MEET_MEM_DATAID_ZERO = 0;</code>
+     */
+    public static final int Pb_CMX_MEET_MEM_DATAID_ZERO_VALUE = 0;
+    /**
+     * <pre>
+     *目录文件的基本信息
+     * </pre>
+     *
+     * <code>Pb_CMX_MEET_MEM_DATAID_BASE = 1;</code>
+     */
+    public static final int Pb_CMX_MEET_MEM_DATAID_BASE_VALUE = 1;
+
+
+    public final int getNumber() {
+      return value;
+    }
+
+    /**
+     * @deprecated Use {@link #forNumber(int)} instead.
+     */
+    @java.lang.Deprecated
+    public static Pb_CMX_MEET_MEM_DATAID valueOf(int value) {
+      return forNumber(value);
+    }
+
+    public static Pb_CMX_MEET_MEM_DATAID forNumber(int value) {
+      switch (value) {
+        case 0: return Pb_CMX_MEET_MEM_DATAID_ZERO;
+        case 1: return Pb_CMX_MEET_MEM_DATAID_BASE;
+        default: return null;
+      }
+    }
+
+    public static com.google.protobuf.Internal.EnumLiteMap<Pb_CMX_MEET_MEM_DATAID>
+        internalGetValueMap() {
+      return internalValueMap;
+    }
+    private static final com.google.protobuf.Internal.EnumLiteMap<
+        Pb_CMX_MEET_MEM_DATAID> internalValueMap =
+          new com.google.protobuf.Internal.EnumLiteMap<Pb_CMX_MEET_MEM_DATAID>() {
+            public Pb_CMX_MEET_MEM_DATAID findValueByNumber(int number) {
+              return Pb_CMX_MEET_MEM_DATAID.forNumber(number);
+            }
+          };
+
+    private final int value;
+
+    private Pb_CMX_MEET_MEM_DATAID(int value) {
+      this.value = value;
+    }
+
+    // @@protoc_insertion_point(enum_scope:Pb_CMX_MEET_MEM_DATAID)
+  }
+
+  /**
+   * <pre>
+   *typ=COMPLEX_MEET_TYP_AGENDA
+   * </pre>
+   *
+   * Protobuf enum {@code Pb_CMX_MEET_AGENDA_DATAID}
+   */
+  public enum Pb_CMX_MEET_AGENDA_DATAID
+      implements com.google.protobuf.Internal.EnumLite {
+    /**
+     * <code>Pb_CMX_MEET_AGENDA_DATAID_ZERO = 0;</code>
+     */
+    Pb_CMX_MEET_AGENDA_DATAID_ZERO(0),
+    /**
+     * <pre>
+     *目录文件的基本信息
+     * </pre>
+     *
+     * <code>Pb_CMX_MEET_AGENDA_DATAID_BASE = 1;</code>
+     */
+    Pb_CMX_MEET_AGENDA_DATAID_BASE(1),
+    UNRECOGNIZED(-1),
+    ;
+
+    /**
+     * <code>Pb_CMX_MEET_AGENDA_DATAID_ZERO = 0;</code>
+     */
+    public static final int Pb_CMX_MEET_AGENDA_DATAID_ZERO_VALUE = 0;
+    /**
+     * <pre>
+     *目录文件的基本信息
+     * </pre>
+     *
+     * <code>Pb_CMX_MEET_AGENDA_DATAID_BASE = 1;</code>
+     */
+    public static final int Pb_CMX_MEET_AGENDA_DATAID_BASE_VALUE = 1;
+
+
+    public final int getNumber() {
+      return value;
+    }
+
+    /**
+     * @deprecated Use {@link #forNumber(int)} instead.
+     */
+    @java.lang.Deprecated
+    public static Pb_CMX_MEET_AGENDA_DATAID valueOf(int value) {
+      return forNumber(value);
+    }
+
+    public static Pb_CMX_MEET_AGENDA_DATAID forNumber(int value) {
+      switch (value) {
+        case 0: return Pb_CMX_MEET_AGENDA_DATAID_ZERO;
+        case 1: return Pb_CMX_MEET_AGENDA_DATAID_BASE;
+        default: return null;
+      }
+    }
+
+    public static com.google.protobuf.Internal.EnumLiteMap<Pb_CMX_MEET_AGENDA_DATAID>
+        internalGetValueMap() {
+      return internalValueMap;
+    }
+    private static final com.google.protobuf.Internal.EnumLiteMap<
+        Pb_CMX_MEET_AGENDA_DATAID> internalValueMap =
+          new com.google.protobuf.Internal.EnumLiteMap<Pb_CMX_MEET_AGENDA_DATAID>() {
+            public Pb_CMX_MEET_AGENDA_DATAID findValueByNumber(int number) {
+              return Pb_CMX_MEET_AGENDA_DATAID.forNumber(number);
+            }
+          };
+
+    private final int value;
+
+    private Pb_CMX_MEET_AGENDA_DATAID(int value) {
+      this.value = value;
+    }
+
+    // @@protoc_insertion_point(enum_scope:Pb_CMX_MEET_AGENDA_DATAID)
+  }
+
+  /**
+   * <pre>
+   *typ=COMPLEX_MEET_TYP_DIR
+   * </pre>
+   *
+   * Protobuf enum {@code Pb_CMX_MEET_DIR_DATAID}
+   */
+  public enum Pb_CMX_MEET_DIR_DATAID
+      implements com.google.protobuf.Internal.EnumLite {
+    /**
+     * <code>Pb_CMX_MEET_DIR_DATAID_ZERO = 0;</code>
+     */
+    Pb_CMX_MEET_DIR_DATAID_ZERO(0),
+    /**
+     * <pre>
+     *目录文件的基本信息
+     * </pre>
+     *
+     * <code>Pb_CMX_MEET_DIR_DATAID_BASE = 1;</code>
+     */
+    Pb_CMX_MEET_DIR_DATAID_BASE(1),
+    UNRECOGNIZED(-1),
+    ;
+
+    /**
+     * <code>Pb_CMX_MEET_DIR_DATAID_ZERO = 0;</code>
+     */
+    public static final int Pb_CMX_MEET_DIR_DATAID_ZERO_VALUE = 0;
+    /**
+     * <pre>
+     *目录文件的基本信息
+     * </pre>
+     *
+     * <code>Pb_CMX_MEET_DIR_DATAID_BASE = 1;</code>
+     */
+    public static final int Pb_CMX_MEET_DIR_DATAID_BASE_VALUE = 1;
+
+
+    public final int getNumber() {
+      return value;
+    }
+
+    /**
+     * @deprecated Use {@link #forNumber(int)} instead.
+     */
+    @java.lang.Deprecated
+    public static Pb_CMX_MEET_DIR_DATAID valueOf(int value) {
+      return forNumber(value);
+    }
+
+    public static Pb_CMX_MEET_DIR_DATAID forNumber(int value) {
+      switch (value) {
+        case 0: return Pb_CMX_MEET_DIR_DATAID_ZERO;
+        case 1: return Pb_CMX_MEET_DIR_DATAID_BASE;
+        default: return null;
+      }
+    }
+
+    public static com.google.protobuf.Internal.EnumLiteMap<Pb_CMX_MEET_DIR_DATAID>
+        internalGetValueMap() {
+      return internalValueMap;
+    }
+    private static final com.google.protobuf.Internal.EnumLiteMap<
+        Pb_CMX_MEET_DIR_DATAID> internalValueMap =
+          new com.google.protobuf.Internal.EnumLiteMap<Pb_CMX_MEET_DIR_DATAID>() {
+            public Pb_CMX_MEET_DIR_DATAID findValueByNumber(int number) {
+              return Pb_CMX_MEET_DIR_DATAID.forNumber(number);
+            }
+          };
+
+    private final int value;
+
+    private Pb_CMX_MEET_DIR_DATAID(int value) {
+      this.value = value;
+    }
+
+    // @@protoc_insertion_point(enum_scope:Pb_CMX_MEET_DIR_DATAID)
+  }
+
+  /**
+   * <pre>
+   *typ=COMPLEX_MEET_TYP_FILE
+   * </pre>
+   *
+   * Protobuf enum {@code Pb_CMX_MEET_FILE_DATAID}
+   */
+  public enum Pb_CMX_MEET_FILE_DATAID
+      implements com.google.protobuf.Internal.EnumLite {
+    /**
+     * <code>Pb_CMX_MEET_FILE_DATAID_ZERO = 0;</code>
+     */
+    Pb_CMX_MEET_FILE_DATAID_ZERO(0),
+    /**
+     * <pre>
+     *目录文件的基本信息
+     * </pre>
+     *
+     * <code>Pb_CMX_MEET_FILE_DATAID_BASE = 1;</code>
+     */
+    Pb_CMX_MEET_FILE_DATAID_BASE(1),
+    UNRECOGNIZED(-1),
+    ;
+
+    /**
+     * <code>Pb_CMX_MEET_FILE_DATAID_ZERO = 0;</code>
+     */
+    public static final int Pb_CMX_MEET_FILE_DATAID_ZERO_VALUE = 0;
+    /**
+     * <pre>
+     *目录文件的基本信息
+     * </pre>
+     *
+     * <code>Pb_CMX_MEET_FILE_DATAID_BASE = 1;</code>
+     */
+    public static final int Pb_CMX_MEET_FILE_DATAID_BASE_VALUE = 1;
+
+
+    public final int getNumber() {
+      return value;
+    }
+
+    /**
+     * @deprecated Use {@link #forNumber(int)} instead.
+     */
+    @java.lang.Deprecated
+    public static Pb_CMX_MEET_FILE_DATAID valueOf(int value) {
+      return forNumber(value);
+    }
+
+    public static Pb_CMX_MEET_FILE_DATAID forNumber(int value) {
+      switch (value) {
+        case 0: return Pb_CMX_MEET_FILE_DATAID_ZERO;
+        case 1: return Pb_CMX_MEET_FILE_DATAID_BASE;
+        default: return null;
+      }
+    }
+
+    public static com.google.protobuf.Internal.EnumLiteMap<Pb_CMX_MEET_FILE_DATAID>
+        internalGetValueMap() {
+      return internalValueMap;
+    }
+    private static final com.google.protobuf.Internal.EnumLiteMap<
+        Pb_CMX_MEET_FILE_DATAID> internalValueMap =
+          new com.google.protobuf.Internal.EnumLiteMap<Pb_CMX_MEET_FILE_DATAID>() {
+            public Pb_CMX_MEET_FILE_DATAID findValueByNumber(int number) {
+              return Pb_CMX_MEET_FILE_DATAID.forNumber(number);
+            }
+          };
+
+    private final int value;
+
+    private Pb_CMX_MEET_FILE_DATAID(int value) {
+      this.value = value;
+    }
+
+    // @@protoc_insertion_point(enum_scope:Pb_CMX_MEET_FILE_DATAID)
+  }
+
+  /**
+   * <pre>
+   *typ=COMPLEX_MEET_TYP_MEMFILE
+   * </pre>
+   *
+   * Protobuf enum {@code Pb_CMX_MEET_MEEFILE_DATAID}
+   */
+  public enum Pb_CMX_MEET_MEEFILE_DATAID
+      implements com.google.protobuf.Internal.EnumLite {
+    /**
+     * <code>Pb_CMX_MEET_MEEFILE_DATAID_ZERO = 0;</code>
+     */
+    Pb_CMX_MEET_MEEFILE_DATAID_ZERO(0),
+    /**
+     * <pre>
+     *目录文件的基本信息
+     * </pre>
+     *
+     * <code>Pb_CMX_MEET_MEEFILE_DATAID_BASE = 1;</code>
+     */
+    Pb_CMX_MEET_MEEFILE_DATAID_BASE(1),
+    UNRECOGNIZED(-1),
+    ;
+
+    /**
+     * <code>Pb_CMX_MEET_MEEFILE_DATAID_ZERO = 0;</code>
+     */
+    public static final int Pb_CMX_MEET_MEEFILE_DATAID_ZERO_VALUE = 0;
+    /**
+     * <pre>
+     *目录文件的基本信息
+     * </pre>
+     *
+     * <code>Pb_CMX_MEET_MEEFILE_DATAID_BASE = 1;</code>
+     */
+    public static final int Pb_CMX_MEET_MEEFILE_DATAID_BASE_VALUE = 1;
+
+
+    public final int getNumber() {
+      return value;
+    }
+
+    /**
+     * @deprecated Use {@link #forNumber(int)} instead.
+     */
+    @java.lang.Deprecated
+    public static Pb_CMX_MEET_MEEFILE_DATAID valueOf(int value) {
+      return forNumber(value);
+    }
+
+    public static Pb_CMX_MEET_MEEFILE_DATAID forNumber(int value) {
+      switch (value) {
+        case 0: return Pb_CMX_MEET_MEEFILE_DATAID_ZERO;
+        case 1: return Pb_CMX_MEET_MEEFILE_DATAID_BASE;
+        default: return null;
+      }
+    }
+
+    public static com.google.protobuf.Internal.EnumLiteMap<Pb_CMX_MEET_MEEFILE_DATAID>
+        internalGetValueMap() {
+      return internalValueMap;
+    }
+    private static final com.google.protobuf.Internal.EnumLiteMap<
+        Pb_CMX_MEET_MEEFILE_DATAID> internalValueMap =
+          new com.google.protobuf.Internal.EnumLiteMap<Pb_CMX_MEET_MEEFILE_DATAID>() {
+            public Pb_CMX_MEET_MEEFILE_DATAID findValueByNumber(int number) {
+              return Pb_CMX_MEET_MEEFILE_DATAID.forNumber(number);
+            }
+          };
+
+    private final int value;
+
+    private Pb_CMX_MEET_MEEFILE_DATAID(int value) {
+      this.value = value;
+    }
+
+    // @@protoc_insertion_point(enum_scope:Pb_CMX_MEET_MEEFILE_DATAID)
+  }
+
+  /**
+   * <pre>
+   *typ=COMPLEX_MEET_TYP_VOTE
+   * </pre>
+   *
+   * Protobuf enum {@code Pb_CMX_MEET_VOTE_DATAID}
+   */
+  public enum Pb_CMX_MEET_VOTE_DATAID
+      implements com.google.protobuf.Internal.EnumLite {
+    /**
+     * <code>Pb_CMX_MEET_VOTE_DATAID_ZERO = 0;</code>
+     */
+    Pb_CMX_MEET_VOTE_DATAID_ZERO(0),
+    /**
+     * <pre>
+     *目录文件的基本信息
+     * </pre>
+     *
+     * <code>Pb_CMX_MEET_VOTE_DATAID_BASE = 1;</code>
+     */
+    Pb_CMX_MEET_VOTE_DATAID_BASE(1),
+    UNRECOGNIZED(-1),
+    ;
+
+    /**
+     * <code>Pb_CMX_MEET_VOTE_DATAID_ZERO = 0;</code>
+     */
+    public static final int Pb_CMX_MEET_VOTE_DATAID_ZERO_VALUE = 0;
+    /**
+     * <pre>
+     *目录文件的基本信息
+     * </pre>
+     *
+     * <code>Pb_CMX_MEET_VOTE_DATAID_BASE = 1;</code>
+     */
+    public static final int Pb_CMX_MEET_VOTE_DATAID_BASE_VALUE = 1;
+
+
+    public final int getNumber() {
+      return value;
+    }
+
+    /**
+     * @deprecated Use {@link #forNumber(int)} instead.
+     */
+    @java.lang.Deprecated
+    public static Pb_CMX_MEET_VOTE_DATAID valueOf(int value) {
+      return forNumber(value);
+    }
+
+    public static Pb_CMX_MEET_VOTE_DATAID forNumber(int value) {
+      switch (value) {
+        case 0: return Pb_CMX_MEET_VOTE_DATAID_ZERO;
+        case 1: return Pb_CMX_MEET_VOTE_DATAID_BASE;
+        default: return null;
+      }
+    }
+
+    public static com.google.protobuf.Internal.EnumLiteMap<Pb_CMX_MEET_VOTE_DATAID>
+        internalGetValueMap() {
+      return internalValueMap;
+    }
+    private static final com.google.protobuf.Internal.EnumLiteMap<
+        Pb_CMX_MEET_VOTE_DATAID> internalValueMap =
+          new com.google.protobuf.Internal.EnumLiteMap<Pb_CMX_MEET_VOTE_DATAID>() {
+            public Pb_CMX_MEET_VOTE_DATAID findValueByNumber(int number) {
+              return Pb_CMX_MEET_VOTE_DATAID.forNumber(number);
+            }
+          };
+
+    private final int value;
+
+    private Pb_CMX_MEET_VOTE_DATAID(int value) {
+      this.value = value;
+    }
+
+    // @@protoc_insertion_point(enum_scope:Pb_CMX_MEET_VOTE_DATAID)
+  }
+
+  /**
+   * <pre>
+   *typ=COMPLEX_MEET_TYP_NEWVOTE
+   * </pre>
+   *
+   * Protobuf enum {@code Pb_CMX_MEET_NEWVOTE_DATAID}
+   */
+  public enum Pb_CMX_MEET_NEWVOTE_DATAID
+      implements com.google.protobuf.Internal.EnumLite {
+    /**
+     * <code>Pb_CMX_MEET_NEWVOTE_DATAID_ZERO = 0;</code>
+     */
+    Pb_CMX_MEET_NEWVOTE_DATAID_ZERO(0),
+    /**
+     * <pre>
+     *目录文件的基本信息
+     * </pre>
+     *
+     * <code>Pb_CMX_MEET_NEWVOTE_DATAID_BASE = 1;</code>
+     */
+    Pb_CMX_MEET_NEWVOTE_DATAID_BASE(1),
+    UNRECOGNIZED(-1),
+    ;
+
+    /**
+     * <code>Pb_CMX_MEET_NEWVOTE_DATAID_ZERO = 0;</code>
+     */
+    public static final int Pb_CMX_MEET_NEWVOTE_DATAID_ZERO_VALUE = 0;
+    /**
+     * <pre>
+     *目录文件的基本信息
+     * </pre>
+     *
+     * <code>Pb_CMX_MEET_NEWVOTE_DATAID_BASE = 1;</code>
+     */
+    public static final int Pb_CMX_MEET_NEWVOTE_DATAID_BASE_VALUE = 1;
+
+
+    public final int getNumber() {
+      return value;
+    }
+
+    /**
+     * @deprecated Use {@link #forNumber(int)} instead.
+     */
+    @java.lang.Deprecated
+    public static Pb_CMX_MEET_NEWVOTE_DATAID valueOf(int value) {
+      return forNumber(value);
+    }
+
+    public static Pb_CMX_MEET_NEWVOTE_DATAID forNumber(int value) {
+      switch (value) {
+        case 0: return Pb_CMX_MEET_NEWVOTE_DATAID_ZERO;
+        case 1: return Pb_CMX_MEET_NEWVOTE_DATAID_BASE;
+        default: return null;
+      }
+    }
+
+    public static com.google.protobuf.Internal.EnumLiteMap<Pb_CMX_MEET_NEWVOTE_DATAID>
+        internalGetValueMap() {
+      return internalValueMap;
+    }
+    private static final com.google.protobuf.Internal.EnumLiteMap<
+        Pb_CMX_MEET_NEWVOTE_DATAID> internalValueMap =
+          new com.google.protobuf.Internal.EnumLiteMap<Pb_CMX_MEET_NEWVOTE_DATAID>() {
+            public Pb_CMX_MEET_NEWVOTE_DATAID findValueByNumber(int number) {
+              return Pb_CMX_MEET_NEWVOTE_DATAID.forNumber(number);
+            }
+          };
+
+    private final int value;
+
+    private Pb_CMX_MEET_NEWVOTE_DATAID(int value) {
+      this.value = value;
+    }
+
+    // @@protoc_insertion_point(enum_scope:Pb_CMX_MEET_NEWVOTE_DATAID)
+  }
+
   public interface pbui_Type_MeetUserdefItemInfoOrBuilder extends
       // @@protoc_insertion_point(interface_extends:pbui_Type_MeetUserdefItemInfo)
       com.google.protobuf.MessageLiteOrBuilder {
@@ -1027,6 +1843,2678 @@ public final class InterfaceMeetuserdef {
     private static volatile com.google.protobuf.Parser<pbui_Type_MeetUserdefInfo> PARSER;
 
     public static com.google.protobuf.Parser<pbui_Type_MeetUserdefInfo> parser() {
+      return DEFAULT_INSTANCE.getParserForType();
+    }
+  }
+
+  public interface pbui_Item_ComplexMeetInfoOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:pbui_Item_ComplexMeetInfo)
+      com.google.protobuf.MessageLiteOrBuilder {
+
+    /**
+     * <code>optional fixed32 typ = 1;</code>
+     */
+    int getTyp();
+
+    /**
+     * <code>optional fixed32 id1 = 2;</code>
+     */
+    int getId1();
+
+    /**
+     * <code>optional fixed32 id2 = 3;</code>
+     */
+    int getId2();
+
+    /**
+     * <code>optional fixed32 id3 = 4;</code>
+     */
+    int getId3();
+
+    /**
+     * <code>optional fixed32 dataid = 5;</code>
+     */
+    int getDataid();
+
+    /**
+     * <code>optional bytes ptext = 6;</code>
+     */
+    com.google.protobuf.ByteString getPtext();
+  }
+  /**
+   * Protobuf type {@code pbui_Item_ComplexMeetInfo}
+   */
+  public  static final class pbui_Item_ComplexMeetInfo extends
+      com.google.protobuf.GeneratedMessageLite<
+          pbui_Item_ComplexMeetInfo, pbui_Item_ComplexMeetInfo.Builder> implements
+      // @@protoc_insertion_point(message_implements:pbui_Item_ComplexMeetInfo)
+      pbui_Item_ComplexMeetInfoOrBuilder {
+    private pbui_Item_ComplexMeetInfo() {
+      ptext_ = com.google.protobuf.ByteString.EMPTY;
+    }
+    public static final int TYP_FIELD_NUMBER = 1;
+    private int typ_;
+    /**
+     * <code>optional fixed32 typ = 1;</code>
+     */
+    public int getTyp() {
+      return typ_;
+    }
+    /**
+     * <code>optional fixed32 typ = 1;</code>
+     */
+    private void setTyp(int value) {
+      
+      typ_ = value;
+    }
+    /**
+     * <code>optional fixed32 typ = 1;</code>
+     */
+    private void clearTyp() {
+      
+      typ_ = 0;
+    }
+
+    public static final int ID1_FIELD_NUMBER = 2;
+    private int id1_;
+    /**
+     * <code>optional fixed32 id1 = 2;</code>
+     */
+    public int getId1() {
+      return id1_;
+    }
+    /**
+     * <code>optional fixed32 id1 = 2;</code>
+     */
+    private void setId1(int value) {
+      
+      id1_ = value;
+    }
+    /**
+     * <code>optional fixed32 id1 = 2;</code>
+     */
+    private void clearId1() {
+      
+      id1_ = 0;
+    }
+
+    public static final int ID2_FIELD_NUMBER = 3;
+    private int id2_;
+    /**
+     * <code>optional fixed32 id2 = 3;</code>
+     */
+    public int getId2() {
+      return id2_;
+    }
+    /**
+     * <code>optional fixed32 id2 = 3;</code>
+     */
+    private void setId2(int value) {
+      
+      id2_ = value;
+    }
+    /**
+     * <code>optional fixed32 id2 = 3;</code>
+     */
+    private void clearId2() {
+      
+      id2_ = 0;
+    }
+
+    public static final int ID3_FIELD_NUMBER = 4;
+    private int id3_;
+    /**
+     * <code>optional fixed32 id3 = 4;</code>
+     */
+    public int getId3() {
+      return id3_;
+    }
+    /**
+     * <code>optional fixed32 id3 = 4;</code>
+     */
+    private void setId3(int value) {
+      
+      id3_ = value;
+    }
+    /**
+     * <code>optional fixed32 id3 = 4;</code>
+     */
+    private void clearId3() {
+      
+      id3_ = 0;
+    }
+
+    public static final int DATAID_FIELD_NUMBER = 5;
+    private int dataid_;
+    /**
+     * <code>optional fixed32 dataid = 5;</code>
+     */
+    public int getDataid() {
+      return dataid_;
+    }
+    /**
+     * <code>optional fixed32 dataid = 5;</code>
+     */
+    private void setDataid(int value) {
+      
+      dataid_ = value;
+    }
+    /**
+     * <code>optional fixed32 dataid = 5;</code>
+     */
+    private void clearDataid() {
+      
+      dataid_ = 0;
+    }
+
+    public static final int PTEXT_FIELD_NUMBER = 6;
+    private com.google.protobuf.ByteString ptext_;
+    /**
+     * <code>optional bytes ptext = 6;</code>
+     */
+    public com.google.protobuf.ByteString getPtext() {
+      return ptext_;
+    }
+    /**
+     * <code>optional bytes ptext = 6;</code>
+     */
+    private void setPtext(com.google.protobuf.ByteString value) {
+      if (value == null) {
+    throw new NullPointerException();
+  }
+  
+      ptext_ = value;
+    }
+    /**
+     * <code>optional bytes ptext = 6;</code>
+     */
+    private void clearPtext() {
+      
+      ptext_ = getDefaultInstance().getPtext();
+    }
+
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      if (typ_ != 0) {
+        output.writeFixed32(1, typ_);
+      }
+      if (id1_ != 0) {
+        output.writeFixed32(2, id1_);
+      }
+      if (id2_ != 0) {
+        output.writeFixed32(3, id2_);
+      }
+      if (id3_ != 0) {
+        output.writeFixed32(4, id3_);
+      }
+      if (dataid_ != 0) {
+        output.writeFixed32(5, dataid_);
+      }
+      if (!ptext_.isEmpty()) {
+        output.writeBytes(6, ptext_);
+      }
+    }
+
+    public int getSerializedSize() {
+      int size = memoizedSerializedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (typ_ != 0) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeFixed32Size(1, typ_);
+      }
+      if (id1_ != 0) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeFixed32Size(2, id1_);
+      }
+      if (id2_ != 0) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeFixed32Size(3, id2_);
+      }
+      if (id3_ != 0) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeFixed32Size(4, id3_);
+      }
+      if (dataid_ != 0) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeFixed32Size(5, dataid_);
+      }
+      if (!ptext_.isEmpty()) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBytesSize(6, ptext_);
+      }
+      memoizedSerializedSize = size;
+      return size;
+    }
+
+    public static com.mogujie.tt.protobuf.InterfaceMeetuserdef.pbui_Item_ComplexMeetInfo parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return com.google.protobuf.GeneratedMessageLite.parseFrom(
+          DEFAULT_INSTANCE, data);
+    }
+    public static com.mogujie.tt.protobuf.InterfaceMeetuserdef.pbui_Item_ComplexMeetInfo parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return com.google.protobuf.GeneratedMessageLite.parseFrom(
+          DEFAULT_INSTANCE, data, extensionRegistry);
+    }
+    public static com.mogujie.tt.protobuf.InterfaceMeetuserdef.pbui_Item_ComplexMeetInfo parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return com.google.protobuf.GeneratedMessageLite.parseFrom(
+          DEFAULT_INSTANCE, data);
+    }
+    public static com.mogujie.tt.protobuf.InterfaceMeetuserdef.pbui_Item_ComplexMeetInfo parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return com.google.protobuf.GeneratedMessageLite.parseFrom(
+          DEFAULT_INSTANCE, data, extensionRegistry);
+    }
+    public static com.mogujie.tt.protobuf.InterfaceMeetuserdef.pbui_Item_ComplexMeetInfo parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageLite.parseFrom(
+          DEFAULT_INSTANCE, input);
+    }
+    public static com.mogujie.tt.protobuf.InterfaceMeetuserdef.pbui_Item_ComplexMeetInfo parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageLite.parseFrom(
+          DEFAULT_INSTANCE, input, extensionRegistry);
+    }
+    public static com.mogujie.tt.protobuf.InterfaceMeetuserdef.pbui_Item_ComplexMeetInfo parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return parseDelimitedFrom(DEFAULT_INSTANCE, input);
+    }
+    public static com.mogujie.tt.protobuf.InterfaceMeetuserdef.pbui_Item_ComplexMeetInfo parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return parseDelimitedFrom(DEFAULT_INSTANCE, input, extensionRegistry);
+    }
+    public static com.mogujie.tt.protobuf.InterfaceMeetuserdef.pbui_Item_ComplexMeetInfo parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageLite.parseFrom(
+          DEFAULT_INSTANCE, input);
+    }
+    public static com.mogujie.tt.protobuf.InterfaceMeetuserdef.pbui_Item_ComplexMeetInfo parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageLite.parseFrom(
+          DEFAULT_INSTANCE, input, extensionRegistry);
+    }
+
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(com.mogujie.tt.protobuf.InterfaceMeetuserdef.pbui_Item_ComplexMeetInfo prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+
+    /**
+     * Protobuf type {@code pbui_Item_ComplexMeetInfo}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageLite.Builder<
+          com.mogujie.tt.protobuf.InterfaceMeetuserdef.pbui_Item_ComplexMeetInfo, Builder> implements
+        // @@protoc_insertion_point(builder_implements:pbui_Item_ComplexMeetInfo)
+        com.mogujie.tt.protobuf.InterfaceMeetuserdef.pbui_Item_ComplexMeetInfoOrBuilder {
+      // Construct using com.mogujie.tt.protobuf.InterfaceMeetuserdef.pbui_Item_ComplexMeetInfo.newBuilder()
+      private Builder() {
+        super(DEFAULT_INSTANCE);
+      }
+
+
+      /**
+       * <code>optional fixed32 typ = 1;</code>
+       */
+      public int getTyp() {
+        return instance.getTyp();
+      }
+      /**
+       * <code>optional fixed32 typ = 1;</code>
+       */
+      public Builder setTyp(int value) {
+        copyOnWrite();
+        instance.setTyp(value);
+        return this;
+      }
+      /**
+       * <code>optional fixed32 typ = 1;</code>
+       */
+      public Builder clearTyp() {
+        copyOnWrite();
+        instance.clearTyp();
+        return this;
+      }
+
+      /**
+       * <code>optional fixed32 id1 = 2;</code>
+       */
+      public int getId1() {
+        return instance.getId1();
+      }
+      /**
+       * <code>optional fixed32 id1 = 2;</code>
+       */
+      public Builder setId1(int value) {
+        copyOnWrite();
+        instance.setId1(value);
+        return this;
+      }
+      /**
+       * <code>optional fixed32 id1 = 2;</code>
+       */
+      public Builder clearId1() {
+        copyOnWrite();
+        instance.clearId1();
+        return this;
+      }
+
+      /**
+       * <code>optional fixed32 id2 = 3;</code>
+       */
+      public int getId2() {
+        return instance.getId2();
+      }
+      /**
+       * <code>optional fixed32 id2 = 3;</code>
+       */
+      public Builder setId2(int value) {
+        copyOnWrite();
+        instance.setId2(value);
+        return this;
+      }
+      /**
+       * <code>optional fixed32 id2 = 3;</code>
+       */
+      public Builder clearId2() {
+        copyOnWrite();
+        instance.clearId2();
+        return this;
+      }
+
+      /**
+       * <code>optional fixed32 id3 = 4;</code>
+       */
+      public int getId3() {
+        return instance.getId3();
+      }
+      /**
+       * <code>optional fixed32 id3 = 4;</code>
+       */
+      public Builder setId3(int value) {
+        copyOnWrite();
+        instance.setId3(value);
+        return this;
+      }
+      /**
+       * <code>optional fixed32 id3 = 4;</code>
+       */
+      public Builder clearId3() {
+        copyOnWrite();
+        instance.clearId3();
+        return this;
+      }
+
+      /**
+       * <code>optional fixed32 dataid = 5;</code>
+       */
+      public int getDataid() {
+        return instance.getDataid();
+      }
+      /**
+       * <code>optional fixed32 dataid = 5;</code>
+       */
+      public Builder setDataid(int value) {
+        copyOnWrite();
+        instance.setDataid(value);
+        return this;
+      }
+      /**
+       * <code>optional fixed32 dataid = 5;</code>
+       */
+      public Builder clearDataid() {
+        copyOnWrite();
+        instance.clearDataid();
+        return this;
+      }
+
+      /**
+       * <code>optional bytes ptext = 6;</code>
+       */
+      public com.google.protobuf.ByteString getPtext() {
+        return instance.getPtext();
+      }
+      /**
+       * <code>optional bytes ptext = 6;</code>
+       */
+      public Builder setPtext(com.google.protobuf.ByteString value) {
+        copyOnWrite();
+        instance.setPtext(value);
+        return this;
+      }
+      /**
+       * <code>optional bytes ptext = 6;</code>
+       */
+      public Builder clearPtext() {
+        copyOnWrite();
+        instance.clearPtext();
+        return this;
+      }
+
+      // @@protoc_insertion_point(builder_scope:pbui_Item_ComplexMeetInfo)
+    }
+    protected final Object dynamicMethod(
+        com.google.protobuf.GeneratedMessageLite.MethodToInvoke method,
+        Object arg0, Object arg1) {
+      switch (method) {
+        case NEW_MUTABLE_INSTANCE: {
+          return new com.mogujie.tt.protobuf.InterfaceMeetuserdef.pbui_Item_ComplexMeetInfo();
+        }
+        case IS_INITIALIZED: {
+          return DEFAULT_INSTANCE;
+        }
+        case MAKE_IMMUTABLE: {
+          return null;
+        }
+        case NEW_BUILDER: {
+          return new Builder();
+        }
+        case VISIT: {
+          Visitor visitor = (Visitor) arg0;
+          com.mogujie.tt.protobuf.InterfaceMeetuserdef.pbui_Item_ComplexMeetInfo other = (com.mogujie.tt.protobuf.InterfaceMeetuserdef.pbui_Item_ComplexMeetInfo) arg1;
+          typ_ = visitor.visitInt(typ_ != 0, typ_,
+              other.typ_ != 0, other.typ_);
+          id1_ = visitor.visitInt(id1_ != 0, id1_,
+              other.id1_ != 0, other.id1_);
+          id2_ = visitor.visitInt(id2_ != 0, id2_,
+              other.id2_ != 0, other.id2_);
+          id3_ = visitor.visitInt(id3_ != 0, id3_,
+              other.id3_ != 0, other.id3_);
+          dataid_ = visitor.visitInt(dataid_ != 0, dataid_,
+              other.dataid_ != 0, other.dataid_);
+          ptext_ = visitor.visitByteString(ptext_ != com.google.protobuf.ByteString.EMPTY, ptext_,
+              other.ptext_ != com.google.protobuf.ByteString.EMPTY, other.ptext_);
+          if (visitor == com.google.protobuf.GeneratedMessageLite.MergeFromVisitor
+              .INSTANCE) {
+          }
+          return this;
+        }
+        case MERGE_FROM_STREAM: {
+          com.google.protobuf.CodedInputStream input =
+              (com.google.protobuf.CodedInputStream) arg0;
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry =
+              (com.google.protobuf.ExtensionRegistryLite) arg1;
+          try {
+            boolean done = false;
+            while (!done) {
+              int tag = input.readTag();
+              switch (tag) {
+                case 0:
+                  done = true;
+                  break;
+                default: {
+                  if (!input.skipField(tag)) {
+                    done = true;
+                  }
+                  break;
+                }
+                case 13: {
+
+                  typ_ = input.readFixed32();
+                  break;
+                }
+                case 21: {
+
+                  id1_ = input.readFixed32();
+                  break;
+                }
+                case 29: {
+
+                  id2_ = input.readFixed32();
+                  break;
+                }
+                case 37: {
+
+                  id3_ = input.readFixed32();
+                  break;
+                }
+                case 45: {
+
+                  dataid_ = input.readFixed32();
+                  break;
+                }
+                case 50: {
+
+                  ptext_ = input.readBytes();
+                  break;
+                }
+              }
+            }
+          } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+            throw new RuntimeException(e.setUnfinishedMessage(this));
+          } catch (java.io.IOException e) {
+            throw new RuntimeException(
+                new com.google.protobuf.InvalidProtocolBufferException(
+                    e.getMessage()).setUnfinishedMessage(this));
+          } finally {
+          }
+        }
+        case GET_DEFAULT_INSTANCE: {
+          return DEFAULT_INSTANCE;
+        }
+        case GET_PARSER: {
+          if (PARSER == null) {    synchronized (com.mogujie.tt.protobuf.InterfaceMeetuserdef.pbui_Item_ComplexMeetInfo.class) {
+              if (PARSER == null) {
+                PARSER = new DefaultInstanceBasedParser(DEFAULT_INSTANCE);
+              }
+            }
+          }
+          return PARSER;
+        }
+      }
+      throw new UnsupportedOperationException();
+    }
+
+
+    // @@protoc_insertion_point(class_scope:pbui_Item_ComplexMeetInfo)
+    private static final com.mogujie.tt.protobuf.InterfaceMeetuserdef.pbui_Item_ComplexMeetInfo DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new pbui_Item_ComplexMeetInfo();
+      DEFAULT_INSTANCE.makeImmutable();
+    }
+
+    public static com.mogujie.tt.protobuf.InterfaceMeetuserdef.pbui_Item_ComplexMeetInfo getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static volatile com.google.protobuf.Parser<pbui_Item_ComplexMeetInfo> PARSER;
+
+    public static com.google.protobuf.Parser<pbui_Item_ComplexMeetInfo> parser() {
+      return DEFAULT_INSTANCE.getParserForType();
+    }
+  }
+
+  public interface pbui_Type_QueComplexMeetInfoOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:pbui_Type_QueComplexMeetInfo)
+      com.google.protobuf.MessageLiteOrBuilder {
+
+    /**
+     * <pre>
+     *指定typ  定义 COMPLEX_PUBLIC_TYP_ADMIN
+     * </pre>
+     *
+     * <code>optional fixed32 typ = 1;</code>
+     */
+    int getTyp();
+
+    /**
+     * <pre>
+     *匹配id1 为0表示typ下的所有id
+     * </pre>
+     *
+     * <code>optional fixed32 id1 = 2;</code>
+     */
+    int getId1();
+
+    /**
+     * <pre>
+     *匹配id2 为0表示typ下的所有id
+     * </pre>
+     *
+     * <code>optional fixed32 id2 = 3;</code>
+     */
+    int getId2();
+
+    /**
+     * <pre>
+     *匹配id3 为0表示typ下的所有id
+     * </pre>
+     *
+     * <code>optional fixed32 id3 = 4;</code>
+     */
+    int getId3();
+
+    /**
+     * <code>repeated .pbui_Item_ComplexMeetInfo item = 5;</code>
+     */
+    java.util.List<com.mogujie.tt.protobuf.InterfaceMeetuserdef.pbui_Item_ComplexMeetInfo> 
+        getItemList();
+    /**
+     * <code>repeated .pbui_Item_ComplexMeetInfo item = 5;</code>
+     */
+    com.mogujie.tt.protobuf.InterfaceMeetuserdef.pbui_Item_ComplexMeetInfo getItem(int index);
+    /**
+     * <code>repeated .pbui_Item_ComplexMeetInfo item = 5;</code>
+     */
+    int getItemCount();
+  }
+  /**
+   * <pre>
+   *call
+   *type:TYPE_MEET_INTERFACE_COMPLEXMEETUSERDEF
+   *method: 
+   *query|使用Type_QueComplexPubInfo
+   * </pre>
+   *
+   * Protobuf type {@code pbui_Type_QueComplexMeetInfo}
+   */
+  public  static final class pbui_Type_QueComplexMeetInfo extends
+      com.google.protobuf.GeneratedMessageLite<
+          pbui_Type_QueComplexMeetInfo, pbui_Type_QueComplexMeetInfo.Builder> implements
+      // @@protoc_insertion_point(message_implements:pbui_Type_QueComplexMeetInfo)
+      pbui_Type_QueComplexMeetInfoOrBuilder {
+    private pbui_Type_QueComplexMeetInfo() {
+      item_ = emptyProtobufList();
+    }
+    private int bitField0_;
+    public static final int TYP_FIELD_NUMBER = 1;
+    private int typ_;
+    /**
+     * <pre>
+     *指定typ  定义 COMPLEX_PUBLIC_TYP_ADMIN
+     * </pre>
+     *
+     * <code>optional fixed32 typ = 1;</code>
+     */
+    public int getTyp() {
+      return typ_;
+    }
+    /**
+     * <pre>
+     *指定typ  定义 COMPLEX_PUBLIC_TYP_ADMIN
+     * </pre>
+     *
+     * <code>optional fixed32 typ = 1;</code>
+     */
+    private void setTyp(int value) {
+      
+      typ_ = value;
+    }
+    /**
+     * <pre>
+     *指定typ  定义 COMPLEX_PUBLIC_TYP_ADMIN
+     * </pre>
+     *
+     * <code>optional fixed32 typ = 1;</code>
+     */
+    private void clearTyp() {
+      
+      typ_ = 0;
+    }
+
+    public static final int ID1_FIELD_NUMBER = 2;
+    private int id1_;
+    /**
+     * <pre>
+     *匹配id1 为0表示typ下的所有id
+     * </pre>
+     *
+     * <code>optional fixed32 id1 = 2;</code>
+     */
+    public int getId1() {
+      return id1_;
+    }
+    /**
+     * <pre>
+     *匹配id1 为0表示typ下的所有id
+     * </pre>
+     *
+     * <code>optional fixed32 id1 = 2;</code>
+     */
+    private void setId1(int value) {
+      
+      id1_ = value;
+    }
+    /**
+     * <pre>
+     *匹配id1 为0表示typ下的所有id
+     * </pre>
+     *
+     * <code>optional fixed32 id1 = 2;</code>
+     */
+    private void clearId1() {
+      
+      id1_ = 0;
+    }
+
+    public static final int ID2_FIELD_NUMBER = 3;
+    private int id2_;
+    /**
+     * <pre>
+     *匹配id2 为0表示typ下的所有id
+     * </pre>
+     *
+     * <code>optional fixed32 id2 = 3;</code>
+     */
+    public int getId2() {
+      return id2_;
+    }
+    /**
+     * <pre>
+     *匹配id2 为0表示typ下的所有id
+     * </pre>
+     *
+     * <code>optional fixed32 id2 = 3;</code>
+     */
+    private void setId2(int value) {
+      
+      id2_ = value;
+    }
+    /**
+     * <pre>
+     *匹配id2 为0表示typ下的所有id
+     * </pre>
+     *
+     * <code>optional fixed32 id2 = 3;</code>
+     */
+    private void clearId2() {
+      
+      id2_ = 0;
+    }
+
+    public static final int ID3_FIELD_NUMBER = 4;
+    private int id3_;
+    /**
+     * <pre>
+     *匹配id3 为0表示typ下的所有id
+     * </pre>
+     *
+     * <code>optional fixed32 id3 = 4;</code>
+     */
+    public int getId3() {
+      return id3_;
+    }
+    /**
+     * <pre>
+     *匹配id3 为0表示typ下的所有id
+     * </pre>
+     *
+     * <code>optional fixed32 id3 = 4;</code>
+     */
+    private void setId3(int value) {
+      
+      id3_ = value;
+    }
+    /**
+     * <pre>
+     *匹配id3 为0表示typ下的所有id
+     * </pre>
+     *
+     * <code>optional fixed32 id3 = 4;</code>
+     */
+    private void clearId3() {
+      
+      id3_ = 0;
+    }
+
+    public static final int ITEM_FIELD_NUMBER = 5;
+    private com.google.protobuf.Internal.ProtobufList<com.mogujie.tt.protobuf.InterfaceMeetuserdef.pbui_Item_ComplexMeetInfo> item_;
+    /**
+     * <code>repeated .pbui_Item_ComplexMeetInfo item = 5;</code>
+     */
+    public java.util.List<com.mogujie.tt.protobuf.InterfaceMeetuserdef.pbui_Item_ComplexMeetInfo> getItemList() {
+      return item_;
+    }
+    /**
+     * <code>repeated .pbui_Item_ComplexMeetInfo item = 5;</code>
+     */
+    public java.util.List<? extends com.mogujie.tt.protobuf.InterfaceMeetuserdef.pbui_Item_ComplexMeetInfoOrBuilder> 
+        getItemOrBuilderList() {
+      return item_;
+    }
+    /**
+     * <code>repeated .pbui_Item_ComplexMeetInfo item = 5;</code>
+     */
+    public int getItemCount() {
+      return item_.size();
+    }
+    /**
+     * <code>repeated .pbui_Item_ComplexMeetInfo item = 5;</code>
+     */
+    public com.mogujie.tt.protobuf.InterfaceMeetuserdef.pbui_Item_ComplexMeetInfo getItem(int index) {
+      return item_.get(index);
+    }
+    /**
+     * <code>repeated .pbui_Item_ComplexMeetInfo item = 5;</code>
+     */
+    public com.mogujie.tt.protobuf.InterfaceMeetuserdef.pbui_Item_ComplexMeetInfoOrBuilder getItemOrBuilder(
+        int index) {
+      return item_.get(index);
+    }
+    private void ensureItemIsMutable() {
+      if (!item_.isModifiable()) {
+        item_ =
+            com.google.protobuf.GeneratedMessageLite.mutableCopy(item_);
+       }
+    }
+
+    /**
+     * <code>repeated .pbui_Item_ComplexMeetInfo item = 5;</code>
+     */
+    private void setItem(
+        int index, com.mogujie.tt.protobuf.InterfaceMeetuserdef.pbui_Item_ComplexMeetInfo value) {
+      if (value == null) {
+        throw new NullPointerException();
+      }
+      ensureItemIsMutable();
+      item_.set(index, value);
+    }
+    /**
+     * <code>repeated .pbui_Item_ComplexMeetInfo item = 5;</code>
+     */
+    private void setItem(
+        int index, com.mogujie.tt.protobuf.InterfaceMeetuserdef.pbui_Item_ComplexMeetInfo.Builder builderForValue) {
+      ensureItemIsMutable();
+      item_.set(index, builderForValue.build());
+    }
+    /**
+     * <code>repeated .pbui_Item_ComplexMeetInfo item = 5;</code>
+     */
+    private void addItem(com.mogujie.tt.protobuf.InterfaceMeetuserdef.pbui_Item_ComplexMeetInfo value) {
+      if (value == null) {
+        throw new NullPointerException();
+      }
+      ensureItemIsMutable();
+      item_.add(value);
+    }
+    /**
+     * <code>repeated .pbui_Item_ComplexMeetInfo item = 5;</code>
+     */
+    private void addItem(
+        int index, com.mogujie.tt.protobuf.InterfaceMeetuserdef.pbui_Item_ComplexMeetInfo value) {
+      if (value == null) {
+        throw new NullPointerException();
+      }
+      ensureItemIsMutable();
+      item_.add(index, value);
+    }
+    /**
+     * <code>repeated .pbui_Item_ComplexMeetInfo item = 5;</code>
+     */
+    private void addItem(
+        com.mogujie.tt.protobuf.InterfaceMeetuserdef.pbui_Item_ComplexMeetInfo.Builder builderForValue) {
+      ensureItemIsMutable();
+      item_.add(builderForValue.build());
+    }
+    /**
+     * <code>repeated .pbui_Item_ComplexMeetInfo item = 5;</code>
+     */
+    private void addItem(
+        int index, com.mogujie.tt.protobuf.InterfaceMeetuserdef.pbui_Item_ComplexMeetInfo.Builder builderForValue) {
+      ensureItemIsMutable();
+      item_.add(index, builderForValue.build());
+    }
+    /**
+     * <code>repeated .pbui_Item_ComplexMeetInfo item = 5;</code>
+     */
+    private void addAllItem(
+        java.lang.Iterable<? extends com.mogujie.tt.protobuf.InterfaceMeetuserdef.pbui_Item_ComplexMeetInfo> values) {
+      ensureItemIsMutable();
+      com.google.protobuf.AbstractMessageLite.addAll(
+          values, item_);
+    }
+    /**
+     * <code>repeated .pbui_Item_ComplexMeetInfo item = 5;</code>
+     */
+    private void clearItem() {
+      item_ = emptyProtobufList();
+    }
+    /**
+     * <code>repeated .pbui_Item_ComplexMeetInfo item = 5;</code>
+     */
+    private void removeItem(int index) {
+      ensureItemIsMutable();
+      item_.remove(index);
+    }
+
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      if (typ_ != 0) {
+        output.writeFixed32(1, typ_);
+      }
+      if (id1_ != 0) {
+        output.writeFixed32(2, id1_);
+      }
+      if (id2_ != 0) {
+        output.writeFixed32(3, id2_);
+      }
+      if (id3_ != 0) {
+        output.writeFixed32(4, id3_);
+      }
+      for (int i = 0; i < item_.size(); i++) {
+        output.writeMessage(5, item_.get(i));
+      }
+    }
+
+    public int getSerializedSize() {
+      int size = memoizedSerializedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (typ_ != 0) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeFixed32Size(1, typ_);
+      }
+      if (id1_ != 0) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeFixed32Size(2, id1_);
+      }
+      if (id2_ != 0) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeFixed32Size(3, id2_);
+      }
+      if (id3_ != 0) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeFixed32Size(4, id3_);
+      }
+      for (int i = 0; i < item_.size(); i++) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(5, item_.get(i));
+      }
+      memoizedSerializedSize = size;
+      return size;
+    }
+
+    public static com.mogujie.tt.protobuf.InterfaceMeetuserdef.pbui_Type_QueComplexMeetInfo parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return com.google.protobuf.GeneratedMessageLite.parseFrom(
+          DEFAULT_INSTANCE, data);
+    }
+    public static com.mogujie.tt.protobuf.InterfaceMeetuserdef.pbui_Type_QueComplexMeetInfo parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return com.google.protobuf.GeneratedMessageLite.parseFrom(
+          DEFAULT_INSTANCE, data, extensionRegistry);
+    }
+    public static com.mogujie.tt.protobuf.InterfaceMeetuserdef.pbui_Type_QueComplexMeetInfo parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return com.google.protobuf.GeneratedMessageLite.parseFrom(
+          DEFAULT_INSTANCE, data);
+    }
+    public static com.mogujie.tt.protobuf.InterfaceMeetuserdef.pbui_Type_QueComplexMeetInfo parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return com.google.protobuf.GeneratedMessageLite.parseFrom(
+          DEFAULT_INSTANCE, data, extensionRegistry);
+    }
+    public static com.mogujie.tt.protobuf.InterfaceMeetuserdef.pbui_Type_QueComplexMeetInfo parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageLite.parseFrom(
+          DEFAULT_INSTANCE, input);
+    }
+    public static com.mogujie.tt.protobuf.InterfaceMeetuserdef.pbui_Type_QueComplexMeetInfo parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageLite.parseFrom(
+          DEFAULT_INSTANCE, input, extensionRegistry);
+    }
+    public static com.mogujie.tt.protobuf.InterfaceMeetuserdef.pbui_Type_QueComplexMeetInfo parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return parseDelimitedFrom(DEFAULT_INSTANCE, input);
+    }
+    public static com.mogujie.tt.protobuf.InterfaceMeetuserdef.pbui_Type_QueComplexMeetInfo parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return parseDelimitedFrom(DEFAULT_INSTANCE, input, extensionRegistry);
+    }
+    public static com.mogujie.tt.protobuf.InterfaceMeetuserdef.pbui_Type_QueComplexMeetInfo parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageLite.parseFrom(
+          DEFAULT_INSTANCE, input);
+    }
+    public static com.mogujie.tt.protobuf.InterfaceMeetuserdef.pbui_Type_QueComplexMeetInfo parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageLite.parseFrom(
+          DEFAULT_INSTANCE, input, extensionRegistry);
+    }
+
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(com.mogujie.tt.protobuf.InterfaceMeetuserdef.pbui_Type_QueComplexMeetInfo prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+
+    /**
+     * <pre>
+     *call
+     *type:TYPE_MEET_INTERFACE_COMPLEXMEETUSERDEF
+     *method: 
+     *query|使用Type_QueComplexPubInfo
+     * </pre>
+     *
+     * Protobuf type {@code pbui_Type_QueComplexMeetInfo}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageLite.Builder<
+          com.mogujie.tt.protobuf.InterfaceMeetuserdef.pbui_Type_QueComplexMeetInfo, Builder> implements
+        // @@protoc_insertion_point(builder_implements:pbui_Type_QueComplexMeetInfo)
+        com.mogujie.tt.protobuf.InterfaceMeetuserdef.pbui_Type_QueComplexMeetInfoOrBuilder {
+      // Construct using com.mogujie.tt.protobuf.InterfaceMeetuserdef.pbui_Type_QueComplexMeetInfo.newBuilder()
+      private Builder() {
+        super(DEFAULT_INSTANCE);
+      }
+
+
+      /**
+       * <pre>
+       *指定typ  定义 COMPLEX_PUBLIC_TYP_ADMIN
+       * </pre>
+       *
+       * <code>optional fixed32 typ = 1;</code>
+       */
+      public int getTyp() {
+        return instance.getTyp();
+      }
+      /**
+       * <pre>
+       *指定typ  定义 COMPLEX_PUBLIC_TYP_ADMIN
+       * </pre>
+       *
+       * <code>optional fixed32 typ = 1;</code>
+       */
+      public Builder setTyp(int value) {
+        copyOnWrite();
+        instance.setTyp(value);
+        return this;
+      }
+      /**
+       * <pre>
+       *指定typ  定义 COMPLEX_PUBLIC_TYP_ADMIN
+       * </pre>
+       *
+       * <code>optional fixed32 typ = 1;</code>
+       */
+      public Builder clearTyp() {
+        copyOnWrite();
+        instance.clearTyp();
+        return this;
+      }
+
+      /**
+       * <pre>
+       *匹配id1 为0表示typ下的所有id
+       * </pre>
+       *
+       * <code>optional fixed32 id1 = 2;</code>
+       */
+      public int getId1() {
+        return instance.getId1();
+      }
+      /**
+       * <pre>
+       *匹配id1 为0表示typ下的所有id
+       * </pre>
+       *
+       * <code>optional fixed32 id1 = 2;</code>
+       */
+      public Builder setId1(int value) {
+        copyOnWrite();
+        instance.setId1(value);
+        return this;
+      }
+      /**
+       * <pre>
+       *匹配id1 为0表示typ下的所有id
+       * </pre>
+       *
+       * <code>optional fixed32 id1 = 2;</code>
+       */
+      public Builder clearId1() {
+        copyOnWrite();
+        instance.clearId1();
+        return this;
+      }
+
+      /**
+       * <pre>
+       *匹配id2 为0表示typ下的所有id
+       * </pre>
+       *
+       * <code>optional fixed32 id2 = 3;</code>
+       */
+      public int getId2() {
+        return instance.getId2();
+      }
+      /**
+       * <pre>
+       *匹配id2 为0表示typ下的所有id
+       * </pre>
+       *
+       * <code>optional fixed32 id2 = 3;</code>
+       */
+      public Builder setId2(int value) {
+        copyOnWrite();
+        instance.setId2(value);
+        return this;
+      }
+      /**
+       * <pre>
+       *匹配id2 为0表示typ下的所有id
+       * </pre>
+       *
+       * <code>optional fixed32 id2 = 3;</code>
+       */
+      public Builder clearId2() {
+        copyOnWrite();
+        instance.clearId2();
+        return this;
+      }
+
+      /**
+       * <pre>
+       *匹配id3 为0表示typ下的所有id
+       * </pre>
+       *
+       * <code>optional fixed32 id3 = 4;</code>
+       */
+      public int getId3() {
+        return instance.getId3();
+      }
+      /**
+       * <pre>
+       *匹配id3 为0表示typ下的所有id
+       * </pre>
+       *
+       * <code>optional fixed32 id3 = 4;</code>
+       */
+      public Builder setId3(int value) {
+        copyOnWrite();
+        instance.setId3(value);
+        return this;
+      }
+      /**
+       * <pre>
+       *匹配id3 为0表示typ下的所有id
+       * </pre>
+       *
+       * <code>optional fixed32 id3 = 4;</code>
+       */
+      public Builder clearId3() {
+        copyOnWrite();
+        instance.clearId3();
+        return this;
+      }
+
+      /**
+       * <code>repeated .pbui_Item_ComplexMeetInfo item = 5;</code>
+       */
+      public java.util.List<com.mogujie.tt.protobuf.InterfaceMeetuserdef.pbui_Item_ComplexMeetInfo> getItemList() {
+        return java.util.Collections.unmodifiableList(
+            instance.getItemList());
+      }
+      /**
+       * <code>repeated .pbui_Item_ComplexMeetInfo item = 5;</code>
+       */
+      public int getItemCount() {
+        return instance.getItemCount();
+      }/**
+       * <code>repeated .pbui_Item_ComplexMeetInfo item = 5;</code>
+       */
+      public com.mogujie.tt.protobuf.InterfaceMeetuserdef.pbui_Item_ComplexMeetInfo getItem(int index) {
+        return instance.getItem(index);
+      }
+      /**
+       * <code>repeated .pbui_Item_ComplexMeetInfo item = 5;</code>
+       */
+      public Builder setItem(
+          int index, com.mogujie.tt.protobuf.InterfaceMeetuserdef.pbui_Item_ComplexMeetInfo value) {
+        copyOnWrite();
+        instance.setItem(index, value);
+        return this;
+      }
+      /**
+       * <code>repeated .pbui_Item_ComplexMeetInfo item = 5;</code>
+       */
+      public Builder setItem(
+          int index, com.mogujie.tt.protobuf.InterfaceMeetuserdef.pbui_Item_ComplexMeetInfo.Builder builderForValue) {
+        copyOnWrite();
+        instance.setItem(index, builderForValue);
+        return this;
+      }
+      /**
+       * <code>repeated .pbui_Item_ComplexMeetInfo item = 5;</code>
+       */
+      public Builder addItem(com.mogujie.tt.protobuf.InterfaceMeetuserdef.pbui_Item_ComplexMeetInfo value) {
+        copyOnWrite();
+        instance.addItem(value);
+        return this;
+      }
+      /**
+       * <code>repeated .pbui_Item_ComplexMeetInfo item = 5;</code>
+       */
+      public Builder addItem(
+          int index, com.mogujie.tt.protobuf.InterfaceMeetuserdef.pbui_Item_ComplexMeetInfo value) {
+        copyOnWrite();
+        instance.addItem(index, value);
+        return this;
+      }
+      /**
+       * <code>repeated .pbui_Item_ComplexMeetInfo item = 5;</code>
+       */
+      public Builder addItem(
+          com.mogujie.tt.protobuf.InterfaceMeetuserdef.pbui_Item_ComplexMeetInfo.Builder builderForValue) {
+        copyOnWrite();
+        instance.addItem(builderForValue);
+        return this;
+      }
+      /**
+       * <code>repeated .pbui_Item_ComplexMeetInfo item = 5;</code>
+       */
+      public Builder addItem(
+          int index, com.mogujie.tt.protobuf.InterfaceMeetuserdef.pbui_Item_ComplexMeetInfo.Builder builderForValue) {
+        copyOnWrite();
+        instance.addItem(index, builderForValue);
+        return this;
+      }
+      /**
+       * <code>repeated .pbui_Item_ComplexMeetInfo item = 5;</code>
+       */
+      public Builder addAllItem(
+          java.lang.Iterable<? extends com.mogujie.tt.protobuf.InterfaceMeetuserdef.pbui_Item_ComplexMeetInfo> values) {
+        copyOnWrite();
+        instance.addAllItem(values);
+        return this;
+      }
+      /**
+       * <code>repeated .pbui_Item_ComplexMeetInfo item = 5;</code>
+       */
+      public Builder clearItem() {
+        copyOnWrite();
+        instance.clearItem();
+        return this;
+      }
+      /**
+       * <code>repeated .pbui_Item_ComplexMeetInfo item = 5;</code>
+       */
+      public Builder removeItem(int index) {
+        copyOnWrite();
+        instance.removeItem(index);
+        return this;
+      }
+
+      // @@protoc_insertion_point(builder_scope:pbui_Type_QueComplexMeetInfo)
+    }
+    protected final Object dynamicMethod(
+        com.google.protobuf.GeneratedMessageLite.MethodToInvoke method,
+        Object arg0, Object arg1) {
+      switch (method) {
+        case NEW_MUTABLE_INSTANCE: {
+          return new com.mogujie.tt.protobuf.InterfaceMeetuserdef.pbui_Type_QueComplexMeetInfo();
+        }
+        case IS_INITIALIZED: {
+          return DEFAULT_INSTANCE;
+        }
+        case MAKE_IMMUTABLE: {
+          item_.makeImmutable();
+          return null;
+        }
+        case NEW_BUILDER: {
+          return new Builder();
+        }
+        case VISIT: {
+          Visitor visitor = (Visitor) arg0;
+          com.mogujie.tt.protobuf.InterfaceMeetuserdef.pbui_Type_QueComplexMeetInfo other = (com.mogujie.tt.protobuf.InterfaceMeetuserdef.pbui_Type_QueComplexMeetInfo) arg1;
+          typ_ = visitor.visitInt(typ_ != 0, typ_,
+              other.typ_ != 0, other.typ_);
+          id1_ = visitor.visitInt(id1_ != 0, id1_,
+              other.id1_ != 0, other.id1_);
+          id2_ = visitor.visitInt(id2_ != 0, id2_,
+              other.id2_ != 0, other.id2_);
+          id3_ = visitor.visitInt(id3_ != 0, id3_,
+              other.id3_ != 0, other.id3_);
+          item_= visitor.visitList(item_, other.item_);
+          if (visitor == com.google.protobuf.GeneratedMessageLite.MergeFromVisitor
+              .INSTANCE) {
+            bitField0_ |= other.bitField0_;
+          }
+          return this;
+        }
+        case MERGE_FROM_STREAM: {
+          com.google.protobuf.CodedInputStream input =
+              (com.google.protobuf.CodedInputStream) arg0;
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry =
+              (com.google.protobuf.ExtensionRegistryLite) arg1;
+          try {
+            boolean done = false;
+            while (!done) {
+              int tag = input.readTag();
+              switch (tag) {
+                case 0:
+                  done = true;
+                  break;
+                default: {
+                  if (!input.skipField(tag)) {
+                    done = true;
+                  }
+                  break;
+                }
+                case 13: {
+
+                  typ_ = input.readFixed32();
+                  break;
+                }
+                case 21: {
+
+                  id1_ = input.readFixed32();
+                  break;
+                }
+                case 29: {
+
+                  id2_ = input.readFixed32();
+                  break;
+                }
+                case 37: {
+
+                  id3_ = input.readFixed32();
+                  break;
+                }
+                case 42: {
+                  if (!item_.isModifiable()) {
+                    item_ =
+                        com.google.protobuf.GeneratedMessageLite.mutableCopy(item_);
+                  }
+                  item_.add(
+                      input.readMessage(com.mogujie.tt.protobuf.InterfaceMeetuserdef.pbui_Item_ComplexMeetInfo.parser(), extensionRegistry));
+                  break;
+                }
+              }
+            }
+          } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+            throw new RuntimeException(e.setUnfinishedMessage(this));
+          } catch (java.io.IOException e) {
+            throw new RuntimeException(
+                new com.google.protobuf.InvalidProtocolBufferException(
+                    e.getMessage()).setUnfinishedMessage(this));
+          } finally {
+          }
+        }
+        case GET_DEFAULT_INSTANCE: {
+          return DEFAULT_INSTANCE;
+        }
+        case GET_PARSER: {
+          if (PARSER == null) {    synchronized (com.mogujie.tt.protobuf.InterfaceMeetuserdef.pbui_Type_QueComplexMeetInfo.class) {
+              if (PARSER == null) {
+                PARSER = new DefaultInstanceBasedParser(DEFAULT_INSTANCE);
+              }
+            }
+          }
+          return PARSER;
+        }
+      }
+      throw new UnsupportedOperationException();
+    }
+
+
+    // @@protoc_insertion_point(class_scope:pbui_Type_QueComplexMeetInfo)
+    private static final com.mogujie.tt.protobuf.InterfaceMeetuserdef.pbui_Type_QueComplexMeetInfo DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new pbui_Type_QueComplexMeetInfo();
+      DEFAULT_INSTANCE.makeImmutable();
+    }
+
+    public static com.mogujie.tt.protobuf.InterfaceMeetuserdef.pbui_Type_QueComplexMeetInfo getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static volatile com.google.protobuf.Parser<pbui_Type_QueComplexMeetInfo> PARSER;
+
+    public static com.google.protobuf.Parser<pbui_Type_QueComplexMeetInfo> parser() {
+      return DEFAULT_INSTANCE.getParserForType();
+    }
+  }
+
+  public interface pbui_Type_SingleQueComplexMeetInfoOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:pbui_Type_SingleQueComplexMeetInfo)
+      com.google.protobuf.MessageLiteOrBuilder {
+
+    /**
+     * <code>optional fixed32 typ = 1;</code>
+     */
+    int getTyp();
+
+    /**
+     * <code>optional fixed32 id1 = 2;</code>
+     */
+    int getId1();
+
+    /**
+     * <code>optional fixed32 id2 = 3;</code>
+     */
+    int getId2();
+
+    /**
+     * <code>optional fixed32 id3 = 4;</code>
+     */
+    int getId3();
+
+    /**
+     * <code>optional fixed32 dataid = 5;</code>
+     */
+    int getDataid();
+
+    /**
+     * <code>optional bytes ptext = 6;</code>
+     */
+    com.google.protobuf.ByteString getPtext();
+  }
+  /**
+   * <pre>
+   *call
+   *type:TYPE_MEET_INTERFACE_COMPLEXMEETUSERDEF
+   *method: 
+   *modify|使用Interface_base.proto 中的pbui_Type_SmartJsonProtol  
+   *METHOD_MEET_INTERFACE_SINGLEQUERYBYID|使用Type_SingleQueComplexMeetInfo 
+   * </pre>
+   *
+   * Protobuf type {@code pbui_Type_SingleQueComplexMeetInfo}
+   */
+  public  static final class pbui_Type_SingleQueComplexMeetInfo extends
+      com.google.protobuf.GeneratedMessageLite<
+          pbui_Type_SingleQueComplexMeetInfo, pbui_Type_SingleQueComplexMeetInfo.Builder> implements
+      // @@protoc_insertion_point(message_implements:pbui_Type_SingleQueComplexMeetInfo)
+      pbui_Type_SingleQueComplexMeetInfoOrBuilder {
+    private pbui_Type_SingleQueComplexMeetInfo() {
+      ptext_ = com.google.protobuf.ByteString.EMPTY;
+    }
+    public static final int TYP_FIELD_NUMBER = 1;
+    private int typ_;
+    /**
+     * <code>optional fixed32 typ = 1;</code>
+     */
+    public int getTyp() {
+      return typ_;
+    }
+    /**
+     * <code>optional fixed32 typ = 1;</code>
+     */
+    private void setTyp(int value) {
+      
+      typ_ = value;
+    }
+    /**
+     * <code>optional fixed32 typ = 1;</code>
+     */
+    private void clearTyp() {
+      
+      typ_ = 0;
+    }
+
+    public static final int ID1_FIELD_NUMBER = 2;
+    private int id1_;
+    /**
+     * <code>optional fixed32 id1 = 2;</code>
+     */
+    public int getId1() {
+      return id1_;
+    }
+    /**
+     * <code>optional fixed32 id1 = 2;</code>
+     */
+    private void setId1(int value) {
+      
+      id1_ = value;
+    }
+    /**
+     * <code>optional fixed32 id1 = 2;</code>
+     */
+    private void clearId1() {
+      
+      id1_ = 0;
+    }
+
+    public static final int ID2_FIELD_NUMBER = 3;
+    private int id2_;
+    /**
+     * <code>optional fixed32 id2 = 3;</code>
+     */
+    public int getId2() {
+      return id2_;
+    }
+    /**
+     * <code>optional fixed32 id2 = 3;</code>
+     */
+    private void setId2(int value) {
+      
+      id2_ = value;
+    }
+    /**
+     * <code>optional fixed32 id2 = 3;</code>
+     */
+    private void clearId2() {
+      
+      id2_ = 0;
+    }
+
+    public static final int ID3_FIELD_NUMBER = 4;
+    private int id3_;
+    /**
+     * <code>optional fixed32 id3 = 4;</code>
+     */
+    public int getId3() {
+      return id3_;
+    }
+    /**
+     * <code>optional fixed32 id3 = 4;</code>
+     */
+    private void setId3(int value) {
+      
+      id3_ = value;
+    }
+    /**
+     * <code>optional fixed32 id3 = 4;</code>
+     */
+    private void clearId3() {
+      
+      id3_ = 0;
+    }
+
+    public static final int DATAID_FIELD_NUMBER = 5;
+    private int dataid_;
+    /**
+     * <code>optional fixed32 dataid = 5;</code>
+     */
+    public int getDataid() {
+      return dataid_;
+    }
+    /**
+     * <code>optional fixed32 dataid = 5;</code>
+     */
+    private void setDataid(int value) {
+      
+      dataid_ = value;
+    }
+    /**
+     * <code>optional fixed32 dataid = 5;</code>
+     */
+    private void clearDataid() {
+      
+      dataid_ = 0;
+    }
+
+    public static final int PTEXT_FIELD_NUMBER = 6;
+    private com.google.protobuf.ByteString ptext_;
+    /**
+     * <code>optional bytes ptext = 6;</code>
+     */
+    public com.google.protobuf.ByteString getPtext() {
+      return ptext_;
+    }
+    /**
+     * <code>optional bytes ptext = 6;</code>
+     */
+    private void setPtext(com.google.protobuf.ByteString value) {
+      if (value == null) {
+    throw new NullPointerException();
+  }
+  
+      ptext_ = value;
+    }
+    /**
+     * <code>optional bytes ptext = 6;</code>
+     */
+    private void clearPtext() {
+      
+      ptext_ = getDefaultInstance().getPtext();
+    }
+
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      if (typ_ != 0) {
+        output.writeFixed32(1, typ_);
+      }
+      if (id1_ != 0) {
+        output.writeFixed32(2, id1_);
+      }
+      if (id2_ != 0) {
+        output.writeFixed32(3, id2_);
+      }
+      if (id3_ != 0) {
+        output.writeFixed32(4, id3_);
+      }
+      if (dataid_ != 0) {
+        output.writeFixed32(5, dataid_);
+      }
+      if (!ptext_.isEmpty()) {
+        output.writeBytes(6, ptext_);
+      }
+    }
+
+    public int getSerializedSize() {
+      int size = memoizedSerializedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (typ_ != 0) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeFixed32Size(1, typ_);
+      }
+      if (id1_ != 0) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeFixed32Size(2, id1_);
+      }
+      if (id2_ != 0) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeFixed32Size(3, id2_);
+      }
+      if (id3_ != 0) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeFixed32Size(4, id3_);
+      }
+      if (dataid_ != 0) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeFixed32Size(5, dataid_);
+      }
+      if (!ptext_.isEmpty()) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBytesSize(6, ptext_);
+      }
+      memoizedSerializedSize = size;
+      return size;
+    }
+
+    public static com.mogujie.tt.protobuf.InterfaceMeetuserdef.pbui_Type_SingleQueComplexMeetInfo parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return com.google.protobuf.GeneratedMessageLite.parseFrom(
+          DEFAULT_INSTANCE, data);
+    }
+    public static com.mogujie.tt.protobuf.InterfaceMeetuserdef.pbui_Type_SingleQueComplexMeetInfo parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return com.google.protobuf.GeneratedMessageLite.parseFrom(
+          DEFAULT_INSTANCE, data, extensionRegistry);
+    }
+    public static com.mogujie.tt.protobuf.InterfaceMeetuserdef.pbui_Type_SingleQueComplexMeetInfo parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return com.google.protobuf.GeneratedMessageLite.parseFrom(
+          DEFAULT_INSTANCE, data);
+    }
+    public static com.mogujie.tt.protobuf.InterfaceMeetuserdef.pbui_Type_SingleQueComplexMeetInfo parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return com.google.protobuf.GeneratedMessageLite.parseFrom(
+          DEFAULT_INSTANCE, data, extensionRegistry);
+    }
+    public static com.mogujie.tt.protobuf.InterfaceMeetuserdef.pbui_Type_SingleQueComplexMeetInfo parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageLite.parseFrom(
+          DEFAULT_INSTANCE, input);
+    }
+    public static com.mogujie.tt.protobuf.InterfaceMeetuserdef.pbui_Type_SingleQueComplexMeetInfo parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageLite.parseFrom(
+          DEFAULT_INSTANCE, input, extensionRegistry);
+    }
+    public static com.mogujie.tt.protobuf.InterfaceMeetuserdef.pbui_Type_SingleQueComplexMeetInfo parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return parseDelimitedFrom(DEFAULT_INSTANCE, input);
+    }
+    public static com.mogujie.tt.protobuf.InterfaceMeetuserdef.pbui_Type_SingleQueComplexMeetInfo parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return parseDelimitedFrom(DEFAULT_INSTANCE, input, extensionRegistry);
+    }
+    public static com.mogujie.tt.protobuf.InterfaceMeetuserdef.pbui_Type_SingleQueComplexMeetInfo parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageLite.parseFrom(
+          DEFAULT_INSTANCE, input);
+    }
+    public static com.mogujie.tt.protobuf.InterfaceMeetuserdef.pbui_Type_SingleQueComplexMeetInfo parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageLite.parseFrom(
+          DEFAULT_INSTANCE, input, extensionRegistry);
+    }
+
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(com.mogujie.tt.protobuf.InterfaceMeetuserdef.pbui_Type_SingleQueComplexMeetInfo prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+
+    /**
+     * <pre>
+     *call
+     *type:TYPE_MEET_INTERFACE_COMPLEXMEETUSERDEF
+     *method: 
+     *modify|使用Interface_base.proto 中的pbui_Type_SmartJsonProtol  
+     *METHOD_MEET_INTERFACE_SINGLEQUERYBYID|使用Type_SingleQueComplexMeetInfo 
+     * </pre>
+     *
+     * Protobuf type {@code pbui_Type_SingleQueComplexMeetInfo}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageLite.Builder<
+          com.mogujie.tt.protobuf.InterfaceMeetuserdef.pbui_Type_SingleQueComplexMeetInfo, Builder> implements
+        // @@protoc_insertion_point(builder_implements:pbui_Type_SingleQueComplexMeetInfo)
+        com.mogujie.tt.protobuf.InterfaceMeetuserdef.pbui_Type_SingleQueComplexMeetInfoOrBuilder {
+      // Construct using com.mogujie.tt.protobuf.InterfaceMeetuserdef.pbui_Type_SingleQueComplexMeetInfo.newBuilder()
+      private Builder() {
+        super(DEFAULT_INSTANCE);
+      }
+
+
+      /**
+       * <code>optional fixed32 typ = 1;</code>
+       */
+      public int getTyp() {
+        return instance.getTyp();
+      }
+      /**
+       * <code>optional fixed32 typ = 1;</code>
+       */
+      public Builder setTyp(int value) {
+        copyOnWrite();
+        instance.setTyp(value);
+        return this;
+      }
+      /**
+       * <code>optional fixed32 typ = 1;</code>
+       */
+      public Builder clearTyp() {
+        copyOnWrite();
+        instance.clearTyp();
+        return this;
+      }
+
+      /**
+       * <code>optional fixed32 id1 = 2;</code>
+       */
+      public int getId1() {
+        return instance.getId1();
+      }
+      /**
+       * <code>optional fixed32 id1 = 2;</code>
+       */
+      public Builder setId1(int value) {
+        copyOnWrite();
+        instance.setId1(value);
+        return this;
+      }
+      /**
+       * <code>optional fixed32 id1 = 2;</code>
+       */
+      public Builder clearId1() {
+        copyOnWrite();
+        instance.clearId1();
+        return this;
+      }
+
+      /**
+       * <code>optional fixed32 id2 = 3;</code>
+       */
+      public int getId2() {
+        return instance.getId2();
+      }
+      /**
+       * <code>optional fixed32 id2 = 3;</code>
+       */
+      public Builder setId2(int value) {
+        copyOnWrite();
+        instance.setId2(value);
+        return this;
+      }
+      /**
+       * <code>optional fixed32 id2 = 3;</code>
+       */
+      public Builder clearId2() {
+        copyOnWrite();
+        instance.clearId2();
+        return this;
+      }
+
+      /**
+       * <code>optional fixed32 id3 = 4;</code>
+       */
+      public int getId3() {
+        return instance.getId3();
+      }
+      /**
+       * <code>optional fixed32 id3 = 4;</code>
+       */
+      public Builder setId3(int value) {
+        copyOnWrite();
+        instance.setId3(value);
+        return this;
+      }
+      /**
+       * <code>optional fixed32 id3 = 4;</code>
+       */
+      public Builder clearId3() {
+        copyOnWrite();
+        instance.clearId3();
+        return this;
+      }
+
+      /**
+       * <code>optional fixed32 dataid = 5;</code>
+       */
+      public int getDataid() {
+        return instance.getDataid();
+      }
+      /**
+       * <code>optional fixed32 dataid = 5;</code>
+       */
+      public Builder setDataid(int value) {
+        copyOnWrite();
+        instance.setDataid(value);
+        return this;
+      }
+      /**
+       * <code>optional fixed32 dataid = 5;</code>
+       */
+      public Builder clearDataid() {
+        copyOnWrite();
+        instance.clearDataid();
+        return this;
+      }
+
+      /**
+       * <code>optional bytes ptext = 6;</code>
+       */
+      public com.google.protobuf.ByteString getPtext() {
+        return instance.getPtext();
+      }
+      /**
+       * <code>optional bytes ptext = 6;</code>
+       */
+      public Builder setPtext(com.google.protobuf.ByteString value) {
+        copyOnWrite();
+        instance.setPtext(value);
+        return this;
+      }
+      /**
+       * <code>optional bytes ptext = 6;</code>
+       */
+      public Builder clearPtext() {
+        copyOnWrite();
+        instance.clearPtext();
+        return this;
+      }
+
+      // @@protoc_insertion_point(builder_scope:pbui_Type_SingleQueComplexMeetInfo)
+    }
+    protected final Object dynamicMethod(
+        com.google.protobuf.GeneratedMessageLite.MethodToInvoke method,
+        Object arg0, Object arg1) {
+      switch (method) {
+        case NEW_MUTABLE_INSTANCE: {
+          return new com.mogujie.tt.protobuf.InterfaceMeetuserdef.pbui_Type_SingleQueComplexMeetInfo();
+        }
+        case IS_INITIALIZED: {
+          return DEFAULT_INSTANCE;
+        }
+        case MAKE_IMMUTABLE: {
+          return null;
+        }
+        case NEW_BUILDER: {
+          return new Builder();
+        }
+        case VISIT: {
+          Visitor visitor = (Visitor) arg0;
+          com.mogujie.tt.protobuf.InterfaceMeetuserdef.pbui_Type_SingleQueComplexMeetInfo other = (com.mogujie.tt.protobuf.InterfaceMeetuserdef.pbui_Type_SingleQueComplexMeetInfo) arg1;
+          typ_ = visitor.visitInt(typ_ != 0, typ_,
+              other.typ_ != 0, other.typ_);
+          id1_ = visitor.visitInt(id1_ != 0, id1_,
+              other.id1_ != 0, other.id1_);
+          id2_ = visitor.visitInt(id2_ != 0, id2_,
+              other.id2_ != 0, other.id2_);
+          id3_ = visitor.visitInt(id3_ != 0, id3_,
+              other.id3_ != 0, other.id3_);
+          dataid_ = visitor.visitInt(dataid_ != 0, dataid_,
+              other.dataid_ != 0, other.dataid_);
+          ptext_ = visitor.visitByteString(ptext_ != com.google.protobuf.ByteString.EMPTY, ptext_,
+              other.ptext_ != com.google.protobuf.ByteString.EMPTY, other.ptext_);
+          if (visitor == com.google.protobuf.GeneratedMessageLite.MergeFromVisitor
+              .INSTANCE) {
+          }
+          return this;
+        }
+        case MERGE_FROM_STREAM: {
+          com.google.protobuf.CodedInputStream input =
+              (com.google.protobuf.CodedInputStream) arg0;
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry =
+              (com.google.protobuf.ExtensionRegistryLite) arg1;
+          try {
+            boolean done = false;
+            while (!done) {
+              int tag = input.readTag();
+              switch (tag) {
+                case 0:
+                  done = true;
+                  break;
+                default: {
+                  if (!input.skipField(tag)) {
+                    done = true;
+                  }
+                  break;
+                }
+                case 13: {
+
+                  typ_ = input.readFixed32();
+                  break;
+                }
+                case 21: {
+
+                  id1_ = input.readFixed32();
+                  break;
+                }
+                case 29: {
+
+                  id2_ = input.readFixed32();
+                  break;
+                }
+                case 37: {
+
+                  id3_ = input.readFixed32();
+                  break;
+                }
+                case 45: {
+
+                  dataid_ = input.readFixed32();
+                  break;
+                }
+                case 50: {
+
+                  ptext_ = input.readBytes();
+                  break;
+                }
+              }
+            }
+          } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+            throw new RuntimeException(e.setUnfinishedMessage(this));
+          } catch (java.io.IOException e) {
+            throw new RuntimeException(
+                new com.google.protobuf.InvalidProtocolBufferException(
+                    e.getMessage()).setUnfinishedMessage(this));
+          } finally {
+          }
+        }
+        case GET_DEFAULT_INSTANCE: {
+          return DEFAULT_INSTANCE;
+        }
+        case GET_PARSER: {
+          if (PARSER == null) {    synchronized (com.mogujie.tt.protobuf.InterfaceMeetuserdef.pbui_Type_SingleQueComplexMeetInfo.class) {
+              if (PARSER == null) {
+                PARSER = new DefaultInstanceBasedParser(DEFAULT_INSTANCE);
+              }
+            }
+          }
+          return PARSER;
+        }
+      }
+      throw new UnsupportedOperationException();
+    }
+
+
+    // @@protoc_insertion_point(class_scope:pbui_Type_SingleQueComplexMeetInfo)
+    private static final com.mogujie.tt.protobuf.InterfaceMeetuserdef.pbui_Type_SingleQueComplexMeetInfo DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new pbui_Type_SingleQueComplexMeetInfo();
+      DEFAULT_INSTANCE.makeImmutable();
+    }
+
+    public static com.mogujie.tt.protobuf.InterfaceMeetuserdef.pbui_Type_SingleQueComplexMeetInfo getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static volatile com.google.protobuf.Parser<pbui_Type_SingleQueComplexMeetInfo> PARSER;
+
+    public static com.google.protobuf.Parser<pbui_Type_SingleQueComplexMeetInfo> parser() {
+      return DEFAULT_INSTANCE.getParserForType();
+    }
+  }
+
+  public interface pbui_Type_ComplexMeetUserdefNotifyOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:pbui_Type_ComplexMeetUserdefNotify)
+      com.google.protobuf.MessageLiteOrBuilder {
+
+    /**
+     * <pre>
+     *本次通知是因为opermethod方法触发的
+     * </pre>
+     *
+     * <code>optional fixed32 opermethod = 1;</code>
+     */
+    int getOpermethod();
+
+    /**
+     * <code>optional fixed32 typ = 2;</code>
+     */
+    int getTyp();
+
+    /**
+     * <code>optional fixed32 id1 = 3;</code>
+     */
+    int getId1();
+
+    /**
+     * <code>optional fixed32 id2 = 4;</code>
+     */
+    int getId2();
+
+    /**
+     * <code>optional fixed32 id3 = 5;</code>
+     */
+    int getId3();
+
+    /**
+     * <code>optional fixed32 dataid = 6;</code>
+     */
+    int getDataid();
+  }
+  /**
+   * <pre>
+   *callback
+   *type:TYPE_MEET_INTERFACE_COMPLEXMEETUSERDEF
+   *method: notify
+   * </pre>
+   *
+   * Protobuf type {@code pbui_Type_ComplexMeetUserdefNotify}
+   */
+  public  static final class pbui_Type_ComplexMeetUserdefNotify extends
+      com.google.protobuf.GeneratedMessageLite<
+          pbui_Type_ComplexMeetUserdefNotify, pbui_Type_ComplexMeetUserdefNotify.Builder> implements
+      // @@protoc_insertion_point(message_implements:pbui_Type_ComplexMeetUserdefNotify)
+      pbui_Type_ComplexMeetUserdefNotifyOrBuilder {
+    private pbui_Type_ComplexMeetUserdefNotify() {
+    }
+    public static final int OPERMETHOD_FIELD_NUMBER = 1;
+    private int opermethod_;
+    /**
+     * <pre>
+     *本次通知是因为opermethod方法触发的
+     * </pre>
+     *
+     * <code>optional fixed32 opermethod = 1;</code>
+     */
+    public int getOpermethod() {
+      return opermethod_;
+    }
+    /**
+     * <pre>
+     *本次通知是因为opermethod方法触发的
+     * </pre>
+     *
+     * <code>optional fixed32 opermethod = 1;</code>
+     */
+    private void setOpermethod(int value) {
+      
+      opermethod_ = value;
+    }
+    /**
+     * <pre>
+     *本次通知是因为opermethod方法触发的
+     * </pre>
+     *
+     * <code>optional fixed32 opermethod = 1;</code>
+     */
+    private void clearOpermethod() {
+      
+      opermethod_ = 0;
+    }
+
+    public static final int TYP_FIELD_NUMBER = 2;
+    private int typ_;
+    /**
+     * <code>optional fixed32 typ = 2;</code>
+     */
+    public int getTyp() {
+      return typ_;
+    }
+    /**
+     * <code>optional fixed32 typ = 2;</code>
+     */
+    private void setTyp(int value) {
+      
+      typ_ = value;
+    }
+    /**
+     * <code>optional fixed32 typ = 2;</code>
+     */
+    private void clearTyp() {
+      
+      typ_ = 0;
+    }
+
+    public static final int ID1_FIELD_NUMBER = 3;
+    private int id1_;
+    /**
+     * <code>optional fixed32 id1 = 3;</code>
+     */
+    public int getId1() {
+      return id1_;
+    }
+    /**
+     * <code>optional fixed32 id1 = 3;</code>
+     */
+    private void setId1(int value) {
+      
+      id1_ = value;
+    }
+    /**
+     * <code>optional fixed32 id1 = 3;</code>
+     */
+    private void clearId1() {
+      
+      id1_ = 0;
+    }
+
+    public static final int ID2_FIELD_NUMBER = 4;
+    private int id2_;
+    /**
+     * <code>optional fixed32 id2 = 4;</code>
+     */
+    public int getId2() {
+      return id2_;
+    }
+    /**
+     * <code>optional fixed32 id2 = 4;</code>
+     */
+    private void setId2(int value) {
+      
+      id2_ = value;
+    }
+    /**
+     * <code>optional fixed32 id2 = 4;</code>
+     */
+    private void clearId2() {
+      
+      id2_ = 0;
+    }
+
+    public static final int ID3_FIELD_NUMBER = 5;
+    private int id3_;
+    /**
+     * <code>optional fixed32 id3 = 5;</code>
+     */
+    public int getId3() {
+      return id3_;
+    }
+    /**
+     * <code>optional fixed32 id3 = 5;</code>
+     */
+    private void setId3(int value) {
+      
+      id3_ = value;
+    }
+    /**
+     * <code>optional fixed32 id3 = 5;</code>
+     */
+    private void clearId3() {
+      
+      id3_ = 0;
+    }
+
+    public static final int DATAID_FIELD_NUMBER = 6;
+    private int dataid_;
+    /**
+     * <code>optional fixed32 dataid = 6;</code>
+     */
+    public int getDataid() {
+      return dataid_;
+    }
+    /**
+     * <code>optional fixed32 dataid = 6;</code>
+     */
+    private void setDataid(int value) {
+      
+      dataid_ = value;
+    }
+    /**
+     * <code>optional fixed32 dataid = 6;</code>
+     */
+    private void clearDataid() {
+      
+      dataid_ = 0;
+    }
+
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      if (opermethod_ != 0) {
+        output.writeFixed32(1, opermethod_);
+      }
+      if (typ_ != 0) {
+        output.writeFixed32(2, typ_);
+      }
+      if (id1_ != 0) {
+        output.writeFixed32(3, id1_);
+      }
+      if (id2_ != 0) {
+        output.writeFixed32(4, id2_);
+      }
+      if (id3_ != 0) {
+        output.writeFixed32(5, id3_);
+      }
+      if (dataid_ != 0) {
+        output.writeFixed32(6, dataid_);
+      }
+    }
+
+    public int getSerializedSize() {
+      int size = memoizedSerializedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (opermethod_ != 0) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeFixed32Size(1, opermethod_);
+      }
+      if (typ_ != 0) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeFixed32Size(2, typ_);
+      }
+      if (id1_ != 0) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeFixed32Size(3, id1_);
+      }
+      if (id2_ != 0) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeFixed32Size(4, id2_);
+      }
+      if (id3_ != 0) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeFixed32Size(5, id3_);
+      }
+      if (dataid_ != 0) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeFixed32Size(6, dataid_);
+      }
+      memoizedSerializedSize = size;
+      return size;
+    }
+
+    public static com.mogujie.tt.protobuf.InterfaceMeetuserdef.pbui_Type_ComplexMeetUserdefNotify parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return com.google.protobuf.GeneratedMessageLite.parseFrom(
+          DEFAULT_INSTANCE, data);
+    }
+    public static com.mogujie.tt.protobuf.InterfaceMeetuserdef.pbui_Type_ComplexMeetUserdefNotify parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return com.google.protobuf.GeneratedMessageLite.parseFrom(
+          DEFAULT_INSTANCE, data, extensionRegistry);
+    }
+    public static com.mogujie.tt.protobuf.InterfaceMeetuserdef.pbui_Type_ComplexMeetUserdefNotify parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return com.google.protobuf.GeneratedMessageLite.parseFrom(
+          DEFAULT_INSTANCE, data);
+    }
+    public static com.mogujie.tt.protobuf.InterfaceMeetuserdef.pbui_Type_ComplexMeetUserdefNotify parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return com.google.protobuf.GeneratedMessageLite.parseFrom(
+          DEFAULT_INSTANCE, data, extensionRegistry);
+    }
+    public static com.mogujie.tt.protobuf.InterfaceMeetuserdef.pbui_Type_ComplexMeetUserdefNotify parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageLite.parseFrom(
+          DEFAULT_INSTANCE, input);
+    }
+    public static com.mogujie.tt.protobuf.InterfaceMeetuserdef.pbui_Type_ComplexMeetUserdefNotify parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageLite.parseFrom(
+          DEFAULT_INSTANCE, input, extensionRegistry);
+    }
+    public static com.mogujie.tt.protobuf.InterfaceMeetuserdef.pbui_Type_ComplexMeetUserdefNotify parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return parseDelimitedFrom(DEFAULT_INSTANCE, input);
+    }
+    public static com.mogujie.tt.protobuf.InterfaceMeetuserdef.pbui_Type_ComplexMeetUserdefNotify parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return parseDelimitedFrom(DEFAULT_INSTANCE, input, extensionRegistry);
+    }
+    public static com.mogujie.tt.protobuf.InterfaceMeetuserdef.pbui_Type_ComplexMeetUserdefNotify parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageLite.parseFrom(
+          DEFAULT_INSTANCE, input);
+    }
+    public static com.mogujie.tt.protobuf.InterfaceMeetuserdef.pbui_Type_ComplexMeetUserdefNotify parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageLite.parseFrom(
+          DEFAULT_INSTANCE, input, extensionRegistry);
+    }
+
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(com.mogujie.tt.protobuf.InterfaceMeetuserdef.pbui_Type_ComplexMeetUserdefNotify prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+
+    /**
+     * <pre>
+     *callback
+     *type:TYPE_MEET_INTERFACE_COMPLEXMEETUSERDEF
+     *method: notify
+     * </pre>
+     *
+     * Protobuf type {@code pbui_Type_ComplexMeetUserdefNotify}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageLite.Builder<
+          com.mogujie.tt.protobuf.InterfaceMeetuserdef.pbui_Type_ComplexMeetUserdefNotify, Builder> implements
+        // @@protoc_insertion_point(builder_implements:pbui_Type_ComplexMeetUserdefNotify)
+        com.mogujie.tt.protobuf.InterfaceMeetuserdef.pbui_Type_ComplexMeetUserdefNotifyOrBuilder {
+      // Construct using com.mogujie.tt.protobuf.InterfaceMeetuserdef.pbui_Type_ComplexMeetUserdefNotify.newBuilder()
+      private Builder() {
+        super(DEFAULT_INSTANCE);
+      }
+
+
+      /**
+       * <pre>
+       *本次通知是因为opermethod方法触发的
+       * </pre>
+       *
+       * <code>optional fixed32 opermethod = 1;</code>
+       */
+      public int getOpermethod() {
+        return instance.getOpermethod();
+      }
+      /**
+       * <pre>
+       *本次通知是因为opermethod方法触发的
+       * </pre>
+       *
+       * <code>optional fixed32 opermethod = 1;</code>
+       */
+      public Builder setOpermethod(int value) {
+        copyOnWrite();
+        instance.setOpermethod(value);
+        return this;
+      }
+      /**
+       * <pre>
+       *本次通知是因为opermethod方法触发的
+       * </pre>
+       *
+       * <code>optional fixed32 opermethod = 1;</code>
+       */
+      public Builder clearOpermethod() {
+        copyOnWrite();
+        instance.clearOpermethod();
+        return this;
+      }
+
+      /**
+       * <code>optional fixed32 typ = 2;</code>
+       */
+      public int getTyp() {
+        return instance.getTyp();
+      }
+      /**
+       * <code>optional fixed32 typ = 2;</code>
+       */
+      public Builder setTyp(int value) {
+        copyOnWrite();
+        instance.setTyp(value);
+        return this;
+      }
+      /**
+       * <code>optional fixed32 typ = 2;</code>
+       */
+      public Builder clearTyp() {
+        copyOnWrite();
+        instance.clearTyp();
+        return this;
+      }
+
+      /**
+       * <code>optional fixed32 id1 = 3;</code>
+       */
+      public int getId1() {
+        return instance.getId1();
+      }
+      /**
+       * <code>optional fixed32 id1 = 3;</code>
+       */
+      public Builder setId1(int value) {
+        copyOnWrite();
+        instance.setId1(value);
+        return this;
+      }
+      /**
+       * <code>optional fixed32 id1 = 3;</code>
+       */
+      public Builder clearId1() {
+        copyOnWrite();
+        instance.clearId1();
+        return this;
+      }
+
+      /**
+       * <code>optional fixed32 id2 = 4;</code>
+       */
+      public int getId2() {
+        return instance.getId2();
+      }
+      /**
+       * <code>optional fixed32 id2 = 4;</code>
+       */
+      public Builder setId2(int value) {
+        copyOnWrite();
+        instance.setId2(value);
+        return this;
+      }
+      /**
+       * <code>optional fixed32 id2 = 4;</code>
+       */
+      public Builder clearId2() {
+        copyOnWrite();
+        instance.clearId2();
+        return this;
+      }
+
+      /**
+       * <code>optional fixed32 id3 = 5;</code>
+       */
+      public int getId3() {
+        return instance.getId3();
+      }
+      /**
+       * <code>optional fixed32 id3 = 5;</code>
+       */
+      public Builder setId3(int value) {
+        copyOnWrite();
+        instance.setId3(value);
+        return this;
+      }
+      /**
+       * <code>optional fixed32 id3 = 5;</code>
+       */
+      public Builder clearId3() {
+        copyOnWrite();
+        instance.clearId3();
+        return this;
+      }
+
+      /**
+       * <code>optional fixed32 dataid = 6;</code>
+       */
+      public int getDataid() {
+        return instance.getDataid();
+      }
+      /**
+       * <code>optional fixed32 dataid = 6;</code>
+       */
+      public Builder setDataid(int value) {
+        copyOnWrite();
+        instance.setDataid(value);
+        return this;
+      }
+      /**
+       * <code>optional fixed32 dataid = 6;</code>
+       */
+      public Builder clearDataid() {
+        copyOnWrite();
+        instance.clearDataid();
+        return this;
+      }
+
+      // @@protoc_insertion_point(builder_scope:pbui_Type_ComplexMeetUserdefNotify)
+    }
+    protected final Object dynamicMethod(
+        com.google.protobuf.GeneratedMessageLite.MethodToInvoke method,
+        Object arg0, Object arg1) {
+      switch (method) {
+        case NEW_MUTABLE_INSTANCE: {
+          return new com.mogujie.tt.protobuf.InterfaceMeetuserdef.pbui_Type_ComplexMeetUserdefNotify();
+        }
+        case IS_INITIALIZED: {
+          return DEFAULT_INSTANCE;
+        }
+        case MAKE_IMMUTABLE: {
+          return null;
+        }
+        case NEW_BUILDER: {
+          return new Builder();
+        }
+        case VISIT: {
+          Visitor visitor = (Visitor) arg0;
+          com.mogujie.tt.protobuf.InterfaceMeetuserdef.pbui_Type_ComplexMeetUserdefNotify other = (com.mogujie.tt.protobuf.InterfaceMeetuserdef.pbui_Type_ComplexMeetUserdefNotify) arg1;
+          opermethod_ = visitor.visitInt(opermethod_ != 0, opermethod_,
+              other.opermethod_ != 0, other.opermethod_);
+          typ_ = visitor.visitInt(typ_ != 0, typ_,
+              other.typ_ != 0, other.typ_);
+          id1_ = visitor.visitInt(id1_ != 0, id1_,
+              other.id1_ != 0, other.id1_);
+          id2_ = visitor.visitInt(id2_ != 0, id2_,
+              other.id2_ != 0, other.id2_);
+          id3_ = visitor.visitInt(id3_ != 0, id3_,
+              other.id3_ != 0, other.id3_);
+          dataid_ = visitor.visitInt(dataid_ != 0, dataid_,
+              other.dataid_ != 0, other.dataid_);
+          if (visitor == com.google.protobuf.GeneratedMessageLite.MergeFromVisitor
+              .INSTANCE) {
+          }
+          return this;
+        }
+        case MERGE_FROM_STREAM: {
+          com.google.protobuf.CodedInputStream input =
+              (com.google.protobuf.CodedInputStream) arg0;
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry =
+              (com.google.protobuf.ExtensionRegistryLite) arg1;
+          try {
+            boolean done = false;
+            while (!done) {
+              int tag = input.readTag();
+              switch (tag) {
+                case 0:
+                  done = true;
+                  break;
+                default: {
+                  if (!input.skipField(tag)) {
+                    done = true;
+                  }
+                  break;
+                }
+                case 13: {
+
+                  opermethod_ = input.readFixed32();
+                  break;
+                }
+                case 21: {
+
+                  typ_ = input.readFixed32();
+                  break;
+                }
+                case 29: {
+
+                  id1_ = input.readFixed32();
+                  break;
+                }
+                case 37: {
+
+                  id2_ = input.readFixed32();
+                  break;
+                }
+                case 45: {
+
+                  id3_ = input.readFixed32();
+                  break;
+                }
+                case 53: {
+
+                  dataid_ = input.readFixed32();
+                  break;
+                }
+              }
+            }
+          } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+            throw new RuntimeException(e.setUnfinishedMessage(this));
+          } catch (java.io.IOException e) {
+            throw new RuntimeException(
+                new com.google.protobuf.InvalidProtocolBufferException(
+                    e.getMessage()).setUnfinishedMessage(this));
+          } finally {
+          }
+        }
+        case GET_DEFAULT_INSTANCE: {
+          return DEFAULT_INSTANCE;
+        }
+        case GET_PARSER: {
+          if (PARSER == null) {    synchronized (com.mogujie.tt.protobuf.InterfaceMeetuserdef.pbui_Type_ComplexMeetUserdefNotify.class) {
+              if (PARSER == null) {
+                PARSER = new DefaultInstanceBasedParser(DEFAULT_INSTANCE);
+              }
+            }
+          }
+          return PARSER;
+        }
+      }
+      throw new UnsupportedOperationException();
+    }
+
+
+    // @@protoc_insertion_point(class_scope:pbui_Type_ComplexMeetUserdefNotify)
+    private static final com.mogujie.tt.protobuf.InterfaceMeetuserdef.pbui_Type_ComplexMeetUserdefNotify DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new pbui_Type_ComplexMeetUserdefNotify();
+      DEFAULT_INSTANCE.makeImmutable();
+    }
+
+    public static com.mogujie.tt.protobuf.InterfaceMeetuserdef.pbui_Type_ComplexMeetUserdefNotify getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static volatile com.google.protobuf.Parser<pbui_Type_ComplexMeetUserdefNotify> PARSER;
+
+    public static com.google.protobuf.Parser<pbui_Type_ComplexMeetUserdefNotify> parser() {
       return DEFAULT_INSTANCE.getParserForType();
     }
   }

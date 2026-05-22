@@ -63,9 +63,7 @@ import com.paperless.sdk.SdkVars.Companion.localDeviceId
 import com.paperless.util.IniUtil
 import com.xlk.paperless.sdk.helper.AppNetworkMonitor
 import com.xlk.paperless.sdk.screen.ScreenRecordService
-import com.xlk.paperless.sdk.screen.sync.SyncScreenRecord
-import com.xlk.paperless.sdk.service.ForegroundService
-import com.xlk.paperless.sdk.service.ScreenShareService
+import com.xlk.paperless.sdk.screen.mode2.H265ImageReaderService
 import org.greenrobot.eventbus.EventBus
 import org.greenrobot.eventbus.Subscribe
 import org.greenrobot.eventbus.ThreadMode
@@ -197,17 +195,17 @@ class MainActivity : AppCompatActivity() {
 //                            })
 //                }
 
-//                val intent = Intent(this@MainActivity, ScreenShareService::class.java)
+//                val intent = Intent(this@MainActivity, H265ImageReaderService::class.java)
 //                    .apply {
-//                        setAction(ScreenShareService.ACTION_START)
-//                        putExtra(ScreenShareService.EXTRA_RESULT_CODE, result.resultCode)
-//                        putExtra(ScreenShareService.EXTRA_RESULT_DATA, result.data)
-//                        putExtra(ScreenShareService.EXTRA_WIDTH, SdkVars.record_width)
-//                        putExtra(ScreenShareService.EXTRA_HEIGHT, SdkVars.record_height)
-//                        putExtra(ScreenShareService.EXTRA_FRAME_RATE, SdkVars.frameRate)
-//                        putExtra(ScreenShareService.EXTRA_BITRATE, SdkVars.bitrate)
-//                        putExtra(ScreenShareService.EXTRA_IFRAME_INTERVAL, SdkVars.iframeInterval)
-//                        putExtra(ScreenShareService.EXTRA_DPI, SdkVars.dpi)
+//                        setAction(H265ImageReaderService.ACTION_START)
+//                        putExtra(H265ImageReaderService.EXTRA_RESULT_CODE, result.resultCode)
+//                        putExtra(H265ImageReaderService.EXTRA_RESULT_DATA, result.data)
+//                        putExtra(H265ImageReaderService.EXTRA_WIDTH, SdkVars.record_width)
+//                        putExtra(H265ImageReaderService.EXTRA_HEIGHT, SdkVars.record_height)
+//                        putExtra(H265ImageReaderService.EXTRA_FRAME_RATE, SdkVars.frameRate)
+//                        putExtra(H265ImageReaderService.EXTRA_BITRATE, SdkVars.bitrate)
+//                        putExtra(H265ImageReaderService.EXTRA_IFRAME_INTERVAL, SdkVars.iframeInterval)
+//                        putExtra(H265ImageReaderService.EXTRA_DPI, SdkVars.dpi)
 //                    }
 //                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
 //                    startForegroundService(intent)
@@ -221,17 +219,17 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun launchService(resultCode: Int, data: Intent) {
-        val intent = Intent(this@MainActivity, ScreenShareService::class.java)
+        val intent = Intent(this@MainActivity, H265ImageReaderService::class.java)
             .apply {
-                setAction(ScreenShareService.ACTION_START)
-                putExtra(ScreenShareService.EXTRA_RESULT_CODE, resultCode)
-                putExtra(ScreenShareService.EXTRA_RESULT_DATA, data)
-                putExtra(ScreenShareService.EXTRA_WIDTH, SdkVars.record_width)
-                putExtra(ScreenShareService.EXTRA_HEIGHT, SdkVars.record_height)
-                putExtra(ScreenShareService.EXTRA_FRAME_RATE, SdkVars.frameRate)
-                putExtra(ScreenShareService.EXTRA_BITRATE, SdkVars.bitrate)
-                putExtra(ScreenShareService.EXTRA_IFRAME_INTERVAL, SdkVars.iframeInterval)
-                putExtra(ScreenShareService.EXTRA_DPI, SdkVars.dpi)
+                setAction(H265ImageReaderService.ACTION_START)
+                putExtra(H265ImageReaderService.EXTRA_RESULT_CODE, resultCode)
+                putExtra(H265ImageReaderService.EXTRA_RESULT_DATA, data)
+                putExtra(H265ImageReaderService.EXTRA_WIDTH, SdkVars.record_width)
+                putExtra(H265ImageReaderService.EXTRA_HEIGHT, SdkVars.record_height)
+                putExtra(H265ImageReaderService.EXTRA_FRAME_RATE, SdkVars.frameRate)
+                putExtra(H265ImageReaderService.EXTRA_BITRATE, SdkVars.bitrate)
+                putExtra(H265ImageReaderService.EXTRA_IFRAME_INTERVAL, SdkVars.iframeInterval)
+                putExtra(H265ImageReaderService.EXTRA_DPI, SdkVars.dpi)
             }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             startForegroundService(intent)
@@ -397,6 +395,10 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun networkSpeedWindow() {
+        if (mTextView != null) {
+            closeNetworkMonitorWindow()
+            return
+        }
         windowManager!!.defaultDisplay.width
         windowManager!!.defaultDisplay.height
         val metrics = DisplayMetrics()
@@ -416,19 +418,19 @@ class MainActivity : AppCompatActivity() {
         params.gravity = Gravity.START or Gravity.TOP
         params.width = FrameLayout.LayoutParams.WRAP_CONTENT
         params.height = FrameLayout.LayoutParams.WRAP_CONTENT
-        params.x = 50
-        params.y = metrics.heightPixels - 300
+        params.x = 0
+        params.y = metrics.heightPixels - params.height
         mTextView = TextView(this)
         mTextView!!.setTextColor(Color.argb(200, 255, 255, 255))
-        mTextView!!.setBackgroundColor(Color.argb(80, 0, 0, 0))
+        mTextView!!.setBackgroundColor(Color.argb(50, 0, 0, 0))
         windowManager!!.addView(mTextView, params)
 
         networkMonitor = AppNetworkMonitor(this)
         networkMonitor!!.startMonitoring(object : AppNetworkMonitor.NetworkInfoListener {
             override fun onNetworkInfoUpdated(totalBytes: Long, downloadSpeed: Long, uploadSpeed: Long) {
                 runOnUiThread {
-                    val msg = ("总流量: " + AppNetworkMonitor.formatTraffic(totalBytes)
-                            + "\n" + "下载: " + AppNetworkMonitor.formatSpeed(downloadSpeed)
+                    val msg = (/*"总流量: " + AppNetworkMonitor.formatTraffic(totalBytes)
+                            + "\n" +*/ "下载: " + AppNetworkMonitor.formatSpeed(downloadSpeed)
                             + "\n" + "上传: " + AppNetworkMonitor.formatSpeed(uploadSpeed))
                     LogUtils.e("onNetworkInfoUpdated: $msg")
                     mTextView?.text = msg
@@ -693,8 +695,8 @@ class MainActivity : AppCompatActivity() {
 
             BusType.capture_stop -> {
 //                stopService(Intent(this, ForegroundService::class.java))
-                stopService(Intent(this, ScreenShareService::class.java).apply {
-                    setAction(ScreenShareService.ACTION_STOP)
+                stopService(Intent(this, H265ImageReaderService::class.java).apply {
+                    setAction(H265ImageReaderService.ACTION_STOP)
                 })
             }
         }
@@ -724,15 +726,20 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    private fun closeNetworkMonitorWindow() {
+        windowManager?.removeView(mTextView)
+        mTextView = null
+        networkMonitor?.stopMonitoring()
+        networkMonitor = null
+    }
+
     override fun onDestroy() {
         super.onDestroy()
         if (mIsBound) {
             unbindService(mConnection)
             mIsBound = false;
         }
-        windowManager?.removeView(mTextView)
-        mTextView = null
-        networkMonitor?.stopMonitoring()
-        networkMonitor = null
+        closeNetworkMonitorWindow()
     }
+
 }

@@ -9,6 +9,327 @@ public final class InterfaceBase {
       com.google.protobuf.ExtensionRegistryLite registry) {
   }
   /**
+   * Protobuf enum {@code Pb_MEET_UPDATE_STATUS}
+   */
+  public enum Pb_MEET_UPDATE_STATUS
+      implements com.google.protobuf.Internal.EnumLite {
+    /**
+     * <pre>
+     *空闲
+     * </pre>
+     *
+     * <code>pb_MEET_UPDATE_STATUS_IDLE = 0;</code>
+     */
+    pb_MEET_UPDATE_STATUS_IDLE(0),
+    /**
+     * <pre>
+     *下载中
+     * </pre>
+     *
+     * <code>pb_MEET_UPDATE_STATUS_DOWNLOAD = 1;</code>
+     */
+    pb_MEET_UPDATE_STATUS_DOWNLOAD(1),
+    /**
+     * <pre>
+     *解压 针对安卓
+     * </pre>
+     *
+     * <code>Pb_MEET_UPDATE_STATUS_UNZIP = 2;</code>
+     */
+    Pb_MEET_UPDATE_STATUS_UNZIP(2),
+    /**
+     * <pre>
+     *解压成功好回调给应用层处理，如果长时间没有升级成功，要到平板端查看是不是安装失败
+     * </pre>
+     *
+     * <code>Pb_MEET_UPDATE_STATUS_USER = 3;</code>
+     */
+    Pb_MEET_UPDATE_STATUS_USER(3),
+    /**
+     * <pre>
+     *交给守护程序解压替换--如果长时间没有重启升级成功，要到升级日志目录的log里查看日志
+     * </pre>
+     *
+     * <code>Pb_MEET_UPDATE_STATUS_DEAMON = 4;</code>
+     */
+    Pb_MEET_UPDATE_STATUS_DEAMON(4),
+    /**
+     * <pre>
+     *版本不需要升级
+     * </pre>
+     *
+     * <code>Pb_MEET_UPDATE_STATUS_NEWER = 5;</code>
+     */
+    Pb_MEET_UPDATE_STATUS_NEWER(5),
+    /**
+     * <pre>
+     *开始向媒体服务器请求文件
+     * </pre>
+     *
+     * <code>Pb_MEET_UPDATE_STATUS_STARTGET = 6;</code>
+     */
+    Pb_MEET_UPDATE_STATUS_STARTGET(6),
+    /**
+     * <pre>
+     *未检测到守护程序
+     * </pre>
+     *
+     * <code>Pb_MEET_UPDATE_STATUS_NODEAMON = -1;</code>
+     */
+    Pb_MEET_UPDATE_STATUS_NODEAMON(-1),
+    /**
+     * <pre>
+     *未检测到媒体服务器
+     * </pre>
+     *
+     * <code>Pb_MEET_UPDATE_STATUS_NOMEDIASRV = -2;</code>
+     */
+    Pb_MEET_UPDATE_STATUS_NOMEDIASRV(-2),
+    /**
+     * <pre>
+     *媒体服务器链接不上
+     * </pre>
+     *
+     * <code>Pb_MEET_UPDATE_STATUS_MEDIASRVCONNECTERR = -3;</code>
+     */
+    Pb_MEET_UPDATE_STATUS_MEDIASRVCONNECTERR(-3),
+    /**
+     * <pre>
+     *文件不存在
+     * </pre>
+     *
+     * <code>Pb_MEET_UPDATE_STATUS_FILENOEXIST = -4;</code>
+     */
+    Pb_MEET_UPDATE_STATUS_FILENOEXIST(-4),
+    /**
+     * <pre>
+     *写入文件失败
+     * </pre>
+     *
+     * <code>Pb_MEET_UPDATE_STATUS_OPENFAILED = -5;</code>
+     */
+    Pb_MEET_UPDATE_STATUS_OPENFAILED(-5),
+    /**
+     * <pre>
+     *从媒体服务器请求文件失败
+     * </pre>
+     *
+     * <code>Pb_MEET_UPDATE_STATUS_GETFAILED = -6;</code>
+     */
+    Pb_MEET_UPDATE_STATUS_GETFAILED(-6),
+    /**
+     * <pre>
+     *当前正在升级中
+     * </pre>
+     *
+     * <code>Pb_MEET_UPDATE_STATUS_BUSY = -7;</code>
+     */
+    Pb_MEET_UPDATE_STATUS_BUSY(-7),
+    /**
+     * <pre>
+     *初始化升级失败
+     * </pre>
+     *
+     * <code>Pb_MEET_UPDATE_STATUS_INITUPDATEFAILED = -8;</code>
+     */
+    Pb_MEET_UPDATE_STATUS_INITUPDATEFAILED(-8),
+    /**
+     * <pre>
+     *下载超时
+     * </pre>
+     *
+     * <code>pb_MEET_UPDATE_STATUS_TIMEOUT = -9;</code>
+     */
+    pb_MEET_UPDATE_STATUS_TIMEOUT(-9),
+    UNRECOGNIZED(-1),
+    ;
+
+    /**
+     * <pre>
+     *空闲
+     * </pre>
+     *
+     * <code>pb_MEET_UPDATE_STATUS_IDLE = 0;</code>
+     */
+    public static final int pb_MEET_UPDATE_STATUS_IDLE_VALUE = 0;
+    /**
+     * <pre>
+     *下载中
+     * </pre>
+     *
+     * <code>pb_MEET_UPDATE_STATUS_DOWNLOAD = 1;</code>
+     */
+    public static final int pb_MEET_UPDATE_STATUS_DOWNLOAD_VALUE = 1;
+    /**
+     * <pre>
+     *解压 针对安卓
+     * </pre>
+     *
+     * <code>Pb_MEET_UPDATE_STATUS_UNZIP = 2;</code>
+     */
+    public static final int Pb_MEET_UPDATE_STATUS_UNZIP_VALUE = 2;
+    /**
+     * <pre>
+     *解压成功好回调给应用层处理，如果长时间没有升级成功，要到平板端查看是不是安装失败
+     * </pre>
+     *
+     * <code>Pb_MEET_UPDATE_STATUS_USER = 3;</code>
+     */
+    public static final int Pb_MEET_UPDATE_STATUS_USER_VALUE = 3;
+    /**
+     * <pre>
+     *交给守护程序解压替换--如果长时间没有重启升级成功，要到升级日志目录的log里查看日志
+     * </pre>
+     *
+     * <code>Pb_MEET_UPDATE_STATUS_DEAMON = 4;</code>
+     */
+    public static final int Pb_MEET_UPDATE_STATUS_DEAMON_VALUE = 4;
+    /**
+     * <pre>
+     *版本不需要升级
+     * </pre>
+     *
+     * <code>Pb_MEET_UPDATE_STATUS_NEWER = 5;</code>
+     */
+    public static final int Pb_MEET_UPDATE_STATUS_NEWER_VALUE = 5;
+    /**
+     * <pre>
+     *开始向媒体服务器请求文件
+     * </pre>
+     *
+     * <code>Pb_MEET_UPDATE_STATUS_STARTGET = 6;</code>
+     */
+    public static final int Pb_MEET_UPDATE_STATUS_STARTGET_VALUE = 6;
+    /**
+     * <pre>
+     *未检测到守护程序
+     * </pre>
+     *
+     * <code>Pb_MEET_UPDATE_STATUS_NODEAMON = -1;</code>
+     */
+    public static final int Pb_MEET_UPDATE_STATUS_NODEAMON_VALUE = -1;
+    /**
+     * <pre>
+     *未检测到媒体服务器
+     * </pre>
+     *
+     * <code>Pb_MEET_UPDATE_STATUS_NOMEDIASRV = -2;</code>
+     */
+    public static final int Pb_MEET_UPDATE_STATUS_NOMEDIASRV_VALUE = -2;
+    /**
+     * <pre>
+     *媒体服务器链接不上
+     * </pre>
+     *
+     * <code>Pb_MEET_UPDATE_STATUS_MEDIASRVCONNECTERR = -3;</code>
+     */
+    public static final int Pb_MEET_UPDATE_STATUS_MEDIASRVCONNECTERR_VALUE = -3;
+    /**
+     * <pre>
+     *文件不存在
+     * </pre>
+     *
+     * <code>Pb_MEET_UPDATE_STATUS_FILENOEXIST = -4;</code>
+     */
+    public static final int Pb_MEET_UPDATE_STATUS_FILENOEXIST_VALUE = -4;
+    /**
+     * <pre>
+     *写入文件失败
+     * </pre>
+     *
+     * <code>Pb_MEET_UPDATE_STATUS_OPENFAILED = -5;</code>
+     */
+    public static final int Pb_MEET_UPDATE_STATUS_OPENFAILED_VALUE = -5;
+    /**
+     * <pre>
+     *从媒体服务器请求文件失败
+     * </pre>
+     *
+     * <code>Pb_MEET_UPDATE_STATUS_GETFAILED = -6;</code>
+     */
+    public static final int Pb_MEET_UPDATE_STATUS_GETFAILED_VALUE = -6;
+    /**
+     * <pre>
+     *当前正在升级中
+     * </pre>
+     *
+     * <code>Pb_MEET_UPDATE_STATUS_BUSY = -7;</code>
+     */
+    public static final int Pb_MEET_UPDATE_STATUS_BUSY_VALUE = -7;
+    /**
+     * <pre>
+     *初始化升级失败
+     * </pre>
+     *
+     * <code>Pb_MEET_UPDATE_STATUS_INITUPDATEFAILED = -8;</code>
+     */
+    public static final int Pb_MEET_UPDATE_STATUS_INITUPDATEFAILED_VALUE = -8;
+    /**
+     * <pre>
+     *下载超时
+     * </pre>
+     *
+     * <code>pb_MEET_UPDATE_STATUS_TIMEOUT = -9;</code>
+     */
+    public static final int pb_MEET_UPDATE_STATUS_TIMEOUT_VALUE = -9;
+
+
+    public final int getNumber() {
+      return value;
+    }
+
+    /**
+     * @deprecated Use {@link #forNumber(int)} instead.
+     */
+    @java.lang.Deprecated
+    public static Pb_MEET_UPDATE_STATUS valueOf(int value) {
+      return forNumber(value);
+    }
+
+    public static Pb_MEET_UPDATE_STATUS forNumber(int value) {
+      switch (value) {
+        case 0: return pb_MEET_UPDATE_STATUS_IDLE;
+        case 1: return pb_MEET_UPDATE_STATUS_DOWNLOAD;
+        case 2: return Pb_MEET_UPDATE_STATUS_UNZIP;
+        case 3: return Pb_MEET_UPDATE_STATUS_USER;
+        case 4: return Pb_MEET_UPDATE_STATUS_DEAMON;
+        case 5: return Pb_MEET_UPDATE_STATUS_NEWER;
+        case 6: return Pb_MEET_UPDATE_STATUS_STARTGET;
+        case -1: return Pb_MEET_UPDATE_STATUS_NODEAMON;
+        case -2: return Pb_MEET_UPDATE_STATUS_NOMEDIASRV;
+        case -3: return Pb_MEET_UPDATE_STATUS_MEDIASRVCONNECTERR;
+        case -4: return Pb_MEET_UPDATE_STATUS_FILENOEXIST;
+        case -5: return Pb_MEET_UPDATE_STATUS_OPENFAILED;
+        case -6: return Pb_MEET_UPDATE_STATUS_GETFAILED;
+        case -7: return Pb_MEET_UPDATE_STATUS_BUSY;
+        case -8: return Pb_MEET_UPDATE_STATUS_INITUPDATEFAILED;
+        case -9: return pb_MEET_UPDATE_STATUS_TIMEOUT;
+        default: return null;
+      }
+    }
+
+    public static com.google.protobuf.Internal.EnumLiteMap<Pb_MEET_UPDATE_STATUS>
+        internalGetValueMap() {
+      return internalValueMap;
+    }
+    private static final com.google.protobuf.Internal.EnumLiteMap<
+        Pb_MEET_UPDATE_STATUS> internalValueMap =
+          new com.google.protobuf.Internal.EnumLiteMap<Pb_MEET_UPDATE_STATUS>() {
+            public Pb_MEET_UPDATE_STATUS findValueByNumber(int number) {
+              return Pb_MEET_UPDATE_STATUS.forNumber(number);
+            }
+          };
+
+    private final int value;
+
+    private Pb_MEET_UPDATE_STATUS(int value) {
+      this.value = value;
+    }
+
+    // @@protoc_insertion_point(enum_scope:Pb_MEET_UPDATE_STATUS)
+  }
+
+  /**
    * <pre>
    *SmartJsonProtol  数据库查询 type
    * </pre>
@@ -11177,6 +11498,475 @@ public final class InterfaceBase {
     private static volatile com.google.protobuf.Parser<pbui_Type_MeetUpdateNotify> PARSER;
 
     public static com.google.protobuf.Parser<pbui_Type_MeetUpdateNotify> parser() {
+      return DEFAULT_INSTANCE.getParserForType();
+    }
+  }
+
+  public interface pbui_Type_MeetUpdateStatusNotifyOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:pbui_Type_MeetUpdateStatusNotify)
+      com.google.protobuf.MessageLiteOrBuilder {
+
+    /**
+     * <pre>
+     *下载进度
+     * </pre>
+     *
+     * <code>optional fixed32 progress = 1;</code>
+     */
+    int getProgress();
+
+    /**
+     * <pre>
+     *MEET_UPDATE_STATUS_IDLE
+     * </pre>
+     *
+     * <code>optional fixed32 status = 2;</code>
+     */
+    int getStatus();
+
+    /**
+     * <code>optional bytes msg = 3;</code>
+     */
+    com.google.protobuf.ByteString getMsg();
+  }
+  /**
+   * <pre>
+   *软件升级状态和进度回调
+   *callback
+   *type:TYPE_MEET_INTERFACE_UPDATE
+   *method: METHOD_MEET_INTERFACE_NOTIFY
+   * </pre>
+   *
+   * Protobuf type {@code pbui_Type_MeetUpdateStatusNotify}
+   */
+  public  static final class pbui_Type_MeetUpdateStatusNotify extends
+      com.google.protobuf.GeneratedMessageLite<
+          pbui_Type_MeetUpdateStatusNotify, pbui_Type_MeetUpdateStatusNotify.Builder> implements
+      // @@protoc_insertion_point(message_implements:pbui_Type_MeetUpdateStatusNotify)
+      pbui_Type_MeetUpdateStatusNotifyOrBuilder {
+    private pbui_Type_MeetUpdateStatusNotify() {
+      msg_ = com.google.protobuf.ByteString.EMPTY;
+    }
+    public static final int PROGRESS_FIELD_NUMBER = 1;
+    private int progress_;
+    /**
+     * <pre>
+     *下载进度
+     * </pre>
+     *
+     * <code>optional fixed32 progress = 1;</code>
+     */
+    public int getProgress() {
+      return progress_;
+    }
+    /**
+     * <pre>
+     *下载进度
+     * </pre>
+     *
+     * <code>optional fixed32 progress = 1;</code>
+     */
+    private void setProgress(int value) {
+      
+      progress_ = value;
+    }
+    /**
+     * <pre>
+     *下载进度
+     * </pre>
+     *
+     * <code>optional fixed32 progress = 1;</code>
+     */
+    private void clearProgress() {
+      
+      progress_ = 0;
+    }
+
+    public static final int STATUS_FIELD_NUMBER = 2;
+    private int status_;
+    /**
+     * <pre>
+     *MEET_UPDATE_STATUS_IDLE
+     * </pre>
+     *
+     * <code>optional fixed32 status = 2;</code>
+     */
+    public int getStatus() {
+      return status_;
+    }
+    /**
+     * <pre>
+     *MEET_UPDATE_STATUS_IDLE
+     * </pre>
+     *
+     * <code>optional fixed32 status = 2;</code>
+     */
+    private void setStatus(int value) {
+      
+      status_ = value;
+    }
+    /**
+     * <pre>
+     *MEET_UPDATE_STATUS_IDLE
+     * </pre>
+     *
+     * <code>optional fixed32 status = 2;</code>
+     */
+    private void clearStatus() {
+      
+      status_ = 0;
+    }
+
+    public static final int MSG_FIELD_NUMBER = 3;
+    private com.google.protobuf.ByteString msg_;
+    /**
+     * <code>optional bytes msg = 3;</code>
+     */
+    public com.google.protobuf.ByteString getMsg() {
+      return msg_;
+    }
+    /**
+     * <code>optional bytes msg = 3;</code>
+     */
+    private void setMsg(com.google.protobuf.ByteString value) {
+      if (value == null) {
+    throw new NullPointerException();
+  }
+  
+      msg_ = value;
+    }
+    /**
+     * <code>optional bytes msg = 3;</code>
+     */
+    private void clearMsg() {
+      
+      msg_ = getDefaultInstance().getMsg();
+    }
+
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      if (progress_ != 0) {
+        output.writeFixed32(1, progress_);
+      }
+      if (status_ != 0) {
+        output.writeFixed32(2, status_);
+      }
+      if (!msg_.isEmpty()) {
+        output.writeBytes(3, msg_);
+      }
+    }
+
+    public int getSerializedSize() {
+      int size = memoizedSerializedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (progress_ != 0) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeFixed32Size(1, progress_);
+      }
+      if (status_ != 0) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeFixed32Size(2, status_);
+      }
+      if (!msg_.isEmpty()) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBytesSize(3, msg_);
+      }
+      memoizedSerializedSize = size;
+      return size;
+    }
+
+    public static com.mogujie.tt.protobuf.InterfaceBase.pbui_Type_MeetUpdateStatusNotify parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return com.google.protobuf.GeneratedMessageLite.parseFrom(
+          DEFAULT_INSTANCE, data);
+    }
+    public static com.mogujie.tt.protobuf.InterfaceBase.pbui_Type_MeetUpdateStatusNotify parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return com.google.protobuf.GeneratedMessageLite.parseFrom(
+          DEFAULT_INSTANCE, data, extensionRegistry);
+    }
+    public static com.mogujie.tt.protobuf.InterfaceBase.pbui_Type_MeetUpdateStatusNotify parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return com.google.protobuf.GeneratedMessageLite.parseFrom(
+          DEFAULT_INSTANCE, data);
+    }
+    public static com.mogujie.tt.protobuf.InterfaceBase.pbui_Type_MeetUpdateStatusNotify parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return com.google.protobuf.GeneratedMessageLite.parseFrom(
+          DEFAULT_INSTANCE, data, extensionRegistry);
+    }
+    public static com.mogujie.tt.protobuf.InterfaceBase.pbui_Type_MeetUpdateStatusNotify parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageLite.parseFrom(
+          DEFAULT_INSTANCE, input);
+    }
+    public static com.mogujie.tt.protobuf.InterfaceBase.pbui_Type_MeetUpdateStatusNotify parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageLite.parseFrom(
+          DEFAULT_INSTANCE, input, extensionRegistry);
+    }
+    public static com.mogujie.tt.protobuf.InterfaceBase.pbui_Type_MeetUpdateStatusNotify parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return parseDelimitedFrom(DEFAULT_INSTANCE, input);
+    }
+    public static com.mogujie.tt.protobuf.InterfaceBase.pbui_Type_MeetUpdateStatusNotify parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return parseDelimitedFrom(DEFAULT_INSTANCE, input, extensionRegistry);
+    }
+    public static com.mogujie.tt.protobuf.InterfaceBase.pbui_Type_MeetUpdateStatusNotify parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageLite.parseFrom(
+          DEFAULT_INSTANCE, input);
+    }
+    public static com.mogujie.tt.protobuf.InterfaceBase.pbui_Type_MeetUpdateStatusNotify parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageLite.parseFrom(
+          DEFAULT_INSTANCE, input, extensionRegistry);
+    }
+
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(com.mogujie.tt.protobuf.InterfaceBase.pbui_Type_MeetUpdateStatusNotify prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+
+    /**
+     * <pre>
+     *软件升级状态和进度回调
+     *callback
+     *type:TYPE_MEET_INTERFACE_UPDATE
+     *method: METHOD_MEET_INTERFACE_NOTIFY
+     * </pre>
+     *
+     * Protobuf type {@code pbui_Type_MeetUpdateStatusNotify}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageLite.Builder<
+          com.mogujie.tt.protobuf.InterfaceBase.pbui_Type_MeetUpdateStatusNotify, Builder> implements
+        // @@protoc_insertion_point(builder_implements:pbui_Type_MeetUpdateStatusNotify)
+        com.mogujie.tt.protobuf.InterfaceBase.pbui_Type_MeetUpdateStatusNotifyOrBuilder {
+      // Construct using com.mogujie.tt.protobuf.InterfaceBase.pbui_Type_MeetUpdateStatusNotify.newBuilder()
+      private Builder() {
+        super(DEFAULT_INSTANCE);
+      }
+
+
+      /**
+       * <pre>
+       *下载进度
+       * </pre>
+       *
+       * <code>optional fixed32 progress = 1;</code>
+       */
+      public int getProgress() {
+        return instance.getProgress();
+      }
+      /**
+       * <pre>
+       *下载进度
+       * </pre>
+       *
+       * <code>optional fixed32 progress = 1;</code>
+       */
+      public Builder setProgress(int value) {
+        copyOnWrite();
+        instance.setProgress(value);
+        return this;
+      }
+      /**
+       * <pre>
+       *下载进度
+       * </pre>
+       *
+       * <code>optional fixed32 progress = 1;</code>
+       */
+      public Builder clearProgress() {
+        copyOnWrite();
+        instance.clearProgress();
+        return this;
+      }
+
+      /**
+       * <pre>
+       *MEET_UPDATE_STATUS_IDLE
+       * </pre>
+       *
+       * <code>optional fixed32 status = 2;</code>
+       */
+      public int getStatus() {
+        return instance.getStatus();
+      }
+      /**
+       * <pre>
+       *MEET_UPDATE_STATUS_IDLE
+       * </pre>
+       *
+       * <code>optional fixed32 status = 2;</code>
+       */
+      public Builder setStatus(int value) {
+        copyOnWrite();
+        instance.setStatus(value);
+        return this;
+      }
+      /**
+       * <pre>
+       *MEET_UPDATE_STATUS_IDLE
+       * </pre>
+       *
+       * <code>optional fixed32 status = 2;</code>
+       */
+      public Builder clearStatus() {
+        copyOnWrite();
+        instance.clearStatus();
+        return this;
+      }
+
+      /**
+       * <code>optional bytes msg = 3;</code>
+       */
+      public com.google.protobuf.ByteString getMsg() {
+        return instance.getMsg();
+      }
+      /**
+       * <code>optional bytes msg = 3;</code>
+       */
+      public Builder setMsg(com.google.protobuf.ByteString value) {
+        copyOnWrite();
+        instance.setMsg(value);
+        return this;
+      }
+      /**
+       * <code>optional bytes msg = 3;</code>
+       */
+      public Builder clearMsg() {
+        copyOnWrite();
+        instance.clearMsg();
+        return this;
+      }
+
+      // @@protoc_insertion_point(builder_scope:pbui_Type_MeetUpdateStatusNotify)
+    }
+    protected final Object dynamicMethod(
+        com.google.protobuf.GeneratedMessageLite.MethodToInvoke method,
+        Object arg0, Object arg1) {
+      switch (method) {
+        case NEW_MUTABLE_INSTANCE: {
+          return new com.mogujie.tt.protobuf.InterfaceBase.pbui_Type_MeetUpdateStatusNotify();
+        }
+        case IS_INITIALIZED: {
+          return DEFAULT_INSTANCE;
+        }
+        case MAKE_IMMUTABLE: {
+          return null;
+        }
+        case NEW_BUILDER: {
+          return new Builder();
+        }
+        case VISIT: {
+          Visitor visitor = (Visitor) arg0;
+          com.mogujie.tt.protobuf.InterfaceBase.pbui_Type_MeetUpdateStatusNotify other = (com.mogujie.tt.protobuf.InterfaceBase.pbui_Type_MeetUpdateStatusNotify) arg1;
+          progress_ = visitor.visitInt(progress_ != 0, progress_,
+              other.progress_ != 0, other.progress_);
+          status_ = visitor.visitInt(status_ != 0, status_,
+              other.status_ != 0, other.status_);
+          msg_ = visitor.visitByteString(msg_ != com.google.protobuf.ByteString.EMPTY, msg_,
+              other.msg_ != com.google.protobuf.ByteString.EMPTY, other.msg_);
+          if (visitor == com.google.protobuf.GeneratedMessageLite.MergeFromVisitor
+              .INSTANCE) {
+          }
+          return this;
+        }
+        case MERGE_FROM_STREAM: {
+          com.google.protobuf.CodedInputStream input =
+              (com.google.protobuf.CodedInputStream) arg0;
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry =
+              (com.google.protobuf.ExtensionRegistryLite) arg1;
+          try {
+            boolean done = false;
+            while (!done) {
+              int tag = input.readTag();
+              switch (tag) {
+                case 0:
+                  done = true;
+                  break;
+                default: {
+                  if (!input.skipField(tag)) {
+                    done = true;
+                  }
+                  break;
+                }
+                case 13: {
+
+                  progress_ = input.readFixed32();
+                  break;
+                }
+                case 21: {
+
+                  status_ = input.readFixed32();
+                  break;
+                }
+                case 26: {
+
+                  msg_ = input.readBytes();
+                  break;
+                }
+              }
+            }
+          } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+            throw new RuntimeException(e.setUnfinishedMessage(this));
+          } catch (java.io.IOException e) {
+            throw new RuntimeException(
+                new com.google.protobuf.InvalidProtocolBufferException(
+                    e.getMessage()).setUnfinishedMessage(this));
+          } finally {
+          }
+        }
+        case GET_DEFAULT_INSTANCE: {
+          return DEFAULT_INSTANCE;
+        }
+        case GET_PARSER: {
+          if (PARSER == null) {    synchronized (com.mogujie.tt.protobuf.InterfaceBase.pbui_Type_MeetUpdateStatusNotify.class) {
+              if (PARSER == null) {
+                PARSER = new DefaultInstanceBasedParser(DEFAULT_INSTANCE);
+              }
+            }
+          }
+          return PARSER;
+        }
+      }
+      throw new UnsupportedOperationException();
+    }
+
+
+    // @@protoc_insertion_point(class_scope:pbui_Type_MeetUpdateStatusNotify)
+    private static final com.mogujie.tt.protobuf.InterfaceBase.pbui_Type_MeetUpdateStatusNotify DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new pbui_Type_MeetUpdateStatusNotify();
+      DEFAULT_INSTANCE.makeImmutable();
+    }
+
+    public static com.mogujie.tt.protobuf.InterfaceBase.pbui_Type_MeetUpdateStatusNotify getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static volatile com.google.protobuf.Parser<pbui_Type_MeetUpdateStatusNotify> PARSER;
+
+    public static com.google.protobuf.Parser<pbui_Type_MeetUpdateStatusNotify> parser() {
       return DEFAULT_INSTANCE.getParserForType();
     }
   }

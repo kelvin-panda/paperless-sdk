@@ -282,13 +282,14 @@ object Call {
     }
 
     fun callback_method(type: Int, method: Int, data: ByteArray?, datalen: Int): Int {
-        if (type == 1) return 0
-        LogUtils.e("callback_method：type=$type,method=$method,datalen=$datalen")
-        if (Pb_Type.Pb_TYPE_MEET_INTERFACE_UPDATE_VALUE == type) {
-            Bus.postSticky(type, method, data)
-        } else {
-            Bus.post(type = type, method = method, data = data)
+        if (type != 1) {
+            LogUtils.e("callback_method：type=$type,method=$method,datalen=$datalen")
         }
+//        if (Pb_Type.Pb_TYPE_MEET_INTERFACE_UPDATE_VALUE == type) {
+//            Bus.postSticky(type, method, data)
+//        } else {
+            Bus.post(type = type, method = method, data = data)
+//        }
         return 0
     }
 
@@ -382,7 +383,7 @@ object Call {
         // 放入到待处理解码的集合中
         if (DecodeQueue.offer(res, frameData)) {
             //把帧数据添加进队列中
-            Log.d("", "debugPlayer: 把帧数据添加进队列中 ${DecodeQueue.getSize(res)}")
+            //Log.d("", "debugPlayer: 把帧数据添加进队列中 ${DecodeQueue.getSize(res)}")
         } else {
             // 队列已满，尝试移除最旧的非关键帧
             Log.d("", "debugPlayer: 队列已满，尝试移除最旧的非关键帧")

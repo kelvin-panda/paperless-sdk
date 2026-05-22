@@ -197,6 +197,9 @@
 #define TYPE_MEET_INTERFACE_STREAMSAVE 79 //流录制
 #define TYPE_MEET_INTERFACE_DBSERACH 80 //数据库查询
 #define TYPE_MEET_INTERFACE_FILEACCESS 81 //文件权限
+#define TYPE_MEET_INTERFACE_COMPLEXPUBLICUSERDEF      82 // 复合全局自定义数据
+#define TYPE_MEET_INTERFACE_COMPLEXMEETUSERDEF      83 // 复合会议自定义数据
+#define TYPE_MEET_INTERFACE_NEWSYSLOG      84 // 新系统日志
 
 //注：这里所有的字符串都约定为utf8编码
 #define DEFAULT_SMALLNAME_MAXLEN   64 //默认短名称长度
@@ -617,6 +620,7 @@ typedef struct
 #define MEETDEVICE_PROPERTY_PARENTDEVICE		20 //父设备ID属性 query/set (propertyval int32u)  
 #define MEETDEVICE_PROPERTY_CHECKCHANNLEON		21 //判断指定的设备ID的通道有没有被采集 query paramterval=查询的流通道号[0-11]/ (propertyval int32u)  1表示已经处于采集状态, 0表示处于空闲状态
 #define MEETDEVICE_PROPERTY_STYLE				22 //查询设备的style属性值 query / (propertyval int32u)  
+#define MEETDEVICE_PROPERTY_VOLUMN				23 //查询设备的播放资源音量属性值 query / (paramterval传入资源索引0-11 propertyval int32u) 0-100 
 
 #define MEET_DEVICESTRING_MAXLEN 260
 //type:TYPE_MEET_INTERFACE_DEVICEINFO
@@ -1083,15 +1087,34 @@ typedef struct
 #define TEXTBRODCAST_TYPE_MASK_PUBLISH		  0x04000000 //表示只针对发布机设备
 #define TEXTBRODCAST_TYPE_MASK_SERVICE		  0x08000000 //表示只针对茶水设备
 
-#define TEXTBRODCAST_TYPE_COMMONTEXT  0 //普通文本信息
-#define TEXTBRODCAST_TYPE_MEETINGTEXT 1 //会议名称文本信息
-#define TEXTBRODCAST_TYPE_MEMBERTEXT  2 //参会人文本信息
-#define TEXTBRODCAST_TYPE_IATTEXT     3 //实时会议纪要文本信息 
-#define TEXTBRODCAST_TYPE_SUMARYTEXT  4 //会议纪要文本信息
-#define TEXTBRODCAST_TYPE_CLOSTSUMARY 5 //关闭会议纪要文本信息
-#define TEXTBRODCAST_TYPE_PUBLISH	  6 //发布机通知显示的文本信息
-#define TEXTBRODCAST_TYPE_JSON		  7 //json文本信息 参见meetuserdef.h 注:提醒投票直接发送投票ID的字符串格式
-#define TEXTBRODCAST_TYPE_DEVINFO	  8 //设备信息json文本信息 参见meetuserdef.h 
+#define TEXTBRODCAST_TYPE_COMMONTEXT  0   //普通文本信息
+#define TEXTBRODCAST_TYPE_MEETINGTEXT 1   //会议名称文本信息
+#define TEXTBRODCAST_TYPE_MEMBERTEXT  2   //参会人文本信息
+#define TEXTBRODCAST_TYPE_IATTEXT     3   //实时会议纪要文本信息  {"lang":0, "stat":0, "text":""}
+#define TEXTBRODCAST_TYPE_SUMARYTEXT  4   //会议纪要文本信息
+#define TEXTBRODCAST_TYPE_CLOSTSUMARY 5   //关闭会议纪要文本信息
+#define TEXTBRODCAST_TYPE_PUBLISH	  6   //发布机通知显示的文本信息
+#define TEXTBRODCAST_TYPE_JSON		  7   //json文本信息 参见meetuserdef.h 注:提醒投票直接发送投票ID的字符串格式
+#define TEXTBRODCAST_TYPE_DEVINFO	  8   //设备信息json文本信息 参见meetuserdef.h 
+
+/*
+#define TEXTBRODCAST_TYPE_IATTEXT     3   //实时会议纪要文本信息  {"name":"陈生","lang":0, "stat":0, "text":""}
+lang是语言
+| CHINESE | 0 | 中文（原始语音） |
+| ENGLISH | 1 | 英文（原始语音） |
+| RUSSIAN | 2 | 俄文（原始语音） |
+| KOREAN | 3 | 韩文（原始语音） |
+| JAPANESE | 4 | 日文（原始语音） |
+| CHINESE_T | 5 | 翻译结果 - 中文 |
+| ENGLISH_T | 6 | 翻译结果 - 英文 |
+| RUSSIAN_T | 7 | 翻译结果 - 俄文 |
+| KOREAN_T | 8 | 翻译结果 - 韩文 |
+| JAPANESE_T | 9 | 翻译结果 - 日文 |
+
+stat:1=中间结果，2=最终结果
+
+text:文本信息 utf8
+*/
 
 
 //发送文本广播
@@ -1729,8 +1752,20 @@ typedef struct
 #define DEVICECONTORL_MODIFYFONTCOLOR  11 //更换字体颜色 operval1有效 指颜色标号 参见fontcolor index
 #define DEVICECONTORL_MONITORPOWER_ON   12 //控制显示器亮屏
 #define DEVICECONTORL_MONITORPOWER_OFF  13 //显示器熄屏
-#define DEVICECONTORL_LIFTMICOPEN   14 //开启话筒
-#define DEVICECONTORL_LIFTMICCLOSE  15 //关闭话筒
+#define DEVICECONTORL_LIFTMICOPEN   14 //开启话筒/主机开机
+#define DEVICECONTORL_LIFTMICCLOSE  15 //关闭话筒/主机关机
+#define DEVICECONTORL_CHECKIN  16 ////隐藏投影签到信息
+#define DEVICECONTORL_LIFTON	17			//上升开机
+#define DEVICECONTORL_LIFTOFF	18			//上升关机
+#define DEVICECONTORL_RATOTE15	19			//翻转15
+#define DEVICECONTORL_RATOTE30	20			//翻转30
+#define DEVICECONTORL_PANELENABLE	21			//面板启用
+#define DEVICECONTORL_PANELDISABLE	22			//面板禁用
+#define DEVICECONTORL_SWITCHHDMI1	23			//切换hdmi1
+#define DEVICECONTORL_SWITCHHDMI2	24			//切换hdmi2
+#define DEVICECONTORL_ROTATESPEED	25			//翻转速度
+#define DEVICECONTORL_LIFTSPEED		26			//升降速度
+#define DEVICECONTORL_RATATEANGLE	27			//翻转指定角度
 
 //callback
 //method: notify
@@ -2338,6 +2373,7 @@ typedef struct
 #define memperm_vote					0x00000010		//投票权限
 #define memperm_postilview				0x00000020		//批注查看权限 -- 不保存到数据库
 #define memperm_record					0x00000040		//录制权限 
+#define memperm_lookvote				0x00000080		//投票查看权限 
 
 typedef struct
 {
@@ -2685,6 +2721,7 @@ typedef struct
 #define 	MEETING_STATUS_APPROVALING		7//审批中
 #define 	MEETING_STATUS_APPROVALOK		8//审批通过
 #define 	MEETING_STATUS_APPROVALFAILED	9//审批不通过
+#define 	MEETING_STATUS_RESETDATA		10//重置会议，会议预演结束清空数据恢复到会议开始前的状态
 
 #define SIGNIN_PSW_LEN 16
 //会议信息
@@ -2927,6 +2964,7 @@ typedef struct
 #define MEETDIRECTORY_PROPERTY_FLAG   6 //目录标志 query(fixed32)
 #define MEETDIRECTORY_PROPERTY_VOTEID   7 //目录绑定的投票ID query(fixed32)
 #define MEETDIRECTORY_PROPERTY_AGENDABIND   8 //目录关联的议题ID query(fixed32)
+#define MEETDIRECTORY_PROPERTY_FILENUM   9 //目录内指定人员所属的文件个数 query(fixed32) param1=uploadrole,param2=uploadid
 
 //method: queryproperty
 typedef struct
@@ -2936,6 +2974,9 @@ typedef struct
 	int32u propertyid;//数据ID 
 	int32u dirid;//传入参数
 	int32u propertyval;//返回值
+
+	int32u param1;
+	int32u param2;
 
 }Type_MeetDirectoryQueryPropertyInt32u, *pType_MeetDirectoryQueryPropertyInt32u;
 
@@ -5311,6 +5352,17 @@ typedef struct
 	pItem_MeetOneStatistic pitem;
 }Type_MeetQuarterStatisticInfo, *pType_MeetQuarterStatisticInfo;
 
+//V1详细的会议统计
+//call
+//type:TYPE_MEET_INTERFACE_MEETSTATISTIC
+//method: 
+//METHOD_MEET_INTERFACE_DETAILINFO|使用Type_SmartJsonProtol  协议参见ProtocalData.h  V1详细的会议统计json约定
+
+//返回查询详细的会议统计
+//callback 使用Type_SmartJsonProtolNotify  协议参见ProtocalData.h -- V1详细的会议统计json约定
+//type:TYPE_MEET_INTERFACE_MEETSTATISTIC
+//method: METHOD_MEET_INTERFACE_DETAILINFO
+
 #ifndef MEET_FACEID_MAINBG
 #define MEET_FACEID_MAINBG
 //返回查询界面配置
@@ -5534,6 +5586,7 @@ typedef struct
 //查询指定系统全局字串的某项属性
 //property id
 #define PUBLICINFO_PROPERTY_OFFICEBINDID				1 //查询Office文档绑定的Pdfid parameterval=officemediaid
+#define PUBLICINFO_PROPERTY_LXTABLECARDID			    8008 // 领显网络桌牌全局自定义
 
 //method: queryproperty
 typedef struct
@@ -5952,6 +6005,38 @@ typedef struct
 
 }Type_MeetUpdateNotify, *pType_MeetUpdateNotify;
 
+#define MEET_UPDATE_STATUS_IDLE		0//空闲
+#define MEET_UPDATE_STATUS_DOWNLOAD	1//下载中
+#define MEET_UPDATE_STATUS_UNZIP		2//解压 针对安卓
+#define MEET_UPDATE_STATUS_USER      3//解压成功好回调给应用层处理，如果长时间没有升级成功，要到平板端查看是不是安装失败
+#define MEET_UPDATE_STATUS_DEAMON    4//交给守护程序解压替换--如果长时间没有重启升级成功，要到升级日志目录的log里查看日志
+#define MEET_UPDATE_STATUS_NEWER     5//版本不需要升级
+#define MEET_UPDATE_STATUS_STARTGET     6//开始向媒体服务器请求文件
+
+
+#define MEET_UPDATE_STATUS_NODEAMON    -1//未检测到守护程序
+#define MEET_UPDATE_STATUS_NOMEDIASRV    -2//未检测到媒体服务器
+#define MEET_UPDATE_STATUS_MEDIASRVCONNECTERR    -3//媒体服务器链接不上
+#define MEET_UPDATE_STATUS_FILENOEXIST    -4//文件不存在
+#define MEET_UPDATE_STATUS_OPENFAILED    -5//写入文件失败
+#define MEET_UPDATE_STATUS_GETFAILED    -5//从媒体服务器请求文件失败
+#define MEET_UPDATE_STATUS_BUSY    -6//当前正在升级中
+#define MEET_UPDATE_STATUS_INITUPDATEFAILED    -7//初始化升级失败
+#define MEET_UPDATE_STATUS_TIMEOUT    -8//下载超时
+
+//软件升级状态和进度回调
+//callback
+//type:TYPE_MEET_INTERFACE_UPDATE
+//method: METHOD_MEET_INTERFACE_NOTIFY
+typedef struct
+{
+	Type_HeaderInfo hdr;
+
+	int   progress;//下载进度
+	int   status;//MEET_UPDATE_STATUS_IDLE
+	char* msg;
+	int   msglen;
+}Type_MeetUpdateStatusNotify, *pType_MeetUpdateStatusNotify;
 //////////////////////////// topic 议题 //////////////////////////////////////////////
 //会场议题
 //callback
@@ -6201,9 +6286,9 @@ typedef struct
 	"nomember":1,//不添加参会人
 	"member":  //可选
 	[
-	{"name::"陈工","company":"xx","job":"xx","phone","123456","password":"123456"},
-	{"name::"陈工","company":"xx","job":"xx","phone","123456","password":"123456"},
-	{"name::"陈工","company":"xx","job":"xx","phone","123456","password":"123456"}
+	{"name::"陈工","company":"xx","job":"xx","phone","123456","password":"123456","perm":"0xff","role":3,"devid":"0x1100000"}
+	{"name::"陈工","company":"xx","job":"xx","phone","123456","password":"123456","perm":"0xff","role":4,"devid":"0x1100001"},
+	{"name::"陈工","company":"xx","job":"xx","phone","123456","password":"123456","perm":"0xff","role":1,"devid":"0x1100002"}
 	],
 	"agenda":  //议题 可选
 	[
@@ -6211,8 +6296,9 @@ typedef struct
 	"flag":"",//参见 FASTMEET_AGENDAFLAG_DIR
 	"desc:"",//议题内容 限长320字节
 	"starttime":"",//议题设置的开始时间 UTC 秒数 eg:1683854858 可选
-	"endtime":""//议题设置的结束时间  UTC 秒数 eg:1683891858 可选
-	"passwd":""//议题设置访问密码 限长8字节 可选
+	"endtime":"",//议题设置的结束时间  UTC 秒数 eg:1683891858 可选
+	"passwd":"",//议题设置访问密码 限长8字节 可选
+	"perm":[0,2]//议题黑名单，数值对应了Member中的参会人索引从0开始，指定member时才有效，会设置到目录权限中
 	}
 	],
 	}
@@ -6662,6 +6748,132 @@ typedef struct
 	int    jsonlen;//json + 1
 	char   *json;//jsonlen 参见meetuserdef.h的协议定义
 }Type_SmartJsonProtolNotify, *pType_SmartJsonProtolNotify;
+
+/////2026.4.23/////////////////////////////////////////////////////////////////////
+typedef struct
+{
+	int32u   typ;
+	int32u   id1;
+	int32u   dataid;
+	char*	 ptext; //存放对应的数据 指向字符串的指针，谁分配谁释放
+}Item_ComplexPubInfo, *pItem_ComplexPubInfo;
+
+//call
+//type:TYPE_MEET_INTERFACE_COMPLEXPUBLICUSERDEF
+//method: 
+//query|使用Type_QueComplexPubInfo
+typedef struct
+{
+	Type_HeaderInfo hdr;
+
+	int32u   typ;//指定typ 参见ProtocalData.h  定义 COMPLEX_PUBLIC_TYP_ADMIN
+	int32u   id1;//匹配id1 为0表示typ下的所有id
+
+	int		 num;
+	//Item_ComplexPubInfo [num];
+}Type_QueComplexPubInfo, *pType_QueComplexPubInfo;
+
+//call
+//type:TYPE_MEET_INTERFACE_COMPLEXPUBLICUSERDEF
+//method: 
+//modify|使用Type_SmartJsonProtol  协议参见ProtocalData.h 复合自定义数据 STAGE_ComplexPublicUserInfo 修改时的json约定
+//METHOD_MEET_INTERFACE_SINGLEQUERYBYID|使用Type_SingleQueComplexPubInfo 
+typedef struct
+{
+	Type_HeaderInfo hdr;
+
+	int32u   typ;
+	int32u   id1;
+	int32u   dataid;
+	char*	 ptext; //存放对应的数据 指向字符串的指针，谁分配谁释放
+
+}Type_SingleQueComplexPubInfo, *pType_SingleQueComplexPubInfo;
+
+//callback
+//type:TYPE_MEET_INTERFACE_COMPLEXPUBLICUSERDEF
+//method: notify
+typedef struct
+{
+	Type_HeaderInfo hdr;
+	int32u opermethod;//本次通知是因为opermethod方法触发的
+	int32u typ;//如果指定了ID刚表示是对特定ID的操作,为0表示全部
+	int32u id1;
+	int32u dataid;
+
+}Type_ComplexPublicUserdefNotify, *pType_ComplexPublicUserdefNotify;
+
+////////////newsyslog//////////////////////////////////////////////////////////////
+//call
+//type:TYPE_MEET_INTERFACE_NEWSYSLOG
+//method: 
+//add|使用Type_SmartJsonProtol  协议参见ProtocalData.h STAGE_NewSystemLog 添加的json约定
+//query|使用Type_SmartJsonProtol  协议参见ProtocalData.h STAGE_NewSystemLog 查询的json约定
+
+
+//callback 使用Type_SmartJsonProtolNotify 协议参见ProtocalData.h STAGE_NewSystemLog 查询的json约定
+//type:TYPE_MEET_INTERFACE_NEWSYSLOG
+//method: METHOD_MEET_INTERFACE_QUERY
+
+///////////comlexmeetuserdef///////////////////////////////////////////////////////////////
+typedef struct
+{
+	int32u   typ;
+	int32u   id1;
+	int32u   id2;
+	int32u   id3;
+	int32u   dataid;
+	char*	 ptext; //存放对应的数据 指向字符串的指针，谁分配谁释放
+}Item_ComplexMeetInfo, *pItem_ComplexMeetInfo;
+
+//call
+//type:TYPE_MEET_INTERFACE_COMPLEXMEETUSERDEF
+//method: 
+//query|使用Type_QueComplexPubInfo
+typedef struct
+{
+	Type_HeaderInfo hdr;
+
+	int32u   typ;//指定typ 参见ProtocalData.h  定义 COMPLEX_PUBLIC_TYP_ADMIN
+	int32u   id1;//匹配id1 为0表示typ下的所有id
+	int32u   id2;//匹配id2 为0表示typ下的所有id
+	int32u   id3;//匹配id3 为0表示typ下的所有id
+
+	int		 num;
+	//Item_ComplexMeetInfo [num];
+}Type_QueComplexMeetInfo, *pType_QueComplexMeetInfo;
+
+//call
+//type:TYPE_MEET_INTERFACE_COMPLEXMEETUSERDEF
+//method: 
+//modify|使用Type_SmartJsonProtol  协议参见ProtocalData.h 复合自定义数据STAGE_ComplexMeetUserInfo 修改时的json约定
+//METHOD_MEET_INTERFACE_SINGLEQUERYBYID|使用Type_SingleQueComplexMeetInfo 
+typedef struct
+{
+	Type_HeaderInfo hdr;
+
+	int32u   typ;
+	int32u   id1;
+	int32u   id2;
+	int32u   id3;
+	int32u   dataid;
+	char*	 ptext; //存放对应的数据 指向字符串的指针，谁分配谁释放
+
+}Type_SingleQueComplexMeetInfo, *pType_SingleQueComplexMeetInfo;
+
+//callback
+//type:TYPE_MEET_INTERFACE_COMPLEXMEETUSERDEF
+//method: notify
+typedef struct
+{
+	Type_HeaderInfo hdr;
+	int32u opermethod;//本次通知是因为opermethod方法触发的
+	int32u typ;//如果指定了ID刚表示是对特定ID的操作,为0表示全部
+	int32u id1;
+	int32u id2;
+	int32u id3;
+	int32u dataid;
+
+}Type_ComplexMeetUserdefNotify, *pType_ComplexMeetUserdefNotify;
 
 #pragma pack(pop)
 // #ifdef __cplusplus

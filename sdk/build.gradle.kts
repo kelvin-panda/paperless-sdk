@@ -6,7 +6,8 @@ plugins {
 
 android {
     namespace = "com.paperless.sdk"
-    compileSdk = 34
+    ndkVersion = "28.2.13676358"
+    compileSdk = 35
 
     defaultConfig {
         minSdk = 21
@@ -20,7 +21,7 @@ android {
                 // -frtti: 启用运行时类型信息 (RTTI)，支持 dynamic_cast 和 typeid 操作符
                 // -Wl,<options>: 将逗号分隔的 <options> 直接传递给链接器。这是一个重要的高级功能，
                 //      比如 -Wl,-z,max-page-size=16384 就是告诉链接器将库的内存对齐（alignment）设置为 16KB
-                cppFlags("-frtti -fexceptions -Wl,-z,max-page-size=16384")
+                cppFlags("-frtti -fexceptions")
                 abiFilters("armeabi-v7a", "arm64-v8a")
 
                 // CMake 系统参数 通过 -D 定义 CMake 变量来修改 NDK 工具链的行为
@@ -85,7 +86,7 @@ afterEvaluate {
                 groupId = "com.gitee.xlk_gitee"
                 artifactId = "sdk-library"
                 //定义：大更新.库更新.java层更新
-                version = "1.3.7"
+                version = "1.3.8"
                 from(components["release"])
             }
         }
