@@ -365,6 +365,11 @@ class PlayerController(
 
     private var render = true
     private var discardCount = 0
+
+    /**
+     * 当前帧pts大于上一次35毫秒后的特别处理
+     */
+    private var pts = 0L
     private fun decodeFrame(frameData: FrameData) {
         try {
             val inputBufferIndex = mediaCodec?.dequeueInputBuffer(0) ?: -1
@@ -404,6 +409,10 @@ class PlayerController(
 
                     else -> {
                         updateDecodeStatus(5f)
+//                        if (bufferInfo.presentationTimeUs - pts > 35_000) {
+//
+//                        }
+//                        pts = bufferInfo.presentationTimeUs
                         if (SdkConfig.isDecodeDiscard) {
                             val exceed =
                                 (frameData.w > SdkConfig.decodeDiscardSize.x || frameData.h > SdkConfig.decodeDiscardSize.y)

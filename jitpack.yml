@@ -1,9 +1,9 @@
-before_install:
-  - sdk install java 17.0.10-open
-  - sdk use java 17.0.10-open
+#before_install:
+#  - sdk install java 17.0.10-open
+#  - sdk use java 17.0.10-open
 
 jdk:
   - openjdk17 # 适配 Gradle 7.0+:cite[4]
 
-install:
-  - ./gradlew :sdk:publishReleasePublicationToMavenLocal
+#install:
+#  - ./gradlew :sdk:publishReleasePublicationToMavenLocal
