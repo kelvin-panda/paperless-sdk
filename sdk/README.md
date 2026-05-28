@@ -1,3 +1,6 @@
+1.3.10
+1.`InterfaceCommondata.java`编码格式修正为`UTF-8`
+
 1.3.9
 1.`PlayerControlView`自定义播放器添加双指缩放的功能
 2.`SdkConfig`添加相关配置参数

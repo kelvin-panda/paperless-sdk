@@ -10,7 +10,7 @@ public final class InterfaceCommondata {
   }
   /**
    * <pre>
-   *´íÎóÂë
+   *é”™è¯¯ç 
    * </pre>
    *
    * Protobuf enum {@code pbui_ComContainer_Call}
@@ -19,7 +19,7 @@ public final class InterfaceCommondata {
       implements com.google.protobuf.Internal.EnumLite {
     /**
      * <pre>
-     *·¢ËÍ²éÑ¯²Ù×÷
+     *å‘é€æŸ¥è¯¢æ“ä½œ
      * </pre>
      *
      * <code>Pb_ERROR_MEET_INTERFACE_CALL = 0;</code>
@@ -27,7 +27,7 @@ public final class InterfaceCommondata {
     Pb_ERROR_MEET_INTERFACE_CALL(0),
     /**
      * <pre>
-     *Í¨Öª»Øµ÷Êı¾İ
+     *é€šçŸ¥å›è°ƒæ•°æ®
      * </pre>
      *
      * <code>Pb_ERROR_MEET_INTERFACE_CALLBACK = 1;</code>
@@ -35,7 +35,7 @@ public final class InterfaceCommondata {
     Pb_ERROR_MEET_INTERFACE_CALLBACK(1),
     /**
      * <pre>
-     *²éÑ¯·µ»ØµÄÊı¾İ
+     *æŸ¥è¯¢è¿”å›çš„æ•°æ®
      * </pre>
      *
      * <code>Pb_ERROR_MEET_INTERFACE_CALLRETURN = 2;</code>
@@ -46,7 +46,7 @@ public final class InterfaceCommondata {
 
     /**
      * <pre>
-     *·¢ËÍ²éÑ¯²Ù×÷
+     *å‘é€æŸ¥è¯¢æ“ä½œ
      * </pre>
      *
      * <code>Pb_ERROR_MEET_INTERFACE_CALL = 0;</code>
@@ -54,7 +54,7 @@ public final class InterfaceCommondata {
     public static final int Pb_ERROR_MEET_INTERFACE_CALL_VALUE = 0;
     /**
      * <pre>
-     *Í¨Öª»Øµ÷Êı¾İ
+     *é€šçŸ¥å›è°ƒæ•°æ®
      * </pre>
      *
      * <code>Pb_ERROR_MEET_INTERFACE_CALLBACK = 1;</code>
@@ -62,7 +62,7 @@ public final class InterfaceCommondata {
     public static final int Pb_ERROR_MEET_INTERFACE_CALLBACK_VALUE = 1;
     /**
      * <pre>
-     *²éÑ¯·µ»ØµÄÊı¾İ
+     *æŸ¥è¯¢è¿”å›çš„æ•°æ®
      * </pre>
      *
      * <code>Pb_ERROR_MEET_INTERFACE_CALLRETURN = 2;</code>
@@ -118,7 +118,7 @@ public final class InterfaceCommondata {
 
     /**
      * <pre>
-     *Êı¾İÀàĞÍ ²Î¼û Pb_Type
+     *æ•°æ®ç±»å‹ å‚è§ Pb_Type
      * </pre>
      *
      * <code>optional fixed32 type = 1;</code>
@@ -127,7 +127,7 @@ public final class InterfaceCommondata {
 
     /**
      * <pre>
-     *ÀàĞÍ¶ÔÓ¦µÄ²Ù×÷·½·¨ ²Î¼û Pb_Method
+     *ç±»å‹å¯¹åº”çš„æ“ä½œæ–¹æ³• å‚è§ Pb_Method
      * </pre>
      *
      * <code>optional fixed32 method = 2;</code>
@@ -136,7 +136,7 @@ public final class InterfaceCommondata {
 
     /**
      * <pre>
-     *²Î¼û pbui_ComContainer_Call
+     *å‚è§ pbui_ComContainer_Call
      * </pre>
      *
      * <code>optional fixed32 call = 3;</code>
@@ -145,7 +145,7 @@ public final class InterfaceCommondata {
 
     /**
      * <pre>
-     *±êÊ¶PHPºóÌ¨²Ù×÷Ê¹ÓÃ
+     *æ ‡è¯†PHPåå°æ“ä½œä½¿ç”¨
      * </pre>
      *
      * <code>optional fixed32 meetingid = 4;</code>
@@ -154,7 +154,7 @@ public final class InterfaceCommondata {
 
     /**
      * <pre>
-     *»áÒéID¹ØÁªµÄ»á³¡ID
+     *ä¼šè®®IDå…³è”çš„ä¼šåœºID
      * </pre>
      *
      * <code>optional fixed32 roomid = 5;</code>
@@ -163,7 +163,7 @@ public final class InterfaceCommondata {
 
     /**
      * <pre>
-     *&#47;/ÓÃ»§Éí·İ ²Î¼ûInterface_Macro.proto Pb_MeetFaceStatus
+     *&#47;/ç”¨æˆ·èº«ä»½ å‚è§Interface_Macro.proto Pb_MeetFaceStatus
      * </pre>
      *
      * <code>optional fixed32 role = 6;</code>
@@ -172,7 +172,7 @@ public final class InterfaceCommondata {
 
     /**
      * <pre>
-     *Èç¹ûÊÇ²Î»áÈËÔ±Ôò»á²Î»áÈËÔ±ID,Èç¹ûÊÇ¹ÜÀíÔ±ÔòÎª¹ÜÀíÔ±ID
+     *å¦‚æœæ˜¯å‚ä¼šäººå‘˜åˆ™ä¼šå‚ä¼šäººå‘˜ID,å¦‚æœæ˜¯ç®¡ç†å‘˜åˆ™ä¸ºç®¡ç†å‘˜ID
      * </pre>
      *
      * <code>optional fixed32 userid = 7;</code>
@@ -181,7 +181,7 @@ public final class InterfaceCommondata {
 
     /**
      * <pre>
-     *Èç¹ûÊÇ²Î»áÈËÔ±Ôò»á²Î»áÈËÔ±Ãû³Æ,Èç¹ûÊÇ¹ÜÀíÔ±ÔòÎª¹ÜÀíÔ±Ãû³Æ
+     *å¦‚æœæ˜¯å‚ä¼šäººå‘˜åˆ™ä¼šå‚ä¼šäººå‘˜åç§°,å¦‚æœæ˜¯ç®¡ç†å‘˜åˆ™ä¸ºç®¡ç†å‘˜åç§°
      * </pre>
      *
      * <code>optional bytes username = 8;</code>
@@ -190,7 +190,7 @@ public final class InterfaceCommondata {
 
     /**
      * <pre>
-     *»á»°ID phpºóÌ¨Ê¹ÓÃ
+     *ä¼šè¯ID phpåå°ä½¿ç”¨
      * </pre>
      *
      * <code>optional bytes sessionid = 9;</code>
@@ -199,7 +199,7 @@ public final class InterfaceCommondata {
 
     /**
      * <pre>
-     *·µ»ØµÄÖµ£¬Èç¹û´íÎó±£´æ´íÎóÂë ²Î¼û Pb_Error
+     *è¿”å›çš„å€¼ï¼Œå¦‚æœé”™è¯¯ä¿å­˜é”™è¯¯ç  å‚è§ Pb_Error
      * </pre>
      *
      * <code>optional fixed32 retcode = 10;</code>
@@ -208,7 +208,7 @@ public final class InterfaceCommondata {
 
     /**
      * <pre>
-     *¶ÔÓ¦µÄÊı¾İ£¬Èç¹û´æÔÚÊı¾İ£¬Ôò°´ÕÕ type¡¢method½âÎö¸ÃÊı¾İ
+     *å¯¹åº”çš„æ•°æ®ï¼Œå¦‚æœå­˜åœ¨æ•°æ®ï¼Œåˆ™æŒ‰ç…§ typeã€methodè§£æè¯¥æ•°æ®
      * </pre>
      *
      * <code>optional bytes data = 11;</code>
@@ -217,7 +217,7 @@ public final class InterfaceCommondata {
   }
   /**
    * <pre>
-   *PHP----¡·C++
+   *PHP----ã€‹C++
    * </pre>
    *
    * Protobuf type {@code pbui_ReqComContainer}
@@ -236,7 +236,7 @@ public final class InterfaceCommondata {
     private int type_;
     /**
      * <pre>
-     *Êı¾İÀàĞÍ ²Î¼û Pb_Type
+     *æ•°æ®ç±»å‹ å‚è§ Pb_Type
      * </pre>
      *
      * <code>optional fixed32 type = 1;</code>
@@ -246,7 +246,7 @@ public final class InterfaceCommondata {
     }
     /**
      * <pre>
-     *Êı¾İÀàĞÍ ²Î¼û Pb_Type
+     *æ•°æ®ç±»å‹ å‚è§ Pb_Type
      * </pre>
      *
      * <code>optional fixed32 type = 1;</code>
@@ -257,7 +257,7 @@ public final class InterfaceCommondata {
     }
     /**
      * <pre>
-     *Êı¾İÀàĞÍ ²Î¼û Pb_Type
+     *æ•°æ®ç±»å‹ å‚è§ Pb_Type
      * </pre>
      *
      * <code>optional fixed32 type = 1;</code>
@@ -271,7 +271,7 @@ public final class InterfaceCommondata {
     private int method_;
     /**
      * <pre>
-     *ÀàĞÍ¶ÔÓ¦µÄ²Ù×÷·½·¨ ²Î¼û Pb_Method
+     *ç±»å‹å¯¹åº”çš„æ“ä½œæ–¹æ³• å‚è§ Pb_Method
      * </pre>
      *
      * <code>optional fixed32 method = 2;</code>
@@ -281,7 +281,7 @@ public final class InterfaceCommondata {
     }
     /**
      * <pre>
-     *ÀàĞÍ¶ÔÓ¦µÄ²Ù×÷·½·¨ ²Î¼û Pb_Method
+     *ç±»å‹å¯¹åº”çš„æ“ä½œæ–¹æ³• å‚è§ Pb_Method
      * </pre>
      *
      * <code>optional fixed32 method = 2;</code>
@@ -292,7 +292,7 @@ public final class InterfaceCommondata {
     }
     /**
      * <pre>
-     *ÀàĞÍ¶ÔÓ¦µÄ²Ù×÷·½·¨ ²Î¼û Pb_Method
+     *ç±»å‹å¯¹åº”çš„æ“ä½œæ–¹æ³• å‚è§ Pb_Method
      * </pre>
      *
      * <code>optional fixed32 method = 2;</code>
@@ -306,7 +306,7 @@ public final class InterfaceCommondata {
     private int call_;
     /**
      * <pre>
-     *²Î¼û pbui_ComContainer_Call
+     *å‚è§ pbui_ComContainer_Call
      * </pre>
      *
      * <code>optional fixed32 call = 3;</code>
@@ -316,7 +316,7 @@ public final class InterfaceCommondata {
     }
     /**
      * <pre>
-     *²Î¼û pbui_ComContainer_Call
+     *å‚è§ pbui_ComContainer_Call
      * </pre>
      *
      * <code>optional fixed32 call = 3;</code>
@@ -327,7 +327,7 @@ public final class InterfaceCommondata {
     }
     /**
      * <pre>
-     *²Î¼û pbui_ComContainer_Call
+     *å‚è§ pbui_ComContainer_Call
      * </pre>
      *
      * <code>optional fixed32 call = 3;</code>
@@ -341,7 +341,7 @@ public final class InterfaceCommondata {
     private int meetingid_;
     /**
      * <pre>
-     *±êÊ¶PHPºóÌ¨²Ù×÷Ê¹ÓÃ
+     *æ ‡è¯†PHPåå°æ“ä½œä½¿ç”¨
      * </pre>
      *
      * <code>optional fixed32 meetingid = 4;</code>
@@ -351,7 +351,7 @@ public final class InterfaceCommondata {
     }
     /**
      * <pre>
-     *±êÊ¶PHPºóÌ¨²Ù×÷Ê¹ÓÃ
+     *æ ‡è¯†PHPåå°æ“ä½œä½¿ç”¨
      * </pre>
      *
      * <code>optional fixed32 meetingid = 4;</code>
@@ -362,7 +362,7 @@ public final class InterfaceCommondata {
     }
     /**
      * <pre>
-     *±êÊ¶PHPºóÌ¨²Ù×÷Ê¹ÓÃ
+     *æ ‡è¯†PHPåå°æ“ä½œä½¿ç”¨
      * </pre>
      *
      * <code>optional fixed32 meetingid = 4;</code>
@@ -376,7 +376,7 @@ public final class InterfaceCommondata {
     private int roomid_;
     /**
      * <pre>
-     *»áÒéID¹ØÁªµÄ»á³¡ID
+     *ä¼šè®®IDå…³è”çš„ä¼šåœºID
      * </pre>
      *
      * <code>optional fixed32 roomid = 5;</code>
@@ -386,7 +386,7 @@ public final class InterfaceCommondata {
     }
     /**
      * <pre>
-     *»áÒéID¹ØÁªµÄ»á³¡ID
+     *ä¼šè®®IDå…³è”çš„ä¼šåœºID
      * </pre>
      *
      * <code>optional fixed32 roomid = 5;</code>
@@ -397,7 +397,7 @@ public final class InterfaceCommondata {
     }
     /**
      * <pre>
-     *»áÒéID¹ØÁªµÄ»á³¡ID
+     *ä¼šè®®IDå…³è”çš„ä¼šåœºID
      * </pre>
      *
      * <code>optional fixed32 roomid = 5;</code>
@@ -411,7 +411,7 @@ public final class InterfaceCommondata {
     private int role_;
     /**
      * <pre>
-     *&#47;/ÓÃ»§Éí·İ ²Î¼ûInterface_Macro.proto Pb_MeetFaceStatus
+     *&#47;/ç”¨æˆ·èº«ä»½ å‚è§Interface_Macro.proto Pb_MeetFaceStatus
      * </pre>
      *
      * <code>optional fixed32 role = 6;</code>
@@ -421,7 +421,7 @@ public final class InterfaceCommondata {
     }
     /**
      * <pre>
-     *&#47;/ÓÃ»§Éí·İ ²Î¼ûInterface_Macro.proto Pb_MeetFaceStatus
+     *&#47;/ç”¨æˆ·èº«ä»½ å‚è§Interface_Macro.proto Pb_MeetFaceStatus
      * </pre>
      *
      * <code>optional fixed32 role = 6;</code>
@@ -432,7 +432,7 @@ public final class InterfaceCommondata {
     }
     /**
      * <pre>
-     *&#47;/ÓÃ»§Éí·İ ²Î¼ûInterface_Macro.proto Pb_MeetFaceStatus
+     *&#47;/ç”¨æˆ·èº«ä»½ å‚è§Interface_Macro.proto Pb_MeetFaceStatus
      * </pre>
      *
      * <code>optional fixed32 role = 6;</code>
@@ -446,7 +446,7 @@ public final class InterfaceCommondata {
     private int userid_;
     /**
      * <pre>
-     *Èç¹ûÊÇ²Î»áÈËÔ±Ôò»á²Î»áÈËÔ±ID,Èç¹ûÊÇ¹ÜÀíÔ±ÔòÎª¹ÜÀíÔ±ID
+     *å¦‚æœæ˜¯å‚ä¼šäººå‘˜åˆ™ä¼šå‚ä¼šäººå‘˜ID,å¦‚æœæ˜¯ç®¡ç†å‘˜åˆ™ä¸ºç®¡ç†å‘˜ID
      * </pre>
      *
      * <code>optional fixed32 userid = 7;</code>
@@ -456,7 +456,7 @@ public final class InterfaceCommondata {
     }
     /**
      * <pre>
-     *Èç¹ûÊÇ²Î»áÈËÔ±Ôò»á²Î»áÈËÔ±ID,Èç¹ûÊÇ¹ÜÀíÔ±ÔòÎª¹ÜÀíÔ±ID
+     *å¦‚æœæ˜¯å‚ä¼šäººå‘˜åˆ™ä¼šå‚ä¼šäººå‘˜ID,å¦‚æœæ˜¯ç®¡ç†å‘˜åˆ™ä¸ºç®¡ç†å‘˜ID
      * </pre>
      *
      * <code>optional fixed32 userid = 7;</code>
@@ -467,7 +467,7 @@ public final class InterfaceCommondata {
     }
     /**
      * <pre>
-     *Èç¹ûÊÇ²Î»áÈËÔ±Ôò»á²Î»áÈËÔ±ID,Èç¹ûÊÇ¹ÜÀíÔ±ÔòÎª¹ÜÀíÔ±ID
+     *å¦‚æœæ˜¯å‚ä¼šäººå‘˜åˆ™ä¼šå‚ä¼šäººå‘˜ID,å¦‚æœæ˜¯ç®¡ç†å‘˜åˆ™ä¸ºç®¡ç†å‘˜ID
      * </pre>
      *
      * <code>optional fixed32 userid = 7;</code>
@@ -481,7 +481,7 @@ public final class InterfaceCommondata {
     private com.google.protobuf.ByteString username_;
     /**
      * <pre>
-     *Èç¹ûÊÇ²Î»áÈËÔ±Ôò»á²Î»áÈËÔ±Ãû³Æ,Èç¹ûÊÇ¹ÜÀíÔ±ÔòÎª¹ÜÀíÔ±Ãû³Æ
+     *å¦‚æœæ˜¯å‚ä¼šäººå‘˜åˆ™ä¼šå‚ä¼šäººå‘˜åç§°,å¦‚æœæ˜¯ç®¡ç†å‘˜åˆ™ä¸ºç®¡ç†å‘˜åç§°
      * </pre>
      *
      * <code>optional bytes username = 8;</code>
@@ -491,7 +491,7 @@ public final class InterfaceCommondata {
     }
     /**
      * <pre>
-     *Èç¹ûÊÇ²Î»áÈËÔ±Ôò»á²Î»áÈËÔ±Ãû³Æ,Èç¹ûÊÇ¹ÜÀíÔ±ÔòÎª¹ÜÀíÔ±Ãû³Æ
+     *å¦‚æœæ˜¯å‚ä¼šäººå‘˜åˆ™ä¼šå‚ä¼šäººå‘˜åç§°,å¦‚æœæ˜¯ç®¡ç†å‘˜åˆ™ä¸ºç®¡ç†å‘˜åç§°
      * </pre>
      *
      * <code>optional bytes username = 8;</code>
@@ -505,7 +505,7 @@ public final class InterfaceCommondata {
     }
     /**
      * <pre>
-     *Èç¹ûÊÇ²Î»áÈËÔ±Ôò»á²Î»áÈËÔ±Ãû³Æ,Èç¹ûÊÇ¹ÜÀíÔ±ÔòÎª¹ÜÀíÔ±Ãû³Æ
+     *å¦‚æœæ˜¯å‚ä¼šäººå‘˜åˆ™ä¼šå‚ä¼šäººå‘˜åç§°,å¦‚æœæ˜¯ç®¡ç†å‘˜åˆ™ä¸ºç®¡ç†å‘˜åç§°
      * </pre>
      *
      * <code>optional bytes username = 8;</code>
@@ -519,7 +519,7 @@ public final class InterfaceCommondata {
     private com.google.protobuf.ByteString sessionid_;
     /**
      * <pre>
-     *»á»°ID phpºóÌ¨Ê¹ÓÃ
+     *ä¼šè¯ID phpåå°ä½¿ç”¨
      * </pre>
      *
      * <code>optional bytes sessionid = 9;</code>
@@ -529,7 +529,7 @@ public final class InterfaceCommondata {
     }
     /**
      * <pre>
-     *»á»°ID phpºóÌ¨Ê¹ÓÃ
+     *ä¼šè¯ID phpåå°ä½¿ç”¨
      * </pre>
      *
      * <code>optional bytes sessionid = 9;</code>
@@ -543,7 +543,7 @@ public final class InterfaceCommondata {
     }
     /**
      * <pre>
-     *»á»°ID phpºóÌ¨Ê¹ÓÃ
+     *ä¼šè¯ID phpåå°ä½¿ç”¨
      * </pre>
      *
      * <code>optional bytes sessionid = 9;</code>
@@ -557,7 +557,7 @@ public final class InterfaceCommondata {
     private int retcode_;
     /**
      * <pre>
-     *·µ»ØµÄÖµ£¬Èç¹û´íÎó±£´æ´íÎóÂë ²Î¼û Pb_Error
+     *è¿”å›çš„å€¼ï¼Œå¦‚æœé”™è¯¯ä¿å­˜é”™è¯¯ç  å‚è§ Pb_Error
      * </pre>
      *
      * <code>optional fixed32 retcode = 10;</code>
@@ -567,7 +567,7 @@ public final class InterfaceCommondata {
     }
     /**
      * <pre>
-     *·µ»ØµÄÖµ£¬Èç¹û´íÎó±£´æ´íÎóÂë ²Î¼û Pb_Error
+     *è¿”å›çš„å€¼ï¼Œå¦‚æœé”™è¯¯ä¿å­˜é”™è¯¯ç  å‚è§ Pb_Error
      * </pre>
      *
      * <code>optional fixed32 retcode = 10;</code>
@@ -578,7 +578,7 @@ public final class InterfaceCommondata {
     }
     /**
      * <pre>
-     *·µ»ØµÄÖµ£¬Èç¹û´íÎó±£´æ´íÎóÂë ²Î¼û Pb_Error
+     *è¿”å›çš„å€¼ï¼Œå¦‚æœé”™è¯¯ä¿å­˜é”™è¯¯ç  å‚è§ Pb_Error
      * </pre>
      *
      * <code>optional fixed32 retcode = 10;</code>
@@ -592,7 +592,7 @@ public final class InterfaceCommondata {
     private com.google.protobuf.ByteString data_;
     /**
      * <pre>
-     *¶ÔÓ¦µÄÊı¾İ£¬Èç¹û´æÔÚÊı¾İ£¬Ôò°´ÕÕ type¡¢method½âÎö¸ÃÊı¾İ
+     *å¯¹åº”çš„æ•°æ®ï¼Œå¦‚æœå­˜åœ¨æ•°æ®ï¼Œåˆ™æŒ‰ç…§ typeã€methodè§£æè¯¥æ•°æ®
      * </pre>
      *
      * <code>optional bytes data = 11;</code>
@@ -602,7 +602,7 @@ public final class InterfaceCommondata {
     }
     /**
      * <pre>
-     *¶ÔÓ¦µÄÊı¾İ£¬Èç¹û´æÔÚÊı¾İ£¬Ôò°´ÕÕ type¡¢method½âÎö¸ÃÊı¾İ
+     *å¯¹åº”çš„æ•°æ®ï¼Œå¦‚æœå­˜åœ¨æ•°æ®ï¼Œåˆ™æŒ‰ç…§ typeã€methodè§£æè¯¥æ•°æ®
      * </pre>
      *
      * <code>optional bytes data = 11;</code>
@@ -616,7 +616,7 @@ public final class InterfaceCommondata {
     }
     /**
      * <pre>
-     *¶ÔÓ¦µÄÊı¾İ£¬Èç¹û´æÔÚÊı¾İ£¬Ôò°´ÕÕ type¡¢method½âÎö¸ÃÊı¾İ
+     *å¯¹åº”çš„æ•°æ®ï¼Œå¦‚æœå­˜åœ¨æ•°æ®ï¼Œåˆ™æŒ‰ç…§ typeã€methodè§£æè¯¥æ•°æ®
      * </pre>
      *
      * <code>optional bytes data = 11;</code>
@@ -786,7 +786,7 @@ public final class InterfaceCommondata {
 
     /**
      * <pre>
-     *PHP----¡·C++
+     *PHP----ã€‹C++
      * </pre>
      *
      * Protobuf type {@code pbui_ReqComContainer}
@@ -804,7 +804,7 @@ public final class InterfaceCommondata {
 
       /**
        * <pre>
-       *Êı¾İÀàĞÍ ²Î¼û Pb_Type
+       *æ•°æ®ç±»å‹ å‚è§ Pb_Type
        * </pre>
        *
        * <code>optional fixed32 type = 1;</code>
@@ -814,7 +814,7 @@ public final class InterfaceCommondata {
       }
       /**
        * <pre>
-       *Êı¾İÀàĞÍ ²Î¼û Pb_Type
+       *æ•°æ®ç±»å‹ å‚è§ Pb_Type
        * </pre>
        *
        * <code>optional fixed32 type = 1;</code>
@@ -826,7 +826,7 @@ public final class InterfaceCommondata {
       }
       /**
        * <pre>
-       *Êı¾İÀàĞÍ ²Î¼û Pb_Type
+       *æ•°æ®ç±»å‹ å‚è§ Pb_Type
        * </pre>
        *
        * <code>optional fixed32 type = 1;</code>
@@ -839,7 +839,7 @@ public final class InterfaceCommondata {
 
       /**
        * <pre>
-       *ÀàĞÍ¶ÔÓ¦µÄ²Ù×÷·½·¨ ²Î¼û Pb_Method
+       *ç±»å‹å¯¹åº”çš„æ“ä½œæ–¹æ³• å‚è§ Pb_Method
        * </pre>
        *
        * <code>optional fixed32 method = 2;</code>
@@ -849,7 +849,7 @@ public final class InterfaceCommondata {
       }
       /**
        * <pre>
-       *ÀàĞÍ¶ÔÓ¦µÄ²Ù×÷·½·¨ ²Î¼û Pb_Method
+       *ç±»å‹å¯¹åº”çš„æ“ä½œæ–¹æ³• å‚è§ Pb_Method
        * </pre>
        *
        * <code>optional fixed32 method = 2;</code>
@@ -861,7 +861,7 @@ public final class InterfaceCommondata {
       }
       /**
        * <pre>
-       *ÀàĞÍ¶ÔÓ¦µÄ²Ù×÷·½·¨ ²Î¼û Pb_Method
+       *ç±»å‹å¯¹åº”çš„æ“ä½œæ–¹æ³• å‚è§ Pb_Method
        * </pre>
        *
        * <code>optional fixed32 method = 2;</code>
@@ -874,7 +874,7 @@ public final class InterfaceCommondata {
 
       /**
        * <pre>
-       *²Î¼û pbui_ComContainer_Call
+       *å‚è§ pbui_ComContainer_Call
        * </pre>
        *
        * <code>optional fixed32 call = 3;</code>
@@ -884,7 +884,7 @@ public final class InterfaceCommondata {
       }
       /**
        * <pre>
-       *²Î¼û pbui_ComContainer_Call
+       *å‚è§ pbui_ComContainer_Call
        * </pre>
        *
        * <code>optional fixed32 call = 3;</code>
@@ -896,7 +896,7 @@ public final class InterfaceCommondata {
       }
       /**
        * <pre>
-       *²Î¼û pbui_ComContainer_Call
+       *å‚è§ pbui_ComContainer_Call
        * </pre>
        *
        * <code>optional fixed32 call = 3;</code>
@@ -909,7 +909,7 @@ public final class InterfaceCommondata {
 
       /**
        * <pre>
-       *±êÊ¶PHPºóÌ¨²Ù×÷Ê¹ÓÃ
+       *æ ‡è¯†PHPåå°æ“ä½œä½¿ç”¨
        * </pre>
        *
        * <code>optional fixed32 meetingid = 4;</code>
@@ -919,7 +919,7 @@ public final class InterfaceCommondata {
       }
       /**
        * <pre>
-       *±êÊ¶PHPºóÌ¨²Ù×÷Ê¹ÓÃ
+       *æ ‡è¯†PHPåå°æ“ä½œä½¿ç”¨
        * </pre>
        *
        * <code>optional fixed32 meetingid = 4;</code>
@@ -931,7 +931,7 @@ public final class InterfaceCommondata {
       }
       /**
        * <pre>
-       *±êÊ¶PHPºóÌ¨²Ù×÷Ê¹ÓÃ
+       *æ ‡è¯†PHPåå°æ“ä½œä½¿ç”¨
        * </pre>
        *
        * <code>optional fixed32 meetingid = 4;</code>
@@ -944,7 +944,7 @@ public final class InterfaceCommondata {
 
       /**
        * <pre>
-       *»áÒéID¹ØÁªµÄ»á³¡ID
+       *ä¼šè®®IDå…³è”çš„ä¼šåœºID
        * </pre>
        *
        * <code>optional fixed32 roomid = 5;</code>
@@ -954,7 +954,7 @@ public final class InterfaceCommondata {
       }
       /**
        * <pre>
-       *»áÒéID¹ØÁªµÄ»á³¡ID
+       *ä¼šè®®IDå…³è”çš„ä¼šåœºID
        * </pre>
        *
        * <code>optional fixed32 roomid = 5;</code>
@@ -966,7 +966,7 @@ public final class InterfaceCommondata {
       }
       /**
        * <pre>
-       *»áÒéID¹ØÁªµÄ»á³¡ID
+       *ä¼šè®®IDå…³è”çš„ä¼šåœºID
        * </pre>
        *
        * <code>optional fixed32 roomid = 5;</code>
@@ -979,7 +979,7 @@ public final class InterfaceCommondata {
 
       /**
        * <pre>
-       *&#47;/ÓÃ»§Éí·İ ²Î¼ûInterface_Macro.proto Pb_MeetFaceStatus
+       *&#47;/ç”¨æˆ·èº«ä»½ å‚è§Interface_Macro.proto Pb_MeetFaceStatus
        * </pre>
        *
        * <code>optional fixed32 role = 6;</code>
@@ -989,7 +989,7 @@ public final class InterfaceCommondata {
       }
       /**
        * <pre>
-       *&#47;/ÓÃ»§Éí·İ ²Î¼ûInterface_Macro.proto Pb_MeetFaceStatus
+       *&#47;/ç”¨æˆ·èº«ä»½ å‚è§Interface_Macro.proto Pb_MeetFaceStatus
        * </pre>
        *
        * <code>optional fixed32 role = 6;</code>
@@ -1001,7 +1001,7 @@ public final class InterfaceCommondata {
       }
       /**
        * <pre>
-       *&#47;/ÓÃ»§Éí·İ ²Î¼ûInterface_Macro.proto Pb_MeetFaceStatus
+       *&#47;/ç”¨æˆ·èº«ä»½ å‚è§Interface_Macro.proto Pb_MeetFaceStatus
        * </pre>
        *
        * <code>optional fixed32 role = 6;</code>
@@ -1014,7 +1014,7 @@ public final class InterfaceCommondata {
 
       /**
        * <pre>
-       *Èç¹ûÊÇ²Î»áÈËÔ±Ôò»á²Î»áÈËÔ±ID,Èç¹ûÊÇ¹ÜÀíÔ±ÔòÎª¹ÜÀíÔ±ID
+       *å¦‚æœæ˜¯å‚ä¼šäººå‘˜åˆ™ä¼šå‚ä¼šäººå‘˜ID,å¦‚æœæ˜¯ç®¡ç†å‘˜åˆ™ä¸ºç®¡ç†å‘˜ID
        * </pre>
        *
        * <code>optional fixed32 userid = 7;</code>
@@ -1024,7 +1024,7 @@ public final class InterfaceCommondata {
       }
       /**
        * <pre>
-       *Èç¹ûÊÇ²Î»áÈËÔ±Ôò»á²Î»áÈËÔ±ID,Èç¹ûÊÇ¹ÜÀíÔ±ÔòÎª¹ÜÀíÔ±ID
+       *å¦‚æœæ˜¯å‚ä¼šäººå‘˜åˆ™ä¼šå‚ä¼šäººå‘˜ID,å¦‚æœæ˜¯ç®¡ç†å‘˜åˆ™ä¸ºç®¡ç†å‘˜ID
        * </pre>
        *
        * <code>optional fixed32 userid = 7;</code>
@@ -1036,7 +1036,7 @@ public final class InterfaceCommondata {
       }
       /**
        * <pre>
-       *Èç¹ûÊÇ²Î»áÈËÔ±Ôò»á²Î»áÈËÔ±ID,Èç¹ûÊÇ¹ÜÀíÔ±ÔòÎª¹ÜÀíÔ±ID
+       *å¦‚æœæ˜¯å‚ä¼šäººå‘˜åˆ™ä¼šå‚ä¼šäººå‘˜ID,å¦‚æœæ˜¯ç®¡ç†å‘˜åˆ™ä¸ºç®¡ç†å‘˜ID
        * </pre>
        *
        * <code>optional fixed32 userid = 7;</code>
@@ -1049,7 +1049,7 @@ public final class InterfaceCommondata {
 
       /**
        * <pre>
-       *Èç¹ûÊÇ²Î»áÈËÔ±Ôò»á²Î»áÈËÔ±Ãû³Æ,Èç¹ûÊÇ¹ÜÀíÔ±ÔòÎª¹ÜÀíÔ±Ãû³Æ
+       *å¦‚æœæ˜¯å‚ä¼šäººå‘˜åˆ™ä¼šå‚ä¼šäººå‘˜åç§°,å¦‚æœæ˜¯ç®¡ç†å‘˜åˆ™ä¸ºç®¡ç†å‘˜åç§°
        * </pre>
        *
        * <code>optional bytes username = 8;</code>
@@ -1059,7 +1059,7 @@ public final class InterfaceCommondata {
       }
       /**
        * <pre>
-       *Èç¹ûÊÇ²Î»áÈËÔ±Ôò»á²Î»áÈËÔ±Ãû³Æ,Èç¹ûÊÇ¹ÜÀíÔ±ÔòÎª¹ÜÀíÔ±Ãû³Æ
+       *å¦‚æœæ˜¯å‚ä¼šäººå‘˜åˆ™ä¼šå‚ä¼šäººå‘˜åç§°,å¦‚æœæ˜¯ç®¡ç†å‘˜åˆ™ä¸ºç®¡ç†å‘˜åç§°
        * </pre>
        *
        * <code>optional bytes username = 8;</code>
@@ -1071,7 +1071,7 @@ public final class InterfaceCommondata {
       }
       /**
        * <pre>
-       *Èç¹ûÊÇ²Î»áÈËÔ±Ôò»á²Î»áÈËÔ±Ãû³Æ,Èç¹ûÊÇ¹ÜÀíÔ±ÔòÎª¹ÜÀíÔ±Ãû³Æ
+       *å¦‚æœæ˜¯å‚ä¼šäººå‘˜åˆ™ä¼šå‚ä¼šäººå‘˜åç§°,å¦‚æœæ˜¯ç®¡ç†å‘˜åˆ™ä¸ºç®¡ç†å‘˜åç§°
        * </pre>
        *
        * <code>optional bytes username = 8;</code>
@@ -1084,7 +1084,7 @@ public final class InterfaceCommondata {
 
       /**
        * <pre>
-       *»á»°ID phpºóÌ¨Ê¹ÓÃ
+       *ä¼šè¯ID phpåå°ä½¿ç”¨
        * </pre>
        *
        * <code>optional bytes sessionid = 9;</code>
@@ -1094,7 +1094,7 @@ public final class InterfaceCommondata {
       }
       /**
        * <pre>
-       *»á»°ID phpºóÌ¨Ê¹ÓÃ
+       *ä¼šè¯ID phpåå°ä½¿ç”¨
        * </pre>
        *
        * <code>optional bytes sessionid = 9;</code>
@@ -1106,7 +1106,7 @@ public final class InterfaceCommondata {
       }
       /**
        * <pre>
-       *»á»°ID phpºóÌ¨Ê¹ÓÃ
+       *ä¼šè¯ID phpåå°ä½¿ç”¨
        * </pre>
        *
        * <code>optional bytes sessionid = 9;</code>
@@ -1119,7 +1119,7 @@ public final class InterfaceCommondata {
 
       /**
        * <pre>
-       *·µ»ØµÄÖµ£¬Èç¹û´íÎó±£´æ´íÎóÂë ²Î¼û Pb_Error
+       *è¿”å›çš„å€¼ï¼Œå¦‚æœé”™è¯¯ä¿å­˜é”™è¯¯ç  å‚è§ Pb_Error
        * </pre>
        *
        * <code>optional fixed32 retcode = 10;</code>
@@ -1129,7 +1129,7 @@ public final class InterfaceCommondata {
       }
       /**
        * <pre>
-       *·µ»ØµÄÖµ£¬Èç¹û´íÎó±£´æ´íÎóÂë ²Î¼û Pb_Error
+       *è¿”å›çš„å€¼ï¼Œå¦‚æœé”™è¯¯ä¿å­˜é”™è¯¯ç  å‚è§ Pb_Error
        * </pre>
        *
        * <code>optional fixed32 retcode = 10;</code>
@@ -1141,7 +1141,7 @@ public final class InterfaceCommondata {
       }
       /**
        * <pre>
-       *·µ»ØµÄÖµ£¬Èç¹û´íÎó±£´æ´íÎóÂë ²Î¼û Pb_Error
+       *è¿”å›çš„å€¼ï¼Œå¦‚æœé”™è¯¯ä¿å­˜é”™è¯¯ç  å‚è§ Pb_Error
        * </pre>
        *
        * <code>optional fixed32 retcode = 10;</code>
@@ -1154,7 +1154,7 @@ public final class InterfaceCommondata {
 
       /**
        * <pre>
-       *¶ÔÓ¦µÄÊı¾İ£¬Èç¹û´æÔÚÊı¾İ£¬Ôò°´ÕÕ type¡¢method½âÎö¸ÃÊı¾İ
+       *å¯¹åº”çš„æ•°æ®ï¼Œå¦‚æœå­˜åœ¨æ•°æ®ï¼Œåˆ™æŒ‰ç…§ typeã€methodè§£æè¯¥æ•°æ®
        * </pre>
        *
        * <code>optional bytes data = 11;</code>
@@ -1164,7 +1164,7 @@ public final class InterfaceCommondata {
       }
       /**
        * <pre>
-       *¶ÔÓ¦µÄÊı¾İ£¬Èç¹û´æÔÚÊı¾İ£¬Ôò°´ÕÕ type¡¢method½âÎö¸ÃÊı¾İ
+       *å¯¹åº”çš„æ•°æ®ï¼Œå¦‚æœå­˜åœ¨æ•°æ®ï¼Œåˆ™æŒ‰ç…§ typeã€methodè§£æè¯¥æ•°æ®
        * </pre>
        *
        * <code>optional bytes data = 11;</code>
@@ -1176,7 +1176,7 @@ public final class InterfaceCommondata {
       }
       /**
        * <pre>
-       *¶ÔÓ¦µÄÊı¾İ£¬Èç¹û´æÔÚÊı¾İ£¬Ôò°´ÕÕ type¡¢method½âÎö¸ÃÊı¾İ
+       *å¯¹åº”çš„æ•°æ®ï¼Œå¦‚æœå­˜åœ¨æ•°æ®ï¼Œåˆ™æŒ‰ç…§ typeã€methodè§£æè¯¥æ•°æ®
        * </pre>
        *
        * <code>optional bytes data = 11;</code>
@@ -1361,7 +1361,7 @@ public final class InterfaceCommondata {
 
     /**
      * <pre>
-     *Êı¾İÀàĞÍ ²Î¼û Pb_Type
+     *æ•°æ®ç±»å‹ å‚è§ Pb_Type
      * </pre>
      *
      * <code>optional fixed32 type = 1;</code>
@@ -1370,7 +1370,7 @@ public final class InterfaceCommondata {
 
     /**
      * <pre>
-     *ÀàĞÍ¶ÔÓ¦µÄ²Ù×÷·½·¨ ²Î¼û Pb_Method
+     *ç±»å‹å¯¹åº”çš„æ“ä½œæ–¹æ³• å‚è§ Pb_Method
      * </pre>
      *
      * <code>optional fixed32 method = 2;</code>
@@ -1379,7 +1379,7 @@ public final class InterfaceCommondata {
 
     /**
      * <pre>
-     *²Î¼û pbui_ComContainer_Call
+     *å‚è§ pbui_ComContainer_Call
      * </pre>
      *
      * <code>optional fixed32 call = 3;</code>
@@ -1388,7 +1388,7 @@ public final class InterfaceCommondata {
 
     /**
      * <pre>
-     *»áÒéID£¬dataÊı¾İ¶ÔÓ¦µÄ»áÒéID
+     *ä¼šè®®IDï¼Œdataæ•°æ®å¯¹åº”çš„ä¼šè®®ID
      * </pre>
      *
      * <code>optional fixed32 meetingid = 4;</code>
@@ -1397,7 +1397,7 @@ public final class InterfaceCommondata {
 
     /**
      * <pre>
-     *»á»°ID phpºóÌ¨Ê¹ÓÃ
+     *ä¼šè¯ID phpåå°ä½¿ç”¨
      * </pre>
      *
      * <code>optional bytes sessionid = 5;</code>
@@ -1406,7 +1406,7 @@ public final class InterfaceCommondata {
 
     /**
      * <pre>
-     *·µ»ØµÄÖµ£¬Èç¹û´íÎó±£´æ´íÎóÂë ²Î¼û Pb_Error
+     *è¿”å›çš„å€¼ï¼Œå¦‚æœé”™è¯¯ä¿å­˜é”™è¯¯ç  å‚è§ Pb_Error
      * </pre>
      *
      * <code>optional fixed32 retcode = 6;</code>
@@ -1415,7 +1415,7 @@ public final class InterfaceCommondata {
 
     /**
      * <pre>
-     *¶ÔÓ¦µÄÊı¾İ£¬Èç¹û´æÔÚÊı¾İ£¬Ôò°´ÕÕ type¡¢method½âÎö¸ÃÊı¾İ
+     *å¯¹åº”çš„æ•°æ®ï¼Œå¦‚æœå­˜åœ¨æ•°æ®ï¼Œåˆ™æŒ‰ç…§ typeã€methodè§£æè¯¥æ•°æ®
      * </pre>
      *
      * <code>optional bytes data = 7;</code>
@@ -1442,7 +1442,7 @@ public final class InterfaceCommondata {
     private int type_;
     /**
      * <pre>
-     *Êı¾İÀàĞÍ ²Î¼û Pb_Type
+     *æ•°æ®ç±»å‹ å‚è§ Pb_Type
      * </pre>
      *
      * <code>optional fixed32 type = 1;</code>
@@ -1452,7 +1452,7 @@ public final class InterfaceCommondata {
     }
     /**
      * <pre>
-     *Êı¾İÀàĞÍ ²Î¼û Pb_Type
+     *æ•°æ®ç±»å‹ å‚è§ Pb_Type
      * </pre>
      *
      * <code>optional fixed32 type = 1;</code>
@@ -1463,7 +1463,7 @@ public final class InterfaceCommondata {
     }
     /**
      * <pre>
-     *Êı¾İÀàĞÍ ²Î¼û Pb_Type
+     *æ•°æ®ç±»å‹ å‚è§ Pb_Type
      * </pre>
      *
      * <code>optional fixed32 type = 1;</code>
@@ -1477,7 +1477,7 @@ public final class InterfaceCommondata {
     private int method_;
     /**
      * <pre>
-     *ÀàĞÍ¶ÔÓ¦µÄ²Ù×÷·½·¨ ²Î¼û Pb_Method
+     *ç±»å‹å¯¹åº”çš„æ“ä½œæ–¹æ³• å‚è§ Pb_Method
      * </pre>
      *
      * <code>optional fixed32 method = 2;</code>
@@ -1487,7 +1487,7 @@ public final class InterfaceCommondata {
     }
     /**
      * <pre>
-     *ÀàĞÍ¶ÔÓ¦µÄ²Ù×÷·½·¨ ²Î¼û Pb_Method
+     *ç±»å‹å¯¹åº”çš„æ“ä½œæ–¹æ³• å‚è§ Pb_Method
      * </pre>
      *
      * <code>optional fixed32 method = 2;</code>
@@ -1498,7 +1498,7 @@ public final class InterfaceCommondata {
     }
     /**
      * <pre>
-     *ÀàĞÍ¶ÔÓ¦µÄ²Ù×÷·½·¨ ²Î¼û Pb_Method
+     *ç±»å‹å¯¹åº”çš„æ“ä½œæ–¹æ³• å‚è§ Pb_Method
      * </pre>
      *
      * <code>optional fixed32 method = 2;</code>
@@ -1512,7 +1512,7 @@ public final class InterfaceCommondata {
     private int call_;
     /**
      * <pre>
-     *²Î¼û pbui_ComContainer_Call
+     *å‚è§ pbui_ComContainer_Call
      * </pre>
      *
      * <code>optional fixed32 call = 3;</code>
@@ -1522,7 +1522,7 @@ public final class InterfaceCommondata {
     }
     /**
      * <pre>
-     *²Î¼û pbui_ComContainer_Call
+     *å‚è§ pbui_ComContainer_Call
      * </pre>
      *
      * <code>optional fixed32 call = 3;</code>
@@ -1533,7 +1533,7 @@ public final class InterfaceCommondata {
     }
     /**
      * <pre>
-     *²Î¼û pbui_ComContainer_Call
+     *å‚è§ pbui_ComContainer_Call
      * </pre>
      *
      * <code>optional fixed32 call = 3;</code>
@@ -1547,7 +1547,7 @@ public final class InterfaceCommondata {
     private int meetingid_;
     /**
      * <pre>
-     *»áÒéID£¬dataÊı¾İ¶ÔÓ¦µÄ»áÒéID
+     *ä¼šè®®IDï¼Œdataæ•°æ®å¯¹åº”çš„ä¼šè®®ID
      * </pre>
      *
      * <code>optional fixed32 meetingid = 4;</code>
@@ -1557,7 +1557,7 @@ public final class InterfaceCommondata {
     }
     /**
      * <pre>
-     *»áÒéID£¬dataÊı¾İ¶ÔÓ¦µÄ»áÒéID
+     *ä¼šè®®IDï¼Œdataæ•°æ®å¯¹åº”çš„ä¼šè®®ID
      * </pre>
      *
      * <code>optional fixed32 meetingid = 4;</code>
@@ -1568,7 +1568,7 @@ public final class InterfaceCommondata {
     }
     /**
      * <pre>
-     *»áÒéID£¬dataÊı¾İ¶ÔÓ¦µÄ»áÒéID
+     *ä¼šè®®IDï¼Œdataæ•°æ®å¯¹åº”çš„ä¼šè®®ID
      * </pre>
      *
      * <code>optional fixed32 meetingid = 4;</code>
@@ -1582,7 +1582,7 @@ public final class InterfaceCommondata {
     private com.google.protobuf.ByteString sessionid_;
     /**
      * <pre>
-     *»á»°ID phpºóÌ¨Ê¹ÓÃ
+     *ä¼šè¯ID phpåå°ä½¿ç”¨
      * </pre>
      *
      * <code>optional bytes sessionid = 5;</code>
@@ -1592,7 +1592,7 @@ public final class InterfaceCommondata {
     }
     /**
      * <pre>
-     *»á»°ID phpºóÌ¨Ê¹ÓÃ
+     *ä¼šè¯ID phpåå°ä½¿ç”¨
      * </pre>
      *
      * <code>optional bytes sessionid = 5;</code>
@@ -1606,7 +1606,7 @@ public final class InterfaceCommondata {
     }
     /**
      * <pre>
-     *»á»°ID phpºóÌ¨Ê¹ÓÃ
+     *ä¼šè¯ID phpåå°ä½¿ç”¨
      * </pre>
      *
      * <code>optional bytes sessionid = 5;</code>
@@ -1620,7 +1620,7 @@ public final class InterfaceCommondata {
     private int retcode_;
     /**
      * <pre>
-     *·µ»ØµÄÖµ£¬Èç¹û´íÎó±£´æ´íÎóÂë ²Î¼û Pb_Error
+     *è¿”å›çš„å€¼ï¼Œå¦‚æœé”™è¯¯ä¿å­˜é”™è¯¯ç  å‚è§ Pb_Error
      * </pre>
      *
      * <code>optional fixed32 retcode = 6;</code>
@@ -1630,7 +1630,7 @@ public final class InterfaceCommondata {
     }
     /**
      * <pre>
-     *·µ»ØµÄÖµ£¬Èç¹û´íÎó±£´æ´íÎóÂë ²Î¼û Pb_Error
+     *è¿”å›çš„å€¼ï¼Œå¦‚æœé”™è¯¯ä¿å­˜é”™è¯¯ç  å‚è§ Pb_Error
      * </pre>
      *
      * <code>optional fixed32 retcode = 6;</code>
@@ -1641,7 +1641,7 @@ public final class InterfaceCommondata {
     }
     /**
      * <pre>
-     *·µ»ØµÄÖµ£¬Èç¹û´íÎó±£´æ´íÎóÂë ²Î¼û Pb_Error
+     *è¿”å›çš„å€¼ï¼Œå¦‚æœé”™è¯¯ä¿å­˜é”™è¯¯ç  å‚è§ Pb_Error
      * </pre>
      *
      * <code>optional fixed32 retcode = 6;</code>
@@ -1655,7 +1655,7 @@ public final class InterfaceCommondata {
     private com.google.protobuf.ByteString data_;
     /**
      * <pre>
-     *¶ÔÓ¦µÄÊı¾İ£¬Èç¹û´æÔÚÊı¾İ£¬Ôò°´ÕÕ type¡¢method½âÎö¸ÃÊı¾İ
+     *å¯¹åº”çš„æ•°æ®ï¼Œå¦‚æœå­˜åœ¨æ•°æ®ï¼Œåˆ™æŒ‰ç…§ typeã€methodè§£æè¯¥æ•°æ®
      * </pre>
      *
      * <code>optional bytes data = 7;</code>
@@ -1665,7 +1665,7 @@ public final class InterfaceCommondata {
     }
     /**
      * <pre>
-     *¶ÔÓ¦µÄÊı¾İ£¬Èç¹û´æÔÚÊı¾İ£¬Ôò°´ÕÕ type¡¢method½âÎö¸ÃÊı¾İ
+     *å¯¹åº”çš„æ•°æ®ï¼Œå¦‚æœå­˜åœ¨æ•°æ®ï¼Œåˆ™æŒ‰ç…§ typeã€methodè§£æè¯¥æ•°æ®
      * </pre>
      *
      * <code>optional bytes data = 7;</code>
@@ -1679,7 +1679,7 @@ public final class InterfaceCommondata {
     }
     /**
      * <pre>
-     *¶ÔÓ¦µÄÊı¾İ£¬Èç¹û´æÔÚÊı¾İ£¬Ôò°´ÕÕ type¡¢method½âÎö¸ÃÊı¾İ
+     *å¯¹åº”çš„æ•°æ®ï¼Œå¦‚æœå­˜åœ¨æ•°æ®ï¼Œåˆ™æŒ‰ç…§ typeã€methodè§£æè¯¥æ•°æ®
      * </pre>
      *
      * <code>optional bytes data = 7;</code>
@@ -1839,7 +1839,7 @@ public final class InterfaceCommondata {
 
       /**
        * <pre>
-       *Êı¾İÀàĞÍ ²Î¼û Pb_Type
+       *æ•°æ®ç±»å‹ å‚è§ Pb_Type
        * </pre>
        *
        * <code>optional fixed32 type = 1;</code>
@@ -1849,7 +1849,7 @@ public final class InterfaceCommondata {
       }
       /**
        * <pre>
-       *Êı¾İÀàĞÍ ²Î¼û Pb_Type
+       *æ•°æ®ç±»å‹ å‚è§ Pb_Type
        * </pre>
        *
        * <code>optional fixed32 type = 1;</code>
@@ -1861,7 +1861,7 @@ public final class InterfaceCommondata {
       }
       /**
        * <pre>
-       *Êı¾İÀàĞÍ ²Î¼û Pb_Type
+       *æ•°æ®ç±»å‹ å‚è§ Pb_Type
        * </pre>
        *
        * <code>optional fixed32 type = 1;</code>
@@ -1874,7 +1874,7 @@ public final class InterfaceCommondata {
 
       /**
        * <pre>
-       *ÀàĞÍ¶ÔÓ¦µÄ²Ù×÷·½·¨ ²Î¼û Pb_Method
+       *ç±»å‹å¯¹åº”çš„æ“ä½œæ–¹æ³• å‚è§ Pb_Method
        * </pre>
        *
        * <code>optional fixed32 method = 2;</code>
@@ -1884,7 +1884,7 @@ public final class InterfaceCommondata {
       }
       /**
        * <pre>
-       *ÀàĞÍ¶ÔÓ¦µÄ²Ù×÷·½·¨ ²Î¼û Pb_Method
+       *ç±»å‹å¯¹åº”çš„æ“ä½œæ–¹æ³• å‚è§ Pb_Method
        * </pre>
        *
        * <code>optional fixed32 method = 2;</code>
@@ -1896,7 +1896,7 @@ public final class InterfaceCommondata {
       }
       /**
        * <pre>
-       *ÀàĞÍ¶ÔÓ¦µÄ²Ù×÷·½·¨ ²Î¼û Pb_Method
+       *ç±»å‹å¯¹åº”çš„æ“ä½œæ–¹æ³• å‚è§ Pb_Method
        * </pre>
        *
        * <code>optional fixed32 method = 2;</code>
@@ -1909,7 +1909,7 @@ public final class InterfaceCommondata {
 
       /**
        * <pre>
-       *²Î¼û pbui_ComContainer_Call
+       *å‚è§ pbui_ComContainer_Call
        * </pre>
        *
        * <code>optional fixed32 call = 3;</code>
@@ -1919,7 +1919,7 @@ public final class InterfaceCommondata {
       }
       /**
        * <pre>
-       *²Î¼û pbui_ComContainer_Call
+       *å‚è§ pbui_ComContainer_Call
        * </pre>
        *
        * <code>optional fixed32 call = 3;</code>
@@ -1931,7 +1931,7 @@ public final class InterfaceCommondata {
       }
       /**
        * <pre>
-       *²Î¼û pbui_ComContainer_Call
+       *å‚è§ pbui_ComContainer_Call
        * </pre>
        *
        * <code>optional fixed32 call = 3;</code>
@@ -1944,7 +1944,7 @@ public final class InterfaceCommondata {
 
       /**
        * <pre>
-       *»áÒéID£¬dataÊı¾İ¶ÔÓ¦µÄ»áÒéID
+       *ä¼šè®®IDï¼Œdataæ•°æ®å¯¹åº”çš„ä¼šè®®ID
        * </pre>
        *
        * <code>optional fixed32 meetingid = 4;</code>
@@ -1954,7 +1954,7 @@ public final class InterfaceCommondata {
       }
       /**
        * <pre>
-       *»áÒéID£¬dataÊı¾İ¶ÔÓ¦µÄ»áÒéID
+       *ä¼šè®®IDï¼Œdataæ•°æ®å¯¹åº”çš„ä¼šè®®ID
        * </pre>
        *
        * <code>optional fixed32 meetingid = 4;</code>
@@ -1966,7 +1966,7 @@ public final class InterfaceCommondata {
       }
       /**
        * <pre>
-       *»áÒéID£¬dataÊı¾İ¶ÔÓ¦µÄ»áÒéID
+       *ä¼šè®®IDï¼Œdataæ•°æ®å¯¹åº”çš„ä¼šè®®ID
        * </pre>
        *
        * <code>optional fixed32 meetingid = 4;</code>
@@ -1979,7 +1979,7 @@ public final class InterfaceCommondata {
 
       /**
        * <pre>
-       *»á»°ID phpºóÌ¨Ê¹ÓÃ
+       *ä¼šè¯ID phpåå°ä½¿ç”¨
        * </pre>
        *
        * <code>optional bytes sessionid = 5;</code>
@@ -1989,7 +1989,7 @@ public final class InterfaceCommondata {
       }
       /**
        * <pre>
-       *»á»°ID phpºóÌ¨Ê¹ÓÃ
+       *ä¼šè¯ID phpåå°ä½¿ç”¨
        * </pre>
        *
        * <code>optional bytes sessionid = 5;</code>
@@ -2001,7 +2001,7 @@ public final class InterfaceCommondata {
       }
       /**
        * <pre>
-       *»á»°ID phpºóÌ¨Ê¹ÓÃ
+       *ä¼šè¯ID phpåå°ä½¿ç”¨
        * </pre>
        *
        * <code>optional bytes sessionid = 5;</code>
@@ -2014,7 +2014,7 @@ public final class InterfaceCommondata {
 
       /**
        * <pre>
-       *·µ»ØµÄÖµ£¬Èç¹û´íÎó±£´æ´íÎóÂë ²Î¼û Pb_Error
+       *è¿”å›çš„å€¼ï¼Œå¦‚æœé”™è¯¯ä¿å­˜é”™è¯¯ç  å‚è§ Pb_Error
        * </pre>
        *
        * <code>optional fixed32 retcode = 6;</code>
@@ -2024,7 +2024,7 @@ public final class InterfaceCommondata {
       }
       /**
        * <pre>
-       *·µ»ØµÄÖµ£¬Èç¹û´íÎó±£´æ´íÎóÂë ²Î¼û Pb_Error
+       *è¿”å›çš„å€¼ï¼Œå¦‚æœé”™è¯¯ä¿å­˜é”™è¯¯ç  å‚è§ Pb_Error
        * </pre>
        *
        * <code>optional fixed32 retcode = 6;</code>
@@ -2036,7 +2036,7 @@ public final class InterfaceCommondata {
       }
       /**
        * <pre>
-       *·µ»ØµÄÖµ£¬Èç¹û´íÎó±£´æ´íÎóÂë ²Î¼û Pb_Error
+       *è¿”å›çš„å€¼ï¼Œå¦‚æœé”™è¯¯ä¿å­˜é”™è¯¯ç  å‚è§ Pb_Error
        * </pre>
        *
        * <code>optional fixed32 retcode = 6;</code>
@@ -2049,7 +2049,7 @@ public final class InterfaceCommondata {
 
       /**
        * <pre>
-       *¶ÔÓ¦µÄÊı¾İ£¬Èç¹û´æÔÚÊı¾İ£¬Ôò°´ÕÕ type¡¢method½âÎö¸ÃÊı¾İ
+       *å¯¹åº”çš„æ•°æ®ï¼Œå¦‚æœå­˜åœ¨æ•°æ®ï¼Œåˆ™æŒ‰ç…§ typeã€methodè§£æè¯¥æ•°æ®
        * </pre>
        *
        * <code>optional bytes data = 7;</code>
@@ -2059,7 +2059,7 @@ public final class InterfaceCommondata {
       }
       /**
        * <pre>
-       *¶ÔÓ¦µÄÊı¾İ£¬Èç¹û´æÔÚÊı¾İ£¬Ôò°´ÕÕ type¡¢method½âÎö¸ÃÊı¾İ
+       *å¯¹åº”çš„æ•°æ®ï¼Œå¦‚æœå­˜åœ¨æ•°æ®ï¼Œåˆ™æŒ‰ç…§ typeã€methodè§£æè¯¥æ•°æ®
        * </pre>
        *
        * <code>optional bytes data = 7;</code>
@@ -2071,7 +2071,7 @@ public final class InterfaceCommondata {
       }
       /**
        * <pre>
-       *¶ÔÓ¦µÄÊı¾İ£¬Èç¹û´æÔÚÊı¾İ£¬Ôò°´ÕÕ type¡¢method½âÎö¸ÃÊı¾İ
+       *å¯¹åº”çš„æ•°æ®ï¼Œå¦‚æœå­˜åœ¨æ•°æ®ï¼Œåˆ™æŒ‰ç…§ typeã€methodè§£æè¯¥æ•°æ®
        * </pre>
        *
        * <code>optional bytes data = 7;</code>
