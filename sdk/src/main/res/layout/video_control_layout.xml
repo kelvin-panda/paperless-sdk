@@ -27,17 +27,18 @@
         android:scaleType="fitCenter" />
 
     <LinearLayout
-        android:id="@+id/layout_bottom"
+        android:id="@+id/layoutBottom"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:background="#99000000"
         android:gravity="center_vertical"
         android:orientation="vertical"
-        android:visibility="invisible"
+        android:visibility="visible"
         tools:visibility="visible">
 
         <LinearLayout
+            android:id="@+id/layoutTime"
             android:layout_width="match_parent"
             android:layout_height="40dp"
             android:gravity="center_vertical"
@@ -76,48 +77,51 @@
 
         </LinearLayout>
 
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:layout_marginBottom="10dp"
-            android:orientation="horizontal">
+<!--        <LinearLayout-->
+<!--            android:id="@+id/layoutControl"-->
+<!--            android:layout_width="wrap_content"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:layout_gravity="center"-->
+<!--            android:visibility="gone"-->
+<!--            tools:visibility="visible"-->
+<!--            android:layout_marginBottom="10dp"-->
+<!--            android:orientation="horizontal">-->
 
-            <Button
-                android:id="@+id/btnPlay"
-                android:layout_width="wrap_content"
-                android:layout_height="35dp"
-                android:layout_marginEnd="5dp"
-                android:background="@drawable/video_button"
-                android:text="暂停"
-                android:textColor="@android:color/white" />
+<!--            <Button-->
+<!--                android:id="@+id/btnPlay"-->
+<!--                android:layout_width="wrap_content"-->
+<!--                android:layout_height="35dp"-->
+<!--                android:layout_marginEnd="5dp"-->
+<!--                android:background="@drawable/video_button"-->
+<!--                android:text="暂停"-->
+<!--                android:textColor="@android:color/white" />-->
 
-            <Button
-                android:id="@+id/btnCapture"
-                android:layout_width="wrap_content"
-                android:layout_height="35dp"
-                android:layout_marginEnd="5dp"
-                android:background="@drawable/video_button"
-                android:text="截图"
-                android:textColor="@android:color/white" />
+<!--            <Button-->
+<!--                android:id="@+id/btnCapture"-->
+<!--                android:layout_width="wrap_content"-->
+<!--                android:layout_height="35dp"-->
+<!--                android:layout_marginEnd="5dp"-->
+<!--                android:background="@drawable/video_button"-->
+<!--                android:text="截图"-->
+<!--                android:textColor="@android:color/white" />-->
 
-            <Button
-                android:id="@+id/btnSameScreen"
-                android:layout_width="wrap_content"
-                android:layout_height="35dp"
-                android:layout_marginEnd="5dp"
-                android:background="@drawable/video_button"
-                android:text="同屏"
-                android:textColor="@android:color/white" />
+<!--            <Button-->
+<!--                android:id="@+id/btnSameScreen"-->
+<!--                android:layout_width="wrap_content"-->
+<!--                android:layout_height="35dp"-->
+<!--                android:layout_marginEnd="5dp"-->
+<!--                android:background="@drawable/video_button"-->
+<!--                android:text="同屏"-->
+<!--                android:textColor="@android:color/white" />-->
 
-            <Button
-                android:id="@+id/btnStop"
-                android:layout_width="wrap_content"
-                android:layout_height="35dp"
-                android:background="@drawable/video_button"
-                android:text="结束"
-                android:textColor="@android:color/white" />
-        </LinearLayout>
+<!--            <Button-->
+<!--                android:id="@+id/btnStop"-->
+<!--                android:layout_width="wrap_content"-->
+<!--                android:layout_height="35dp"-->
+<!--                android:background="@drawable/video_button"-->
+<!--                android:text="结束"-->
+<!--                android:textColor="@android:color/white" />-->
+<!--        </LinearLayout>-->
     </LinearLayout>
 
     <ProgressBar
@@ -172,7 +176,7 @@
             android:layout_width="48dp"
             android:layout_height="48dp"
             android:paddingLeft="10dp"
-            android:visibility="visible"
+            android:visibility="gone"
             android:scaleType="centerInside"
             android:src="@drawable/more" />
 

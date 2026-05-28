@@ -3,9 +3,8 @@ package com.paperless.sdk
 import android.util.Log
 import com.blankj.utilcode.util.LogUtils
 import com.mogujie.tt.protobuf.InterfaceMacro
-import com.mogujie.tt.protobuf.InterfaceMacro.Pb_Type
 import com.paperless.bus.Bus
-import com.paperless.bus.BusType
+import com.paperless.bus.SdkBusType
 import com.paperless.data.FrameData
 import com.paperless.data.YuvData
 import com.paperless.player.DecodeQueue
@@ -241,13 +240,13 @@ object Call {
             // start capture
             4 -> {
                 LogUtils.e("通知开始采集 type:$type")
-                Bus.post(BusType.capture_start, type)
+                Bus.postObj(type = SdkBusType.capture_start, type)
                 return 0
             }
             // stop carture
             5 -> {
                 LogUtils.e("通知停止采集 type:$type")
-                Bus.post(BusType.capture_stop, type)
+                Bus.postObj(type = SdkBusType.capture_stop, type)
                 return 0
             }
 
@@ -265,7 +264,7 @@ object Call {
         u: ByteArray,
         v: ByteArray
     ): Int {
-        Bus.post(BusType.yuv_data, YuvData(res, w, h, y, u, v))
+        Bus.postObj(SdkBusType.yuv_data, YuvData(res, w, h, y, u, v))
         return 0
     }
 
@@ -285,11 +284,7 @@ object Call {
         if (type != 1) {
             LogUtils.e("callback_method：type=$type,method=$method,datalen=$datalen")
         }
-//        if (Pb_Type.Pb_TYPE_MEET_INTERFACE_UPDATE_VALUE == type) {
-//            Bus.postSticky(type, method, data)
-//        } else {
-            Bus.post(type = type, method = method, data = data)
-//        }
+        Bus.post(type = type, method = method, data = data)
         return 0
     }
 
@@ -303,8 +298,8 @@ object Call {
         pts: Long,
         codecdatalen: Int
     ): Int {
-        if (SdkConfig.isDebugPlayer) {
-            debugPlayer(isKeyframe, res, codecid, w, h, datalen, pts, codecdatalen)
+        if (SdkConfig.isUseSdkPlayer) {
+            sdkPlayer(isKeyframe, res, codecid, w, h, datalen, pts, codecdatalen)
         } else {
             m_dbuf.position(0)
             m_dbuf.limit(datalen)
@@ -344,7 +339,7 @@ object Call {
         return 0
     }
 
-    fun debugPlayer(
+    fun sdkPlayer(
         isKeyframe: Int,
         res: Int,
         codecid: Int,
@@ -374,7 +369,7 @@ object Call {
                 lastReceivedTime = System.currentTimeMillis()
             } else if (System.currentTimeMillis() - lastReceivedTime >= 1000L) {
                 lastReceivedTime = System.currentTimeMillis()
-                Bus.post(BusType.fps, obj = receivedCount)
+                Bus.postVararg(type = SdkBusType.fps, receivedCount, res)
                 receivedCount = 0
             }
         }
@@ -421,7 +416,7 @@ object Call {
                 lastReceivedTime = System.currentTimeMillis()
             } else if (System.currentTimeMillis() - lastReceivedTime >= 1000L) {
                 lastReceivedTime = System.currentTimeMillis()
-                Bus.post(BusType.fps, obj = receivedCount)
+                Bus.postVararg(type = SdkBusType.fps, receivedCount, res)
                 receivedCount = 0
             }
         }

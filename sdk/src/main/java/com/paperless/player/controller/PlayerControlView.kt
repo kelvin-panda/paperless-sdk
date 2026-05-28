@@ -3,25 +3,21 @@ package com.paperless.player.controller
 import android.app.Activity
 import android.app.Dialog
 import android.content.Context
-import android.graphics.Bitmap
 import android.media.AudioManager
-import android.os.Handler
 import android.util.AttributeSet
-import android.view.ContextMenu
 import android.view.GestureDetector
 import android.view.GestureDetector.SimpleOnGestureListener
 import android.view.Gravity
 import android.view.LayoutInflater
-import android.view.MenuItem
 import android.view.MotionEvent
-import android.view.PixelCopy
+import android.view.ScaleGestureDetector
 import android.view.View
 import android.view.ViewGroup
 import android.view.Window
 import android.view.WindowManager
-import android.widget.Button
 import android.widget.FrameLayout
 import android.widget.ImageView
+import android.widget.LinearLayout
 import android.widget.PopupMenu
 import android.widget.ProgressBar
 import android.widget.RelativeLayout
@@ -38,6 +34,12 @@ import com.paperless.util.CommonUtil.stringForTime
 import java.util.Locale
 import kotlin.math.abs
 
+data class MoreMenuItem(
+    val id: Int,           // 菜单项唯一标识
+    val title: String,     // 菜单项文本
+    val iconRes: Int = 0   // 菜单项图标资源ID，0表示无图标
+)
+
 /**
  *  @author : Administrator
  *  created on 2025/9/18 10:03
@@ -52,6 +54,9 @@ class PlayerControlView(context: Context, attrs: AttributeSet? = null) : FrameLa
     //是否展示控制UI
     var showControlView = true
 
+    //是否展示播放时间UI
+    var showTimeView = true
+
     //音频焦点管理器
     private var mAudioFocusManager: AudioFocusManager? = null
 
@@ -62,6 +67,8 @@ class PlayerControlView(context: Context, attrs: AttributeSet? = null) : FrameLa
     //锁定屏幕点击
     private var mLockCurScreen: Boolean = false
 
+    //右上角的菜单
+    private var mMoreMenuItems: List<MoreMenuItem> = emptyList()
 
     //<editor-fold desc="弹窗">
     //触摸进度dialog
@@ -188,11 +195,6 @@ class PlayerControlView(context: Context, attrs: AttributeSet? = null) : FrameLa
     //底部进度条
     private var mBottomProgressBar: ProgressBar? = null
 
-    private var mBtnPlay: Button? = null
-    private var mBtnCapture: Button? = null
-    private var mBtnSameScreen: Button? = null
-    private var mBtnStop: Button? = null
-
     //</editor-fold>
 
     //<editor-fold desc="播放状态">
@@ -207,6 +209,16 @@ class PlayerControlView(context: Context, attrs: AttributeSet? = null) : FrameLa
     private var mCurrentState: Int = -1
     //</editor-fold>
 
+    //<editor-fold desc="缩放平移相关">
+    private var mScaleGestureDetector: ScaleGestureDetector? = null
+    private var mVideoView: View? = null           // 当前播放视图（SurfaceView 或 VideoGLSurfaceView）
+    private var mMinScale = 0.5f                   // 最小缩放比例
+    private var mMaxScale = 3.0f                   // 最大缩放比例
+    private var mLastTouchX = 0f
+    private var mLastTouchY = 0f
+    private var mIsPanning = false                 // 是否正在平移
+    private var mActivePointerId = MotionEvent.INVALID_POINTER_ID  // 用于单指平移的手指ID
+    //</editor-fold>
 
     init {
         mScreenWidth = context.resources.displayMetrics.widthPixels
@@ -219,6 +231,14 @@ class PlayerControlView(context: Context, attrs: AttributeSet? = null) : FrameLa
         initAudioFocusManager()
     }
 
+    /**
+     * 设置更多菜单的菜单项列表
+     * @param items 菜单项列表
+     */
+    fun setMoreMenuItems(items: List<MoreMenuItem>) {
+        mMoreMenuItems = items
+    }
+
     private fun viewEvent() {
         mStartButton?.setOnClickListener(this)
         mTextureViewContainer?.setOnClickListener(this)
@@ -227,11 +247,6 @@ class PlayerControlView(context: Context, attrs: AttributeSet? = null) : FrameLa
         mProgressBar?.setOnTouchListener(this)
         mBottomContainer?.setOnClickListener(this)
         mThumbImageViewLayout?.setOnClickListener(this)
-
-        mBtnPlay?.setOnClickListener(this)
-        mBtnCapture?.setOnClickListener(this)
-        mBtnSameScreen?.setOnClickListener(this)
-        mBtnStop?.setOnClickListener(this)
 
         if (mThumbImageView != null && mThumbImageViewLayout != null) {
             mThumbImageViewLayout?.removeAllViews()
@@ -251,34 +266,31 @@ class PlayerControlView(context: Context, attrs: AttributeSet? = null) : FrameLa
 
         mTextureViewContainer = findViewById(R.id.surface_container)
 
-        mThumbImageViewLayout = findViewById<RelativeLayout?>(R.id.thumb).apply { visibility = View.INVISIBLE }
+        mThumbImageViewLayout = findViewById<RelativeLayout?>(R.id.thumb)?.apply { visibility = INVISIBLE }
 
         mBottomContainer =
-            findViewById<ViewGroup?>(R.id.layout_bottom).apply {
-                visibility = if (showControlView) View.VISIBLE else View.INVISIBLE
+            findViewById<ViewGroup?>(R.id.layoutBottom)?.apply {
+                visibility = if (showControlView) VISIBLE else INVISIBLE
             }
+        findViewById<LinearLayout?>(R.id.layoutTime)?.apply {
+            visibility = if (showTimeView) VISIBLE else INVISIBLE
+        }
         mCurrentTimeTextView = findViewById(R.id.current)
         mProgressBar = findViewById(R.id.progress)
         mTotalTimeTextView = findViewById(R.id.total)
 
-        mBtnPlay = findViewById(R.id.btnPlay)
-        mBtnCapture = findViewById(R.id.btnCapture)
-        mBtnSameScreen = findViewById(R.id.btnSameScreen)
-        mBtnStop = findViewById(R.id.btnStop)
-
-
         mStartButton =
-            findViewById<View?>(R.id.start).apply { visibility = if (showControlView) View.VISIBLE else View.INVISIBLE }
+            findViewById<View?>(R.id.start)?.apply { visibility = if (showControlView) VISIBLE else INVISIBLE }
         mLoadingProgressBar = findViewById(R.id.loading)
-        mLockScreen = findViewById<ImageView?>(R.id.lock_screen).apply { visibility = View.INVISIBLE }
+        mLockScreen = findViewById<ImageView?>(R.id.lock_screen)?.apply { visibility = INVISIBLE }
 
-        mBottomProgressBar = findViewById<ProgressBar?>(R.id.bottom_progressbar).apply {
-            visibility = if (showControlView) View.VISIBLE else View.INVISIBLE
+        mBottomProgressBar = findViewById<ProgressBar?>(R.id.bottom_progressbar)?.apply {
+            visibility = if (showControlView) VISIBLE else INVISIBLE
         }
     }
 
     private fun initInflate(context: Context) {
-        View.inflate(context, R.layout.video_control_layout, this)
+        inflate(context, R.layout.video_control_layout, this)
     }
 
     //<editor-fold desc="音频焦点管理器">
@@ -287,6 +299,10 @@ class PlayerControlView(context: Context, attrs: AttributeSet? = null) : FrameLa
             mAudioFocusManager = AudioFocusManager()
         }
         mAudioFocusManager!!.initialize(context, this)
+        // 初始化双指缩放检测器
+        mScaleGestureDetector = ScaleGestureDetector(context, ScaleListener())
+        // 允许容器内的视图超出边界显示（使缩放后的视图不被裁剪）
+        mTextureViewContainer?.clipChildren = false
     }
 
     private fun getAudioManager(): AudioManager? {
@@ -306,8 +322,8 @@ class PlayerControlView(context: Context, attrs: AttributeSet? = null) : FrameLa
             it.removeAllViews()
             it.addView(thumb)
             thumb.layoutParams = it.layoutParams.apply {
-                width = ViewGroup.LayoutParams.MATCH_PARENT
-                height = ViewGroup.LayoutParams.MATCH_PARENT
+                width = LayoutParams.MATCH_PARENT
+                height = LayoutParams.MATCH_PARENT
             }
         }
     }
@@ -325,12 +341,14 @@ class PlayerControlView(context: Context, attrs: AttributeSet? = null) : FrameLa
     }
 
     fun setPlayView(view: View) {
-        mTextureViewContainer?.addView(view, RelativeLayout.LayoutParams(
-            ViewGroup.LayoutParams.MATCH_PARENT,
-            ViewGroup.LayoutParams.MATCH_PARENT
-        ).apply {
-            addRule(RelativeLayout.CENTER_IN_PARENT)
-        })
+        mVideoView = view   // 保存引用
+        mTextureViewContainer?.addView(
+            view, RelativeLayout.LayoutParams(
+                LayoutParams.MATCH_PARENT,
+                LayoutParams.MATCH_PARENT
+            ).apply {
+                addRule(RelativeLayout.CENTER_IN_PARENT)
+            })
     }
 
     override fun onClick(v: View?) {
@@ -361,29 +379,41 @@ class PlayerControlView(context: Context, attrs: AttributeSet? = null) : FrameLa
                     lockTouchLogic()
                 }
 
-                R.id.btnPlay -> {
-                    clickStartIcon()
-                }
-
-                R.id.btnCapture -> {
-                    callback?.capture()
-                }
-
-                R.id.btnSameScreen -> {
-                    callback?.sameScreen()
-                }
-
-                R.id.btnStop -> {
-                    callback?.onBack()
-                }
-
                 else -> {}
             }
         }
     }
 
     private fun showMoreMenu() {
+        if (mMoreMenuItems.isEmpty()) return
 
+        val popupMenu = PopupMenu(context, mMoreButton)
+        // 使图标在菜单中显示（API < 28 需要）
+        if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.P) {
+            try {
+                val field = PopupMenu::class.java.getDeclaredField("mPopup")
+                field.isAccessible = true
+                val menuPopupHelper = field.get(popupMenu)
+                val setForceShowIcon =
+                    menuPopupHelper.javaClass.getDeclaredMethod("setForceShowIcon", Boolean::class.javaPrimitiveType)
+                setForceShowIcon.invoke(menuPopupHelper, true)
+            } catch (e: Exception) {
+                // 忽略反射失败
+            }
+        }
+
+        // 动态添加菜单项
+        mMoreMenuItems.forEach { item ->
+            val menuItem = popupMenu.menu.add(0, item.id, 0, item.title)
+            if (item.iconRes != 0) {
+                menuItem.setIcon(item.iconRes)
+            }
+        }
+        popupMenu.setOnMenuItemClickListener { menuItem ->
+            callback?.onMoreMenuItemClick(menuItem.itemId)
+            true
+        }
+        popupMenu.show()
     }
 
     override fun onTouch(v: View?, event: MotionEvent?): Boolean {
@@ -396,6 +426,21 @@ class PlayerControlView(context: Context, attrs: AttributeSet? = null) : FrameLa
         val y = event.y
         when (v!!.id) {
             R.id.surface_container -> {
+                // 必须让缩放检测器处理事件，以便检测双指缩放
+                mScaleGestureDetector?.onTouchEvent(event)
+
+                // 如果正在缩放 或者 画面已经被缩放，则进入缩放/平移模式
+                if (mScaleGestureDetector?.isInProgress == true || (mVideoView?.scaleX ?: 1f) != 1f) {
+                    handleScaleAndPanTouch(event)
+                    return true
+                }
+
+                val view = mVideoView
+                // 确保 scale=1 时复位平移
+                view?.let {
+                    it.translationX = 0f
+                    it.translationY = 0f
+                }
                 when (event.action) {
                     MotionEvent.ACTION_DOWN -> {
                         touchSurfaceDown(x, y)
@@ -452,6 +497,89 @@ class PlayerControlView(context: Context, attrs: AttributeSet? = null) : FrameLa
             }
         }
         return false
+    }
+
+    private fun handleScaleAndPanTouch(event: MotionEvent): Boolean {
+        // 让手势检测器也能工作（支持双击重置）
+        gestureDetector.onTouchEvent(event)
+
+        val view = mVideoView ?: return true
+        val action = event.actionMasked
+        val pointerCount = event.pointerCount
+
+        when (action) {
+            MotionEvent.ACTION_DOWN -> {
+                mActivePointerId = event.getPointerId(0)
+                mLastTouchX = event.getX(0)
+                mLastTouchY = event.getY(0)
+                mIsPanning = false
+                return true
+            }
+
+            MotionEvent.ACTION_MOVE -> {
+                // 如果正在缩放，不处理平移
+                if (mScaleGestureDetector?.isInProgress == true) {
+                    return true
+                }
+
+                // 单指平移（修复：去掉 !mIsPanning 条件）
+                if (pointerCount == 1) {
+                    val index = event.findPointerIndex(mActivePointerId)
+                    if (index == MotionEvent.INVALID_POINTER_ID) return true
+
+                    val x = event.getX(index)
+                    val y = event.getY(index)
+                    val dx = x - mLastTouchX
+                    val dy = y - mLastTouchY
+
+                    // 移动超过阈值才激活平移模式
+                    if (!mIsPanning && (abs(dx) > 10 || abs(dy) > 10)) {
+                        mIsPanning = true
+                    }
+
+                    if (mIsPanning) {
+                        view.translationX += dx
+                        view.translationY += dy
+                        clampTranslation()
+                    }
+
+                    mLastTouchX = x
+                    mLastTouchY = y
+                }
+                return true
+            }
+
+            MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
+                mIsPanning = false
+                mActivePointerId = MotionEvent.INVALID_POINTER_ID
+                return true
+            }
+
+            MotionEvent.ACTION_POINTER_DOWN -> {
+                val newPointerIndex = event.actionIndex
+                mActivePointerId = event.getPointerId(newPointerIndex)
+                mLastTouchX = event.getX(newPointerIndex)
+                mLastTouchY = event.getY(newPointerIndex)
+                return true
+            }
+
+            MotionEvent.ACTION_POINTER_UP -> {
+                val pointerIndex = event.actionIndex
+                val pointerId = event.getPointerId(pointerIndex)
+                if (pointerId == mActivePointerId) {
+                    val newPointerIndex = if (pointerIndex == 0) 1 else 0
+                    if (newPointerIndex < event.pointerCount) {
+                        mActivePointerId = event.getPointerId(newPointerIndex)
+                        mLastTouchX = event.getX(newPointerIndex)
+                        mLastTouchY = event.getY(newPointerIndex)
+                    } else {
+                        mActivePointerId = MotionEvent.INVALID_POINTER_ID
+                    }
+                }
+                return true
+            }
+        }
+        return true
     }
 
     private fun touchSurfaceDown(x: Float, y: Float) {
@@ -585,7 +713,7 @@ class PlayerControlView(context: Context, attrs: AttributeSet? = null) : FrameLa
                 window!!.addFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL)
                 window!!.addFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE)
                 window!!.decorView.systemUiVisibility = SYSTEM_UI_FLAG_HIDE_NAVIGATION
-                window!!.setLayout(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT)
+                window!!.setLayout(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT)
             }
             val attributes = mBrightnessDialog!!.window!!.attributes
             mBrightnessDialog!!.window!!.attributes = attributes.apply {
@@ -613,7 +741,7 @@ class PlayerControlView(context: Context, attrs: AttributeSet? = null) : FrameLa
                 window!!.addFlags(WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE)
                 window!!.addFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL)
                 window!!.addFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE)
-                window!!.setLayout(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT)
+                window!!.setLayout(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT)
             }
             val attributes = mVolumeDialog!!.window!!.attributes
             mVolumeDialog!!.window!!.attributes = attributes.apply {
@@ -714,14 +842,14 @@ class PlayerControlView(context: Context, attrs: AttributeSet? = null) : FrameLa
     }
 
     private fun startDismissControlViewTimer() {
-//        cancelDismissControlViewTimer()
-//        mPostDismiss = true
-//        postDelayed(dismissControlTask, mDismissControlTime)
+        cancelDismissControlViewTimer()
+        mPostDismiss = true
+        postDelayed(dismissControlTask, mDismissControlTime)
     }
 
     private fun cancelDismissControlViewTimer() {
-//        mPostDismiss = false
-//        removeCallbacks(dismissControlTask)
+        mPostDismiss = false
+        removeCallbacks(dismissControlTask)
     }
 
     //</editor-fold>
@@ -737,11 +865,9 @@ class PlayerControlView(context: Context, attrs: AttributeSet? = null) : FrameLa
             //暂停播放
             setStateAndUi(CURRENT_STATE_PAUSE)//更新ui
             callback?.pause()
-            mBtnPlay?.text = "播放"
         } else if (mCurrentState == CURRENT_STATE_PAUSE) {
             //恢复播放
             setStateAndUi(CURRENT_STATE_PLAYING)//更新ui
-            mBtnPlay?.text = "暂停"
             callback?.start()
         } else if (mCurrentState == CURRENT_STATE_AUTO_COMPLETE) {
             //播放结束，再次播放
@@ -1018,6 +1144,8 @@ class PlayerControlView(context: Context, attrs: AttributeSet? = null) : FrameLa
         GestureDetector(getContext().applicationContext, object : SimpleOnGestureListener() {
             override fun onDoubleTap(e: MotionEvent): Boolean {
                 touchDoubleUp(e)
+                // 重置缩放
+                resetVideoScale()
                 return super.onDoubleTap(e)
             }
 
@@ -1031,6 +1159,18 @@ class PlayerControlView(context: Context, attrs: AttributeSet? = null) : FrameLa
                 touchLongPress(e)
             }
         })
+
+    private fun resetVideoScale() {
+        mVideoView?.let {
+            it.scaleX = 1f
+            it.scaleY = 1f
+            it.translationX = 0f
+            it.translationY = 0f
+            // 将 pivot 重置为视图中心
+            it.pivotX = (it.width / 2).toFloat()
+            it.pivotY = (it.height / 2).toFloat()
+        }
+    }
 
     // 长按
     private fun touchLongPress(e: MotionEvent) {
@@ -1090,8 +1230,9 @@ class PlayerControlView(context: Context, attrs: AttributeSet? = null) : FrameLa
         cancelDismissControlViewTimer()
         //释放音频焦点管理器资源
         releaseAudioFocusManager()
+        mVideoView = null
+        mScaleGestureDetector = null
     }
-
 
     override fun onAudioFocusGain() {
         TODO("Not yet implemented")
@@ -1107,6 +1248,83 @@ class PlayerControlView(context: Context, attrs: AttributeSet? = null) : FrameLa
 
     override fun onAudioFocusLossTransientCanDuck() {
         TODO("Not yet implemented")
+    }
+
+    private fun clampTranslation() {
+        val view = mVideoView ?: return
+        val scale = view.scaleX
+        if (scale <= 1.0f) {
+            // 如果未放大，无需平移限制，直接复位
+            view.translationX = 0f
+            view.translationY = 0f
+            return
+        }
+
+        // 获取父容器宽高
+        val parent = view.parent as? ViewGroup ?: return
+        val parentWidth = parent.width
+        val parentHeight = parent.height
+
+        // 计算缩放后的视图尺寸
+        val scaledWidth = view.width * scale
+        val scaledHeight = view.height * scale
+
+        // 计算最大可平移范围
+        val maxTranslateX = (scaledWidth - parentWidth) / 2
+        val maxTranslateY = (scaledHeight - parentHeight) / 2
+
+        // 限制平移量
+        var tx = view.translationX
+        var ty = view.translationY
+        tx = tx.coerceIn(-maxTranslateX, maxTranslateX)
+        ty = ty.coerceIn(-maxTranslateY, maxTranslateY)
+
+        view.translationX = tx
+        view.translationY = ty
+    }
+
+    private inner class ScaleListener : ScaleGestureDetector.OnScaleGestureListener {
+        override fun onScale(detector: ScaleGestureDetector): Boolean {
+            val view = mVideoView ?: return false
+
+            // 当前缩放比例
+            val oldScale = view.scaleX
+            var newScale = oldScale * detector.scaleFactor
+            newScale = newScale.coerceIn(mMinScale, mMaxScale)
+
+            if (newScale == oldScale) return true
+
+            // 计算焦点在父容器中的坐标
+            val focusX = detector.focusX
+            val focusY = detector.focusY
+
+            // 为了以手指为中心缩放，需要同步调整 translation
+            // 保持焦点对应的内容点不变
+            val deltaScale = newScale - oldScale
+            // 注意：默认 pivot 是视图中心 (width/2, height/2)，这里我们需要根据 pivot 调整 translation
+            val pivotX = view.pivotX
+            val pivotY = view.pivotY
+
+            view.translationX += (focusX - pivotX) * deltaScale / oldScale
+            view.translationY += (focusY - pivotY) * deltaScale / oldScale
+
+            view.scaleX = newScale
+            view.scaleY = newScale
+
+            // 限制平移范围，防止画面移出可视区域过多
+            clampTranslation()
+
+            return true
+        }
+
+        override fun onScaleBegin(detector: ScaleGestureDetector): Boolean {
+            return true
+        }
+
+        override fun onScaleEnd(detector: ScaleGestureDetector) {
+            // 可以留空，或用于记录最后状态
+        }
+
     }
 
 }

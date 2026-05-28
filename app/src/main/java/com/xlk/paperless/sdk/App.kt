@@ -18,7 +18,7 @@ class App : Application() {
     override fun onCreate() {
         super.onCreate()
         Paperless.init(this)
-        SdkConfig.isDebugPlayer = true
+        SdkConfig.isUseSdkPlayer = true
         CrashUtils.init(SdkVars.crash_dir)
         registerActivityLifecycleCallbacks(object : Application.ActivityLifecycleCallbacks {
             override fun onActivityPreCreated(activity: Activity, savedInstanceState: Bundle?) {

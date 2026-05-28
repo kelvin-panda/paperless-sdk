@@ -46,7 +46,7 @@ import com.mogujie.tt.protobuf.InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_REA
 import com.mogujie.tt.protobuf.InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_STREAMPLAY_VALUE
 import com.mogujie.tt.protobuf.InterfacePlaymedia
 import com.mogujie.tt.protobuf.InterfaceStream
-import com.paperless.bus.BusType
+import com.paperless.bus.SdkBusType
 import com.paperless.bus.EventBusMessage
 import com.paperless.player.DecodeQueue
 import com.paperless.sdk.Call
@@ -314,6 +314,7 @@ class MainActivity : AppCompatActivity() {
             if (id_4.isChecked) temp.add(4)
             Jni.mediaPlay(temp, id, localDeviceId)
         }
+        //播放终端屏幕
         findViewById<Button>(R.id.btn_stream_play).setOnClickListener {
             val temp = mutableListOf<Int>()
             if (id_0.isChecked) temp.add(0)
@@ -656,11 +657,11 @@ class MainActivity : AppCompatActivity() {
                     ) {
                         DecodeQueue.cleanup(it.res)
                         if (it.res == 0) {
-                            startActivity(Intent(this, ControlViewActivity::class.java).apply {
-                                putExtra("type", Pb_TYPE_MEET_INTERFACE_MEDIAPLAY_VALUE)
-                                putExtra("isMandatory", isMandatory)
-                                putExtra("createdeviceid", it.createdeviceid)
-                                putExtra("mediaid", it.mediaid)
+                            ControlViewActivity.jump(this, Bundle().apply {
+                                putInt("type", Pb_TYPE_MEET_INTERFACE_MEDIAPLAY_VALUE)
+                                putBoolean("isMandatory", isMandatory)
+                                putInt("createdeviceid", it.createdeviceid)
+                                putInt("mediaid", it.mediaid)
                             })
                         }
                     }
@@ -673,12 +674,12 @@ class MainActivity : AppCompatActivity() {
                         it.triggeruserval == InterfaceMacro.Pb_TriggerUsedef.Pb_MEETFILE_PUSH_FLAG_FORCEMODE_VALUE
                     DecodeQueue.cleanup(it.res)
                     if (it.res == 0) {
-                        startActivity(Intent(this, ControlViewActivity::class.java).apply {
-                            putExtra("type", Pb_TYPE_MEET_INTERFACE_STREAMPLAY_VALUE)
-                            putExtra("isMandatory", isMandatory)
-                            putExtra("createdeviceid", it.createdeviceid)
-                            putExtra("deviceid", it.deviceid)
-                            putExtra("subid", it.subid)
+                        ControlViewActivity.jump(this, Bundle().apply {
+                            putInt("type", Pb_TYPE_MEET_INTERFACE_STREAMPLAY_VALUE)
+                            putBoolean("isMandatory", isMandatory)
+                            putInt("createdeviceid", it.createdeviceid)
+                            putInt("deviceid", it.deviceid)
+                            putInt("subid", it.subid)
                         })
                     }
                 }
@@ -688,12 +689,12 @@ class MainActivity : AppCompatActivity() {
                 queryDeviceMeetInfo()
             }
 
-            BusType.capture_start -> {
+            SdkBusType.capture_start -> {
                 val mediaProjectionManager = getSystemService(MEDIA_PROJECTION_SERVICE) as MediaProjectionManager
                 applyScreenRecorder.launch(mediaProjectionManager.createScreenCaptureIntent())
             }
 
-            BusType.capture_stop -> {
+            SdkBusType.capture_stop -> {
 //                stopService(Intent(this, ForegroundService::class.java))
                 stopService(Intent(this, H265ImageReaderService::class.java).apply {
                     setAction(H265ImageReaderService.ACTION_STOP)

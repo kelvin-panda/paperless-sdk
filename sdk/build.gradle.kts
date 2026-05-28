@@ -86,7 +86,7 @@ afterEvaluate {
                 groupId = "com.gitee.xlk_gitee"
                 artifactId = "sdk-library"
                 //定义：大更新.库更新.java层更新
-                version = "1.3.8"
+                version = "1.3.9"
                 from(components["release"])
             }
         }

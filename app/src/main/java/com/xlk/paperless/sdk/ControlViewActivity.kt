@@ -1,10 +1,12 @@
 package com.xlk.paperless.sdk
 
+import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
 import android.os.Bundle
 import android.os.Handler
-import android.view.LayoutInflater
+import android.os.Looper
+import android.util.Log
 import android.view.PixelCopy
 import android.view.SurfaceView
 import android.widget.ImageView
@@ -21,21 +23,25 @@ import com.mogujie.tt.protobuf.InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_STO
 import com.mogujie.tt.protobuf.InterfaceMember
 import com.mogujie.tt.protobuf.InterfacePlaymedia
 import com.mogujie.tt.protobuf.InterfaceStop
-import com.paperless.bus.BusType
+import com.paperless.bus.SdkBusType
 import com.paperless.bus.EventBusMessage
 import com.paperless.player.PlayerController
+import com.paperless.player.controller.MoreMenuItem
 import com.paperless.player.controller.PlayerControlView
 import com.paperless.player.controller.listener.ControlCallback
+import com.paperless.sdk.Protocol
 import com.paperless.sdk.SdkVars
 import org.greenrobot.eventbus.EventBus
 import org.greenrobot.eventbus.Subscribe
 import org.greenrobot.eventbus.ThreadMode
+import androidx.core.graphics.createBitmap
 
 class ControlViewActivity : AppCompatActivity(), ControlCallback {
     private lateinit var controlView: PlayerControlView
     private var playerController: PlayerController? = null
     private var isMandatory = false
     private var isPlayMedia = false
+    private var curResId = Protocol.resource_id_0
 
     //标题
     private var curTitle = ""
@@ -52,6 +58,19 @@ class ControlViewActivity : AppCompatActivity(), ControlCallback {
 
     lateinit var surfaceView: SurfaceView
     private var memberDetails: MutableList<InterfaceMember.pbui_Item_MeetMemberDetailInfo> = mutableListOf()
+
+    companion object {
+        fun jump(context: Context, bundle: Bundle) {
+            context.startActivity(
+                Intent(
+                    context, ControlViewActivity::class.java
+                ).apply {
+                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                    addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION) //快速显示画面，取消动画
+                    putExtra("bundle", bundle)
+                })
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -89,18 +108,19 @@ class ControlViewActivity : AppCompatActivity(), ControlCallback {
     }
 
     private fun initViewTitle(intent: Intent?) {
-        intent?.let {
-            isPlayMedia = it.getIntExtra("type", 0) == Pb_TYPE_MEET_INTERFACE_MEDIAPLAY_VALUE
-            isMandatory = it.getBooleanExtra("isMandatory", false)
-            val createdeviceid = it.getIntExtra("createdeviceid", 0)
+        intent?.getBundleExtra("bundle")?.let {
+            isPlayMedia = it.getInt("type", 0) == Pb_TYPE_MEET_INTERFACE_MEDIAPLAY_VALUE
+            curResId = it.getInt("resId", 0)
+            isMandatory = it.getBoolean("isMandatory", false)
+            val createdeviceid = it.getInt("createdeviceid", 0)
             if (isPlayMedia) {
-                curMediaId = it.getIntExtra("mediaid", -1)
+                curMediaId = it.getInt("mediaid", -1)
                 curTitle = Jni.queryFileName(curMediaId)
                 curTotalMs = Jni.queryFileVideoTime(curMediaId)
                 LogUtils.i("initViewTitle: 媒体播放文件 curMediaId【$curMediaId】 curFileName【${curTitle}】curTotalSec【${curTotalMs}】")
             } else {
-                curDeviceId = it.getIntExtra("deviceid", -1)
-                curSubId = it.getIntExtra("subid", -1)
+                curDeviceId = it.getInt("deviceid", -1)
+                curSubId = it.getInt("subid", -1)
                 val devName = Jni.queryDeviceNameById(curDeviceId)
                 LogUtils.i("initViewTitle: 流播放 curDeviceId【$curDeviceId】 curSubId【${curSubId}】devName【${devName}】")
                 curTitle = if (curSubId == 2) {
@@ -109,10 +129,31 @@ class ControlViewActivity : AppCompatActivity(), ControlCallback {
                     "正在播放[$devName]设备的摄像头"
                 }
             }
-            LogUtils.i("initViewTitle: isMandatory【$isMandatory】 createdeviceid【${createdeviceid}】")
             controlView.apply {
                 showControlView = isPlayMedia
+                showTimeView = isPlayMedia
                 setTitle(curTitle)
+                setMoreMenuItems(
+                    listOf(
+                        MoreMenuItem(1, "截图", R.mipmap.ic_launcher),
+                        MoreMenuItem(2, "退出", R.mipmap.ic_launcher)
+                    )
+                )
+            }
+        }
+    }
+
+    override fun onMoreMenuItemClick(itemId: Int) {
+        println("onMoreMenuItemClick: $itemId")
+        when (itemId) {
+            1 -> {
+                capture {
+                    showCapture(it)
+                }
+            }
+
+            2 -> {
+                onBackPressedCallback.handleOnBackPressed()
             }
         }
     }
@@ -121,9 +162,14 @@ class ControlViewActivity : AppCompatActivity(), ControlCallback {
     fun busEvent(msg: EventBusMessage) {
         when (msg.type) {
             //接收的帧数
-            BusType.fps -> {
-                val count = msg.objects as Int
-                controlView.setFps(count)
+            SdkBusType.fps -> {
+//                val fps = msg.obj as Int
+                LogUtils.e("msg.objs: ${msg.objs?.size}");
+                val fps = msg.objs?.get(0) as Int
+                val resId = msg.objs?.get(1) as Int
+                if (curResId == resId) {
+                    controlView.setFps(fps)
+                }
             }
             //平台播放进度通知 -- 高频回调
             Pb_TYPE_MEET_INTERFACE_MEDIAPLAYPOSINFO_VALUE -> {
@@ -169,16 +215,20 @@ class ControlViewActivity : AppCompatActivity(), ControlCallback {
         Jni.mediaPlayPause(0, SdkVars.localDeviceId)
     }
 
-    override fun capture() {
+    private fun sameScreen() {
+        //val inflate = LayoutInflater.from(this).inflate(R.layout.pop_member_details, null)
+    }
+
+    private fun capture(callBack: (Bitmap) -> Unit) {
         surfaceView.post {
-            val bitmap = Bitmap.createBitmap(surfaceView.width, surfaceView.height, Bitmap.Config.ARGB_8888)
+            val bitmap = createBitmap(surfaceView.width, surfaceView.height)
             PixelCopy.request(surfaceView, bitmap, object : PixelCopy.OnPixelCopyFinishedListener {
                 override fun onPixelCopyFinished(copyResult: Int) {
                     if (copyResult == PixelCopy.SUCCESS) {
-                        showCapture(bitmap)
+                        callBack.invoke(bitmap)
                     }
                 }
-            }, Handler())
+            }, Handler(Looper.getMainLooper()))
         }
     }
 
@@ -194,10 +244,6 @@ class ControlViewActivity : AppCompatActivity(), ControlCallback {
                 bitmap.recycle()
             }
         }
-    }
-
-    override fun sameScreen() {
-        val inflate = LayoutInflater.from(this).inflate(R.layout.pop_member_details, null)
     }
 
     override fun onBrightnessSlide(percent: Float) {

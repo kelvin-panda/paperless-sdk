@@ -31,12 +31,8 @@ interface ControlCallback {
     fun onBrightnessSlide(percent: Float)
 
     /**
-     * 截图
+     * 更多菜单项被点击
+     * @param itemId 菜单项ID
      */
-    fun capture()
-
-    /**
-     * 同屏
-     */
-    fun sameScreen()
+    fun onMoreMenuItemClick(itemId: Int){}
 }

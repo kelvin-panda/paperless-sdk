@@ -9,6 +9,7 @@ import android.view.SurfaceView
 import com.blankj.utilcode.util.LogUtils
 import com.paperless.data.FrameData
 import com.paperless.player.gl.VideoGLSurfaceView
+import com.paperless.sdk.SdkConfig
 import java.io.IOException
 import java.nio.ByteBuffer
 import java.util.concurrent.atomic.AtomicBoolean
@@ -205,7 +206,6 @@ class PlayerController(
 
         override fun run() {
             // 设置线程优先级
-//            android.os.Process.setThreadPriority(threadPriority.get())
             LogUtils.i(TAG, "DecodeThread started with priority: ${threadPriority.get()},${isPlaying()},${isInterrupted}")
 
             while (isPlaying() && !isInterrupted) {
@@ -214,7 +214,6 @@ class PlayerController(
                     if (frameData == null) {
                         // 无帧可处理，短暂休眠
                         sleep(noFrameSleepTime)
-//                        LogUtils.i(TAG, "无帧可处理，短暂休眠")
                         continue
                     }
 
@@ -288,7 +287,7 @@ class PlayerController(
             // 释放旧的解码器
             mediaCodec?.stop()
             mediaCodec?.release()
-            val mimeType = MIME_VIDEO_HEVC;//getMimeType(configFrame.codecid)
+            val mimeType = getMimeType(configFrame.codecid)
             mediaCodec = MediaCodec.createDecoderByType(mimeType)
             val format = MediaFormat.createVideoFormat(mimeType, configFrame.w, configFrame.h)
             if (configFrame.codecDataSize > 0) {
@@ -364,6 +363,8 @@ class PlayerController(
         currentMimeType = savedMimeType
     }
 
+    private var render = true
+    private var discardCount = 0
     private fun decodeFrame(frameData: FrameData) {
         try {
             val inputBufferIndex = mediaCodec?.dequeueInputBuffer(0) ?: -1
@@ -403,7 +404,22 @@ class PlayerController(
 
                     else -> {
                         updateDecodeStatus(5f)
-                        mediaCodec?.releaseOutputBuffer(outputBufferIndex, true)
+                        if (SdkConfig.isDecodeDiscard) {
+                            val exceed =
+                                (frameData.w > SdkConfig.decodeDiscardSize.x || frameData.h > SdkConfig.decodeDiscardSize.y)
+                            if (exceed) {
+                                if (render) {
+                                    render = false
+                                    discardCount++
+                                    LogUtils.d(TAG, "discard ${frameData.w}x${frameData.h} discardCount:$discardCount")
+                                } else {
+                                    render = true
+                                }
+                            } else {
+                                render = true
+                            }
+                        }
+                        mediaCodec?.releaseOutputBuffer(outputBufferIndex, render)
                         // 计算帧率
                         val now = System.currentTimeMillis()
                         if (lastFrameTime > 0) {
