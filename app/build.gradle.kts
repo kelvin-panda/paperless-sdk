@@ -55,7 +55,6 @@ dependencies {
     api(libs.xxPermissions)
     api(libs.eventbus)
     api(libs.utilcodex)
-
-//    implementation(libs.paperlessSdk)
+//    implementation("com.gitee.xlk_gitee:paperless_sdk:1.3.10")
     api(project(":sdk"))
 }

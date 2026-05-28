@@ -86,7 +86,8 @@ afterEvaluate {
                 groupId = "com.gitee.xlk_gitee"
                 artifactId = "sdk-library"
                 //定义：大更新.库更新.java层更新
-                version = "1.3.10"
+//                version = "1.3.10"
+                // 移除 version 的硬编码，让 JitPack 从 Git Tag 获取
                 from(components["release"])
             }
         }

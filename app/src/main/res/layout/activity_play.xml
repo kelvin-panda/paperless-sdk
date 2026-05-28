@@ -7,7 +7,7 @@
     android:layout_height="match_parent"
     tools:context=".PlayActivity">
 
-    <com.paperless.player.VideoGLSurfaceView
+    <com.paperless.player.gl.VideoGLSurfaceView
         android:id="@+id/videoGLSurfaceView"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
