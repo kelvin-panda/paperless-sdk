@@ -6,13 +6,13 @@ import android.graphics.Bitmap
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
-import android.util.Log
 import android.view.PixelCopy
 import android.view.SurfaceView
 import android.widget.ImageView
 import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.graphics.createBitmap
 import com.blankj.utilcode.util.LogUtils
 import com.mogujie.tt.protobuf.InterfaceMacro
 import com.mogujie.tt.protobuf.InterfaceMacro.Pb_Method.Pb_METHOD_MEET_INTERFACE_CLOSE_VALUE
@@ -23,10 +23,9 @@ import com.mogujie.tt.protobuf.InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_STO
 import com.mogujie.tt.protobuf.InterfaceMember
 import com.mogujie.tt.protobuf.InterfacePlaymedia
 import com.mogujie.tt.protobuf.InterfaceStop
-import com.paperless.bus.SdkBusType
 import com.paperless.bus.EventBusMessage
+import com.paperless.bus.SdkBusType
 import com.paperless.player.PlayerController
-import com.paperless.player.controller.MoreMenuItem
 import com.paperless.player.controller.PlayerControlView
 import com.paperless.player.controller.listener.ControlCallback
 import com.paperless.sdk.Protocol
@@ -34,7 +33,6 @@ import com.paperless.sdk.SdkVars
 import org.greenrobot.eventbus.EventBus
 import org.greenrobot.eventbus.Subscribe
 import org.greenrobot.eventbus.ThreadMode
-import androidx.core.graphics.createBitmap
 
 class ControlViewActivity : AppCompatActivity(), ControlCallback {
     private lateinit var controlView: PlayerControlView
@@ -131,14 +129,7 @@ class ControlViewActivity : AppCompatActivity(), ControlCallback {
             }
             controlView.apply {
                 showControlView = isPlayMedia
-                showTimeView = isPlayMedia
                 setTitle(curTitle)
-                setMoreMenuItems(
-                    listOf(
-                        MoreMenuItem(1, "截图", R.mipmap.ic_launcher),
-                        MoreMenuItem(2, "退出", R.mipmap.ic_launcher)
-                    )
-                )
             }
         }
     }
@@ -261,6 +252,10 @@ class ControlViewActivity : AppCompatActivity(), ControlCallback {
             lpa.screenBrightness = 0.01f
         }
         window.attributes = lpa
+    }
+
+    override fun toggleScreen() {
+
     }
 
     override fun onBack() {

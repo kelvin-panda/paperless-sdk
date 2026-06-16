@@ -19,9 +19,10 @@ class SdkConfig {
         var isUseSdkPlayer: Boolean = false
 
         /**
-         * 解码播放时帧画面超过
+         * 解码播放时帧渲染根据视频源的宽高或像素点来限制
+         * - 比如如果是4K视频，则帧间隔是60毫秒，至多60毫秒显示一帧
          */
-        var isDecodeDiscard: Boolean = false
+        var isDecodeDiscard: Boolean = true
 
         /**
          * 解码时超出该宽高的帧时进行跳帧渲染

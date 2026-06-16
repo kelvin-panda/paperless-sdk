@@ -31,8 +31,13 @@ interface ControlCallback {
     fun onBrightnessSlide(percent: Float)
 
     /**
+     * 窗口切换：全屏/半屏
+     */
+    fun toggleScreen()
+
+    /**
      * 更多菜单项被点击
      * @param itemId 菜单项ID
      */
-    fun onMoreMenuItemClick(itemId: Int){}
+    fun onMoreMenuItemClick(itemId: Int) {}
 }

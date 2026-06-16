@@ -62,7 +62,6 @@ class PlayerController(
     private var decodeThread: DecodeThread? = null
     private val isDecoding = AtomicBoolean(false)
     private val isCodecConfigured = AtomicBoolean(false)
-    private var lastFrameTime: Long = 0
 
     private var decodeStatus = 0f
     private var inputTime = 0L
@@ -363,13 +362,7 @@ class PlayerController(
         currentMimeType = savedMimeType
     }
 
-    private var render = true
-    private var discardCount = 0
-
-    /**
-     * 当前帧pts大于上一次35毫秒后的特别处理
-     */
-    private var pts = 0L
+    private var lastDisplayPts = 0L
     private fun decodeFrame(frameData: FrameData) {
         try {
             val inputBufferIndex = mediaCodec?.dequeueInputBuffer(0) ?: -1
@@ -409,33 +402,20 @@ class PlayerController(
 
                     else -> {
                         updateDecodeStatus(5f)
-//                        if (bufferInfo.presentationTimeUs - pts > 35_000) {
-//
-//                        }
-//                        pts = bufferInfo.presentationTimeUs
+                        var render = true
                         if (SdkConfig.isDecodeDiscard) {
-                            val exceed =
-                                (frameData.w > SdkConfig.decodeDiscardSize.x || frameData.h > SdkConfig.decodeDiscardSize.y)
-                            if (exceed) {
-                                if (render) {
-                                    render = false
-                                    discardCount++
-                                    LogUtils.d(TAG, "discard ${frameData.w}x${frameData.h} discardCount:$discardCount")
-                                } else {
-                                    render = true
-                                }
-                            } else {
-                                render = true
+                            val timeThreshold = getTimeThreshold(frameData.w, frameData.h)
+                            val timeGapUs = bufferInfo.presentationTimeUs - lastDisplayPts
+                            val tooSmallGap = timeGapUs in 1..timeThreshold  // 大于等于1（避免第一帧误判）
+                            val needSkipPattern = tooSmallGap
+
+                            render = !needSkipPattern
+                            if (render) {
+                                lastDisplayPts = bufferInfo.presentationTimeUs   // 更新显示的帧时间
                             }
                         }
+                        //LogUtils.i("discardRender: $render")
                         mediaCodec?.releaseOutputBuffer(outputBufferIndex, render)
-                        // 计算帧率
-                        val now = System.currentTimeMillis()
-                        if (lastFrameTime > 0) {
-                            val frameInterval = now - lastFrameTime
-                            // 可以在这里记录帧率信息
-                        }
-                        lastFrameTime = now
                         // 记录性能
                         PerformanceMonitor.logFrameDecoded(resId)
                     }
@@ -449,6 +429,25 @@ class PlayerController(
             if (e is IllegalStateException) {
                 isCodecConfigured.set(false)
             }
+        }
+    }
+
+    /**
+     * 根据宽高获取帧之间的限制时间，如果是4K视频，则帧间隔是60毫秒，至多60毫秒显示一帧
+     */
+    fun getTimeThreshold(width: Int, height: Int): Long {
+        val pixels = width * height
+        return when {
+            // 按总像素数
+            pixels >= 8_000_000 -> 60_000L  // 4K 约 829 万像素以上
+            pixels >= 3_000_000 -> 50_000L  // 2K 约 221~369 万像素
+            pixels >= 2_000_000 && height == 1080 -> 40_000L // 1080P 约 207 万像素
+            // 按常用标准
+//            width >= 3840 && height >= 2160 -> 60_000L   // 4K 1秒16帧
+//            width >= 2560 && height >= 1440 -> 50_000L   // 视为 2K 1秒20帧
+//            width >= 2048 && height >= 1080 -> 45_000L   // DCI 2K 1秒22帧
+//            width == 1920 && height == 1080 -> 40_000L   // 1080P 1秒25帧
+            else -> 20_000L     // 默认每20毫秒最多一帧，1秒50帧
         }
     }
 

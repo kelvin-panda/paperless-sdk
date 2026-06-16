@@ -15,6 +15,7 @@ import android.os.IBinder
 import android.provider.Settings.ACTION_USAGE_ACCESS_SETTINGS
 import android.util.DisplayMetrics
 import android.view.Gravity
+import android.view.SurfaceView
 import android.view.WindowManager
 import android.widget.Button
 import android.widget.CheckBox
@@ -46,9 +47,11 @@ import com.mogujie.tt.protobuf.InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_REA
 import com.mogujie.tt.protobuf.InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_STREAMPLAY_VALUE
 import com.mogujie.tt.protobuf.InterfacePlaymedia
 import com.mogujie.tt.protobuf.InterfaceStream
-import com.paperless.bus.SdkBusType
 import com.paperless.bus.EventBusMessage
+import com.paperless.bus.SdkBusType
 import com.paperless.player.DecodeQueue
+import com.paperless.player.PlayerController
+import com.paperless.player.floating.FloatingPlayerWindow
 import com.paperless.sdk.Call
 import com.paperless.sdk.MAIN_TYPE_BITMASK
 import com.paperless.sdk.MEDIA_FILE_TYPE_AUDIO
@@ -63,7 +66,6 @@ import com.paperless.sdk.SdkVars.Companion.localDeviceId
 import com.paperless.util.IniUtil
 import com.xlk.paperless.sdk.helper.AppNetworkMonitor
 import com.xlk.paperless.sdk.screen.ScreenRecordService
-import com.xlk.paperless.sdk.screen.mode2.H265ImageReaderService
 import org.greenrobot.eventbus.EventBus
 import org.greenrobot.eventbus.Subscribe
 import org.greenrobot.eventbus.ThreadMode
@@ -172,12 +174,12 @@ class MainActivity : AppCompatActivity() {
     ) { result: ActivityResult? ->
         if (result != null) {
             if (result.resultCode == RESULT_OK) {
+                resultCode = result.resultCode
+                resultData = result.data
                 // 绑定服务
-//                val serviceIntent = Intent(this, ScreenRecordService::class.java)
-//                bindService(serviceIntent, mConnection, Context.BIND_AUTO_CREATE)
-//                LogUtils.d("进行绑定服务")
-//                resultCode = result.resultCode
-//                resultData = result.data
+                val serviceIntent = Intent(this, ScreenRecordService::class.java)
+                bindService(serviceIntent, mConnection, Context.BIND_AUTO_CREATE)
+                LogUtils.d("进行绑定服务")
 
 //                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
 //                    startForegroundService(
@@ -195,41 +197,36 @@ class MainActivity : AppCompatActivity() {
 //                            })
 //                }
 
-//                val intent = Intent(this@MainActivity, H265ImageReaderService::class.java)
-//                    .apply {
-//                        setAction(H265ImageReaderService.ACTION_START)
-//                        putExtra(H265ImageReaderService.EXTRA_RESULT_CODE, result.resultCode)
-//                        putExtra(H265ImageReaderService.EXTRA_RESULT_DATA, result.data)
-//                        putExtra(H265ImageReaderService.EXTRA_WIDTH, SdkVars.record_width)
-//                        putExtra(H265ImageReaderService.EXTRA_HEIGHT, SdkVars.record_height)
-//                        putExtra(H265ImageReaderService.EXTRA_FRAME_RATE, SdkVars.frameRate)
-//                        putExtra(H265ImageReaderService.EXTRA_BITRATE, SdkVars.bitrate)
-//                        putExtra(H265ImageReaderService.EXTRA_IFRAME_INTERVAL, SdkVars.iframeInterval)
-//                        putExtra(H265ImageReaderService.EXTRA_DPI, SdkVars.dpi)
-//                    }
-//                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-//                    startForegroundService(intent)
-//                } else {
-//                    startService(intent)
+                // 3. 获取 MediaProjection
+//                val pm = getSystemService(MEDIA_PROJECTION_SERVICE) as MediaProjectionManager
+//                val mediaProjection = pm.getMediaProjection(resultCode, resultData!!)
+//                val intent = Intent(this, ScreenShareService::class.java).apply {
+//                    action = "START_SHARE"
+//                    putExtra("media_projection", mediaProjection) // 授权返回的 Intent
+//                    putExtra("config", ScreenShareService.Config(
+//                        width = 720, height = 1280, frameRate = 15,
+//                        bitRate = 800_000, iFrameInterval = 2, enableAudio = false
+//                    ))
 //                }
+//                startForegroundService(intent)
 
-                launchService(result.resultCode, result.data!!)
+//                launchService(result.resultCode, result.data!!)
             }
         }
     }
 
     private fun launchService(resultCode: Int, data: Intent) {
-        val intent = Intent(this@MainActivity, H265ImageReaderService::class.java)
+        val intent = Intent(this@MainActivity, ScreenRecordService::class.java)
             .apply {
-                setAction(H265ImageReaderService.ACTION_START)
-                putExtra(H265ImageReaderService.EXTRA_RESULT_CODE, resultCode)
-                putExtra(H265ImageReaderService.EXTRA_RESULT_DATA, data)
-                putExtra(H265ImageReaderService.EXTRA_WIDTH, SdkVars.record_width)
-                putExtra(H265ImageReaderService.EXTRA_HEIGHT, SdkVars.record_height)
-                putExtra(H265ImageReaderService.EXTRA_FRAME_RATE, SdkVars.frameRate)
-                putExtra(H265ImageReaderService.EXTRA_BITRATE, SdkVars.bitrate)
-                putExtra(H265ImageReaderService.EXTRA_IFRAME_INTERVAL, SdkVars.iframeInterval)
-                putExtra(H265ImageReaderService.EXTRA_DPI, SdkVars.dpi)
+                setAction(ScreenRecordService.ACTION_START)
+                putExtra(ScreenRecordService.EXTRA_RESULT_CODE, resultCode)
+                putExtra(ScreenRecordService.EXTRA_RESULT_DATA, data)
+                putExtra(ScreenRecordService.EXTRA_WIDTH, SdkVars.record_width)
+                putExtra(ScreenRecordService.EXTRA_HEIGHT, SdkVars.record_height)
+                putExtra(ScreenRecordService.EXTRA_FRAME_RATE, SdkVars.frameRate)
+                putExtra(ScreenRecordService.EXTRA_BITRATE, SdkVars.bitrate)
+                putExtra(ScreenRecordService.EXTRA_IFRAME_INTERVAL, SdkVars.iframeInterval)
+                putExtra(ScreenRecordService.EXTRA_DPI, SdkVars.dpi)
             }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             startForegroundService(intent)
@@ -657,12 +654,13 @@ class MainActivity : AppCompatActivity() {
                     ) {
                         DecodeQueue.cleanup(it.res)
                         if (it.res == 0) {
-                            ControlViewActivity.jump(this, Bundle().apply {
-                                putInt("type", Pb_TYPE_MEET_INTERFACE_MEDIAPLAY_VALUE)
-                                putBoolean("isMandatory", isMandatory)
-                                putInt("createdeviceid", it.createdeviceid)
-                                putInt("mediaid", it.mediaid)
-                            })
+                            createFloatingPlayer()
+//                            ControlViewActivity.jump(this, Bundle().apply {
+//                                putInt("type", Pb_TYPE_MEET_INTERFACE_MEDIAPLAY_VALUE)
+//                                putBoolean("isMandatory", isMandatory)
+//                                putInt("createdeviceid", it.createdeviceid)
+//                                putInt("mediaid", it.mediaid)
+//                            })
                         }
                     }
                 }
@@ -674,13 +672,14 @@ class MainActivity : AppCompatActivity() {
                         it.triggeruserval == InterfaceMacro.Pb_TriggerUsedef.Pb_MEETFILE_PUSH_FLAG_FORCEMODE_VALUE
                     DecodeQueue.cleanup(it.res)
                     if (it.res == 0) {
-                        ControlViewActivity.jump(this, Bundle().apply {
-                            putInt("type", Pb_TYPE_MEET_INTERFACE_STREAMPLAY_VALUE)
-                            putBoolean("isMandatory", isMandatory)
-                            putInt("createdeviceid", it.createdeviceid)
-                            putInt("deviceid", it.deviceid)
-                            putInt("subid", it.subid)
-                        })
+                        createFloatingPlayer()
+//                        ControlViewActivity.jump(this, Bundle().apply {
+//                            putInt("type", Pb_TYPE_MEET_INTERFACE_STREAMPLAY_VALUE)
+//                            putBoolean("isMandatory", isMandatory)
+//                            putInt("createdeviceid", it.createdeviceid)
+//                            putInt("deviceid", it.deviceid)
+//                            putInt("subid", it.subid)
+//                        })
                     }
                 }
             }
@@ -695,10 +694,11 @@ class MainActivity : AppCompatActivity() {
             }
 
             SdkBusType.capture_stop -> {
+                mRecordService?.stopRecording()
 //                stopService(Intent(this, ForegroundService::class.java))
-                stopService(Intent(this, H265ImageReaderService::class.java).apply {
-                    setAction(H265ImageReaderService.ACTION_STOP)
-                })
+//                stopService(Intent(this, ScreenRecordService::class.java).apply {
+//                    setAction(ScreenRecordService.ACTION_STOP)
+//                })
             }
         }
     }
@@ -736,6 +736,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
+        floatingWindow?.dismiss()
         if (mIsBound) {
             unbindService(mConnection)
             mIsBound = false;
@@ -743,4 +744,15 @@ class MainActivity : AppCompatActivity() {
         closeNetworkMonitorWindow()
     }
 
+    private var floatingWindow: FloatingPlayerWindow? = null
+
+    // 2. 创建悬浮窗
+    private fun createFloatingPlayer() {
+
+        val surfaceView = SurfaceView(applicationContext)
+        // 创建悬浮窗
+        floatingWindow = FloatingPlayerWindow(applicationContext).apply {
+            show(surfaceView, "悬浮窗播放测试")
+        }
+    }
 }

@@ -14,7 +14,8 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <!-- 流量统计权限（Android 5.0+需要） -->
-    <uses-permission android:name="android.permission.PACKAGE_USAGE_STATS"
+    <uses-permission
+        android:name="android.permission.PACKAGE_USAGE_STATS"
         tools:ignore="ProtectedPermissions" />
 
     <application
@@ -51,35 +52,41 @@
         </activity>
 
         <service
+            android:name=".screen.ScreenShareService"
+            android:enabled="true"
+            android:exported="true"
+            android:foregroundServiceType="mediaProjection" />
+
+        <service
             android:name="com.xlk.paperless.sdk.service.ForegroundService"
             android:enabled="true"
             android:exported="true"
-            android:foregroundServiceType="mediaProjection"/>
+            android:foregroundServiceType="mediaProjection" />
         <service
             android:name="com.xlk.paperless.sdk.screen.ScreenRecordService"
             android:enabled="true"
             android:exported="true"
-            android:foregroundServiceType="mediaProjection"/>
+            android:foregroundServiceType="mediaProjection" />
         <service
             android:name="com.xlk.paperless.sdk.service.ScreenShareService"
             android:enabled="true"
             android:exported="true"
-            android:foregroundServiceType="mediaProjection"/>
+            android:foregroundServiceType="mediaProjection" />
         <service
             android:name="com.xlk.paperless.sdk.screen.mode1.H265ScreenShareService"
             android:enabled="true"
             android:exported="true"
-            android:foregroundServiceType="mediaProjection"/>
+            android:foregroundServiceType="mediaProjection" />
         <service
             android:name="com.xlk.paperless.sdk.screen.mode2.H265ImageReaderService"
             android:enabled="true"
             android:exported="true"
-            android:foregroundServiceType="mediaProjection"/>
+            android:foregroundServiceType="mediaProjection" />
         <service
             android:name="com.xlk.paperless.sdk.screen.sync.SyncScreenRecord"
             android:enabled="true"
             android:exported="true"
-            android:foregroundServiceType="mediaProjection"/>
+            android:foregroundServiceType="mediaProjection" />
     </application>
 
 </manifest>

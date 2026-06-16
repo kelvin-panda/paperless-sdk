@@ -27,7 +27,7 @@
         android:scaleType="fitCenter" />
 
     <LinearLayout
-        android:id="@+id/layoutBottom"
+        android:id="@+id/layout_bottom"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
@@ -76,53 +76,8 @@
                 android:textColor="#ffffff" />
 
         </LinearLayout>
-
-<!--        <LinearLayout-->
-<!--            android:id="@+id/layoutControl"-->
-<!--            android:layout_width="wrap_content"-->
-<!--            android:layout_height="wrap_content"-->
-<!--            android:layout_gravity="center"-->
-<!--            android:visibility="gone"-->
-<!--            tools:visibility="visible"-->
-<!--            android:layout_marginBottom="10dp"-->
-<!--            android:orientation="horizontal">-->
-
-<!--            <Button-->
-<!--                android:id="@+id/btnPlay"-->
-<!--                android:layout_width="wrap_content"-->
-<!--                android:layout_height="35dp"-->
-<!--                android:layout_marginEnd="5dp"-->
-<!--                android:background="@drawable/video_button"-->
-<!--                android:text="暂停"-->
-<!--                android:textColor="@android:color/white" />-->
-
-<!--            <Button-->
-<!--                android:id="@+id/btnCapture"-->
-<!--                android:layout_width="wrap_content"-->
-<!--                android:layout_height="35dp"-->
-<!--                android:layout_marginEnd="5dp"-->
-<!--                android:background="@drawable/video_button"-->
-<!--                android:text="截图"-->
-<!--                android:textColor="@android:color/white" />-->
-
-<!--            <Button-->
-<!--                android:id="@+id/btnSameScreen"-->
-<!--                android:layout_width="wrap_content"-->
-<!--                android:layout_height="35dp"-->
-<!--                android:layout_marginEnd="5dp"-->
-<!--                android:background="@drawable/video_button"-->
-<!--                android:text="同屏"-->
-<!--                android:textColor="@android:color/white" />-->
-
-<!--            <Button-->
-<!--                android:id="@+id/btnStop"-->
-<!--                android:layout_width="wrap_content"-->
-<!--                android:layout_height="35dp"-->
-<!--                android:background="@drawable/video_button"-->
-<!--                android:text="结束"-->
-<!--                android:textColor="@android:color/white" />-->
-<!--        </LinearLayout>-->
     </LinearLayout>
+
 
     <ProgressBar
         android:id="@+id/bottom_progressbar"
@@ -133,27 +88,27 @@
         android:max="100"
         android:progressDrawable="@drawable/video_progress" />
 
-
     <LinearLayout
         android:id="@+id/layout_top"
         android:layout_width="match_parent"
         android:layout_height="48dp"
         android:background="@drawable/video_title_bg"
-        android:gravity="center_vertical">
+        android:gravity="center_vertical"
+        tools:visibility="visible">
 
         <ImageView
             android:id="@+id/back"
             android:layout_width="48dp"
             android:layout_height="48dp"
-            android:paddingLeft="10dp"
             android:scaleType="centerInside"
             android:src="@drawable/video_back" />
 
         <TextView
             android:id="@+id/title"
             android:layout_width="0dp"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:layout_weight="1"
+            android:gravity="center_vertical"
             android:lines="1"
             android:paddingLeft="10dp"
             android:singleLine="true"
@@ -165,20 +120,27 @@
             android:id="@+id/fps"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:paddingLeft="10dp"
             android:layout_marginEnd="10dp"
+            android:paddingLeft="10dp"
             android:textColor="@android:color/white"
             android:textSize="18sp"
             tools:text="25 f/s" />
 
         <ImageView
+            android:id="@+id/full"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:scaleType="centerInside"
+            android:src="@drawable/video_full"
+            android:visibility="visible" />
+
+        <ImageView
             android:id="@+id/more"
             android:layout_width="48dp"
             android:layout_height="48dp"
-            android:paddingLeft="10dp"
-            android:visibility="gone"
             android:scaleType="centerInside"
-            android:src="@drawable/more" />
+            android:src="@drawable/more"
+            android:visibility="visible" />
 
     </LinearLayout>
 

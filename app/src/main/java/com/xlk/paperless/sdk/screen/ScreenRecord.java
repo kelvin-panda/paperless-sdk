@@ -536,7 +536,7 @@ public class ScreenRecord implements IScreenRecord {
             format.setInteger(MediaFormat.KEY_BIT_RATE, bitrate);
 
             // 帧率
-            format.setInteger(MediaFormat.KEY_FRAME_RATE, frameRate);
+            format.setInteger(MediaFormat.KEY_FRAME_RATE, 60);
 
             // 关键帧间隔
             format.setInteger(MediaFormat.KEY_I_FRAME_INTERVAL, iframeInterval);
