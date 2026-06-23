@@ -98,5 +98,6 @@ dependencies {
     api(libs.eventbus)
     api(files("libs/ini4j-0.5.2.jar"))
     api(files("libs/protobuf-java-3.3.0.jar"))
+    implementation(libs.androidx.recyclerview)
 }
 

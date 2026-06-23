@@ -42,6 +42,7 @@ import com.mogujie.tt.protobuf.InterfaceMacro
 import com.mogujie.tt.protobuf.InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_DEVICEFACESHOW_VALUE
 import com.mogujie.tt.protobuf.InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_DEVICEINFO_VALUE
 import com.mogujie.tt.protobuf.InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_DEVICEVALIDATE_VALUE
+import com.mogujie.tt.protobuf.InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_MEDIAPLAYPOSINFO_VALUE
 import com.mogujie.tt.protobuf.InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_MEDIAPLAY_VALUE
 import com.mogujie.tt.protobuf.InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_READY_VALUE
 import com.mogujie.tt.protobuf.InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_STREAMPLAY_VALUE
@@ -61,11 +62,13 @@ import com.paperless.sdk.Protocol
 import com.paperless.sdk.Protocol.Companion.resource_id_0
 import com.paperless.sdk.ProtocolTool
 import com.paperless.sdk.SUB_TYPE_BITMASK
+import com.paperless.sdk.SdkConfig
 import com.paperless.sdk.SdkVars
 import com.paperless.sdk.SdkVars.Companion.localDeviceId
 import com.paperless.util.IniUtil
 import com.xlk.paperless.sdk.helper.AppNetworkMonitor
 import com.xlk.paperless.sdk.screen.ScreenRecordService
+import com.xlk.paperless.sdk.service.ForegroundService
 import org.greenrobot.eventbus.EventBus
 import org.greenrobot.eventbus.Subscribe
 import org.greenrobot.eventbus.ThreadMode
@@ -177,25 +180,26 @@ class MainActivity : AppCompatActivity() {
                 resultCode = result.resultCode
                 resultData = result.data
                 // 绑定服务
-                val serviceIntent = Intent(this, ScreenRecordService::class.java)
-                bindService(serviceIntent, mConnection, Context.BIND_AUTO_CREATE)
-                LogUtils.d("进行绑定服务")
+//                val serviceIntent = Intent(this, ScreenRecordService::class.java)
+//                bindService(serviceIntent, mConnection, Context.BIND_AUTO_CREATE)
+//                LogUtils.d("进行绑定服务")
 
-//                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-//                    startForegroundService(
-//                        Intent(this@MainActivity, ForegroundService::class.java)
-//                            .apply {
-//                                putExtra("intent_extra_code", result.resultCode)
-//                                putExtra("intent_extra_data", result.data)
-//                            })
-//                } else {
-//                    startService(
-//                        Intent(this@MainActivity, ForegroundService::class.java)
-//                            .apply {
-//                                putExtra("intent_extra_code", result.resultCode)
-//                                putExtra("intent_extra_data", result.data)
-//                            })
-//                }
+
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    startForegroundService(
+                        Intent(this@MainActivity, ForegroundService::class.java)
+                            .apply {
+                                putExtra("intent_extra_code", result.resultCode)
+                                putExtra("intent_extra_data", result.data)
+                            })
+                } else {
+                    startService(
+                        Intent(this@MainActivity, ForegroundService::class.java)
+                            .apply {
+                                putExtra("intent_extra_code", result.resultCode)
+                                putExtra("intent_extra_data", result.data)
+                            })
+                }
 
                 // 3. 获取 MediaProjection
 //                val pm = getSystemService(MEDIA_PROJECTION_SERVICE) as MediaProjectionManager
@@ -270,26 +274,29 @@ class MainActivity : AppCompatActivity() {
         val id_4 = findViewById<CheckBox>(R.id.id_4)
         val edt_device_id = findViewById<EditText>(R.id.edt_device_id)
         val edt_media_id = findViewById<EditText>(R.id.edt_media_id)
-
-        findViewById<Button>(R.id.btnPlayPage).setOnClickListener {
-            startActivity(Intent(this, ControlViewActivity::class.java))
-        }
         val edt_page_code = findViewById<EditText>(R.id.edt_page_code)
+        //修改界面状态
         findViewById<Button>(R.id.btn_page).setOnClickListener {
             //InterfaceMacro.Pb_MeetFaceStatus.Pb_MemState_MemFace_VALUE
             val pageCode = Integer.parseInt(edt_page_code.text.toString())
             Jni.modPageStatus(pageCode)
         }
+        //播放页面
+        findViewById<Button>(R.id.btnPlayPage).setOnClickListener {
+            startActivity(Intent(this, ControlViewActivity::class.java))
+        }
+        //四分屏播放页面
         findViewById<Button>(R.id.btn_split).setOnClickListener {
             startActivity(Intent(this, SplitPlayActivity::class.java))
         }
 
-        //缓存数据
+        //<editor-fold desc="缓存数据">
         edtType = findViewById<EditText>(R.id.edtType)
         edtCacheId = findViewById<EditText>(R.id.edtCacheId)
         findViewById<Button>(R.id.btnCacheData).setOnClickListener {
             Jni.cache(edtType.text.toString().toInt(), edtCacheId.text.toString().toInt())
         }
+        //</editor-fold>
 
         //下载文件
         findViewById<Button>(R.id.btn_download_media).setOnClickListener {
@@ -330,6 +337,7 @@ class MainActivity : AppCompatActivity() {
             SdkVars.root_dir + "client.ini", DeviceUtils.getUniqueDeviceId(), 4, 0
         )
 
+        //<editor-fold desc="同屏">
         val edt_record_width = findViewById<EditText>(R.id.edt_record_width)
         val edt_record_height = findViewById<EditText>(R.id.edt_record_height)
         val edt_bitrate = findViewById<EditText>(R.id.edt_bitrate)
@@ -356,6 +364,7 @@ class MainActivity : AppCompatActivity() {
             val dstDevId = Integer.parseInt(edt_dst_id.text.toString())
             Jni.stopResource(0, dstDevId, resource_id_0, 0)
         }
+        //</editor-fold>
 
         //<editor-fold desc="目录与文件黑名单查询">
         tvShowBlackList = findViewById<TextView>(R.id.tvShowBlackList)
@@ -390,6 +399,7 @@ class MainActivity : AppCompatActivity() {
             tvShowBlackList.text = sb.toString()
         }
         //</editor-fold>
+
     }
 
     private fun networkSpeedWindow() {
@@ -469,16 +479,25 @@ class MainActivity : AppCompatActivity() {
         //修改本机界面状态
         Jni.modPageStatus(InterfaceMacro.Pb_MeetFaceStatus.Pb_MemState_MainFace_VALUE)
         queryDeviceMeetInfo()
+        if (SdkConfig.floatingPlayEnable) {
+            createFloatingPlayer()
+        }
     }
 
     private fun queryDeviceMeetInfo() {
         var memberName = ""
         var memberId = 0
+        var meetingId = 0
+        var roomid = 0
         Jni.queryDeviceMeetInfo()?.let {
             memberName = it.membername.toStringUtf8()
             memberId = it.memberid
+            meetingId = it.meetingid
+            roomid = it.roomid
         }
+        SdkVars.localMeetingId = meetingId
         SdkVars.localMemberId = memberId
+        SdkVars.localRoomId = roomid
         tvMemberName.text = memberName
         tvMemberId.text = "$memberId"
     }
@@ -641,8 +660,10 @@ class MainActivity : AppCompatActivity() {
                     }
                 }
             }
+
             // 媒体播放
             Pb_TYPE_MEET_INTERFACE_MEDIAPLAY_VALUE -> {
+                if (SdkConfig.floatingPlayEnable) return
                 InterfacePlaymedia.pbui_Type_MeetMediaPlay.parseFrom(msg.data)?.let {
                     val isMandatory =
                         it.triggeruserval == InterfaceMacro.Pb_TriggerUsedef.Pb_MEETFILE_PUSH_FLAG_FORCEMODE_VALUE
@@ -654,32 +675,31 @@ class MainActivity : AppCompatActivity() {
                     ) {
                         DecodeQueue.cleanup(it.res)
                         if (it.res == 0) {
-                            createFloatingPlayer()
-//                            ControlViewActivity.jump(this, Bundle().apply {
-//                                putInt("type", Pb_TYPE_MEET_INTERFACE_MEDIAPLAY_VALUE)
-//                                putBoolean("isMandatory", isMandatory)
-//                                putInt("createdeviceid", it.createdeviceid)
-//                                putInt("mediaid", it.mediaid)
-//                            })
+                            ControlViewActivity.jump(this, Bundle().apply {
+                                putInt("type", Pb_TYPE_MEET_INTERFACE_MEDIAPLAY_VALUE)
+                                putBoolean("isMandatory", isMandatory)
+                                putInt("createdeviceid", it.createdeviceid)
+                                putInt("mediaid", it.mediaid)
+                            })
                         }
                     }
                 }
             }
             // 流播放
             Pb_TYPE_MEET_INTERFACE_STREAMPLAY_VALUE -> {
+                if (SdkConfig.floatingPlayEnable) return
                 InterfaceStream.pbui_Type_MeetStreamPlay.parseFrom(msg.data)?.let {
                     val isMandatory =
                         it.triggeruserval == InterfaceMacro.Pb_TriggerUsedef.Pb_MEETFILE_PUSH_FLAG_FORCEMODE_VALUE
                     DecodeQueue.cleanup(it.res)
                     if (it.res == 0) {
-                        createFloatingPlayer()
-//                        ControlViewActivity.jump(this, Bundle().apply {
-//                            putInt("type", Pb_TYPE_MEET_INTERFACE_STREAMPLAY_VALUE)
-//                            putBoolean("isMandatory", isMandatory)
-//                            putInt("createdeviceid", it.createdeviceid)
-//                            putInt("deviceid", it.deviceid)
-//                            putInt("subid", it.subid)
-//                        })
+                        ControlViewActivity.jump(this, Bundle().apply {
+                            putInt("type", Pb_TYPE_MEET_INTERFACE_STREAMPLAY_VALUE)
+                            putBoolean("isMandatory", isMandatory)
+                            putInt("createdeviceid", it.createdeviceid)
+                            putInt("deviceid", it.deviceid)
+                            putInt("subid", it.subid)
+                        })
                     }
                 }
             }
@@ -746,13 +766,10 @@ class MainActivity : AppCompatActivity() {
 
     private var floatingWindow: FloatingPlayerWindow? = null
 
-    // 2. 创建悬浮窗
     private fun createFloatingPlayer() {
-
-        val surfaceView = SurfaceView(applicationContext)
         // 创建悬浮窗
         floatingWindow = FloatingPlayerWindow(applicationContext).apply {
-            show(surfaceView, "悬浮窗播放测试")
+            initial()
         }
     }
 }

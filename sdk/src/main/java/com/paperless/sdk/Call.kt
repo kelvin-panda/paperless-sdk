@@ -277,12 +277,12 @@ object Call {
     }
 
     fun error_ret(type: Int, method: Int, ret: Int) {
-        LogUtils.e("error_ret：type=$type,method=$method,ret=$ret")
+        if (SdkConfig.logEnable) LogUtils.e("error_ret：type=$type,method=$method,ret=$ret")
     }
 
     fun callback_method(type: Int, method: Int, data: ByteArray?, datalen: Int): Int {
         if (type != 1) {
-            LogUtils.e("callback_method：type=$type,method=$method,datalen=$datalen")
+            if (SdkConfig.logEnable) LogUtils.e("callback_method：type=$type,method=$method,datalen=$datalen")
         }
         Bus.post(type = type, method = method, data = data)
         return 0
@@ -310,7 +310,7 @@ object Call {
             }
             var decodeQueue = SdkVars.decodeMap[res]
             if (decodeQueue == null) {
-                LogUtils.e("player_log", "新建 LinkedBlockingQueue<FrameData>")
+                if (SdkConfig.logEnable) LogUtils.e("player_log", "新建 LinkedBlockingQueue<FrameData>")
                 val value = LinkedBlockingQueue<FrameData>(SdkVars.CAPACITY)
                 SdkVars.decodeMap.put(res, value)
                 decodeQueue = value
@@ -318,7 +318,7 @@ object Call {
             var frameData = SdkVars.frameDataPool.poll()
             if (frameData == null) {
                 frameData = FrameData()
-                LogUtils.e("player_log", "新建对象 size=${decodeQueue.size}")
+                if (SdkConfig.logEnable) LogUtils.e("player_log", "新建对象 size=${decodeQueue.size}")
             }
             frameData.isKeyFrame = isKeyframe
             frameData.res = res
@@ -332,7 +332,7 @@ object Call {
                 //添加失败就把最旧的数据删除后再添加
                 if (decodeQueue.poll() != null) {
                     val offer = decodeQueue.offer(frameData)
-                    LogUtils.e("player_log", "添加失败就把最旧的数据删除后再添加，offer=$offer")
+                    if (SdkConfig.logEnable) LogUtils.e("player_log", "添加失败就把最旧的数据删除后再添加，offer=$offer")
                 }
             }
         }
@@ -381,7 +381,7 @@ object Call {
             //Log.d("", "debugPlayer: 把帧数据添加进队列中 ${DecodeQueue.getSize(res)}")
         } else {
             // 队列已满，尝试移除最旧的非关键帧
-            Log.d("", "debugPlayer: 队列已满，尝试移除最旧的非关键帧")
+            if (SdkConfig.logEnable) Log.d("", "debugPlayer: 队列已满，尝试移除最旧的非关键帧")
             DecodeQueue.remove(frameData)
         }
     }
@@ -399,7 +399,7 @@ object Call {
         pts: Long,
         codecdata: ByteArray
     ): Int {
-        LogUtils.e("后台接收 datalen：${packet.size}")
+        if (SdkConfig.logEnable) LogUtils.e("后台接收 datalen：${packet.size}")
         // 优化内存使用对象池
         val frameData = FrameDataPool.obtain()
         frameData.isKeyFrame = isKeyframe

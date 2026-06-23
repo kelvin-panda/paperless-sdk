@@ -2,6 +2,7 @@ package com.paperless.player
 
 import com.blankj.utilcode.util.LogUtils
 import com.paperless.data.FrameData
+import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.LinkedBlockingQueue
 
 /**
@@ -10,7 +11,7 @@ import java.util.concurrent.LinkedBlockingQueue
  */
 object DecodeQueue {
     //根据资源id存放，jni回调的解码数据，每个资源id对应一个播放窗口
-    private val decodeMap: HashMap<Int, LinkedBlockingQueue<FrameData>> = hashMapOf()
+    private val decodeMap: ConcurrentHashMap<Int, LinkedBlockingQueue<FrameData>> = ConcurrentHashMap<Int, LinkedBlockingQueue<FrameData>>()
 
     private fun getQueue(resId: Int): LinkedBlockingQueue<FrameData> {
         var queue = decodeMap.get(resId)
@@ -44,13 +45,13 @@ object DecodeQueue {
                 // 仍然添加失败，回收帧数据
                 FrameDataPool.recycle(frameData)
                 PerformanceMonitor.logFrameDropped(frameData.res)
-                LogUtils.e("player_log", "添加帧数据失败，队列已满")
+                LogUtils.d("player_log", "添加帧数据失败，队列已满")
             }
         } else {
             // 没有非关键帧可移除，回收当前帧
             FrameDataPool.recycle(frameData)
             PerformanceMonitor.logFrameDropped(frameData.res)
-            LogUtils.e("player_log", "队列已满且无非关键帧可移除")
+            LogUtils.d("player_log", "队列已满且无非关键帧可移除")
         }
     }
 

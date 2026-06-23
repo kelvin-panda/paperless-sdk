@@ -155,7 +155,6 @@ class ControlViewActivity : AppCompatActivity(), ControlCallback {
             //接收的帧数
             SdkBusType.fps -> {
 //                val fps = msg.obj as Int
-                LogUtils.e("msg.objs: ${msg.objs?.size}");
                 val fps = msg.objs?.get(0) as Int
                 val resId = msg.objs?.get(1) as Int
                 if (curResId == resId) {

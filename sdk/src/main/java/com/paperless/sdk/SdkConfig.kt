@@ -27,6 +27,16 @@ class SdkConfig {
         /**
          * 解码时超出该宽高的帧时进行跳帧渲染
          */
-        var decodeDiscardSize: Point = Point(1920,1080)
+        var decodeDiscardSize: Point = Point(1920, 1080)
+
+        /**
+         * Call 类中的日志打印开关
+         */
+        var logEnable: Boolean = true
+
+        /**
+         * 使用悬浮窗口播放，默认false
+         */
+        var floatingPlayEnable: Boolean = false
     }
 }

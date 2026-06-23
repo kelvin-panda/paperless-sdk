@@ -19,6 +19,7 @@ class App : Application() {
         super.onCreate()
         Paperless.init(this)
         SdkConfig.isUseSdkPlayer = true
+        SdkConfig.floatingPlayEnable = true
         CrashUtils.init(SdkVars.crash_dir)
         registerActivityLifecycleCallbacks(object : Application.ActivityLifecycleCallbacks {
             override fun onActivityPreCreated(activity: Activity, savedInstanceState: Bundle?) {

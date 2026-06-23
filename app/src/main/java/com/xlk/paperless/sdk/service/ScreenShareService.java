@@ -20,10 +20,13 @@ import android.media.MediaFormat;
 import android.media.projection.MediaProjection;
 import android.media.projection.MediaProjectionManager;
 import android.os.Build;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
+import android.os.PersistableBundle;
 import android.util.DisplayMetrics;
+import android.util.Range;
 import android.view.WindowManager;
 
 import androidx.annotation.Nullable;
@@ -45,6 +48,22 @@ import java.util.concurrent.atomic.AtomicBoolean;
  */
 public class ScreenShareService extends Service {
     private static final String TAG = "H265ScreenShareService";
+    private static final long MIN_SYNC_FRAME_REQUEST_INTERVAL_MS = 5000L;
+    private static final long CODEC_STATUS_LOG_INTERVAL_MS = 5000L;
+    private static final long BITRATE_COMPENSATION_WINDOW_MS = 1000L;
+    private static final long MIN_BITRATE_COMPENSATION_SYNC_INTERVAL_MS = 3000L;
+    private static final long MIN_BITRATE_COMPENSATION_KEY_FRAME_GAP_MS = 1200L;
+    private static final double LOW_BITRATE_COMPENSATION_RATIO = 0.65;
+    private static final double LOW_BITRATE_RECOVER_RATIO = 1.20;
+    private static final int LOW_BITRATE_COMPENSATION_WINDOWS = 2;
+    private static final double OVER_COMPENSATION_RATIO = 1.2;
+    private static final double TOTAL_DEFICIT_TRIGGER_RATIO = 0.05;
+    private static final int QP_I_MIN = 1;
+    private static final int QP_I_MAX = 54;
+    private static final int QP_P_MIN = 1;
+    private static final int QP_P_MAX = 54;
+    private static final int QP_MIN = QP_I_MIN;
+    private static final int QP_MAX = QP_I_MAX;
 
     // 通知相关
     private static final String CHANNEL_ID = "screen_record_channel";
@@ -53,6 +72,7 @@ public class ScreenShareService extends Service {
 
     private NotificationManager mNotificationManager;
     private MediaProjection mMediaProjection;
+    private MediaProjection.Callback mProjectionCallback;
     private VirtualDisplay mVirtualDisplay;
     private ImageReader mImageReader;
 
@@ -69,20 +89,79 @@ public class ScreenShareService extends Service {
     byte[] a = null;
     byte[] b = null;
 
-    public static Pools.SynchronizedPool<byte[]> framePoll = new Pools.SynchronizedPool<>(2);
-    public static ArrayBlockingQueue<byte[]> decodeQueue = new ArrayBlockingQueue<>(2);
+    public static Pools.SynchronizedPool<byte[]> framePoll = new Pools.SynchronizedPool<>(1);
+    public static ArrayBlockingQueue<byte[]> decodeQueue = new ArrayBlockingQueue<>(1);
 
     private MediaCodec mMediaCodec;
     private final MediaCodec.BufferInfo bufferInfo = new MediaCodec.BufferInfo();
     private byte[] outData;
-    private byte[] configbyte = null;
+    private volatile byte[] configbyte = null;
     private ByteBuffer srcBuff, dstBuff;
+    private long mLastSyncFrameRequestMs;
+    private long mLastKeyFrameMs;
+    private int mBitrateMode;
+    private String mSupportedBitrateModes = "unknown";
+    private String mQpBoundsSupported = "unknown";
+    private String mComplexityRange = "unknown";
+    private int mConfiguredComplexity = Integer.MIN_VALUE;
+    private String mLowLatencySupported = "unknown";
+    private boolean mLowLatencyFeatureEnabled;
+    private String mSupportedAvcProfileLevels = "unknown";
+    private String mConfiguredAvcProfile = "unknown";
+    private String mConfiguredAvcLevel = "unknown";
+    private String mCodecName = "unknown";
+    private MediaFormat mCodecConfigFormat;
+    private MediaFormat mCodecOutputFormat;
+    private long mCodecWindowStartMs;
+    private long mCodecWindowBytes;
+    private long mCodecWindowFrames;
+    private long mCodecWindowKeyFrames;
+    private int mCodecWindowMaxFrameBytes;
+    private long mCodecTotalBytes;
+    private long mCodecTotalFrames;
+    private long mCodecTotalKeyFrames;
+    private long mLastCodecPtsUs;
+    private long mSendWindowStartMs;
+    private long mSendWindowBytes;
+    private long mSendWindowFrames;
+    private long mSendWindowKeyFrames;
+    private long mSendTotalBytes;
+    private long mSendTotalFrames;
+    private long mCompensationWindowStartMs;
+    private long mCompensationWindowBytes;
+    private long mCompensationWindowFrames;
+    private int mLowBitrateWindowCount;
+    private long mLastBitrateCompensationRequestMs;
+    private long mBitrateCompensationRequests;
+    private double mLastCompensationBitrateRatio = -1.0;
+    private int mBitrateJitterFrameCount = 0;
+    private boolean mBitrateJitterUp = true;
+    private double mFrameSizeEma = 0.0;
+    private long mLastSpikeResetMs = 0L;
+    private boolean mHalfRate = false;
+    private long mHalfRateUntilMs = 0L;
+    private int mHalfRateFrameSkip = 0;
+    private volatile boolean mNeedResetEncoder = false;
+    private long mTotalDeficitBytes = 0L;
+    private long mTotalExpectedBytes = 0L;
+    private int mEstimatedPFrameBytes = 0;
+    private int mPFrameCount = 0;
+
+    // ====== 应用层令牌桶限速（真正防码率飙升的最终防线） ======
+    // 硬件编码器的 CBR / max-bitrate 不可靠：场景突变时 RC 会一次性释放攒下的额度，
+    // 导致瞬时码率冲到 10-30Mbps。token bucket 在网络发送前阻塞等待，硬性卡死上限。
+    private volatile TokenBucket mTokenBucket = null;
+    // 峰值上限（bps），<=0 表示不启用限速。默认 = bitRate * 1.5（允许小幅突发）
+    private int mMaxBitrate = 0;
+    // 是否启用令牌桶限速
+    private volatile boolean mThrottleEnabled = false;
 
     //<editor-fold desc="Intent">
 
     // Intent Action
     public static final String ACTION_START = "com.xlk.paperless.action.START_RECORDING";
     public static final String ACTION_STOP = "com.xlk.paperless.action.STOP_RECORDING";
+    public static final String ACTION_UPDATE_BITRATE = "com.xlk.paperless.action.UPDATE_BITRATE";
 
     // Intent Extra
     public static final String EXTRA_RESULT_CODE = "result_code";
@@ -165,6 +244,9 @@ public class ScreenShareService extends Service {
             case ACTION_STOP:
                 handleStopRecording();
                 break;
+            case ACTION_UPDATE_BITRATE:
+                handleUpdateBitrate(intent);
+                break;
             default:
                 LogUtils.w(TAG, "Unknown action: " + action);
         }
@@ -209,6 +291,73 @@ public class ScreenShareService extends Service {
             stopForeground(true);
             stopSelf();
         });
+    }
+
+    private void handleUpdateBitrate(Intent intent) {
+        int bitrate = intent.getIntExtra(EXTRA_BITRATE, 0);
+        if (bitrate <= 0) {
+            LogUtils.w(TAG, "Ignore invalid bitrate update: " + bitrate);
+            return;
+        }
+        if (mWorkerHandler == null) {
+            LogUtils.w(TAG, "Cannot update bitrate, worker is null");
+            return;
+        }
+        mWorkerHandler.post(() -> updateBitrateInternal(bitrate));
+    }
+
+    private synchronized void updateBitrateInternal(int bitrate) {
+        if (mServiceState != ServiceState.RECORDING || mMediaCodec == null) {
+            LogUtils.w(TAG, "Cannot update bitrate, state=" + mServiceState
+                    + ", codec=" + (mMediaCodec == null ? "null" : "ready")
+                    + ", bitrate=" + bitrate);
+            if (mServiceState == ServiceState.IDLE) {
+                stopSelf();
+            }
+            return;
+        }
+
+        int oldBitrate = mBitrate;
+        mBitrate = bitrate;
+        long now = System.currentTimeMillis();
+        resetCodecWindow(now);
+        resetSendWindow(now);
+        resetBitrateCompensationWindow(now);
+        mBitrateJitterFrameCount = 0;
+        mBitrateJitterUp = true;
+        mFrameSizeEma = 0.0;
+        mLastSpikeResetMs = 0L;
+        mHalfRate = false;
+        mHalfRateUntilMs = 0L;
+        mHalfRateFrameSkip = 0;
+        mTotalDeficitBytes = 0L;
+        mTotalExpectedBytes = 0L;
+        mEstimatedPFrameBytes = 0;
+        mPFrameCount = 0;
+
+        if (mCodecConfigFormat != null) {
+            mCodecConfigFormat.setInteger(MediaFormat.KEY_BIT_RATE, bitrate);
+            mCodecConfigFormat.setInteger("max-bitrate", bitrate);
+        }
+
+        try {
+            Bundle bundle = new Bundle();
+            bundle.putInt(MediaCodec.PARAMETER_KEY_VIDEO_BITRATE, bitrate);
+            mMediaCodec.setParameters(bundle);
+
+            // 令牌桶已禁用
+            // int effectiveMaxBitrate = mMaxBitrate > 0 ? mMaxBitrate : bitrate * 4;
+            // if (mTokenBucket != null) {
+            //     mTokenBucket.updateRefillRate(bitrate);
+            //     mTokenBucket.updateCapacity(bitrate, effectiveMaxBitrate);
+            //     mThrottleEnabled = true;
+            // }
+            LogUtils.i(TAG, "Updated screen share bitrate from " + oldBitrate + " to " + bitrate);
+        } catch (Exception e) {
+            LogUtils.w(TAG, "Failed to update codec bitrate", e);
+        }
+
+        logCodecStatus("bitrate-updated", true);
     }
 
     /**
@@ -367,20 +516,22 @@ public class ScreenShareService extends Service {
 
         byte[] acquire = framePoll.acquire();
         if (acquire != null) {
-            decodeQueue.clear();//清空
             buffer.get(acquire, 0, buffer.capacity());
             boolean offer = decodeQueue.offer(acquire);
             if (!offer) {
-                LogUtils.e(TAG, "processImage: 放入帧失败");
+                // 队列满，丢弃旧帧
+                recycleFrame(decodeQueue.poll());
+                if (!decodeQueue.offer(acquire)) {
+                    recycleFrame(acquire);
+                }
             }
         } else {
+            // 对象池耗尽，从队列中取旧帧覆盖
             byte[] oldFrame = decodeQueue.poll();
             if (oldFrame != null) {
-                decodeQueue.clear();//清空
                 buffer.get(oldFrame, 0, buffer.capacity());
-                boolean offer = decodeQueue.offer(oldFrame);
-                if (!offer) {
-                    LogUtils.e(TAG, "processImage: 放入帧失败");
+                if (!decodeQueue.offer(oldFrame)) {
+                    recycleFrame(oldFrame);
                 }
             } else {
                 LogUtils.i(TAG, "processImage：进行丢帧...");
@@ -392,17 +543,229 @@ public class ScreenShareService extends Service {
         try {
             String MIME_TYPE = MediaFormat.MIMETYPE_VIDEO_AVC;
             mMediaCodec = MediaCodec.createEncoderByType(MIME_TYPE);
+            mCodecName = safeCodecName();
             MediaFormat format = MediaFormat.createVideoFormat(MIME_TYPE, mWidth, mHeight);
             format.setInteger(MediaFormat.KEY_FRAME_RATE, mFrameRate);
             format.setInteger(MediaFormat.KEY_I_FRAME_INTERVAL, mIFrameInterval);
             format.setInteger(MediaFormat.KEY_BIT_RATE, mBitrate);
-            format.setInteger(MediaFormat.KEY_COLOR_FORMAT, MediaCodecInfo.CodecCapabilities.COLOR_FormatYUV420SemiPlanar);//COLOR_FormatYUV420SemiPlanar
+            // 峰值上限 hint（仅作 hint，不可靠。真正限制在应用层 token bucket）
+            // ⚠ 原代码设了两次 max-bitrate（第二次覆盖第一次），此处只设一次
+            format.setInteger("max-bitrate", mMaxBitrate > 0 ? mMaxBitrate : mBitrate * 4);
+            format.setInteger(MediaFormat.KEY_COLOR_FORMAT, MediaCodecInfo.CodecCapabilities.COLOR_FormatYUV420SemiPlanar);
+            mBitrateMode = chooseBitrateMode(MIME_TYPE);
+            format.setInteger(MediaFormat.KEY_BITRATE_MODE, mBitrateMode);
+            format.setInteger("vendor.qti-ext-enc-scene-mode", 0); // 高通关闭场景检测
+            format.setInteger("vendor.qti-ext-enc-adaptive-quantization", 0); // 高通关闭自适应量化
+            format.setInteger("vendor.mtk-enc-scene-mode-detect", 0); // 联发科
+
+            // 尝试关闭自动场景检测 (可能是无效的Key，但不会崩溃)
+            format.setInteger("vendor.hisi-ext-enc-scene-mode", 0);
+            format.setInteger("enc-scene-mode", 0);
+            format.setInteger("scene-mode-enable", 0);
+            // 禁用 B 帧 (减少缓冲和突发数据)
+            format.setInteger(MediaFormat.KEY_MAX_B_FRAMES, 0);
+            configureAvcProfileLevel(MIME_TYPE, format);
+            configureLowLatency(format);
+            configureComplexity(format);
+            configureQpLimits(format);
+            mCodecConfigFormat = format;
+            resetCodecStats();
             mMediaCodec.configure(format, null, null, MediaCodec.CONFIGURE_FLAG_ENCODE);
             mMediaCodec.start();
+            mLastSyncFrameRequestMs = 0L;
+            mLastKeyFrameMs = System.currentTimeMillis();
+
+            // 令牌桶已禁用（避免阻塞导致延迟）
+            // int effectiveMaxBitrate = mMaxBitrate > 0 ? mMaxBitrate : mBitrate * 4;
+            // mTokenBucket = new TokenBucket(mBitrate, effectiveMaxBitrate);
+            // mThrottleEnabled = true;
+
             LogUtils.e(TAG, "initMediaCodec: format=" + format);
+            logCodecStatus("codec-start", true);
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    private void configureQpLimits(MediaFormat format) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
+            LogUtils.i(TAG, "Skip QP limits, requires Android 12+");
+            return;
+        }
+        if (!"true".equals(mQpBoundsSupported)) {
+            LogUtils.w(TAG, "Codec does not report FEATURE_QpBounds support, QP limits may be ignored: "
+                    + mQpBoundsSupported);
+        }
+        format.setInteger(MediaFormat.KEY_VIDEO_QP_MIN, QP_MIN);
+        format.setInteger(MediaFormat.KEY_VIDEO_QP_MAX, QP_MAX);
+        format.setInteger(MediaFormat.KEY_VIDEO_QP_I_MIN, QP_I_MIN);
+        format.setInteger(MediaFormat.KEY_VIDEO_QP_I_MAX, QP_I_MAX);
+        format.setInteger(MediaFormat.KEY_VIDEO_QP_P_MIN, QP_P_MIN);
+        format.setInteger(MediaFormat.KEY_VIDEO_QP_P_MAX, QP_P_MAX);
+        LogUtils.i(TAG, "Configured QP limits: all=" + QP_MIN + "-" + QP_MAX
+                + ", I=" + QP_I_MIN + "-" + QP_I_MAX
+                + ", P=" + QP_P_MIN + "-" + QP_P_MAX);
+    }
+
+    private void configureAvcProfileLevel(String mimeType, MediaFormat format) {
+        int profile = MediaCodecInfo.CodecProfileLevel.AVCProfileBaseline;
+        int requiredLevel = chooseRequiredAvcLevel();
+        int selectedLevel = requiredLevel;
+        try {
+            MediaCodecInfo.CodecCapabilities capabilities =
+                    mMediaCodec.getCodecInfo().getCapabilitiesForType(mimeType);
+            mSupportedAvcProfileLevels = supportedAvcProfileLevels(capabilities);
+            selectedLevel = chooseSupportedAvcLevel(capabilities, profile, requiredLevel);
+        } catch (Exception e) {
+            mSupportedAvcProfileLevels = "query-error:" + e.getMessage();
+            LogUtils.w(TAG, "Failed to query AVC profile levels", e);
+        }
+
+        format.setInteger(MediaFormat.KEY_PROFILE, profile);
+        format.setInteger(MediaFormat.KEY_LEVEL, selectedLevel);
+        mConfiguredAvcProfile = avcProfileName(profile);
+        mConfiguredAvcLevel = avcLevelName(selectedLevel);
+        LogUtils.i(TAG, "Configured AVC profile/level: profile=" + mConfiguredAvcProfile
+                + ", level=" + mConfiguredAvcLevel
+                + ", requiredLevel=" + avcLevelName(requiredLevel)
+                + ", supported=" + mSupportedAvcProfileLevels);
+    }
+
+    private int chooseRequiredAvcLevel() {
+        int mbWidth = (mWidth + 15) / 16;
+        int mbHeight = (mHeight + 15) / 16;
+        int maxFs = mbWidth * mbHeight;
+        int maxMbps = maxFs * Math.max(1, mFrameRate);
+        AvcLevelLimit[] limits = new AvcLevelLimit[]{
+                new AvcLevelLimit(MediaCodecInfo.CodecProfileLevel.AVCLevel1, 99, 1485),
+                new AvcLevelLimit(MediaCodecInfo.CodecProfileLevel.AVCLevel1b, 99, 1485),
+                new AvcLevelLimit(MediaCodecInfo.CodecProfileLevel.AVCLevel11, 396, 3000),
+                new AvcLevelLimit(MediaCodecInfo.CodecProfileLevel.AVCLevel12, 396, 6000),
+                new AvcLevelLimit(MediaCodecInfo.CodecProfileLevel.AVCLevel13, 396, 11880),
+                new AvcLevelLimit(MediaCodecInfo.CodecProfileLevel.AVCLevel2, 396, 11880),
+                new AvcLevelLimit(MediaCodecInfo.CodecProfileLevel.AVCLevel21, 792, 19800),
+                new AvcLevelLimit(MediaCodecInfo.CodecProfileLevel.AVCLevel22, 1620, 20250),
+                new AvcLevelLimit(MediaCodecInfo.CodecProfileLevel.AVCLevel3, 1620, 40500),
+                new AvcLevelLimit(MediaCodecInfo.CodecProfileLevel.AVCLevel31, 3600, 108000),
+                new AvcLevelLimit(MediaCodecInfo.CodecProfileLevel.AVCLevel32, 5120, 216000),
+                new AvcLevelLimit(MediaCodecInfo.CodecProfileLevel.AVCLevel4, 8192, 245760),
+                new AvcLevelLimit(MediaCodecInfo.CodecProfileLevel.AVCLevel41, 8192, 245760),
+                new AvcLevelLimit(MediaCodecInfo.CodecProfileLevel.AVCLevel42, 8704, 522240),
+                new AvcLevelLimit(MediaCodecInfo.CodecProfileLevel.AVCLevel5, 22080, 589824),
+                new AvcLevelLimit(MediaCodecInfo.CodecProfileLevel.AVCLevel51, 36864, 983040),
+                new AvcLevelLimit(MediaCodecInfo.CodecProfileLevel.AVCLevel52, 36864, 2073600)
+        };
+        for (AvcLevelLimit limit : limits) {
+            if (maxFs <= limit.maxFs && maxMbps <= limit.maxMbps) {
+                return limit.level;
+            }
+        }
+        return MediaCodecInfo.CodecProfileLevel.AVCLevel52;
+    }
+
+    private int chooseSupportedAvcLevel(MediaCodecInfo.CodecCapabilities capabilities,
+                                        int profile,
+                                        int requiredLevel) {
+        if (capabilities == null || capabilities.profileLevels == null) {
+            return requiredLevel;
+        }
+        int selectedLevel = 0;
+        for (MediaCodecInfo.CodecProfileLevel profileLevel : capabilities.profileLevels) {
+            if (profileLevel.profile == profile && profileLevel.level >= requiredLevel) {
+                if (selectedLevel == 0 || profileLevel.level < selectedLevel) {
+                    selectedLevel = profileLevel.level;
+                }
+            }
+        }
+        return selectedLevel == 0 ? requiredLevel : selectedLevel;
+    }
+
+    private String supportedAvcProfileLevels(MediaCodecInfo.CodecCapabilities capabilities) {
+        if (capabilities == null || capabilities.profileLevels == null) {
+            return "unknown";
+        }
+        StringBuilder builder = new StringBuilder();
+        for (MediaCodecInfo.CodecProfileLevel profileLevel : capabilities.profileLevels) {
+            if (builder.length() > 0) {
+                builder.append('/');
+            }
+            builder.append(avcProfileName(profileLevel.profile))
+                    .append('@')
+                    .append(avcLevelName(profileLevel.level));
+        }
+        return builder.length() == 0 ? "none" : builder.toString();
+    }
+
+    private String avcProfileName(int profile) {
+        if (profile == MediaCodecInfo.CodecProfileLevel.AVCProfileBaseline) {
+            return "Baseline";
+        }
+        if (profile == MediaCodecInfo.CodecProfileLevel.AVCProfileMain) {
+            return "Main";
+        }
+        if (profile == MediaCodecInfo.CodecProfileLevel.AVCProfileExtended) {
+            return "Extended";
+        }
+        if (profile == MediaCodecInfo.CodecProfileLevel.AVCProfileHigh) {
+            return "High";
+        }
+        return String.valueOf(profile);
+    }
+
+    private String avcLevelName(int level) {
+        if (level == MediaCodecInfo.CodecProfileLevel.AVCLevel1) return "1";
+        if (level == MediaCodecInfo.CodecProfileLevel.AVCLevel1b) return "1b";
+        if (level == MediaCodecInfo.CodecProfileLevel.AVCLevel11) return "1.1";
+        if (level == MediaCodecInfo.CodecProfileLevel.AVCLevel12) return "1.2";
+        if (level == MediaCodecInfo.CodecProfileLevel.AVCLevel13) return "1.3";
+        if (level == MediaCodecInfo.CodecProfileLevel.AVCLevel2) return "2";
+        if (level == MediaCodecInfo.CodecProfileLevel.AVCLevel21) return "2.1";
+        if (level == MediaCodecInfo.CodecProfileLevel.AVCLevel22) return "2.2";
+        if (level == MediaCodecInfo.CodecProfileLevel.AVCLevel3) return "3";
+        if (level == MediaCodecInfo.CodecProfileLevel.AVCLevel31) return "3.1";
+        if (level == MediaCodecInfo.CodecProfileLevel.AVCLevel32) return "3.2";
+        if (level == MediaCodecInfo.CodecProfileLevel.AVCLevel4) return "4";
+        if (level == MediaCodecInfo.CodecProfileLevel.AVCLevel41) return "4.1";
+        if (level == MediaCodecInfo.CodecProfileLevel.AVCLevel42) return "4.2";
+        if (level == MediaCodecInfo.CodecProfileLevel.AVCLevel5) return "5";
+        if (level == MediaCodecInfo.CodecProfileLevel.AVCLevel51) return "5.1";
+        if (level == MediaCodecInfo.CodecProfileLevel.AVCLevel52) return "5.2";
+        return String.valueOf(level);
+    }
+
+    private void configureLowLatency(MediaFormat format) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            format.setInteger(MediaFormat.KEY_PRIORITY, 0);
+            format.setInteger(MediaFormat.KEY_OPERATING_RATE, mFrameRate);
+        }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            format.setInteger(MediaFormat.KEY_LATENCY, 0);
+        }
+        mLowLatencyFeatureEnabled = false;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R
+                && "true".equals(mLowLatencySupported)) {
+            try {
+                format.setFeatureEnabled(MediaCodecInfo.CodecCapabilities.FEATURE_LowLatency, true);
+                mLowLatencyFeatureEnabled = true;
+            } catch (Exception e) {
+                LogUtils.w(TAG, "Failed to enable FEATURE_LowLatency", e);
+            }
+        }
+        LogUtils.i(TAG, "Configured low latency params: priority=0, latency="
+                + (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O ? "0" : "skip")
+                + ", operatingRate=" + mFrameRate
+                + ", lowLatencySupported=" + mLowLatencySupported
+                + ", lowLatencyFeatureEnabled=" + mLowLatencyFeatureEnabled);
+    }
+
+    private void configureComplexity(MediaFormat format) {
+        if (mConfiguredComplexity == Integer.MIN_VALUE) {
+            LogUtils.i(TAG, "Skip KEY_COMPLEXITY, complexityRange=" + mComplexityRange);
+            return;
+        }
+        format.setInteger(MediaFormat.KEY_COMPLEXITY, mConfiguredComplexity);
+        LogUtils.i(TAG, "Configured KEY_COMPLEXITY=" + mConfiguredComplexity
+                + ", range=" + mComplexityRange);
     }
 
     private void pushFrame() {
@@ -410,86 +773,148 @@ public class ScreenShareService extends Service {
             try {
                 LogUtils.e(TAG, "开始推送数据：" + mIsRunning.get());
                 byte[] lastFramePacket = null;
-                long frame_added_interval_setting = 1000 / mFrameRate;
-                long lastTime = 0;
+                long frameIntervalMs = 1000 / mFrameRate; // 帧间隔（毫秒）
+                long lastProcessTime = 0;
                 long startTime = 0;
                 int dstLength = 0;
-                int normalFrameCount = 0;
                 int secCount = 0;
-                long lastSecPushMs = 0;
                 int pushFps = 0;
+                long lastSecPushMs = 0;
+
                 while (mIsRunning.get() || !decodeQueue.isEmpty()) {
-                    byte[] frame = decodeQueue.poll();
-                    //<editor-fold desc="丢帧与补帧">
-                    if (frame == null && System.currentTimeMillis() - lastTime > frame_added_interval_setting) {
-                        // 补帧
-                        frame = lastFramePacket;
-                    } else if (frame != null && System.currentTimeMillis() - lastTime < frame_added_interval_setting) {
-                        // 丢帧
-                        lastFramePacket = frame;
-                        try {
-                            // 回收
-                            framePoll.release(frame);
-                        } catch (IllegalStateException e) {
-                            // ignore
-                        }
-                        frame = null;
+                    // 等待到下一帧时间点
+                    long now = System.currentTimeMillis();
+                    long elapsed = now - lastProcessTime;
+                    if (elapsed < frameIntervalMs) {
+                        Thread.sleep(frameIntervalMs - elapsed);
                     }
-                    //</editor-fold>
+
+                    byte[] frame = decodeQueue.poll();
+                    boolean needRecycleFrame = frame != null;
+                    if (frame != null && frame.length == 0) {
+                        break;
+                    }
+                    if (frame == null) {
+                        // 队列为空，使用上一帧补帧
+                        frame = lastFramePacket;
+                        needRecycleFrame = false;
+                    }
                     if (frame != null) {
+                        // I帧超预算：送帧减半（每2帧跳过1帧），直到恢复
+                        if (mHalfRate) {
+                            if (System.currentTimeMillis() >= mHalfRateUntilMs) {
+                                mHalfRate = false;
+                                mHalfRateFrameSkip = 0;
+                                LogUtils.i(TAG, "halfRate-ended, resume full rate");
+                            } else {
+                                mHalfRateFrameSkip++;
+                                if (mHalfRateFrameSkip % 2 == 0) {
+                                    // 跳过此帧
+                                    if (needRecycleFrame) {
+                                        recycleFrame(frame);
+                                    }
+                                    continue;
+                                }
+                            }
+                        }
+
+                        // 检查是否需要完整重置编码器（海思等平台 setParameters 不生效时）
+                        if (mNeedResetEncoder) {
+                            mNeedResetEncoder = false;
+                            recycleFrame(frame);
+                            resetEncoderFull();
+                            requestSyncFrame("encoder-reset");
+                            continue;
+                        }
+
                         secCount++;
                         if (System.currentTimeMillis() - startTime >= 1000) {
                             startTime = System.currentTimeMillis();
                             LogUtils.e(TAG, "处理帧：" + secCount + "f/s");
                             secCount = 0;
                         }
-                        lastFramePacket = frame;
-                        lastTime = System.currentTimeMillis();
+                        lastProcessTime = System.currentTimeMillis();
+
+                        // 复制帧数据，避免引用问题
+                        byte[] frameCopy = new byte[frame.length];
+                        System.arraycopy(frame, 0, frameCopy, 0, frame.length);
+                        lastFramePacket = frameCopy;
+
                         srcBuff.clear();
                         dstBuff.clear();
                         srcBuff.put(frame);
-                        try {
-                            framePoll.release(frame);
-                        } catch (IllegalStateException e) {
-                            // ignore
+                        if (needRecycleFrame) {
+                            recycleFrame(frame);
                         }
 
                         dstLength = Call.INSTANCE.RGBToNV12(3, srcBuff, dstBuff, screen_width, screen_height, mWidth, mHeight, rowStride);
                         dstBuff.position(0);
                         dstBuff.limit(dstLength);
 
+                        // 送入编码器（非阻塞）
                         int inputBufferIndex = mMediaCodec.dequeueInputBuffer(0);
                         if (inputBufferIndex >= 0) {
                             ByteBuffer inputBuffer = mMediaCodec.getInputBuffer(inputBufferIndex);
-                            inputBuffer.clear();
-                            inputBuffer.put(dstBuff);
-                            mMediaCodec.queueInputBuffer(inputBufferIndex, 0, dstBuff.limit(), System.nanoTime() / 1000L, 0);
-                        }
-                        int outputBufferIndex = mMediaCodec.dequeueOutputBuffer(bufferInfo, 0L);
-                        if (outputBufferIndex >= 0) {
-                            ByteBuffer outputBuffer = mMediaCodec.getOutputBuffer(outputBufferIndex);
-                            outData = new byte[bufferInfo.size];
-                            outputBuffer.get(outData);
-                            if (bufferInfo.flags == MediaCodec.BUFFER_FLAG_CODEC_CONFIG) {
-                                configbyte = outData;
-                            } else {
-                                boolean isKey = bufferInfo.flags == MediaCodec.BUFFER_FLAG_KEY_FRAME;
-                                byte[] frameData = isKey
-                                        ? combineKeyFrame(configbyte, outData)
-                                        : outData;
-                                if (lastSecPushMs == 0) {
-                                    lastSecPushMs = System.currentTimeMillis();
-                                }
-                                if (System.currentTimeMillis() - lastSecPushMs >= 1000) {
-                                    lastSecPushMs = System.currentTimeMillis();
-                                    LogUtils.e(TAG, "推送帧 fps：" + pushFps);
-                                    pushFps = 0;
-                                }
-                                pushFps++;
-                                //LogUtils.e(TAG, "pushFrame 推送" + (isKey ? "关键" : "普通") + "帧：" + frameData.length);
-                                Call.INSTANCE.call(2, isKey ? 1 : 0, bufferInfo.presentationTimeUs, frameData);
+                            if (inputBuffer != null) {
+                                inputBuffer.clear();
+                                inputBuffer.put(dstBuff);
+                                mMediaCodec.queueInputBuffer(inputBufferIndex, 0, dstBuff.limit(), System.nanoTime() / 1000L, 0);
                             }
-                            mMediaCodec.releaseOutputBuffer(outputBufferIndex, false);
+                        }
+
+                        // 处理编码器输出（非阻塞，循环读取所有可用输出）
+                        boolean hasOutput = true;
+                        while (hasOutput) {
+                            int outputBufferIndex = mMediaCodec.dequeueOutputBuffer(bufferInfo, 0);
+                            if (outputBufferIndex >= 0) {
+                                boolean isKey = false;
+                                long ptsUs = bufferInfo.presentationTimeUs;
+                                byte[] frameData = null;
+                                try {
+                                    ByteBuffer outputBuffer = mMediaCodec.getOutputBuffer(outputBufferIndex);
+                                    if (outputBuffer != null && bufferInfo.size > 0) {
+                                        outputBuffer.position(bufferInfo.offset);
+                                        outputBuffer.limit(bufferInfo.offset + bufferInfo.size);
+                                        outData = new byte[bufferInfo.size];
+                                        outputBuffer.get(outData);
+                                        if ((bufferInfo.flags & MediaCodec.BUFFER_FLAG_CODEC_CONFIG) != 0) {
+                                            configbyte = outData;
+                                            LogUtils.v(TAG, "Received config frame, size: " + configbyte.length);
+                                        } else {
+                                            isKey = (bufferInfo.flags & MediaCodec.BUFFER_FLAG_KEY_FRAME) != 0;
+                                            frameData = isKey && configbyte != null
+                                                    ? combineKeyFrame(configbyte, outData)
+                                                    : outData;
+                                            recordCodecOutput(frameData.length, isKey, ptsUs);
+                                        }
+                                    }
+                                } finally {
+                                    mMediaCodec.releaseOutputBuffer(outputBufferIndex, false);
+                                }
+
+                                if (frameData != null) {
+                                    sendEncodedFrame(frameData, isKey, ptsUs);
+                                    if (isKey) {
+                                        mLastKeyFrameMs = System.currentTimeMillis();
+                                    }
+                                    pushFps++;
+                                    if (System.currentTimeMillis() - lastSecPushMs >= 1000) {
+                                        lastSecPushMs = System.currentTimeMillis();
+                                        LogUtils.e(TAG, "推送帧 fps：" + pushFps);
+                                        pushFps = 0;
+                                    }
+                                }
+                            } else if (outputBufferIndex == MediaCodec.INFO_OUTPUT_FORMAT_CHANGED) {
+                                mCodecOutputFormat = mMediaCodec.getOutputFormat();
+                                byte[] formatConfig = getCodecConfigFromFormat(mCodecOutputFormat);
+                                if (formatConfig != null) {
+                                    configbyte = formatConfig;
+                                }
+                                LogUtils.i(TAG, "Output format changed, config size: " + (configbyte == null ? 0 : configbyte.length));
+                                logCodecStatus("format-changed", true);
+                            } else {
+                                hasOutput = false;
+                            }
                         }
                     }
                 }
@@ -498,23 +923,12 @@ public class ScreenShareService extends Service {
             } finally {
                 LogUtils.e(TAG, "---finally---");
                 releaseMediaCodec();
-                decodeQueue.clear();
+                clearFrameQueue();
                 while (framePoll.acquire() != null) {
                     LogUtils.i("清理对象池");
                 }
             }
         }).start();
-    }
-
-    private void releaseMediaCodec() {
-        if (mMediaCodec != null) {
-            try {
-                mMediaCodec.release();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-            mMediaCodec = null;
-        }
     }
 
     private byte[] combineKeyFrame(byte[] configData, byte[] frameData) {
@@ -524,6 +938,768 @@ public class ScreenShareService extends Service {
         return keyframe;
     }
 
+    private int chooseBitrateMode(String mimeType) {
+        try {
+            MediaCodecInfo.CodecCapabilities capabilities =
+                    mMediaCodec.getCodecInfo().getCapabilitiesForType(mimeType);
+            MediaCodecInfo.EncoderCapabilities encoderCapabilities =
+                    capabilities.getEncoderCapabilities();
+            mSupportedBitrateModes = supportedBitrateModes(encoderCapabilities);
+            mQpBoundsSupported = qpBoundsSupported(capabilities);
+            mLowLatencySupported = lowLatencySupported(capabilities);
+            updateComplexityInfo(encoderCapabilities);
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
+                    && isBitrateModeSupported(encoderCapabilities,
+                    MediaCodecInfo.EncoderCapabilities.BITRATE_MODE_CBR_FD)) {
+                return MediaCodecInfo.EncoderCapabilities.BITRATE_MODE_CBR_FD;
+            }
+            if (isBitrateModeSupported(encoderCapabilities,
+                    MediaCodecInfo.EncoderCapabilities.BITRATE_MODE_CBR)) {
+                return MediaCodecInfo.EncoderCapabilities.BITRATE_MODE_CBR;
+            }
+            if (isBitrateModeSupported(encoderCapabilities,
+                    MediaCodecInfo.EncoderCapabilities.BITRATE_MODE_VBR)) {
+                return MediaCodecInfo.EncoderCapabilities.BITRATE_MODE_VBR;
+            }
+        } catch (Exception e) {
+            mSupportedBitrateModes = "query-error:" + e.getMessage();
+            mQpBoundsSupported = "query-error:" + e.getMessage();
+            mLowLatencySupported = "query-error:" + e.getMessage();
+            mComplexityRange = "query-error:" + e.getMessage();
+            mConfiguredComplexity = Integer.MIN_VALUE;
+            LogUtils.w(TAG, "Failed to choose bitrate mode, use VBR", e);
+        }
+        return MediaCodecInfo.EncoderCapabilities.BITRATE_MODE_VBR;
+    }
+
+    private boolean isBitrateModeSupported(MediaCodecInfo.EncoderCapabilities capabilities, int mode) {
+        return capabilities != null && capabilities.isBitrateModeSupported(mode);
+    }
+
+    private String supportedBitrateModes(MediaCodecInfo.EncoderCapabilities capabilities) {
+        if (capabilities == null) {
+            return "unknown";
+        }
+        StringBuilder builder = new StringBuilder();
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
+                && capabilities.isBitrateModeSupported(MediaCodecInfo.EncoderCapabilities.BITRATE_MODE_CBR_FD)) {
+            builder.append("CBR_FD,");
+        }
+        if (capabilities.isBitrateModeSupported(MediaCodecInfo.EncoderCapabilities.BITRATE_MODE_CBR)) {
+            builder.append("CBR,");
+        }
+        if (capabilities.isBitrateModeSupported(MediaCodecInfo.EncoderCapabilities.BITRATE_MODE_VBR)) {
+            builder.append("VBR,");
+        }
+        if (capabilities.isBitrateModeSupported(MediaCodecInfo.EncoderCapabilities.BITRATE_MODE_CQ)) {
+            builder.append("CQ,");
+        }
+        if (builder.length() == 0) {
+            return "none";
+        }
+        builder.setLength(builder.length() - 1);
+        return builder.toString();
+    }
+
+    private String qpBoundsSupported(MediaCodecInfo.CodecCapabilities capabilities) {
+        if (capabilities == null) {
+            return "unknown";
+        }
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
+            return "api<31";
+        }
+        try {
+            return String.valueOf(capabilities.isFeatureSupported(
+                    MediaCodecInfo.CodecCapabilities.FEATURE_QpBounds));
+        } catch (Exception e) {
+            return "query-error:" + e.getMessage();
+        }
+    }
+
+    private String lowLatencySupported(MediaCodecInfo.CodecCapabilities capabilities) {
+        if (capabilities == null) {
+            return "unknown";
+        }
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) {
+            return "api<30";
+        }
+        try {
+            return String.valueOf(capabilities.isFeatureSupported(
+                    MediaCodecInfo.CodecCapabilities.FEATURE_LowLatency));
+        } catch (Exception e) {
+            return "query-error:" + e.getMessage();
+        }
+    }
+
+    private void updateComplexityInfo(MediaCodecInfo.EncoderCapabilities capabilities) {
+        if (capabilities == null) {
+            mComplexityRange = "unknown";
+            mConfiguredComplexity = Integer.MIN_VALUE;
+            return;
+        }
+        try {
+            Range<Integer> range = capabilities.getComplexityRange();
+            if (range == null) {
+                mComplexityRange = "none";
+                mConfiguredComplexity = Integer.MIN_VALUE;
+                return;
+            }
+            int lower = range.getLower();
+            int upper = range.getUpper();
+            mComplexityRange = lower + "-" + upper;
+            mConfiguredComplexity = lower;
+        } catch (Exception e) {
+            mComplexityRange = "query-error:" + e.getMessage();
+            mConfiguredComplexity = Integer.MIN_VALUE;
+        }
+    }
+
+    private String safeCodecName() {
+        try {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2 && mMediaCodec != null) {
+                return mMediaCodec.getName();
+            }
+        } catch (Exception e) {
+            LogUtils.w(TAG, "Failed to get codec name", e);
+        }
+        return "unknown";
+    }
+
+    private void resetCodecStats() {
+        long now = System.currentTimeMillis();
+        mCodecWindowStartMs = now;
+        mCodecWindowBytes = 0L;
+        mCodecWindowFrames = 0L;
+        mCodecWindowKeyFrames = 0L;
+        mCodecWindowMaxFrameBytes = 0;
+        mCodecTotalBytes = 0L;
+        mCodecTotalFrames = 0L;
+        mCodecTotalKeyFrames = 0L;
+        mLastCodecPtsUs = 0L;
+        mSendWindowStartMs = now;
+        mSendWindowBytes = 0L;
+        mSendWindowFrames = 0L;
+        mSendWindowKeyFrames = 0L;
+        mSendTotalBytes = 0L;
+        mSendTotalFrames = 0L;
+        resetBitrateCompensationWindow(now);
+        mLastSyncFrameRequestMs = 0L;
+        mLastKeyFrameMs = 0L;
+        mLastBitrateCompensationRequestMs = 0L;
+        mBitrateCompensationRequests = 0L;
+        mBitrateJitterFrameCount = 0;
+        mBitrateJitterUp = true;
+        mFrameSizeEma = 0.0;
+        mLastSpikeResetMs = 0L;
+        mHalfRate = false;
+        mHalfRateUntilMs = 0L;
+        mHalfRateFrameSkip = 0;
+        mTotalDeficitBytes = 0L;
+        mTotalExpectedBytes = 0L;
+        mEstimatedPFrameBytes = 0;
+        mPFrameCount = 0;
+    }
+
+    private void recordCodecOutput(int bytes, boolean isKey, long ptsUs) {
+        long now = System.currentTimeMillis();
+        if (mCodecWindowStartMs == 0L) {
+            mCodecWindowStartMs = now;
+        }
+
+        mCodecWindowBytes += bytes;
+        mCodecWindowFrames++;
+        if (isKey) {
+            mCodecWindowKeyFrames++;
+        }
+        if (bytes > mCodecWindowMaxFrameBytes) {
+            mCodecWindowMaxFrameBytes = bytes;
+        }
+        mCodecTotalBytes += bytes;
+        mCodecTotalFrames++;
+        if (isKey) {
+            mCodecTotalKeyFrames++;
+        }
+        mLastCodecPtsUs = ptsUs;
+
+        // I帧预算检查：I帧超预算时启用送帧减半（而非暂停），避免延迟累积
+        if (isKey && !mHalfRate) {
+            long expectedBytesPerSec = mBitrate / 8;
+            if (bytes > expectedBytesPerSec * 4) {
+                mHalfRate = true;
+                mHalfRateUntilMs = now + Math.max(1L, (long) mIFrameInterval) * 1000L;
+                mHalfRateFrameSkip = 0;
+                LogUtils.i(TAG, "iframe-over-budget: bytes=" + bytes
+                        + ", expectedPerSec=" + expectedBytesPerSec
+                        + ", halfRate until " + (mHalfRateUntilMs - now) + "ms");
+            }
+        }
+
+        // 帧大小突变检测：静止→动态时帧暴增，重置编码器
+        if (!isKey && bytes > 0) {
+            if (mFrameSizeEma <= 0.0) {
+                mFrameSizeEma = bytes;
+            } else {
+                mFrameSizeEma = mFrameSizeEma * 0.9 + bytes * 0.1;
+            }
+            if (mFrameSizeEma > 0 && bytes > mFrameSizeEma * 5.0
+                    && now - mLastSpikeResetMs > 3000L) {
+                LogUtils.i(TAG, "frame-spike-detected: bytes=" + bytes
+                        + ", ema=" + String.format("%.0f", mFrameSizeEma)
+                        + ", ratio=" + String.format("%.2f", bytes / mFrameSizeEma));
+                resetEncoderForSpike();
+                mLastSpikeResetMs = now;
+            }
+        }
+
+        applyBitrateJitter();
+
+        if (now - mCodecWindowStartMs >= CODEC_STATUS_LOG_INTERVAL_MS) {
+            // 飙升恢复：如果之前降了码率，检查窗口内实际码率是否已回到正常
+            // （飙升期间 token bucket 已在限速，窗口码率会反映限速后的真实值）
+            recoverFromSpikeIfNeeded();
+            logCodecStatus("codec-status", false);
+            resetCodecWindow(now);
+        }
+    }
+
+    /**
+     * 飙升恢复：resetEncoderForSpike 把码率降到了 50%，当窗口内实际码率回到
+     * 目标附近时，恢复原始码率和令牌桶速率。
+     */
+    private void recoverFromSpikeIfNeeded() {
+        if (mMediaCodec == null || mBitrate <= 0) return;
+        long durationMs = System.currentTimeMillis() - mCodecWindowStartMs;
+        if (durationMs < CODEC_STATUS_LOG_INTERVAL_MS / 2) return;
+
+        double windowMbps = mCodecWindowBytes * 8.0 / Math.max(1L, durationMs) / 1000.0;
+        double configuredMbps = mBitrate / 1_000_000.0;
+
+        // 窗口内码率不超过目标 1.2 倍，认为已恢复
+        if (windowMbps <= configuredMbps * 1.2) {
+            try {
+                Bundle params = new Bundle();
+                params.putInt(MediaCodec.PARAMETER_KEY_VIDEO_BITRATE, mBitrate);
+                mMediaCodec.setParameters(params);
+                int effectiveMaxBitrate = mMaxBitrate > 0 ? mMaxBitrate : mBitrate * 4;
+                // mTokenBucket.updateRefillRate(mBitrate);
+                // mTokenBucket.updateCapacity(mBitrate, effectiveMaxBitrate);
+                LogUtils.i(TAG, "spike-recovered: bitrate restored to "
+                        + String.format("%.2f", configuredMbps) + "Mbps");
+            } catch (Exception e) {
+                LogUtils.w(TAG, "Failed to recover bitrate from spike", e);
+            }
+        }
+    }
+
+    private void sendEncodedFrame(byte[] frameData, boolean isKey, long ptsUs) {
+        if (frameData == null || frameData.length == 0) {
+            return;
+        }
+
+        // 令牌桶限速已禁用（避免阻塞导致延迟）
+        // if (mThrottleEnabled && mTokenBucket != null) {
+        //     mTokenBucket.acquire(frameData.length);
+        // }
+
+        Call.INSTANCE.call(2, isKey ? 1 : 0, ptsUs, frameData);
+        recordSentOutput(frameData.length, isKey);
+    }
+
+    private void recordSentOutput(int bytes, boolean isKey) {
+        long now = System.currentTimeMillis();
+        if (mSendWindowStartMs == 0L) {
+            mSendWindowStartMs = now;
+        }
+        mSendWindowBytes += bytes;
+        mSendWindowFrames++;
+        if (isKey) {
+            mSendWindowKeyFrames++;
+        }
+        mSendTotalBytes += bytes;
+        mSendTotalFrames++;
+
+        if (now - mSendWindowStartMs >= CODEC_STATUS_LOG_INTERVAL_MS) {
+            logCodecStatus("send-status", false);
+            resetSendWindow(now);
+        }
+    }
+
+    private void resetCodecWindow(long now) {
+        mCodecWindowStartMs = now;
+        mCodecWindowBytes = 0L;
+        mCodecWindowFrames = 0L;
+        mCodecWindowKeyFrames = 0L;
+        mCodecWindowMaxFrameBytes = 0;
+    }
+
+    private void resetSendWindow(long now) {
+        mSendWindowStartMs = now;
+        mSendWindowBytes = 0L;
+        mSendWindowFrames = 0L;
+        mSendWindowKeyFrames = 0L;
+    }
+
+    private void resetBitrateCompensationWindow(long now) {
+        mCompensationWindowStartMs = now;
+        mCompensationWindowBytes = 0L;
+        mCompensationWindowFrames = 0L;
+        mLowBitrateWindowCount = 0;
+        mLastCompensationBitrateRatio = -1.0;
+    }
+
+    private void updateBitrateCompensation(int bytes, long now) {
+        if (mBitrate <= 0) {
+            return;
+        }
+        if (mCompensationWindowStartMs == 0L) {
+            resetBitrateCompensationWindow(now);
+        }
+
+        mCompensationWindowBytes += bytes;
+        mCompensationWindowFrames++;
+
+        long durationMs = now - mCompensationWindowStartMs;
+        if (durationMs < BITRATE_COMPENSATION_WINDOW_MS) {
+            return;
+        }
+
+        double actualBitrate = mCompensationWindowBytes * 8.0 * 1000.0 / Math.max(1L, durationMs);
+        double ratio = actualBitrate / mBitrate;
+        mLastCompensationBitrateRatio = ratio;
+
+        // 全程欠缺统计（超量扣减）
+        long expectedBytes = (long) (mBitrate / 8.0 * durationMs / 1000.0);
+        mTotalExpectedBytes += expectedBytes;
+        if (mCompensationWindowBytes < expectedBytes) {
+            mTotalDeficitBytes += (expectedBytes - mCompensationWindowBytes);
+        } else {
+            mTotalDeficitBytes = Math.max(0L, mTotalDeficitBytes - (mCompensationWindowBytes - expectedBytes));
+        }
+
+        // 计算全程欠缺比例
+        double totalDeficitRatio = mTotalExpectedBytes > 0
+                ? (double) mTotalDeficitBytes / mTotalExpectedBytes : 0.0;
+
+        // 窗口码率判断 + 全程欠缺判断：任一个触发都进入补偿
+        boolean windowLow = mCompensationWindowFrames > 0 && ratio < LOW_BITRATE_COMPENSATION_RATIO;
+        boolean totalDeficitHigh = totalDeficitRatio >= TOTAL_DEFICIT_TRIGGER_RATIO;
+
+        if (windowLow || totalDeficitHigh) {
+            mLowBitrateWindowCount++;
+        } else if (ratio >= LOW_BITRATE_RECOVER_RATIO && totalDeficitRatio < TOTAL_DEFICIT_TRIGGER_RATIO) {
+            mLowBitrateWindowCount = 0;
+        }
+
+        if (mLowBitrateWindowCount >= LOW_BITRATE_COMPENSATION_WINDOWS) {
+            requestBitrateCompensationSyncFrame(now, actualBitrate, ratio, totalDeficitRatio);
+        }
+
+        mCompensationWindowStartMs = now;
+        mCompensationWindowBytes = 0L;
+        mCompensationWindowFrames = 0L;
+    }
+
+    private void applyBitrateJitter() {
+        mBitrateJitterFrameCount++;
+        if (mBitrateJitterFrameCount < 5 || mMediaCodec == null || mBitrate <= 0) {
+            return;
+        }
+        mBitrateJitterFrameCount = 0;
+        mBitrateJitterUp = !mBitrateJitterUp;
+
+        int delta = (int) (mBitrate * 0.02);
+        if (delta < 1000) delta = 1000;
+        int target = mBitrateJitterUp ? mBitrate + delta : mBitrate - delta;
+
+        try {
+            Bundle params = new Bundle();
+            params.putInt(MediaCodec.PARAMETER_KEY_VIDEO_BITRATE, target);
+            mMediaCodec.setParameters(params);
+            LogUtils.v(TAG, "bitrate-jitter: " + (mBitrateJitterUp ? "+" : "-")
+                    + String.format("%.2f", delta / 1_000_000.0) + "Mbps → "
+                    + String.format("%.2f", target / 1_000_000.0) + "Mbps");
+        } catch (Exception e) {
+            LogUtils.w(TAG, "Failed to apply bitrate jitter", e);
+        }
+    }
+
+    private void resetEncoderForSpike() {
+        // 直接走完整重置流程，setParameters 在海思平台不生效
+        mNeedResetEncoder = true;
+    }
+
+    /**
+     * 完整重置编码器：stop → release → recreate → configure → start
+     * 适用于海思等 VBV 机制下 setParameters 不生效的平台。
+     * 代价：重置期间（约100-300ms）会有短暂黑屏/花屏。
+     */
+    private void resetEncoderFull() {
+        LogUtils.i(TAG, "resetEncoderFull: start, bitrate=" + mBitrate);
+        long startTime = System.currentTimeMillis();
+
+        // 1. 释放旧编码器
+        if (mMediaCodec != null) {
+            try {
+                mMediaCodec.stop();
+            } catch (Exception e) {
+                LogUtils.w(TAG, "resetEncoderFull: stop failed", e);
+            }
+            try {
+                mMediaCodec.release();
+            } catch (Exception e) {
+                LogUtils.w(TAG, "resetEncoderFull: release failed", e);
+            }
+            mMediaCodec = null;
+        }
+
+        // 2. 重新创建编码器
+        try {
+            String MIME_TYPE = MediaFormat.MIMETYPE_VIDEO_AVC;
+            mMediaCodec = MediaCodec.createEncoderByType(MIME_TYPE);
+            mCodecName = safeCodecName();
+            MediaFormat format = MediaFormat.createVideoFormat(MIME_TYPE, mWidth, mHeight);
+            format.setInteger(MediaFormat.KEY_FRAME_RATE, mFrameRate);
+            format.setInteger(MediaFormat.KEY_I_FRAME_INTERVAL, mIFrameInterval);
+            format.setInteger(MediaFormat.KEY_BIT_RATE, mBitrate);
+            format.setInteger("max-bitrate", mMaxBitrate > 0 ? mMaxBitrate : mBitrate * 4);
+            format.setInteger(MediaFormat.KEY_COLOR_FORMAT,
+                    MediaCodecInfo.CodecCapabilities.COLOR_FormatYUV420SemiPlanar);
+            format.setInteger(MediaFormat.KEY_BITRATE_MODE, mBitrateMode);
+            format.setInteger("vendor.qti-ext-enc-scene-mode", 0);
+            format.setInteger("vendor.qti-ext-enc-adaptive-quantization", 0);
+            format.setInteger("vendor.mtk-enc-scene-mode-detect", 0);
+            format.setInteger("vendor.hisi-ext-enc-scene-mode", 0);
+            format.setInteger("enc-scene-mode", 0);
+            format.setInteger("scene-mode-enable", 0);
+            format.setInteger(MediaFormat.KEY_MAX_B_FRAMES, 0);
+            configureAvcProfileLevel(MIME_TYPE, format);
+            configureLowLatency(format);
+            configureComplexity(format);
+            configureQpLimits(format);
+            mCodecConfigFormat = format;
+            resetCodecStats();
+            mMediaCodec.configure(format, null, null, MediaCodec.CONFIGURE_FLAG_ENCODE);
+            mMediaCodec.start();
+
+            // 清空旧 config，等待新的 SPS/PPS
+            configbyte = null;
+            mLastSyncFrameRequestMs = 0L;
+            mLastKeyFrameMs = System.currentTimeMillis();
+            mLastSpikeResetMs = System.currentTimeMillis();
+
+            long costMs = System.currentTimeMillis() - startTime;
+            LogUtils.i(TAG, "resetEncoderFull: done, cost=" + costMs + "ms, bitrate=" + mBitrate
+                    + ", codec=" + mCodecName);
+        } catch (Exception e) {
+            LogUtils.e(TAG, "resetEncoderFull: recreate failed", e);
+        }
+    }
+
+    private void requestBitrateCompensationSyncFrame(long now, double actualBitrate,
+                                                     double ratio, double totalDeficitRatio) {
+        // 根据全程欠缺比例动态调整保护间隔：欠缺越大越激进
+        long effectiveKeyFrameGapMs;
+        long effectiveMinSyncIntervalMs;
+        if (totalDeficitRatio >= 0.20) {
+            effectiveKeyFrameGapMs = 500L;
+            effectiveMinSyncIntervalMs = 1000L;
+        } else if (totalDeficitRatio >= 0.10) {
+            effectiveKeyFrameGapMs = 800L;
+            effectiveMinSyncIntervalMs = 2000L;
+        } else {
+            effectiveKeyFrameGapMs = MIN_BITRATE_COMPENSATION_KEY_FRAME_GAP_MS;
+            effectiveMinSyncIntervalMs = MIN_BITRATE_COMPENSATION_SYNC_INTERVAL_MS;
+        }
+
+        if (mLastKeyFrameMs > 0 && now - mLastKeyFrameMs < effectiveKeyFrameGapMs) {
+            return;
+        }
+        if (now - mLastBitrateCompensationRequestMs < effectiveMinSyncIntervalMs) {
+            return;
+        }
+        if (requestSyncFrame("bitrate-compensation")) {
+            mLastBitrateCompensationRequestMs = now;
+            mBitrateCompensationRequests++;
+            mLowBitrateWindowCount = Math.max(0, mLowBitrateWindowCount - 1);
+            LogUtils.i(TAG, "bitrate-compensation requested sync frame, actual="
+                    + String.format("%.2f", actualBitrate / 1_000_000.0)
+                    + "Mbps, configured=" + String.format("%.2f", mBitrate / 1_000_000.0)
+                    + "Mbps, ratio=" + String.format("%.2f", ratio)
+                    + ", totalDeficitRatio=" + String.format("%.2f", totalDeficitRatio)
+                    + ", totalDeficitKB=" + (mTotalDeficitBytes / 1000)
+                    + ", totalRequests=" + mBitrateCompensationRequests);
+        }
+    }
+
+    private void logCodecStatus(String reason, boolean includeMetrics) {
+        long now = System.currentTimeMillis();
+        long durationMs = Math.max(1L, now - mCodecWindowStartMs);
+        long sendDurationMs = Math.max(1L, now - mSendWindowStartMs);
+        double windowMbps = mCodecWindowBytes * 8.0 / durationMs / 1000.0;
+        double sendWindowMbps = mSendWindowBytes * 8.0 / sendDurationMs / 1000.0;
+        double configuredMbps = mBitrate / 1_000_000.0;
+        StringBuilder builder = new StringBuilder();
+        builder.append(reason)
+                .append(" service=").append(getClass().getName())
+//                .append(", codec=").append(mCodecName)
+                .append(", configured=").append(String.format("%.2f", configuredMbps)).append("Mbps")
+                .append(", actualWindow=").append(String.format("%.2f", windowMbps)).append("Mbps/")
+                .append(durationMs).append("ms")
+                .append(", sentWindow=").append(String.format("%.2f", sendWindowMbps)).append("Mbps/")
+                .append(sendDurationMs).append("ms")
+                .append(", frames=").append(mCodecWindowFrames)
+                .append(", key=").append(mCodecWindowKeyFrames)
+                .append(", sentFrames=").append(mSendWindowFrames)
+                .append(", sentKey=").append(mSendWindowKeyFrames)
+                .append(", maxFrame=").append(mCodecWindowMaxFrameBytes)
+                .append(", totalFrames=").append(mCodecTotalFrames)
+                .append(", totalKey=").append(mCodecTotalKeyFrames)
+                .append(", totalBytes=").append(mCodecTotalBytes)
+                .append(", sentTotalFrames=").append(mSendTotalFrames)
+                .append(", sentTotalBytes=").append(mSendTotalBytes)
+                .append(", lastPtsUs=").append(mLastCodecPtsUs)
+                .append(", size=").append(mWidth).append("x").append(mHeight)
+                .append(", fps=").append(mFrameRate)
+                .append(", iframe=").append(mIFrameInterval)
+                .append(", bitrateMode=").append(bitrateModeName(mBitrateMode))
+                .append(", supportedBitrateModes=").append(mSupportedBitrateModes)
+                .append(", bitrateCompRatio=")
+                .append(mLastCompensationBitrateRatio < 0 ? "none" : String.format("%.2f", mLastCompensationBitrateRatio))
+                .append(", lowBitrateWindows=").append(mLowBitrateWindowCount)
+                .append(", bitrateCompRequests=").append(mBitrateCompensationRequests)
+                .append(", totalDeficitKB=").append(mTotalDeficitBytes / 1000)
+                .append(", totalExpectedKB=").append(mTotalExpectedBytes / 1000)
+                .append(", estPFrameBytes=").append(mEstimatedPFrameBytes)
+                .append(", avcProfile=").append(mConfiguredAvcProfile)
+                .append(", avcLevel=").append(mConfiguredAvcLevel)
+                .append(", supportedAvcProfileLevels=").append(mSupportedAvcProfileLevels)
+                .append(", qpBoundsSupported=").append(mQpBoundsSupported)
+                .append(", complexityRange=").append(mComplexityRange)
+                .append(", configuredComplexity=")
+                .append(mConfiguredComplexity == Integer.MIN_VALUE ? "none" : mConfiguredComplexity)
+                .append(", configFormat=").append(mCodecConfigFormat)
+                .append(", outputFormat=").append(mCodecOutputFormat);
+
+        if (includeMetrics && Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && mMediaCodec != null) {
+            try {
+                PersistableBundle metrics = mMediaCodec.getMetrics();
+                builder.append(", metrics=").append(metrics);
+            } catch (Exception e) {
+                builder.append(", metricsError=").append(e.getMessage());
+            }
+        }
+
+        LogUtils.i(TAG, builder.toString());
+    }
+
+    private String bitrateModeName(int mode) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
+                && mode == MediaCodecInfo.EncoderCapabilities.BITRATE_MODE_CBR_FD) {
+            return "CBR_FD";
+        }
+        if (mode == MediaCodecInfo.EncoderCapabilities.BITRATE_MODE_CBR) {
+            return "CBR";
+        }
+        if (mode == MediaCodecInfo.EncoderCapabilities.BITRATE_MODE_VBR) {
+            return "VBR";
+        }
+        if (mode == MediaCodecInfo.EncoderCapabilities.BITRATE_MODE_CQ) {
+            return "CQ";
+        }
+        return String.valueOf(mode);
+    }
+
+    private void requestSyncFrameIfNeeded() {
+        long now = System.currentTimeMillis();
+        long expectedKeyFrameIntervalMs = Math.max(
+                MIN_SYNC_FRAME_REQUEST_INTERVAL_MS,
+                Math.max(1L, (long) mIFrameInterval) * 2000L
+        );
+        if (mLastKeyFrameMs > 0 && now - mLastKeyFrameMs < expectedKeyFrameIntervalMs) {
+            return;
+        }
+        if (now - mLastSyncFrameRequestMs < expectedKeyFrameIntervalMs) {
+            return;
+        }
+        requestSyncFrame("periodic");
+    }
+
+    private boolean requestSyncFrame(String reason) {
+        try {
+            if (mMediaCodec != null) {
+                Bundle bundle = new Bundle();
+                bundle.putInt(MediaCodec.PARAMETER_KEY_REQUEST_SYNC_FRAME, 0);
+                mMediaCodec.setParameters(bundle);
+                mLastSyncFrameRequestMs = System.currentTimeMillis();
+                LogUtils.i(TAG, "Requested sync frame, reason=" + reason);
+                return true;
+            }
+        } catch (Exception e) {
+            LogUtils.w(TAG, "Failed to request sync frame", e);
+        }
+        return false;
+    }
+
+    private byte[] getCodecConfigFromFormat(MediaFormat format) {
+        try {
+            ByteBuffer csd0 = format.getByteBuffer("csd-0");
+            ByteBuffer csd1 = format.getByteBuffer("csd-1");
+            int size = remaining(csd0) + remaining(csd1);
+            if (size <= 0) {
+                return null;
+            }
+            byte[] config = new byte[size];
+            int offset = copyBuffer(csd0, config, 0);
+            copyBuffer(csd1, config, offset);
+            return config;
+        } catch (Exception e) {
+            LogUtils.w(TAG, "Failed to read codec config", e);
+            return null;
+        }
+    }
+
+    private int remaining(ByteBuffer buffer) {
+        return buffer == null ? 0 : buffer.remaining();
+    }
+
+    private int copyBuffer(ByteBuffer src, byte[] dst, int offset) {
+        if (src == null) {
+            return offset;
+        }
+        ByteBuffer duplicate = src.duplicate();
+        int len = duplicate.remaining();
+        duplicate.get(dst, offset, len);
+        return offset + len;
+    }
+
+    private void recycleFrame(byte[] frame) {
+        if (frame == null || frame.length == 0) {
+            return;
+        }
+        try {
+            framePoll.release(frame);
+        } catch (IllegalStateException ignored) {
+            // Pool is full.
+        }
+    }
+
+    private void clearFrameQueue() {
+        byte[] frame;
+        while ((frame = decodeQueue.poll()) != null) {
+            recycleFrame(frame);
+        }
+    }
+
+    private static class AvcLevelLimit {
+        final int level;
+        final int maxFs;
+        final int maxMbps;
+
+        AvcLevelLimit(int level, int maxFs, int maxMbps) {
+            this.level = level;
+            this.maxFs = maxFs;
+            this.maxMbps = maxMbps;
+        }
+    }
+
+    /**
+     * 令牌桶——应用层码率整形。
+     * <p>
+     * 原理：以 refillRateBytesPerSec 的速率持续产生令牌，桶容量 capacityBytes。
+     * 每发送 N 字节需消耗 N 个令牌；令牌不足时阻塞等待补充。
+     * <p>
+     * 效果：
+     * - 短期突发（如单个 I 帧）最多可冲到 capacityBytes 大小（容量上限）
+     * - 长期平均码率严格不超过 refillRateBytesPerSec
+     * - 即使硬件编码器一次输出 10MB 的 I 帧，也会被强行延迟拆分，绝不超过上限
+     * <p>
+     * 这是唯一能硬性保证带宽上限的方式（硬件 CBR/max-bitrate 不可靠时）。
+     * 代价：会增加端到端延迟（最多 capacityBytes / refillRateBytesPerSec 秒）。
+     */
+    private static class TokenBucket {
+        private long refillRateBytesPerSec; // 每秒补充字节数（= 目标码率 bps * 4 / 8）
+        private long capacityBytes;        // 桶容量（= 峰值上限 bps / 8）
+        private long tokens;                 // 当前令牌数
+        private long lastRefillNs;           // 上次补充时间（纳秒）
+
+        TokenBucket(int bitrateBps, int maxBitrateBps) {
+            // 补充速率 = 目标码率（长期平均不超过此值）
+            this.refillRateBytesPerSec = bitrateBps / 8;
+            // 容量 = 目标码率×2（允许I帧突发，约1-2秒的缓冲窗口）
+            // 原容量=maxBitrateBps/8太小，I帧频繁触发阻塞导致延迟累积
+            this.capacityBytes = Math.max(maxBitrateBps / 8, bitrateBps / 8 * 2);
+            this.tokens = capacityBytes; // 初始给满
+            this.lastRefillNs = System.nanoTime();
+        }
+
+        /**
+         * 获取 bytes 个令牌，不足则阻塞 sleep 等待。
+         *
+         * @param bytes 需要发送的字节数
+         */
+        synchronized void acquire(int bytes) {
+            if (refillRateBytesPerSec <= 0 || bytes <= 0) return;
+            refill();
+            // 等待循环：令牌不足时按需 sleep
+            while (tokens < bytes) {
+                long deficit = bytes - tokens;
+                // 补充 deficit 字节需要的毫秒数（至少 1ms）
+                long waitMs = Math.max(1L, deficit * 1000L / refillRateBytesPerSec);
+                try {
+                    Thread.sleep(waitMs);
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    break;
+                }
+                refill();
+            }
+            tokens -= bytes;
+        }
+
+        /** 按时间补充令牌，最多不超过桶容量。 */
+        private void refill() {
+            long nowNs = System.nanoTime();
+            long elapsedNs = nowNs - lastRefillNs;
+            if (elapsedNs <= 0) return;
+            long add = refillRateBytesPerSec * elapsedNs / 1_000_000_000L;
+            if (add > 0) {
+                tokens = Math.min(tokens + add, capacityBytes);
+                lastRefillNs = nowNs;
+            }
+        }
+
+        /** 动态调整补充速率（动态码率时调用）。 */
+        synchronized void updateRefillRate(int newBitrateBps) {
+            refill();
+            this.refillRateBytesPerSec = newBitrateBps / 8;
+        }
+
+        /** 动态调整桶容量（与构造函数公式一致）。 */
+        synchronized void updateCapacity(int newBitrateBps, int newMaxBitrateBps) {
+            this.capacityBytes = Math.max(newMaxBitrateBps / 8, newBitrateBps / 8 * 2);
+        }
+    }
+
+    private void releaseMediaCodec() {
+        if (mMediaCodec != null) {
+            try {
+                mMediaCodec.stop();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            try {
+                mMediaCodec.release();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            mMediaCodec = null;
+        }
+        mTokenBucket = null;
+        mThrottleEnabled = false;
+    }
+
+
 
     /**
      * 创建VirtualDisplay
@@ -532,6 +1708,15 @@ public class ScreenShareService extends Service {
         if (mMediaProjection == null) {
             throw new IllegalStateException("MediaProjection is null");
         }
+
+        // Android 14+ 要求在 createVirtualDisplay 前注册 Callback
+        mProjectionCallback = new MediaProjection.Callback() {
+            @Override
+            public void onStop() {
+                LogUtils.i(TAG, "MediaProjection stopped");
+            }
+        };
+        mMediaProjection.registerCallback(mProjectionCallback, null);
 
         mImageReader = ImageReader.newInstance(screen_width, screen_height, PixelFormat.RGBA_8888, 2);//0x1 PixelFormat.RGBA_8888
 
@@ -587,6 +1772,10 @@ public class ScreenShareService extends Service {
         // 停止MediaProjection
         if (mMediaProjection != null) {
             try {
+                if (mProjectionCallback != null) {
+                    mMediaProjection.unregisterCallback(mProjectionCallback);
+                    mProjectionCallback = null;
+                }
                 mMediaProjection.stop();
             } catch (Exception e) {
                 LogUtils.w(TAG, "Error stopping MediaProjection", e);

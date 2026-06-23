@@ -64,7 +64,6 @@ class PlayerController(
     private val isCodecConfigured = AtomicBoolean(false)
 
     private var decodeStatus = 0f
-    private var inputTime = 0L
 
     // 添加GLSurfaceView引用
     private var glSurfaceView: VideoGLSurfaceView? = null
@@ -72,8 +71,10 @@ class PlayerController(
     // 线程优先级
     private val threadPriority = AtomicInteger(android.os.Process.THREAD_PRIORITY_URGENT_DISPLAY)
 
+    private var mPlayerViewResetListener: PlayerViewResetListener? = null
+
     fun initialize(glSurfaceView: VideoGLSurfaceView) {
-        LogUtils.i(TAG, "initialize")
+        LogUtils.i(TAG, "initialize: VideoGLSurfaceView")
         this.glSurfaceView = glSurfaceView
         // 设置Surface准备监听器
         glSurfaceView.setOnSurfaceReadyListener(object : VideoGLSurfaceView.OnSurfaceReadyListener {
@@ -93,7 +94,7 @@ class PlayerController(
     }
 
     fun initialize(surfaceView: SurfaceView) {
-        LogUtils.i(TAG, "initialize: ")
+        LogUtils.i(TAG, "initialize: SurfaceView ")
         surfaceView.holder.addCallback(object : SurfaceHolder.Callback {
             override fun surfaceCreated(holder: SurfaceHolder) {
                 surface = holder.surface
@@ -112,7 +113,7 @@ class PlayerController(
     }
 
     fun initialize(surface: Surface) {
-        LogUtils.i(TAG, "initialize: ")
+        LogUtils.i(TAG, "initialize: Surface ")
         this.surface = surface
         start()
     }
@@ -313,7 +314,7 @@ class PlayerController(
 //                glSurfaceView?.setVideoRotation(configFrame.getRotation(), configFrame.w, configFrame.h)
 //            }
             val isSupported = mediaCodec?.codecInfo?.getCapabilitiesForType(mimeType)?.isFormatSupported(format) ?: false
-
+            mPlayerViewResetListener?.onPlayerViewReset(configFrame.w, configFrame.h)
             mediaCodec?.configure(format, surface, null, 0)
             mediaCodec?.start()
             isCodecConfigured.set(true)
@@ -451,6 +452,11 @@ class PlayerController(
         }
     }
 
+    fun getVideoAspectRatio(): Float {
+        // 如果尚未解码出尺寸，返回默认的 16:9 比例（或 1.78f）
+        return if (currentHeight > 0) currentWidth.toFloat() / currentHeight else 16f / 9f
+    }
+
     fun isPlaying(): Boolean = isDecoding.get()
 
     // 清理资源
@@ -464,5 +470,13 @@ class PlayerController(
         glSurfaceView?.setOnSurfaceReadyListener(null)
         glSurfaceView?.release()
         glSurfaceView = null
+    }
+
+    fun setPlayerViewResetListener(listener: PlayerViewResetListener) {
+        mPlayerViewResetListener = listener
+    }
+
+    interface PlayerViewResetListener {
+        fun onPlayerViewReset(width: Int, height: Int)
     }
 }

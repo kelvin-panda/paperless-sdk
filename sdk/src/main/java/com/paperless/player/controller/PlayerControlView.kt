@@ -43,12 +43,17 @@ class PlayerControlView(context: Context, attrs: AttributeSet? = null) : FrameLa
 
     var showControlView = true
     private var mAudioFocusManager: AudioFocusManager? = null
-    private var mDismissControlTime: Long = 2500L
+    private var mDismissControlTime: Long = 10_000L
     private var mPostDismiss: Boolean = false
     private var mLockCurScreen: Boolean = false
 
     // 悬浮窗模式：禁用亮度调节和所有 Dialog
     private var mFloatingMode = false
+
+    // 功能开关：默认启用
+    private var mEnableSeekGesture = false      // 是否允许进度滑动
+    private var mEnableBrightnessGesture = false // 是否允许亮度滑动（仅在非悬浮窗模式有效）
+    private var mEnableVolumeGesture = false // 是否允许音量滑动调节（仅在非悬浮窗模式有效）
 
     // Dialog 相关
     private var mProgressDialog: Dialog? = null
@@ -87,6 +92,8 @@ class PlayerControlView(context: Context, attrs: AttributeSet? = null) : FrameLa
     private var mFpsTextView: TextView? = null
     private var mFullImageView: ImageView? = null
     private var mMoreButton: ImageView? = null
+    private var mStartScreen: Button? = null
+    private var mStopScreen: Button? = null
     private var mTextureViewContainer: ViewGroup? = null
     private var mThumbImageViewLayout: RelativeLayout? = null
     private var mThumbImageView: View? = null
@@ -146,6 +153,34 @@ class PlayerControlView(context: Context, attrs: AttributeSet? = null) : FrameLa
         }
     }
 
+    /**
+     * 设置是否允许进度滑动（左右滑动调节播放进度）
+     * @param enabled true 允许，false 禁用
+     */
+    fun setSeekGestureEnabled(enabled: Boolean) {
+        mEnableSeekGesture = enabled
+    }
+
+    /**
+     * 设置是否允许亮度调节手势（右侧滑动）
+     * 注意：悬浮窗模式下（mFloatingMode = true）亮度调节会被强制禁用
+     */
+    fun setBrightnessGestureEnabled(enabled: Boolean) {
+        if (mFloatingMode && enabled) {
+            LogUtils.w("Brightness gesture is disabled in floating mode")
+            mEnableBrightnessGesture = false
+        } else {
+            mEnableBrightnessGesture = enabled
+        }
+    }
+
+    /**
+     * 设置是否允许音量调节手势（左侧滑动）
+     */
+    fun setVolumeGestureEnabled(enabled: Boolean) {
+        mEnableVolumeGesture = enabled
+    }
+
     private fun viewEvent() {
         mStartButton?.setOnClickListener(this)
         mTextureViewContainer?.setOnClickListener(this)
@@ -164,6 +199,8 @@ class PlayerControlView(context: Context, attrs: AttributeSet? = null) : FrameLa
         }
         mBackButton?.setOnClickListener(this)
         mMoreButton?.setOnClickListener(this)
+        mStartScreen?.setOnClickListener(this)
+        mStopScreen?.setOnClickListener(this)
         mLockScreen?.setOnClickListener(this)
         mFullImageView?.setOnClickListener(this)
     }
@@ -175,6 +212,8 @@ class PlayerControlView(context: Context, attrs: AttributeSet? = null) : FrameLa
         mFpsTextView = findViewById(R.id.fps)
         mFullImageView = findViewById(R.id.full)
         mMoreButton = findViewById(R.id.more)
+        mStartScreen = findViewById(R.id.startScreen)
+        mStopScreen = findViewById(R.id.stopScreen)
         mTextureViewContainer = findViewById(R.id.surface_container)
         mThumbImageViewLayout = findViewById<RelativeLayout?>(R.id.thumb)?.apply { visibility = View.INVISIBLE }
         mBottomContainer = findViewById<ViewGroup?>(R.id.layout_bottom)?.apply {
@@ -250,6 +289,31 @@ class PlayerControlView(context: Context, attrs: AttributeSet? = null) : FrameLa
             })
     }
 
+    fun resetPlayerViewRenderSize(width: Int, height: Int, maxWidth: Int, maxHeight: Int) {
+        var newWidth = 0
+        var newHeight = 0
+        LogUtils.e("resetPlayerViewRenderSize 视频源:$width x $height,最大宽高:$maxWidth x $maxHeight")
+        //视频源是横屏
+        if (width > height) {
+            //根据播放区域宽进行适配新高度
+            newHeight = height * maxWidth / width
+            newWidth = maxWidth
+            if (newHeight > maxHeight) {
+                //适配后进行计算后的高度太高了，则改成进行基于高度的适配
+                newHeight = maxHeight
+                newWidth = width * newHeight / height
+            }
+        } else {
+            //视频源是竖屏
+            newHeight = maxHeight
+            newWidth = width * newHeight / height
+        }
+        LogUtils.e("resetPlayerViewRenderSize 适配后宽高:$newWidth x $newHeight")
+        mVideoView?.layoutParams = RelativeLayout.LayoutParams(newWidth, newHeight)
+            .apply { addRule(RelativeLayout.CENTER_IN_PARENT) }
+        mVideoView?.invalidate()
+    }
+
     override fun onClick(v: View?) {
         v?.let {
             when (it.id) {
@@ -260,7 +324,9 @@ class PlayerControlView(context: Context, attrs: AttributeSet? = null) : FrameLa
                 }
 
                 R.id.back -> callback?.onBack()
-                R.id.more -> showMoreMenu()
+                R.id.more -> callback?.onMoreMenuItemClick(0)
+                R.id.startScreen -> callback?.onMoreMenuItemClick(1)
+                R.id.stopScreen -> callback?.onMoreMenuItemClick(2)
                 R.id.lock_screen -> {
                     if (mCurrentState == CURRENT_STATE_AUTO_COMPLETE || mCurrentState == CURRENT_STATE_ERROR) return
                     lockTouchLogic()
@@ -273,10 +339,6 @@ class PlayerControlView(context: Context, attrs: AttributeSet? = null) : FrameLa
                 else -> {}
             }
         }
-    }
-
-    private fun showMoreMenu() {
-        // TODO: 添加功能：同屏，投影，截图
     }
 
     override fun onTouch(v: View?, event: MotionEvent?): Boolean {
@@ -487,27 +549,33 @@ class PlayerControlView(context: Context, attrs: AttributeSet? = null) : FrameLa
         val curWidth = mScreenWidth
         if (absDeltaX > mThreshold || absDeltaY > mThreshold) {
             if (absDeltaX >= mThreshold) {
-                val screenWidth: Int = CommonUtil.getScreenWidth(context)
-                if (abs((screenWidth - mDownX).toDouble()) > mSeekEndOffset) {
-                    mChangePosition = true
-                    mDownPosition = mCurPosition
-                } else {
-                    mShowVKey = true
+                // 进度调节：需要判断是否允许
+                if (mEnableSeekGesture) {
+                    val screenWidth: Int = CommonUtil.getScreenWidth(context)
+                    if (abs((screenWidth - mDownX).toDouble()) > mSeekEndOffset) {
+                        mChangePosition = true
+                        mDownPosition = mCurPosition
+                    } else {
+                        mShowVKey = true
+                    }
                 }
             } else {
                 val screenHeight: Int = CommonUtil.getScreenHeight(context)
                 val noEnd: Boolean = abs((screenHeight - mDownY).toDouble()) > mSeekEndOffset
                 if (mFirstTouch) {
-                    // 悬浮窗模式下禁用亮度调节
-                    mBrightness = if (!mFloatingMode) (mDownX < curWidth * 0.5f) && noEnd else false
+                    // 悬浮窗模式下禁用亮度调节，判断是否允许
+                    mBrightness = if (!mFloatingMode && mEnableBrightnessGesture) (mDownX < curWidth * 0.5f) && noEnd else false
                     mFirstTouch = false
                 }
-                if (!mBrightness) {
+                if (!mBrightness && mEnableVolumeGesture) {
                     mChangeVolume = noEnd
                     val audioManager: AudioManager? = mAudioFocusManager?.getAudioManager()
                     if (audioManager != null) {
                         mGestureDownVolume = audioManager.getStreamVolume(AudioManager.STREAM_MUSIC)
                     }
+                } else if (!mBrightness) {
+                    // 音量被禁用，确保 mChangeVolume 为 false
+                    mChangeVolume = false
                 }
                 mShowVKey = !noEnd
             }
@@ -515,7 +583,7 @@ class PlayerControlView(context: Context, attrs: AttributeSet? = null) : FrameLa
     }
 
     private fun onBrightnessSlide(percent: Float) {
-        if (mFloatingMode) {
+        if (mFloatingMode || !mEnableBrightnessGesture) {
             // 悬浮窗模式下不调节亮度
             return
         }
@@ -781,7 +849,7 @@ class PlayerControlView(context: Context, attrs: AttributeSet? = null) : FrameLa
     }
 
     fun setDragWindowTouchListener(listener: OnTouchListener) {
-        mTitleTextView?.setOnTouchListener(listener)
+        mTopContainer?.setOnTouchListener(listener)
     }
 
     fun setTitle(title: String) {
@@ -978,7 +1046,7 @@ class PlayerControlView(context: Context, attrs: AttributeSet? = null) : FrameLa
         override fun onScale(detector: ScaleGestureDetector): Boolean {
             val view = mVideoView ?: return false
             val oldScale = view.scaleX
-            var newScale = (oldScale * detector.scaleFactor).coerceIn(mMinScale, mMaxScale)
+            val newScale = (oldScale * detector.scaleFactor).coerceIn(mMinScale, mMaxScale)
             if (newScale == oldScale) return true
             val focusX = detector.focusX
             val focusY = detector.focusY

@@ -1,27 +1,17 @@
 package com.xlk.paperless.sdk
 
-import android.content.Intent
 import android.os.Bundle
 import android.widget.Button
 import androidx.appcompat.app.AppCompatActivity
 import com.blankj.utilcode.util.LogUtils
 import com.mogujie.tt.protobuf.InterfaceMacro
 import com.mogujie.tt.protobuf.InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_MEDIAPLAYPOSINFO_VALUE
-import com.mogujie.tt.protobuf.InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_MEDIAPLAY_VALUE
 import com.mogujie.tt.protobuf.InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_STOPPLAY_VALUE
-import com.mogujie.tt.protobuf.InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_STREAMPLAY_VALUE
 import com.mogujie.tt.protobuf.InterfacePlaymedia
 import com.mogujie.tt.protobuf.InterfaceStop
-import com.mogujie.tt.protobuf.InterfaceStream
 import com.paperless.bus.EventBusMessage
-import com.paperless.player.DecodeQueue
 import com.paperless.player.SplitSurfaceView
-import com.paperless.sdk.MAIN_TYPE_BITMASK
-import com.paperless.sdk.MEDIA_FILE_TYPE_AUDIO
-import com.paperless.sdk.MEDIA_FILE_TYPE_RECORD
-import com.paperless.sdk.MEDIA_FILE_TYPE_VIDEO
 import com.paperless.sdk.Protocol
-import com.paperless.sdk.SUB_TYPE_BITMASK
 import com.paperless.sdk.SdkVars
 import org.greenrobot.eventbus.EventBus
 import org.greenrobot.eventbus.Subscribe
@@ -46,10 +36,10 @@ class SplitPlayActivity : AppCompatActivity() {
         splitScreenPlayer = findViewById(R.id.splitScreenPlayer)
         findViewById<Button>(R.id.btn_play_video).setOnClickListener {
             val resId = splitScreenPlayer?.getSelectResId() ?: -1
-            playingVideo[resId] = PlayingInfo(true, resId, 654311472, 0)
+            playingVideo[resId] = PlayingInfo(true, resId, 654311438, 0)
             Jni.mediaPlay(
                 resId,
-                654311472,
+                654311438,
                 SdkVars.localDeviceId,
                 InterfaceMacro.Pb_MeetPlayFlag.Pb_MEDIA_PLAYFLAG_SETPOSMODE_VALUE
             )
@@ -116,40 +106,40 @@ class SplitPlayActivity : AppCompatActivity() {
     fun busEvent(msg: EventBusMessage) {
         when (msg.type) {
             // 媒体播放
-            Pb_TYPE_MEET_INTERFACE_MEDIAPLAY_VALUE -> {
-                InterfacePlaymedia.pbui_Type_MeetMediaPlay.parseFrom(msg.data)?.let {
-                    val isMandatory =
-                        it.triggeruserval == InterfaceMacro.Pb_TriggerUsedef.Pb_EXCEC_USERDEF_FLAG_NOCREATEWINOPER_VALUE
-                    val type = it.mediaid and MAIN_TYPE_BITMASK.toInt()
-                    val subType = it.mediaid and SUB_TYPE_BITMASK
-                    if (type == MEDIA_FILE_TYPE_AUDIO
-                        || type == MEDIA_FILE_TYPE_VIDEO
-                        || type == MEDIA_FILE_TYPE_RECORD
-                    ) {
-                        DecodeQueue.cleanup(it.res)
-                        if (it.res == 0) {
-                            startActivity(Intent(this, PlayActivity::class.java).apply {
-                                putExtra("isMandatory", isMandatory)
-                            })
-                        }
-                    }
-                }
-            }
+//            Pb_TYPE_MEET_INTERFACE_MEDIAPLAY_VALUE -> {
+//                InterfacePlaymedia.pbui_Type_MeetMediaPlay.parseFrom(msg.data)?.let {
+//                    val isMandatory =
+//                        it.triggeruserval == InterfaceMacro.Pb_TriggerUsedef.Pb_EXCEC_USERDEF_FLAG_NOCREATEWINOPER_VALUE
+//                    val type = it.mediaid and MAIN_TYPE_BITMASK.toInt()
+//                    val subType = it.mediaid and SUB_TYPE_BITMASK
+//                    if (type == MEDIA_FILE_TYPE_AUDIO
+//                        || type == MEDIA_FILE_TYPE_VIDEO
+//                        || type == MEDIA_FILE_TYPE_RECORD
+//                    ) {
+//                        DecodeQueue.cleanup(it.res)
+//                        if (it.res == 0) {
+//                            startActivity(Intent(this, PlayActivity::class.java).apply {
+//                                putExtra("isMandatory", isMandatory)
+//                            })
+//                        }
+//                    }
+//                }
+//            }
             // 流播放
-            Pb_TYPE_MEET_INTERFACE_STREAMPLAY_VALUE -> {
-                InterfaceStream.pbui_Type_MeetStreamPlay.parseFrom(msg.data)?.let {
-                    val isMandatory =
-                        it.triggeruserval == InterfaceMacro.Pb_TriggerUsedef.Pb_EXCEC_USERDEF_FLAG_NOCREATEWINOPER_VALUE
-                    DecodeQueue.cleanup(it.res)
-                    if (it.res == 0) {
-                        startActivity(Intent(this, PlayActivity::class.java).apply {
-                            putExtra("isMandatory", isMandatory)
-                        })
-                    }
-                }
-            }
+//            Pb_TYPE_MEET_INTERFACE_STREAMPLAY_VALUE -> {
+//                InterfaceStream.pbui_Type_MeetStreamPlay.parseFrom(msg.data)?.let {
+//                    val isMandatory =
+//                        it.triggeruserval == InterfaceMacro.Pb_TriggerUsedef.Pb_EXCEC_USERDEF_FLAG_NOCREATEWINOPER_VALUE
+//                    DecodeQueue.cleanup(it.res)
+//                    if (it.res == 0) {
+//                        startActivity(Intent(this, PlayActivity::class.java).apply {
+//                            putExtra("isMandatory", isMandatory)
+//                        })
+//                    }
+//                }
+//            }
 
-            //流播放
+            //停止流播放
             Pb_TYPE_MEET_INTERFACE_STOPPLAY_VALUE -> {
                 if (msg.method == InterfaceMacro.Pb_Method.Pb_METHOD_MEET_INTERFACE_CLOSE_VALUE) {
                     InterfaceStop.pbui_Type_MeetStopResWork.parseFrom(msg.data)?.let {
