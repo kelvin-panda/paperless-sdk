@@ -91,7 +91,7 @@
     <LinearLayout
         android:id="@+id/layout_top"
         android:layout_width="match_parent"
-        android:layout_height="48dp"
+        android:layout_height="wrap_content"
         android:background="@drawable/video_title_bg"
         android:gravity="center_vertical"
         tools:visibility="visible">
@@ -122,28 +122,27 @@
             android:layout_marginEnd="10dp"
             android:paddingLeft="10dp"
             android:textColor="@android:color/white"
-            android:textSize="18sp"
             tools:text="25 f/s" />
 
-        <Button
+        <TextView
             android:id="@+id/startScreen"
             android:layout_width="wrap_content"
-            android:layout_height="30dp"
+            android:layout_height="wrap_content"
             android:layout_marginEnd="10dp"
+            android:padding="5dp"
             android:background="@drawable/video_button"
             android:text="发起同屏"
-            android:textColor="@android:color/white"
-            android:textSize="18sp" />
+            android:textColor="@android:color/white" />
 
-        <Button
+        <TextView
             android:id="@+id/stopScreen"
             android:layout_width="wrap_content"
-            android:layout_height="30dp"
+            android:layout_height="wrap_content"
+            android:padding="5dp"
             android:layout_marginEnd="10dp"
             android:background="@drawable/video_button"
             android:text="结束同屏"
-            android:textColor="@android:color/white"
-            android:textSize="18sp" />
+            android:textColor="@android:color/white" />
 
         <ImageView
             android:id="@+id/full"

@@ -194,7 +194,7 @@ class SplitPlayActivity : AppCompatActivity() {
             fullResId = resId
             stopPlay()
             FloatingPlayerWindow.getInstance(this).apply {
-                configure(0,false)
+                configure(0,false,false)
                 initial()
                 if (it.isVideo) {
                     Jni.mediaPlay(
@@ -238,52 +238,6 @@ class SplitPlayActivity : AppCompatActivity() {
                     }
                 })
             }
-//            FloatingPlayerWindow(this).apply {
-//                configure(0,false)
-//                initial()
-//                if (it.isVideo) {
-//                    Jni.mediaPlay(
-//                        Protocol.resource_id_0,
-//                        it.value1,
-//                        SdkVars.localDeviceId,
-//                        InterfaceMacro.Pb_MeetPlayFlag.Pb_MEDIA_PLAYFLAG_SETPOSMODE_VALUE,
-//                        it.value2,
-//                        0
-//                    )
-//                } else {
-//                    Jni.streamPlay(
-//                        it.value1, it.value2, Protocol.resource_id_0, SdkVars.localDeviceId
-//                    )
-//                }
-//
-//                setExitFloatingPlayListener(object : FloatingPlayerWindow.ExitFloatingPlayListener {
-//                    override fun exitFloatingPlayListener() {
-//                        // 退出全屏后恢复播放
-//                        LogUtils.i("exitFloatingPlayListener: 退出全屏后恢复播放")
-//                        //重置全屏前的资源id
-//                        fullResId = 0
-//                        playingVideo.forEach { (resId, model) ->
-//                            model?.let {
-//                                if (it.isVideo) {
-//                                    LogUtils.e("恢复播放 媒体：$resId ${it.value1},${it.value2}")
-//                                    Jni.mediaPlay(
-//                                        resId,
-//                                        it.value1,
-//                                        SdkVars.localDeviceId,
-//                                        InterfaceMacro.Pb_MeetPlayFlag.Pb_MEDIA_PLAYFLAG_SETPOSMODE.number,
-//                                        it.value2
-//                                    )
-//                                } else {
-//                                    LogUtils.e("恢复播放 流：$resId ${it.value1} ${it.value2}")
-//                                    Jni.streamPlay(
-//                                        it.value1, it.value2, resId, SdkVars.localDeviceId
-//                                    )
-//                                }
-//                            }
-//                        }
-//                    }
-//                })
-//            }
         }
     }
 

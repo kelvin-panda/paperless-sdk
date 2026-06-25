@@ -161,12 +161,27 @@ class FloatingPlayerWindow private constructor(context: Context) {
     }
 
     private var curResId = 0
-    private var fullEnabled = true
+
+    // 窗口大小切换开关
+    private var sizeToggleEnabled = true
+
+    // 右下角拖动缩放窗口
+    private var resizeHandleEnabled = true
+
+    // 按比例缩放
+    private var scaleProportionally = true
 
     // 推荐在 initial() 调用前完成配置
-    fun configure(curResId: Int = 0, fullEnabled: Boolean = true) {
+    fun configure(
+        curResId: Int = 0,
+        sizeToggleEnabled: Boolean = true,
+        resizeHandleEnabled: Boolean = true,
+        scaleProportionally: Boolean = true
+    ) {
         this.curResId = curResId
-        this.fullEnabled = fullEnabled
+        this.sizeToggleEnabled = sizeToggleEnabled
+        this.resizeHandleEnabled = resizeHandleEnabled
+        this.scaleProportionally = scaleProportionally
     }
 
     fun initial() {
@@ -340,7 +355,9 @@ class FloatingPlayerWindow private constructor(context: Context) {
             LogUtils.i("FloatingPlayer: Surface ready, decoding started")
         }).apply {
             initialize(surfaceView)   // 绑定 Surface，内部会监听 surfaceCreated
-            setPlayerViewResetListener(object : PlayerController.PlayerViewResetListener {
+        }
+        if (scaleProportionally) {
+            playerController?.setPlayerViewResetListener(object : PlayerController.PlayerViewResetListener {
                 override fun onPlayerViewReset(width: Int, height: Int) {
                     // 从解码线程回调的，需要切换到主线程
                     handler.post { playerControlView?.resetPlayerViewRenderSize(width, height, screenSize().x, screenSize().y) }
@@ -358,7 +375,12 @@ class FloatingPlayerWindow private constructor(context: Context) {
     }
 
     @SuppressLint("ClickableViewAccessibility")
-    private fun createFloatingView(surfaceView: View, title: String, isMedia: Boolean = true, isMandatory: Boolean = false) {
+    private fun createFloatingView(
+        surfaceView: View,
+        title: String,
+        isMedia: Boolean = true,
+        isMandatory: Boolean = false
+    ) {
         // 根布局：FrameLayout，所有子视图叠加
         val root = FrameLayout(appContext).apply {
             layoutParams = ViewGroup.LayoutParams(
@@ -378,7 +400,7 @@ class FloatingPlayerWindow private constructor(context: Context) {
                     if (isMandatory) PlayerControlView.stream_flag.or(PlayerControlView.mandatory_flag) else PlayerControlView.stream_flag
                 }
             )
-            setFullEnabled(fullEnabled)
+            setFullEnabled(sizeToggleEnabled)
             setFloatingMode(true)
             setPlayView(surfaceView)
             setTitle(title)
@@ -432,21 +454,22 @@ class FloatingPlayerWindow private constructor(context: Context) {
                 ViewGroup.LayoutParams.MATCH_PARENT
             )
         )
-
-        // 2. 右下角缩放把手
-        val resizeHandle = View(appContext).apply {
-            layoutParams = FrameLayout.LayoutParams(
-                dp2px(RESIZE_HOTSPOT_SIZE_DP),
-                dp2px(RESIZE_HOTSPOT_SIZE_DP)
-            ).apply {
-                gravity = Gravity.BOTTOM or Gravity.END
+        if (resizeHandleEnabled) {
+            // 2. 右下角缩放把手
+            val resizeHandle = View(appContext).apply {
+                layoutParams = FrameLayout.LayoutParams(
+                    dp2px(RESIZE_HOTSPOT_SIZE_DP),
+                    dp2px(RESIZE_HOTSPOT_SIZE_DP)
+                ).apply {
+                    gravity = Gravity.BOTTOM or Gravity.END
 //                bottomMargin = dp2px(8)
 //                rightMargin = dp2px(8)
+                }
+                setBackgroundResource(R.drawable.video_shrink) // 替换为实际图标
+                setOnTouchListener(resizeHandleTouchListener)
             }
-            setBackgroundResource(R.drawable.video_shrink) // 替换为实际图标
-            setOnTouchListener(resizeHandleTouchListener)
+            root.addView(resizeHandle)
         }
-        root.addView(resizeHandle)
 
         floatingView = root
     }
