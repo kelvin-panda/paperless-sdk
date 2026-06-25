@@ -500,7 +500,7 @@ class MainActivity : AppCompatActivity() {
         Jni.modPageStatus(InterfaceMacro.Pb_MeetFaceStatus.Pb_MemState_MainFace_VALUE)
         queryDeviceMeetInfo()
         if (SdkConfig.floatingPlayEnable) {
-//            createFloatingPlayer()
+            createFloatingPlayer()
         }
     }
 
@@ -794,7 +794,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun createFloatingPlayer() {
         // 创建悬浮窗
-        floatingWindow = FloatingPlayerWindow(applicationContext).apply {
+        floatingWindow = FloatingPlayerWindow.getInstance(applicationContext).apply {
             initial()
         }
     }

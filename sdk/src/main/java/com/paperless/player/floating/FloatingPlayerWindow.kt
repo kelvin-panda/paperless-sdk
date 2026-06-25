@@ -57,12 +57,27 @@ import org.greenrobot.eventbus.EventBus
 import org.greenrobot.eventbus.Subscribe
 import org.greenrobot.eventbus.ThreadMode
 
-class FloatingPlayerWindow(context: Context, private val curResId: Int = 0, private val fullEnabled: Boolean = true) {
+class FloatingPlayerWindow private constructor(context: Context) {
 
     companion object {
         private const val MIN_SIZE_RATIO = 1 / 3f
         private const val DRAG_BAR_HEIGHT_DP = 40
         private const val RESIZE_HOTSPOT_SIZE_DP = 36
+
+        @SuppressLint("StaticFieldLeak")
+        @Volatile
+        private var INSTANCE: FloatingPlayerWindow? = null
+        fun getInstance(context: Context): FloatingPlayerWindow {
+            return INSTANCE ?: synchronized(this) {
+                INSTANCE ?: FloatingPlayerWindow(context.applicationContext).also { INSTANCE = it }
+            }
+        }
+
+        // 在 App 退出时调用，避免单例长期持有
+        fun destroyInstance() {
+            INSTANCE?.onDestroy()
+            INSTANCE = null
+        }
     }
 
     private val appContext = context.applicationContext
@@ -145,8 +160,19 @@ class FloatingPlayerWindow(context: Context, private val curResId: Int = 0, priv
         mExitFloatingPlayListener = listener
     }
 
+    private var curResId = 0
+    private var fullEnabled = true
+
+    // 推荐在 initial() 调用前完成配置
+    fun configure(curResId: Int = 0, fullEnabled: Boolean = true) {
+        this.curResId = curResId
+        this.fullEnabled = fullEnabled
+    }
+
     fun initial() {
-        EventBus.getDefault().register(this)
+        if (!EventBus.getDefault().isRegistered(this)) {
+            EventBus.getDefault().register(this)
+        }
         delayQueryDeviceTask()
     }
 
@@ -158,7 +184,7 @@ class FloatingPlayerWindow(context: Context, private val curResId: Int = 0, priv
 //                val fps = msg.obj as Int
                 val fps = msg.objs?.get(0) as Int
                 val resId = msg.objs?.get(1) as Int
-                if (0 == resId) {
+                if (resId == curResId) {
                     updateFps(fps)
                 }
             }
@@ -246,12 +272,12 @@ class FloatingPlayerWindow(context: Context, private val curResId: Int = 0, priv
         queryOnlineDev()
     }
 
-    fun delayQueryDeviceTask() {
+    private fun delayQueryDeviceTask() {
         handler.removeCallbacks(delayQueryDeviceTask)
         handler.postDelayed(delayQueryDeviceTask, 1000L)
     }
 
-    fun queryOnlineDev() {
+    private fun queryOnlineDev() {
         tempMembers.clear()
         onlineMembers.clear()
         onlineProjects.clear()
@@ -376,12 +402,6 @@ class FloatingPlayerWindow(context: Context, private val curResId: Int = 0, priv
 
             override fun onBack() {
                 jni.stopResource(curResId, SdkVars.localDeviceId)
-//                if (mExitFloatingPlayListener != null) {
-//                    mExitFloatingPlayListener?.exitFloatingPlayListener()
-//                    onDestroy()
-//                } else {
-//                    dismiss()
-//                }
             }
 
             override fun onLock(locked: Boolean) {
@@ -619,13 +639,9 @@ class FloatingPlayerWindow(context: Context, private val curResId: Int = 0, priv
         handler.postDelayed({
             LogUtils.i("delayDismiss: hasNewPlay=$hasNewPlay")
             if (!hasNewPlay) {
-                if (mExitFloatingPlayListener != null) {
-                    // 停止后立马进行播放是无效的，需要延迟
-                    mExitFloatingPlayListener?.exitFloatingPlayListener()
-                    onDestroy()
-                } else {
-                    dismiss()
-                }
+                // 停止后立马进行播放是无效的，需要延迟
+                mExitFloatingPlayListener?.exitFloatingPlayListener()
+                dismiss()
             }
         }, 500L)
     }
