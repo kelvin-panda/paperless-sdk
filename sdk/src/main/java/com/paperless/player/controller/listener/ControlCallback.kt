@@ -8,32 +8,34 @@ interface ControlCallback {
     /**
      * 进度拖动
      */
-    fun seekTo(progress: Int)
+    fun seekTo(progress: Int){}
 
     /**
      * 开始或恢复
      */
-    fun start()
+    fun start(){}
 
     /**
      * 暂停播放
      */
-    fun pause()
+    fun pause(){}
 
     /**
      * 控制界面点击返回按钮
      */
-    fun onBack()
+    fun onBack(){}
 
     /**
      * 调整亮度
      */
-    fun onBrightnessSlide(percent: Float)
+    fun onBrightnessSlide(percent: Float){}
 
     /**
      * 窗口切换：全屏/半屏
      */
-    fun toggleScreen()
+    fun toggleScreen(){}
+
+    fun onLock(locked: Boolean){}
 
     /**
      * 更多菜单项被点击

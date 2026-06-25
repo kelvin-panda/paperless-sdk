@@ -2,7 +2,6 @@ package com.paperless.player
 
 import android.content.Context
 import android.util.AttributeSet
-import android.view.SurfaceHolder
 import android.view.SurfaceView
 import android.view.ViewGroup
 import com.blankj.utilcode.util.LogUtils
@@ -24,7 +23,7 @@ class SplitSurfaceView(cxt: Context, attrs: AttributeSet?) :
     var listener: SplitScreenPlayerClickListener? = null
 
     interface SplitScreenPlayerClickListener {
-        fun onClick(resId: Int)
+        fun onClick(resId: Int, surfaceView: SurfaceView)
     }
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
@@ -79,24 +78,8 @@ class SplitSurfaceView(cxt: Context, attrs: AttributeSet?) :
             val controller = PlayerController(it)
             controller.initialize(p)
             controllerMap[it] = controller
-//            p.holder.addCallback(object : SurfaceHolder.Callback {
-//                override fun surfaceCreated(holder: SurfaceHolder) {
-//                    LogUtils.i("surfaceCreated: $it")
-//                    val controller = PlayerController(it)
-//                    controllerMap[it] = controller
-//                    controller.initialize(holder.surface)
-//                }
-//
-//                override fun surfaceChanged(holder: SurfaceHolder, format: Int, width: Int, height: Int) {
-//                    LogUtils.i("surfaceChanged: $it")
-//                }
-//
-//                override fun surfaceDestroyed(holder: SurfaceHolder) {
-//                    LogUtils.i("surfaceDestroyed: $it")
-//                }
-//            })
             val id = it
-            p.setOnClickListener { listener?.onClick(id) }
+            p.setOnClickListener { listener?.onClick(id,p) }
             p.setBackgroundResource(R.drawable.player_select_bg)
             p.isClickable = true
             addView(p)
@@ -137,23 +120,7 @@ class SplitSurfaceView(cxt: Context, attrs: AttributeSet?) :
         val controller = PlayerController(resId)
         controllerMap[resId] = controller
         controller.initialize(p)
-//        p.holder.addCallback(object : SurfaceHolder.Callback {
-//            override fun surfaceCreated(holder: SurfaceHolder) {
-//                LogUtils.i("surfaceCreated: $resId")
-//                val controller = PlayerController(resId)
-//                controllerMap[resId] = controller
-//                controller.initialize(holder.surface)
-//            }
-//
-//            override fun surfaceChanged(holder: SurfaceHolder, format: Int, width: Int, height: Int) {
-//                LogUtils.i("surfaceChanged: $resId")
-//            }
-//
-//            override fun surfaceDestroyed(holder: SurfaceHolder) {
-//                LogUtils.i("surfaceDestroyed: $resId")
-//            }
-//        })
-        p.setOnClickListener { listener?.onClick(resId) }
+        p.setOnClickListener { listener?.onClick(resId,p) }
         p.setBackgroundResource(R.drawable.player_select_bg)
         p.isClickable = true
         addView(p, index)

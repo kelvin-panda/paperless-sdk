@@ -122,7 +122,7 @@ open class BaseJni {
 
     open fun checkCache(type: Int, id: Int = 0, cacheflag: Int = 0): Boolean {
         val ret = Call.checkcache(type, id, cacheflag)
-        LogUtils.e("检查缓存 type=$type,id=$id,cacheflag=$cacheflag, ret=$ret")
+        if (ret != 0) LogUtils.e("检查缓存 type=$type,id=$id,cacheflag=$cacheflag, ret=$ret")
         return ret >= 0
     }
 
@@ -284,6 +284,7 @@ open class BaseJni {
         }
         return false
     }
+
     /**
      * 判断设备是否在线
      */
@@ -478,10 +479,10 @@ open class BaseJni {
             Pb_Method.Pb_METHOD_MEET_INTERFACE_DUMP.number,
             null
         )?.let {
-            LogUtils.e("查询设备硬件信息: 成功")
+            if (SdkConfig.logEnable) LogUtils.e("查询设备硬件信息: 成功")
             return InterfaceDevice.pbui_Type_DeviceMacInfo.parseFrom(it)
         }
-        LogUtils.e("查询设备硬件信息: 失败")
+        if (SdkConfig.logEnable) LogUtils.e("查询设备硬件信息: 失败")
         return null
     }
 
@@ -1684,7 +1685,7 @@ open class BaseJni {
                 return it.permission.flag(perCode)
             }
         }
-        LogUtils.e("参会人权限查询失败：memberId:$memberId,perCode:$perCode")
+        if (SdkConfig.logEnable) LogUtils.e("参会人权限查询失败：memberId:$memberId,perCode:$perCode")
         return false
     }
 
@@ -3100,7 +3101,7 @@ open class BaseJni {
         )?.let {
             InterfaceWhiteboard.pbui_Type_MeetMemberColorDetailInfo.parseFrom(it)?.itemList?.find { it.memberid == memberId }
                 ?.let {
-                    LogUtils.e("参会人颜色 memberId:$memberId,颜色:${it.rgb}")
+                    if (SdkConfig.logEnable) LogUtils.e("参会人颜色 memberId:$memberId,颜色:${it.rgb}")
                     return it.rgb
                 }
         }

@@ -164,7 +164,7 @@
         android:layout_centerVertical="true"
         android:layout_marginRight="50dp"
         android:scaleType="centerInside"
-        android:src="@drawable/unlock"
+        android:src="@drawable/vector_video_lock"
         android:visibility="gone"
         tools:visibility="visible" />
 

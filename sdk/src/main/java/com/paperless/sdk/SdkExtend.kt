@@ -349,7 +349,7 @@ fun Int.voteStatus() = when (this) {
  * 播放通知中判断是否强制
  */
 fun Int.isMandatory(): Boolean {
-    return this == InterfaceMacro.Pb_TriggerUsedef.Pb_MEETFILE_PUSH_FLAG_FORCEMODE_VALUE
+    return this == InterfaceMacro.Pb_TriggerUsedef.Pb_EXCEC_USERDEF_FLAG_NOCREATEWINOPER_VALUE
 }
 
 /**

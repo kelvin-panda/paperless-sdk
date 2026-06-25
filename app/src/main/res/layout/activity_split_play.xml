@@ -8,11 +8,6 @@
     android:orientation="horizontal"
     tools:context=".SplitPlayActivity">
 
-<!--    <com.paperless.player.SplitScreenPlayer-->
-<!--        android:id="@+id/splitScreenPlayer"-->
-<!--        android:layout_width="match_parent"-->
-<!--        android:layout_height="match_parent" />-->
-
     <com.paperless.player.SplitSurfaceView
         android:id="@+id/splitScreenPlayer"
         android:layout_width="match_parent"

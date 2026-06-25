@@ -18,4 +18,9 @@ data class PlayingInfo(
      * - `isVideo` false 终端子通道
      */
     var value2: Int
-)
+
+) {
+    override fun toString(): String {
+        return "PlayingInfo(isVideo=$isVideo, resId=$resId, value1=$value1, value2=$value2)"
+    }
+}

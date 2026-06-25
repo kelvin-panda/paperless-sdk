@@ -54,6 +54,20 @@
                 android:layout_marginEnd="10dp"
                 android:text="-" />
 
+            <TextView
+                android:id="@+id/tvMeetingId"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="10dp"
+                android:text="-" />
+
+            <TextView
+                android:id="@+id/tvMeetingName"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="10dp"
+                android:text="-" />
+
         </LinearLayout>
 
         <LinearLayout
@@ -199,6 +213,11 @@
                 android:text="4" />
         </LinearLayout>
 
+        <CheckBox
+            android:layout_width="wrap_content"
+            android:id="@+id/cbMandatory"
+            android:text="强制播放"
+            android:layout_height="wrap_content"/>
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

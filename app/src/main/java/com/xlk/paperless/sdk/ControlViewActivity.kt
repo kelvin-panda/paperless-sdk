@@ -128,7 +128,13 @@ class ControlViewActivity : AppCompatActivity(), ControlCallback {
                 }
             }
             controlView.apply {
-                showControlView = isPlayMedia
+                setupPlayFlag(
+                    if (isPlayMedia) {
+                        if (isMandatory) PlayerControlView.video_flag.and(PlayerControlView.mandatory_flag) else PlayerControlView.video_flag
+                    } else {
+                        if (isMandatory) PlayerControlView.stream_flag.and(PlayerControlView.mandatory_flag) else PlayerControlView.stream_flag
+                    }
+                )
                 setTitle(curTitle)
             }
         }
@@ -254,6 +260,10 @@ class ControlViewActivity : AppCompatActivity(), ControlCallback {
     }
 
     override fun toggleScreen() {
+
+    }
+
+    override fun onLock(locked: Boolean) {
 
     }
 

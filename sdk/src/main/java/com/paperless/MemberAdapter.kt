@@ -13,26 +13,39 @@ import com.paperless.sdk.R
  *  @author : Administrator
  *  created on 2026/6/23 11:04
  */
-class MemberAdapter(val dataList: MutableList<InterfaceMember.pbui_Item_MeetMemberDetailInfo>) :
+class MemberAdapter(dataList: MutableList<InterfaceMember.pbui_Item_MeetMemberDetailInfo>) :
     RecyclerView.Adapter<MemberAdapter.ViewHolder>() {
+    //  自己持有内部数据副本，不直接引用外部列表
+    private val innerDataList = dataList.toMutableList()
     val selectedIds = mutableListOf<Int>()
 
     fun chooseAll(all: Boolean) {
         selectedIds.clear()
-        if (all) selectedIds.addAll(dataList.map { it.devid })
+        if (all) selectedIds.addAll(innerDataList.map { it.devid })
         notifyDataSetChanged()
     }
 
-    fun isChooseAll(): Boolean = selectedIds.isNotEmpty() && selectedIds.size == dataList.size
+    fun isChooseAll(): Boolean = selectedIds.isNotEmpty() && selectedIds.size == innerDataList.size
+
+    fun updateData(newList: List<InterfaceMember.pbui_Item_MeetMemberDetailInfo>) {
+        innerDataList.clear()
+        innerDataList.addAll(newList)
+        // 自动过滤选中 id
+        val validIds = innerDataList.map { it.devid }.toSet()
+        selectedIds.retainAll(validIds)
+        onItemCheckedChangeListener?.onCheckedAll(isChooseAll())
+        notifyDataSetChanged()
+    }
 
     // 点击事件监听器（可选）
-    interface OnItemClickListener {
-        fun onItemClick(view: View, position: Int, item: InterfaceMember.pbui_Item_MeetMemberDetailInfo)
+    interface OnItemCheckedChangeListener {
+        fun onCheckedAll(value: Boolean)
     }
-    private var onItemClickListener: OnItemClickListener? = null
 
-    fun setOnItemClickListener(listener: OnItemClickListener?) {
-        onItemClickListener = listener
+    private var onItemCheckedChangeListener: OnItemCheckedChangeListener? = null
+
+    fun setOnItemCheckedChangeListener(listener: OnItemCheckedChangeListener?) {
+        onItemCheckedChangeListener = listener
     }
 
     override fun onCreateViewHolder(p0: ViewGroup, p1: Int): ViewHolder {
@@ -41,10 +54,10 @@ class MemberAdapter(val dataList: MutableList<InterfaceMember.pbui_Item_MeetMemb
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        holder.bind(dataList[position], position)
+        holder.bind(innerDataList[position], position)
     }
 
-    override fun getItemCount(): Int = dataList.size
+    override fun getItemCount(): Int = innerDataList.size
 
     inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val button = itemView.findViewById<Button>(R.id.item_button)
@@ -56,14 +69,12 @@ class MemberAdapter(val dataList: MutableList<InterfaceMember.pbui_Item_MeetMemb
             button.setTextColor(if (isSelected) Color.WHITE else Color.BLACK)
             // ⭐ 添加点击事件
             button.setOnClickListener {
-                // 1. 切换选中状态（更新数据源和UI）
-//                choose(item.memberid)
-                // 或者直接操作 selectedIds 并局部刷新：
-                 if (selectedIds.contains(item.devid)) selectedIds.remove(item.devid) else selectedIds.add(item.devid)
-                 notifyItemChanged(position)  // 更高效
+                // 1. 直接操作 selectedIds 并局部刷新：
+                if (selectedIds.contains(item.devid)) selectedIds.remove(item.devid) else selectedIds.add(item.devid)
+                notifyItemChanged(position)  // 更高效
 
                 // 2. 触发外部监听器（如果有）
-                onItemClickListener?.onItemClick(button, position, item)
+                onItemCheckedChangeListener?.onCheckedAll(isChooseAll())
             }
         }
     }

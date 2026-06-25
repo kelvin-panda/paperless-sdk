@@ -1,6 +1,7 @@
 package com.xlk.paperless.sdk
 
 import android.os.Bundle
+import android.view.SurfaceView
 import android.widget.Button
 import androidx.appcompat.app.AppCompatActivity
 import com.blankj.utilcode.util.LogUtils
@@ -11,16 +12,14 @@ import com.mogujie.tt.protobuf.InterfacePlaymedia
 import com.mogujie.tt.protobuf.InterfaceStop
 import com.paperless.bus.EventBusMessage
 import com.paperless.player.SplitSurfaceView
+import com.paperless.player.floating.FloatingPlayerWindow
 import com.paperless.sdk.Protocol
 import com.paperless.sdk.SdkVars
 import org.greenrobot.eventbus.EventBus
 import org.greenrobot.eventbus.Subscribe
 import org.greenrobot.eventbus.ThreadMode
-import java.util.Timer
-import java.util.TimerTask
 
 class SplitPlayActivity : AppCompatActivity() {
-//    private var splitScreenPlayer: SplitScreenPlayer? = null
     private var splitScreenPlayer: SplitSurfaceView? = null
     private val playingVideo = mutableMapOf<Int, PlayingInfo?>()
     private var fullResId: Int = 0
@@ -63,11 +62,11 @@ class SplitPlayActivity : AppCompatActivity() {
             )
         )
         splitScreenPlayer?.listener = object : SplitSurfaceView.SplitScreenPlayerClickListener {
-            override fun onClick(resId: Int) {
+            override fun onClick(resId: Int, surfaceView: SurfaceView) {
                 when (resId) {
                     Protocol.resource_id_1 -> {
                         if (System.currentTimeMillis() - at < 500) {
-                            extracted(resId)
+                            extracted(resId, surfaceView)
                         } else {
                             at = System.currentTimeMillis()
                         }
@@ -75,7 +74,7 @@ class SplitPlayActivity : AppCompatActivity() {
 
                     Protocol.resource_id_2 -> {
                         if (System.currentTimeMillis() - bt < 500) {
-                            extracted(resId)
+                            extracted(resId, surfaceView)
                         } else {
                             bt = System.currentTimeMillis()
                         }
@@ -83,7 +82,7 @@ class SplitPlayActivity : AppCompatActivity() {
 
                     Protocol.resource_id_3 -> {
                         if (System.currentTimeMillis() - ct < 500) {
-                            extracted(resId)
+                            extracted(resId, surfaceView)
                         } else {
                             ct = System.currentTimeMillis()
                         }
@@ -91,7 +90,7 @@ class SplitPlayActivity : AppCompatActivity() {
 
                     Protocol.resource_id_4 -> {
                         if (System.currentTimeMillis() - dt < 500) {
-                            extracted(resId)
+                            extracted(resId, surfaceView)
                         } else {
                             dt = System.currentTimeMillis()
                         }
@@ -185,64 +184,61 @@ class SplitPlayActivity : AppCompatActivity() {
         }
     }
 
-    override fun onResume() {
-        super.onResume()
-        LogUtils.i("onResume: ")
-        Timer().schedule(object : TimerTask() {
-            override fun run() {
-                //重置全屏前的资源id
-                fullResId = 0
-                playingVideo.forEach { (resId, model) ->
-                    model?.let {
-                        if (it.isVideo) {
-                            LogUtils.e("恢复播放 媒体：$resId ${it.value1},${it.value2}")
-                            Jni.mediaPlay(
-                                resId,
-                                it.value1,
-                                SdkVars.localDeviceId,
-                                InterfaceMacro.Pb_MeetPlayFlag.Pb_MEDIA_PLAYFLAG_SETPOSMODE.number,
-                                it.value2
-                            )
-                        } else {
-                            LogUtils.e("恢复播放 流：$resId ${it.value1} ${it.value2}")
-                            Jni.streamPlay(
-                                it.value1, it.value2, resId, SdkVars.localDeviceId
-                            )
-                        }
-                    }
-                }
-            }
-        }, 500)
-    }
-
-    private fun extracted(resId: Int) {
+    private fun extracted(resId: Int, surfaceView: SurfaceView) {
+        // 1.停止当前页面的所有播放
+        // 2.使用0号资源全屏播放
+        // 3.退出全屏播放后（未播放完毕）恢复本页播放
         val model = playingVideo[resId]
-        LogUtils.e("数量：${playingVideo.size} ${model == null}")
+        LogUtils.e("数量：${playingVideo.size} $model")
         model?.let {
             fullResId = resId
-//            stopPlay()
-            if (it.isVideo) {
-                //Jni.mediaPlay(Protocol.resource_id_0,it.value1,SdkVars.localDeviceId)
-                Jni.mediaPlay(
-                    Protocol.resource_id_0,
-                    it.value1,
-                    SdkVars.localDeviceId,
-                    InterfaceMacro.Pb_MeetPlayFlag.Pb_MEDIA_PLAYFLAG_SETPOSMODE_VALUE,
-                    it.value2,
-                    0
-                )
-            } else {
-                Jni.streamPlay(
-                    it.value1, it.value2, Protocol.resource_id_0, SdkVars.localDeviceId
-                )
+            stopPlay()
+            FloatingPlayerWindow(this, fullEnabled = false).apply {
+                initial()
+                if (it.isVideo) {
+                    Jni.mediaPlay(
+                        Protocol.resource_id_0,
+                        it.value1,
+                        SdkVars.localDeviceId,
+                        InterfaceMacro.Pb_MeetPlayFlag.Pb_MEDIA_PLAYFLAG_SETPOSMODE_VALUE,
+                        it.value2,
+                        0
+                    )
+                } else {
+                    Jni.streamPlay(
+                        it.value1, it.value2, Protocol.resource_id_0, SdkVars.localDeviceId
+                    )
+                }
+
+                setExitFloatingPlayListener(object : FloatingPlayerWindow.ExitFloatingPlayListener {
+                    override fun exitFloatingPlayListener() {
+                        // 退出全屏后恢复播放
+                        LogUtils.i("exitFloatingPlayListener: 退出全屏后恢复播放")
+                        //重置全屏前的资源id
+                        fullResId = 0
+                        playingVideo.forEach { (resId, model) ->
+                            model?.let {
+                                if (it.isVideo) {
+                                    LogUtils.e("恢复播放 媒体：$resId ${it.value1},${it.value2}")
+                                    Jni.mediaPlay(
+                                        resId,
+                                        it.value1,
+                                        SdkVars.localDeviceId,
+                                        InterfaceMacro.Pb_MeetPlayFlag.Pb_MEDIA_PLAYFLAG_SETPOSMODE.number,
+                                        it.value2
+                                    )
+                                } else {
+                                    LogUtils.e("恢复播放 流：$resId ${it.value1} ${it.value2}")
+                                    Jni.streamPlay(
+                                        it.value1, it.value2, resId, SdkVars.localDeviceId
+                                    )
+                                }
+                            }
+                        }
+                    }
+                })
             }
         }
-    }
-
-    override fun onStop() {
-        super.onStop()
-        LogUtils.i("onStop: ")
-        stopPlay()
     }
 
     private fun stopPlay() {
@@ -251,24 +247,12 @@ class SplitPlayActivity : AppCompatActivity() {
         Jni.stopResource(Protocol.resource_id_2, SdkVars.localDeviceId)
         Jni.stopResource(Protocol.resource_id_3, SdkVars.localDeviceId)
         Jni.stopResource(Protocol.resource_id_4, SdkVars.localDeviceId)
-//        playingVideo.forEach { resId, u ->
-//            u?.let {
-////                if (it.isVideo) {
-////                    Jni.mediaPlayPause(resId, SdkVars.localDeviceId)
-////                } else {
-//                    Jni.stopResource(resId, SdkVars.localDeviceId)
-////                }
-//            }
-//        }
     }
 
     override fun onDestroy() {
         LogUtils.i("onDestroy: ")
         EventBus.getDefault().unregister(this)
-//        Jni.stopResource(Protocol.resource_id_1, SdkVars.localDeviceId)
-//        Jni.stopResource(Protocol.resource_id_2, SdkVars.localDeviceId)
-//        Jni.stopResource(Protocol.resource_id_3, SdkVars.localDeviceId)
-//        Jni.stopResource(Protocol.resource_id_4, SdkVars.localDeviceId)
+        stopPlay()
         splitScreenPlayer?.clearAll()
         super.onDestroy()
     }

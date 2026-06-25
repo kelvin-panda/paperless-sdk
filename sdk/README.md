@@ -1,3 +1,6 @@
+1.3.15
+1. 上线悬浮窗窗口播放
+
 1.3.10
 1.`InterfaceCommondata.java`编码格式修正为`UTF-8`
 

@@ -472,7 +472,7 @@ class PlayerController(
         glSurfaceView = null
     }
 
-    fun setPlayerViewResetListener(listener: PlayerViewResetListener) {
+    fun setPlayerViewResetListener(listener: PlayerViewResetListener?) {
         mPlayerViewResetListener = listener
     }
 

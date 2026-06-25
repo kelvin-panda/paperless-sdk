@@ -83,6 +83,9 @@ class MainActivity : AppCompatActivity() {
     lateinit var tvDevName: TextView
     lateinit var tvMemberId: TextView
     lateinit var tvMemberName: TextView
+    lateinit var tvMeetingId: TextView
+    lateinit var tvMeetingName: TextView
+    lateinit var cbMandatory: CheckBox
     lateinit var edtType: EditText
     lateinit var edtCacheId: EditText
 
@@ -267,6 +270,9 @@ class MainActivity : AppCompatActivity() {
         tvDevName = findViewById<TextView>(R.id.tvDevName)
         tvMemberId = findViewById<TextView>(R.id.tvMemberId)
         tvMemberName = findViewById<TextView>(R.id.tvMemberName)
+        tvMeetingId = findViewById<TextView>(R.id.tvMeetingId)
+        tvMeetingName = findViewById<TextView>(R.id.tvMeetingName)
+        cbMandatory = findViewById<CheckBox>(R.id.cbMandatory)
         val id_0 = findViewById<CheckBox>(R.id.id_0)
         val id_1 = findViewById<CheckBox>(R.id.id_1)
         val id_2 = findViewById<CheckBox>(R.id.id_2)
@@ -316,7 +322,14 @@ class MainActivity : AppCompatActivity() {
             if (id_2.isChecked) temp.add(2)
             if (id_3.isChecked) temp.add(3)
             if (id_4.isChecked) temp.add(4)
-            Jni.mediaPlay(temp, id, localDeviceId)
+            Jni.mediaPlay(
+                temp,
+                id,
+                localDeviceId,
+                0,
+                0,
+                if (cbMandatory.isChecked) InterfaceMacro.Pb_TriggerUsedef.Pb_EXCEC_USERDEF_FLAG_NOCREATEWINOPER_VALUE else 0
+            )
         }
         //播放终端屏幕
         findViewById<Button>(R.id.btn_stream_play).setOnClickListener {
@@ -328,7 +341,14 @@ class MainActivity : AppCompatActivity() {
             if (id_4.isChecked) temp.add(4)
             val str = edt_device_id.text.toString()
             val id = Integer.parseInt(str)
-            Jni.streamPlay(id, 2, temp, localDeviceId)
+            Jni.streamPlay(
+                id,
+                2,
+                temp,
+                localDeviceId,
+                0,
+                if (cbMandatory.isChecked) InterfaceMacro.Pb_TriggerUsedef.Pb_EXCEC_USERDEF_FLAG_NOCREATEWINOPER_VALUE else 0
+            )
         }
         onBackPressedDispatcher.addCallback(this, onBackPressedCallback)
         initConfigFile()
@@ -480,12 +500,13 @@ class MainActivity : AppCompatActivity() {
         Jni.modPageStatus(InterfaceMacro.Pb_MeetFaceStatus.Pb_MemState_MainFace_VALUE)
         queryDeviceMeetInfo()
         if (SdkConfig.floatingPlayEnable) {
-            createFloatingPlayer()
+//            createFloatingPlayer()
         }
     }
 
     private fun queryDeviceMeetInfo() {
         var memberName = ""
+        var meetingname = ""
         var memberId = 0
         var meetingId = 0
         var roomid = 0
@@ -494,12 +515,17 @@ class MainActivity : AppCompatActivity() {
             memberId = it.memberid
             meetingId = it.meetingid
             roomid = it.roomid
+            meetingname = it.meetingname.toStringUtf8()
         }
         SdkVars.localMeetingId = meetingId
+        SdkVars.localMeetingName = meetingname
         SdkVars.localMemberId = memberId
         SdkVars.localRoomId = roomid
-        tvMemberName.text = memberName
-        tvMemberId.text = "$memberId"
+        LogUtils.i("queryDeviceMeetInfo: roomid=$roomid")
+        tvMemberId.text = "人员id：$memberId"
+        tvMemberName.text = "人员名称：$memberName"
+        tvMeetingId.text = "会议id：$meetingId"
+        tvMeetingName.text = "会议名称：$meetingname"
     }
 
     private fun applyPermissions() {
@@ -666,7 +692,7 @@ class MainActivity : AppCompatActivity() {
                 if (SdkConfig.floatingPlayEnable) return
                 InterfacePlaymedia.pbui_Type_MeetMediaPlay.parseFrom(msg.data)?.let {
                     val isMandatory =
-                        it.triggeruserval == InterfaceMacro.Pb_TriggerUsedef.Pb_MEETFILE_PUSH_FLAG_FORCEMODE_VALUE
+                        it.triggeruserval == InterfaceMacro.Pb_TriggerUsedef.Pb_EXCEC_USERDEF_FLAG_NOCREATEWINOPER_VALUE
                     val type = it.mediaid and MAIN_TYPE_BITMASK.toInt()
                     val subType = it.mediaid and SUB_TYPE_BITMASK
                     if (type == MEDIA_FILE_TYPE_AUDIO
@@ -690,7 +716,7 @@ class MainActivity : AppCompatActivity() {
                 if (SdkConfig.floatingPlayEnable) return
                 InterfaceStream.pbui_Type_MeetStreamPlay.parseFrom(msg.data)?.let {
                     val isMandatory =
-                        it.triggeruserval == InterfaceMacro.Pb_TriggerUsedef.Pb_MEETFILE_PUSH_FLAG_FORCEMODE_VALUE
+                        it.triggeruserval == InterfaceMacro.Pb_TriggerUsedef.Pb_EXCEC_USERDEF_FLAG_NOCREATEWINOPER_VALUE
                     DecodeQueue.cleanup(it.res)
                     if (it.res == 0) {
                         ControlViewActivity.jump(this, Bundle().apply {
@@ -756,7 +782,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
-        floatingWindow?.dismiss()
+        floatingWindow?.onDestroy()
         if (mIsBound) {
             unbindService(mConnection)
             mIsBound = false;
@@ -771,5 +797,9 @@ class MainActivity : AppCompatActivity() {
         floatingWindow = FloatingPlayerWindow(applicationContext).apply {
             initial()
         }
+    }
+
+    override fun onBackPressed() {
+
     }
 }

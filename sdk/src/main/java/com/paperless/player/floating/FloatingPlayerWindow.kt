@@ -17,7 +17,6 @@ import android.view.WindowManager
 import android.widget.Button
 import android.widget.CheckBox
 import android.widget.FrameLayout
-import android.widget.RelativeLayout
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
@@ -57,9 +56,8 @@ import com.paperless.sdk.isProjector
 import org.greenrobot.eventbus.EventBus
 import org.greenrobot.eventbus.Subscribe
 import org.greenrobot.eventbus.ThreadMode
-import kotlin.math.abs
 
-class FloatingPlayerWindow(private val context: Context) {
+class FloatingPlayerWindow(context: Context, private val curResId: Int = 0, private val fullEnabled: Boolean = true) {
 
     companion object {
         private const val MIN_SIZE_RATIO = 1 / 3f
@@ -67,12 +65,14 @@ class FloatingPlayerWindow(private val context: Context) {
         private const val RESIZE_HOTSPOT_SIZE_DP = 36
     }
 
-    private val windowManager = context.getSystemService(Context.WINDOW_SERVICE) as WindowManager
+    private val appContext = context.applicationContext
+    private val windowManager = appContext.getSystemService(Context.WINDOW_SERVICE) as WindowManager
     private var floatingView: View? = null
     private var screenPopView: View? = null
     private var playerControlView: PlayerControlView? = null
     private var playerController: PlayerController? = null
     private var isShowing = false
+    private var hasNewPlay = false
 
     // 窗口参数
     private val layoutParams = WindowManager.LayoutParams().apply {
@@ -102,8 +102,8 @@ class FloatingPlayerWindow(private val context: Context) {
                 WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
         format = PixelFormat.TRANSLUCENT
         gravity = Gravity.CENTER
-        width = screenSize().x / 2
-        height = screenSize().y / 2
+        width = screenSize().x / 3 * 2
+        height = screenSize().y / 3 * 2
     }
 
     private val screenSize: Point by lazy { screenSize() }
@@ -135,6 +135,16 @@ class FloatingPlayerWindow(private val context: Context) {
     val memberAdapter: MemberAdapter = MemberAdapter(onlineMembers)
     var projectAdapter: ProjectAdapter = ProjectAdapter(onlineProjects)
 
+    private var mExitFloatingPlayListener: ExitFloatingPlayListener? = null
+
+    interface ExitFloatingPlayListener {
+        fun exitFloatingPlayListener()
+    }
+
+    fun setExitFloatingPlayListener(listener: ExitFloatingPlayListener?) {
+        mExitFloatingPlayListener = listener
+    }
+
     fun initial() {
         EventBus.getDefault().register(this)
         delayQueryDeviceTask()
@@ -156,17 +166,17 @@ class FloatingPlayerWindow(private val context: Context) {
             Pb_TYPE_MEET_INTERFACE_MEDIAPLAY_VALUE -> {
                 InterfacePlaymedia.pbui_Type_MeetMediaPlay.parseFrom(msg.data)?.let {
                     val isMandatory =
-                        it.triggeruserval == InterfaceMacro.Pb_TriggerUsedef.Pb_MEETFILE_PUSH_FLAG_FORCEMODE_VALUE
+                        it.triggeruserval == InterfaceMacro.Pb_TriggerUsedef.Pb_EXCEC_USERDEF_FLAG_NOCREATEWINOPER_VALUE
                     val type = it.mediaid and MAIN_TYPE_BITMASK.toInt()
                     val subType = it.mediaid and SUB_TYPE_BITMASK
                     if (type == MEDIA_FILE_TYPE_AUDIO
                         || type == MEDIA_FILE_TYPE_VIDEO
                         || type == MEDIA_FILE_TYPE_RECORD
                     ) {
-                        DecodeQueue.cleanup(it.res)
                         if (it.res == 0) {
+                            DecodeQueue.cleanup(it.res)
                             val fileName = jni.queryFileName(it.mediaid)
-                            showPlayerWindow(true, fileName)
+                            showPlayerWindow(true, fileName, isMandatory, it.res)
                         }
                     }
                 }
@@ -175,13 +185,13 @@ class FloatingPlayerWindow(private val context: Context) {
             Pb_TYPE_MEET_INTERFACE_STREAMPLAY_VALUE -> {
                 InterfaceStream.pbui_Type_MeetStreamPlay.parseFrom(msg.data)?.let {
                     val isMandatory =
-                        it.triggeruserval == InterfaceMacro.Pb_TriggerUsedef.Pb_MEETFILE_PUSH_FLAG_FORCEMODE_VALUE
-                    DecodeQueue.cleanup(it.res)
+                        it.triggeruserval == InterfaceMacro.Pb_TriggerUsedef.Pb_EXCEC_USERDEF_FLAG_NOCREATEWINOPER_VALUE
                     if (it.res == 0) {
+                        DecodeQueue.cleanup(it.res)
                         currentDeviceId = it.deviceid
                         currentSubId = it.subid
                         val devName = jni.queryDeviceNameById(it.deviceid)
-                        showPlayerWindow(false, devName)
+                        showPlayerWindow(false, devName, isMandatory, it.res)
                     }
                 }
             }
@@ -209,20 +219,23 @@ class FloatingPlayerWindow(private val context: Context) {
                     InterfaceStop.pbui_Type_MeetStopResWork.parseFrom(msg.data)?.let {
                         it.resList.find { it == 0 }?.let {
                             LogUtils.e("流播放停止资源通知")
-                            dismiss()
+                            delayDismiss()
                         }
                     }
                 } else if (msg.method == Pb_METHOD_MEET_INTERFACE_NOTIFY_VALUE) {
                     InterfaceStop.pbui_Type_MeetStopPlay.parseFrom(msg.data)?.let {
                         LogUtils.i("流播放停止通知: res[${it.res}] createdeviceid[${it.createdeviceid}] triggerid[${it.triggerid}]")
-                        dismiss()
+                        if (it.res == 0) {
+                            delayDismiss()
+                        }
                     }
                 }
             }
-            // 参会人、设备、设备会议
+            // 设备、参会人、设备会议
+            Pb_TYPE_MEET_INTERFACE_DEVICEINFO_VALUE,// InterfaceDevice.pbui_Type_MeetDeviceBaseInfo
             Pb_TYPE_MEET_INTERFACE_MEMBER_VALUE,
-            Pb_TYPE_MEET_INTERFACE_DEVICEINFO_VALUE,
             Pb_TYPE_MEET_INTERFACE_DEVICEMEETSTATUS_VALUE -> {
+                LogUtils.i("busEvent:变更通知更新 ${msg.type}")
                 delayQueryDeviceTask()
             }
         }
@@ -266,34 +279,49 @@ class FloatingPlayerWindow(private val context: Context) {
                 }
             }
         }
-        memberAdapter.notifyDataSetChanged()
-        projectAdapter.notifyDataSetChanged()
+        //LogUtils.i("queryOnlineDev: ${onlineMembers.size},${onlineProjects.size}")
+        memberAdapter.updateData(onlineMembers)
+        projectAdapter.updateData(onlineProjects)
     }
 
-    fun showPlayerWindow(isMedia: Boolean = true, title: String = "") {
+    fun showPlayerWindow(isMedia: Boolean = true, title: String = "", isMandatory: Boolean = false, resid: Int = curResId) {
+        LogUtils.i("showPlayerWindow: isMedia=$isMedia,isMandatory=$isMandatory,title=$title")
+        hasNewPlay = true
         if (isShowing) {
             updateTitle(title)
-            playerControlView?.showControlView = isMedia
+            playerControlView?.setupPlayFlag(
+                if (isMedia) {
+                    if (isMandatory) PlayerControlView.video_flag.or(PlayerControlView.mandatory_flag) else PlayerControlView.video_flag
+                } else {
+                    if (isMandatory) PlayerControlView.stream_flag.or(PlayerControlView.mandatory_flag) else PlayerControlView.stream_flag
+                }
+            )
         } else {
-            val surfaceView = SurfaceView(context)
-            show(surfaceView, title, isMedia)
+            val surfaceView = SurfaceView(appContext)
+            show(surfaceView, title, isMedia, isMandatory, resid)
         }
     }
 
-    fun show(surfaceView: SurfaceView, title: String, isMedia: Boolean) {
+    fun show(
+        surfaceView: SurfaceView,
+        title: String,
+        isMedia: Boolean = true,
+        isMandatory: Boolean = false,
+        resid: Int = curResId
+    ) {
         if (isShowing) return
-        playerController = PlayerController(0, onSurfaceReady = {
+        playerController = PlayerController(resid, onSurfaceReady = {
             LogUtils.i("FloatingPlayer: Surface ready, decoding started")
         }).apply {
             initialize(surfaceView)   // 绑定 Surface，内部会监听 surfaceCreated
-            setPlayerViewResetListener(object : PlayerController.PlayerViewResetListener{
+            setPlayerViewResetListener(object : PlayerController.PlayerViewResetListener {
                 override fun onPlayerViewReset(width: Int, height: Int) {
                     // 从解码线程回调的，需要切换到主线程
-                    handler.post { playerControlView?.resetPlayerViewRenderSize(width,height,screenSize().x,screenSize().y) }
+                    handler.post { playerControlView?.resetPlayerViewRenderSize(width, height, screenSize().x, screenSize().y) }
                 }
             })
         }
-        createFloatingView(surfaceView, title, isMedia)
+        createFloatingView(surfaceView, title, isMedia, isMandatory)
         windowManager.addView(floatingView, layoutParams)
         isShowing = true
         LogUtils.i("FloatingPlayerWindow shown")
@@ -304,9 +332,9 @@ class FloatingPlayerWindow(private val context: Context) {
     }
 
     @SuppressLint("ClickableViewAccessibility")
-    private fun createFloatingView(surfaceView: View, title: String, isMedia: Boolean = true) {
+    private fun createFloatingView(surfaceView: View, title: String, isMedia: Boolean = true, isMandatory: Boolean = false) {
         // 根布局：FrameLayout，所有子视图叠加
-        val root = FrameLayout(context).apply {
+        val root = FrameLayout(appContext).apply {
             layoutParams = ViewGroup.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.MATCH_PARENT
@@ -316,8 +344,15 @@ class FloatingPlayerWindow(private val context: Context) {
         }
 
         // 1. PlayerControlView（视频播放控制层）
-        playerControlView = PlayerControlView(context).apply {
-            showControlView = isMedia
+        playerControlView = PlayerControlView(appContext).apply {
+            setupPlayFlag(
+                if (isMedia) {
+                    if (isMandatory) PlayerControlView.video_flag.or(PlayerControlView.mandatory_flag) else PlayerControlView.video_flag
+                } else {
+                    if (isMandatory) PlayerControlView.stream_flag.or(PlayerControlView.mandatory_flag) else PlayerControlView.stream_flag
+                }
+            )
+            setFullEnabled(fullEnabled)
             setFloatingMode(true)
             setPlayView(surfaceView)
             setTitle(title)
@@ -340,11 +375,17 @@ class FloatingPlayerWindow(private val context: Context) {
             }
 
             override fun onBack() {
-                dismiss()
+                jni.stopResource(curResId, SdkVars.localDeviceId)
+//                if (mExitFloatingPlayListener != null) {
+//                    mExitFloatingPlayListener?.exitFloatingPlayListener()
+//                    onDestroy()
+//                } else {
+//                    dismiss()
+//                }
             }
 
-            override fun onBrightnessSlide(percent: Float) {
-
+            override fun onLock(locked: Boolean) {
+                playerControlView?.setDragWindowTouchListener(dragBarTouchListener, locked)
             }
 
             override fun toggleScreen() {
@@ -373,7 +414,7 @@ class FloatingPlayerWindow(private val context: Context) {
         )
 
         // 2. 右下角缩放把手
-        val resizeHandle = View(context).apply {
+        val resizeHandle = View(appContext).apply {
             layoutParams = FrameLayout.LayoutParams(
                 dp2px(RESIZE_HOTSPOT_SIZE_DP),
                 dp2px(RESIZE_HOTSPOT_SIZE_DP)
@@ -391,7 +432,16 @@ class FloatingPlayerWindow(private val context: Context) {
     }
 
     private fun screenPop(start: Boolean) {
-        val inflate = LayoutInflater.from(context).inflate(R.layout.video_screen_pop, null)
+        // 移除旧的弹窗
+        screenPopView?.let {
+            try {
+                windowManager.removeView(it)
+            } catch (e: Exception) {
+                // 已经移除或未添加，忽略
+            }
+            screenPopView = null
+        }
+        val inflate = LayoutInflater.from(appContext).inflate(R.layout.video_screen_pop, null)
         inflate.apply {
             findViewById<TextView>(R.id.tv_title).apply { text = if (start) "开始同屏" else "结束同屏" }
             val cb_force = findViewById<CheckBox>(R.id.cb_force).apply {
@@ -402,19 +452,19 @@ class FloatingPlayerWindow(private val context: Context) {
             val rv_member = findViewById<RecyclerView>(R.id.rv_member)
             val rv_projector = findViewById<RecyclerView>(R.id.rv_projector)
 
-            memberAdapter.setOnItemClickListener(object : MemberAdapter.OnItemClickListener {
-                override fun onItemClick(view: View, position: Int, item: InterfaceMember.pbui_Item_MeetMemberDetailInfo) {
-                    cb_member.isChecked = memberAdapter.isChooseAll()
+            memberAdapter.setOnItemCheckedChangeListener(object : MemberAdapter.OnItemCheckedChangeListener {
+                override fun onCheckedAll(value: Boolean) {
+                    cb_member.isChecked = value
                 }
             })
-            rv_member.layoutManager = StaggeredGridLayoutManager(3, StaggeredGridLayoutManager.VERTICAL)
+            rv_member.layoutManager = StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL)
             rv_member.adapter = memberAdapter
-            projectAdapter.setOnItemClickListener(object : ProjectAdapter.OnItemClickListener {
-                override fun onItemClick(view: View, position: Int, item: InterfaceDevice.pbui_Item_DeviceDetailInfo) {
-                    cb_projector.isChecked = projectAdapter.isChooseAll()
+            projectAdapter.setOnItemCheckedChangeListener(object : ProjectAdapter.OnItemCheckedChangeListener {
+                override fun onCheckedAll(value: Boolean) {
+                    cb_projector.isChecked = value
                 }
             })
-            rv_projector.layoutManager = StaggeredGridLayoutManager(3, StaggeredGridLayoutManager.VERTICAL)
+            rv_projector.layoutManager = StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL)
             rv_projector.adapter = projectAdapter
             cb_member.isChecked = memberAdapter.isChooseAll()
             cb_member.setOnClickListener {
@@ -530,118 +580,6 @@ class FloatingPlayerWindow(private val context: Context) {
         }
     }
 
-
-
-    // 添加成员变量
-    private var dragDirection: Int = 0 // 0=未定, 1=横向为主, 2=纵向为主
-    private var lastResizeUpdateTime = 0L
-    private val RESIZE_UPDATE_INTERVAL_MS = 16L // 约60fps
-    private var pendingResizeUpdate = false
-
-    @SuppressLint("ClickableViewAccessibility")
-    private val resizeHandleTouchListener1 = View.OnTouchListener { _, event ->
-        when (event.action) {
-            MotionEvent.ACTION_DOWN -> {
-                isResizing = true
-                dragDirection = 0 // 重置方向
-                resizeStartWidth = layoutParams.width
-                resizeStartHeight = layoutParams.height
-                resizeStartX = event.rawX.toInt()
-                resizeStartY = event.rawY.toInt()
-                true
-            }
-
-            MotionEvent.ACTION_MOVE -> {
-                if (!isResizing) return@OnTouchListener true
-
-                val dx = event.rawX.toInt() - resizeStartX
-                val dy = event.rawY.toInt() - resizeStartY
-
-                // 首次移动时确定方向（使用较大的阈值避免抖动）
-                if (dragDirection == 0) {
-                    if (abs(dx) > abs(dy) + 20) {
-                        dragDirection = 1
-                    } else if (abs(dy) > abs(dx) + 20) {
-                        dragDirection = 2
-                    } else {
-                        // 未达到阈值，不处理本次事件
-                        return@OnTouchListener true
-                    }
-                }
-
-                // 节流：限制更新频率
-                val now = System.currentTimeMillis()
-                if (now - lastResizeUpdateTime < RESIZE_UPDATE_INTERVAL_MS) {
-                    // 如果已经有pending更新则不重复post，否则post一个延时更新
-                    if (!pendingResizeUpdate) {
-                        pendingResizeUpdate = true
-                        handler.postDelayed({
-                            pendingResizeUpdate = false
-                            performResizeUpdate(dx, dy)
-                        }, RESIZE_UPDATE_INTERVAL_MS)
-                    }
-                    return@OnTouchListener true
-                }
-                lastResizeUpdateTime = now
-                performResizeUpdate(dx, dy)
-                true
-            }
-
-            MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
-                isResizing = false
-                dragDirection = 0
-                pendingResizeUpdate = false
-                // 最后再更新一次确保位置准确
-                performResizeUpdate(0, 0) // 使用当前实际尺寸
-                true
-            }
-            else -> false
-        }
-    }
-
-    private fun performResizeUpdate(dx: Int, dy: Int) {
-        // 获取视频宽高比
-        val aspectRatio = playerController?.getVideoAspectRatio() ?: (16f / 9f)
-
-        // 根据锁定方向计算目标宽高
-        var targetWidth = layoutParams.width
-        var targetHeight = layoutParams.height
-
-        when (dragDirection) {
-            1 -> { // 横向为主：由宽度决定高度
-                val newWidth = (resizeStartWidth + dx).coerceIn(minWindowWidth(), screenSize.x)
-                targetWidth = newWidth
-                targetHeight = (newWidth / aspectRatio).toInt().coerceIn(minWindowHeight(), screenSize.y)
-                // 若高度触边界，则反向修正宽度
-                if (targetHeight == minWindowHeight() || targetHeight == screenSize.y) {
-                    targetWidth = (targetHeight * aspectRatio).toInt().coerceIn(minWindowWidth(), screenSize.x)
-                    targetHeight = (targetWidth / aspectRatio).toInt() // 再次修正避免误差
-                }
-            }
-            2 -> { // 纵向为主：由高度决定宽度
-                val newHeight = (resizeStartHeight + dy).coerceIn(minWindowHeight(), screenSize.y)
-                targetHeight = newHeight
-                targetWidth = (newHeight * aspectRatio).toInt().coerceIn(minWindowWidth(), screenSize.x)
-                if (targetWidth == minWindowWidth() || targetWidth == screenSize.x) {
-                    targetHeight = (targetWidth / aspectRatio).toInt().coerceIn(minWindowHeight(), screenSize.y)
-                    targetWidth = (targetHeight * aspectRatio).toInt()
-                }
-            }
-            else -> return // 方向未确定不更新
-        }
-
-        // 最终确保比例严格一致（可能有1像素偏差可忽略）
-        layoutParams.width = targetWidth
-        layoutParams.height = targetHeight
-        isFullscreen = false
-        try {
-            windowManager.updateViewLayout(floatingView, layoutParams)
-        } catch (e: Exception) {
-            LogUtils.e("Resize update failed", e)
-        }
-    }
-
-
     private fun minWindowWidth() = (screenSize.x * MIN_SIZE_RATIO).toInt()
     private fun minWindowHeight() = (screenSize.y * MIN_SIZE_RATIO).toInt()
 
@@ -676,7 +614,24 @@ class FloatingPlayerWindow(private val context: Context) {
         floatingView?.visibility = View.VISIBLE
     }
 
-    fun dismiss() {
+    fun delayDismiss() {
+        hasNewPlay = false
+        handler.postDelayed({
+            LogUtils.i("delayDismiss: hasNewPlay=$hasNewPlay")
+            if (!hasNewPlay) {
+                if (mExitFloatingPlayListener != null) {
+                    // 停止后立马进行播放是无效的，需要延迟
+                    mExitFloatingPlayListener?.exitFloatingPlayListener()
+                    onDestroy()
+                } else {
+                    dismiss()
+                }
+            }
+        }, 500L)
+    }
+
+    private fun dismiss() {
+        handler.removeCallbacksAndMessages(null)
         if (isShowing && floatingView != null) {
             // 恢复窗口全屏
             layoutParams.width = screenSize.x
@@ -684,23 +639,33 @@ class FloatingPlayerWindow(private val context: Context) {
             layoutParams.x = 0
             layoutParams.y = 0
 
-            playerControlView?.release()
             windowManager.removeView(floatingView)
             floatingView = null
-            playerControlView = null
             isShowing = false
             jni.stopResource(0, SdkVars.localDeviceId)
             LogUtils.i("FloatingPlayerWindow dismissed")
         }
+
+        playerControlView?.callback = null
+        playerControlView?.release()
+        playerControlView = null
+        playerController?.setPlayerViewResetListener(null)
         playerController?.release()
         playerController = null
+        memberAdapter.setOnItemCheckedChangeListener(null)
+        projectAdapter.setOnItemCheckedChangeListener(null)
 
         if (screenPopView != null) {
-            windowManager.removeView(screenPopView)
+            try {
+                windowManager.removeView(screenPopView)
+            } catch (e: Exception) {
+
+            }
             screenPopView = null
             LogUtils.i("FloatingPlayerWindow remove screenPopView")
         }
 
+        mExitFloatingPlayListener = null
         currentDeviceId = 0
         currentSubId = 0
         currentMediaId = 0
@@ -717,7 +682,7 @@ class FloatingPlayerWindow(private val context: Context) {
 
     fun getPlayerControlView() = playerControlView
 
-    private fun dp2px(dp: Int) = (dp * context.resources.displayMetrics.density).toInt()
+    private fun dp2px(dp: Int) = (dp * appContext.resources.displayMetrics.density).toInt()
     private fun screenSize(): Point {
         val point = Point()
         windowManager.defaultDisplay.getSize(point)
@@ -725,6 +690,7 @@ class FloatingPlayerWindow(private val context: Context) {
     }
 
     fun onDestroy() {
+        LogUtils.i("onDestroy: ")
         dismiss()
         if (EventBus.getDefault().isRegistered(this)) {
             EventBus.getDefault().unregister(this)

@@ -258,10 +258,10 @@ abstract class VideoControlView(context: Context, attrs: AttributeSet?, defStyle
      */
     protected fun lockTouchLogic() {
         if (mLockCurScreen) {
-            mLockScreen!!.setImageResource(R.drawable.unlock)
+            mLockScreen!!.setImageResource(R.drawable.vector_video_unlock)
             mLockCurScreen = false
         } else {
-            mLockScreen!!.setImageResource(R.drawable.lock)
+            mLockScreen!!.setImageResource(R.drawable.vector_video_lock)
             mLockCurScreen = true
             hideAllWidget()
         }
