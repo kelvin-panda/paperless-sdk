@@ -15,7 +15,6 @@ import android.os.IBinder
 import android.provider.Settings.ACTION_USAGE_ACCESS_SETTINGS
 import android.util.DisplayMetrics
 import android.view.Gravity
-import android.view.SurfaceView
 import android.view.WindowManager
 import android.widget.Button
 import android.widget.CheckBox
@@ -42,7 +41,6 @@ import com.mogujie.tt.protobuf.InterfaceMacro
 import com.mogujie.tt.protobuf.InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_DEVICEFACESHOW_VALUE
 import com.mogujie.tt.protobuf.InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_DEVICEINFO_VALUE
 import com.mogujie.tt.protobuf.InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_DEVICEVALIDATE_VALUE
-import com.mogujie.tt.protobuf.InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_MEDIAPLAYPOSINFO_VALUE
 import com.mogujie.tt.protobuf.InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_MEDIAPLAY_VALUE
 import com.mogujie.tt.protobuf.InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_READY_VALUE
 import com.mogujie.tt.protobuf.InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_STREAMPLAY_VALUE
@@ -51,8 +49,6 @@ import com.mogujie.tt.protobuf.InterfaceStream
 import com.paperless.bus.EventBusMessage
 import com.paperless.bus.SdkBusType
 import com.paperless.player.DecodeQueue
-import com.paperless.player.PlayerController
-import com.paperless.player.floating.FloatingPlayerWindow
 import com.paperless.sdk.Call
 import com.paperless.sdk.MAIN_TYPE_BITMASK
 import com.paperless.sdk.MEDIA_FILE_TYPE_AUDIO
@@ -68,7 +64,6 @@ import com.paperless.sdk.SdkVars.Companion.localDeviceId
 import com.paperless.util.IniUtil
 import com.xlk.paperless.sdk.helper.AppNetworkMonitor
 import com.xlk.paperless.sdk.screen.ScreenRecordService
-import com.xlk.paperless.sdk.service.ForegroundService
 import com.xlk.paperless.sdk.service.ScreenShareService
 import org.greenrobot.eventbus.EventBus
 import org.greenrobot.eventbus.Subscribe
@@ -176,7 +171,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private val applyScreenRecorder = registerForActivityResult<Intent, ActivityResult>(
+    private val applyScreenRecorder = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
     ) { result: ActivityResult? ->
         if (result != null) {
@@ -500,9 +495,6 @@ class MainActivity : AppCompatActivity() {
         //修改本机界面状态
         Jni.modPageStatus(InterfaceMacro.Pb_MeetFaceStatus.Pb_MemState_MainFace_VALUE)
         queryDeviceMeetInfo()
-        if (SdkConfig.floatingPlayEnable) {
-            createFloatingPlayer()
-        }
     }
 
     private fun queryDeviceMeetInfo() {
@@ -783,21 +775,11 @@ class MainActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
-        floatingWindow?.onDestroy()
         if (mIsBound) {
             unbindService(mConnection)
             mIsBound = false;
         }
         closeNetworkMonitorWindow()
-    }
-
-    private var floatingWindow: FloatingPlayerWindow? = null
-
-    private fun createFloatingPlayer() {
-        // 创建悬浮窗
-        floatingWindow = FloatingPlayerWindow.getInstance(applicationContext).apply {
-            initial()
-        }
     }
 
     override fun onBackPressed() {

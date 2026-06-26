@@ -7,6 +7,7 @@ import android.graphics.Point
 import android.os.Build
 import android.os.Handler
 import android.os.Looper
+import android.view.ContextThemeWrapper
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.MotionEvent
@@ -485,7 +486,13 @@ class FloatingPlayerWindow private constructor(context: Context) {
             }
             screenPopView = null
         }
-        val inflate = LayoutInflater.from(appContext).inflate(R.layout.video_screen_pop, null)
+        val themeWrapper = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            ContextThemeWrapper(appContext, android.R.style.Theme_DeviceDefault_DayNight)
+        } else {
+            ContextThemeWrapper(appContext, android.R.style.Theme_DeviceDefault_Light_Dialog)
+        }
+        val inflate = LayoutInflater.from(themeWrapper)
+            .inflate(R.layout.video_screen_pop,null)
         inflate.apply {
             findViewById<TextView>(R.id.tv_title).apply { text = if (start) "开始同屏" else "结束同屏" }
             val cb_force = findViewById<CheckBox>(R.id.cb_force).apply {

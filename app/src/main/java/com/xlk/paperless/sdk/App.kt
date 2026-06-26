@@ -5,6 +5,7 @@ import android.app.Application
 import android.os.Bundle
 import com.blankj.utilcode.util.CrashUtils
 import com.blankj.utilcode.util.LogUtils
+import com.paperless.player.floating.FloatingPlayerWindow
 import com.paperless.sdk.Paperless
 import com.paperless.sdk.SdkConfig
 import com.paperless.sdk.SdkVars
@@ -108,5 +109,10 @@ class App : Application() {
                 LogUtils.i(TAG, "onActivityPostDestroyed: $activity")
             }
         })
+        if (SdkConfig.floatingPlayEnable) {
+            FloatingPlayerWindow.getInstance(applicationContext).apply {
+                initial()
+            }
+        }
     }
 }
