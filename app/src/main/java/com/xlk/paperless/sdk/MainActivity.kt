@@ -69,6 +69,7 @@ import com.paperless.util.IniUtil
 import com.xlk.paperless.sdk.helper.AppNetworkMonitor
 import com.xlk.paperless.sdk.screen.ScreenRecordService
 import com.xlk.paperless.sdk.service.ForegroundService
+import com.xlk.paperless.sdk.service.ScreenShareService
 import org.greenrobot.eventbus.EventBus
 import org.greenrobot.eventbus.Subscribe
 import org.greenrobot.eventbus.ThreadMode
@@ -188,34 +189,34 @@ class MainActivity : AppCompatActivity() {
 //                LogUtils.d("进行绑定服务")
 
 
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                    startForegroundService(
-                        Intent(this@MainActivity, ForegroundService::class.java)
-                            .apply {
-                                putExtra("intent_extra_code", result.resultCode)
-                                putExtra("intent_extra_data", result.data)
-                            })
-                } else {
-                    startService(
-                        Intent(this@MainActivity, ForegroundService::class.java)
-                            .apply {
-                                putExtra("intent_extra_code", result.resultCode)
-                                putExtra("intent_extra_data", result.data)
-                            })
-                }
-
-                // 3. 获取 MediaProjection
-//                val pm = getSystemService(MEDIA_PROJECTION_SERVICE) as MediaProjectionManager
-//                val mediaProjection = pm.getMediaProjection(resultCode, resultData!!)
-//                val intent = Intent(this, ScreenShareService::class.java).apply {
-//                    action = "START_SHARE"
-//                    putExtra("media_projection", mediaProjection) // 授权返回的 Intent
-//                    putExtra("config", ScreenShareService.Config(
-//                        width = 720, height = 1280, frameRate = 15,
-//                        bitRate = 800_000, iFrameInterval = 2, enableAudio = false
-//                    ))
+//                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+//                    startForegroundService(
+//                        Intent(this@MainActivity, ForegroundService::class.java)
+//                            .apply {
+//                                putExtra("intent_extra_code", result.resultCode)
+//                                putExtra("intent_extra_data", result.data)
+//                            })
+//                } else {
+//                    startService(
+//                        Intent(this@MainActivity, ForegroundService::class.java)
+//                            .apply {
+//                                putExtra("intent_extra_code", result.resultCode)
+//                                putExtra("intent_extra_data", result.data)
+//                            })
 //                }
-//                startForegroundService(intent)
+
+//                 3. 获取 MediaProjection
+
+                val intent = Intent(this, ScreenShareService::class.java).apply {
+                    action = ScreenShareService.ACTION_START
+                    putExtra(ScreenShareService.EXTRA_RESULT_CODE,resultCode)
+                    putExtra(ScreenShareService.EXTRA_RESULT_DATA,resultData)
+                }
+                if (Build.VERSION.SDK_INT >= VERSION_CODES.O) {
+                    startForegroundService(intent)
+                }else{
+                    startService(intent)
+                }
 
 //                launchService(result.resultCode, result.data!!)
             }

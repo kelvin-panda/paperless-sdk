@@ -394,11 +394,11 @@ public class ScreenShareService extends Service {
             startForeground(NOTIFICATION_ID, buildRecordingNotification());
 
             // 使用传递的参数或默认值
-            mWidth = intent.getIntExtra(EXTRA_WIDTH, 1280);
-            mHeight = intent.getIntExtra(EXTRA_HEIGHT, 720);
+            mWidth = intent.getIntExtra(EXTRA_WIDTH, 1920);
+            mHeight = intent.getIntExtra(EXTRA_HEIGHT, 1080);
             mFrameRate = intent.getIntExtra(EXTRA_FRAME_RATE, 20);
-            mBitrate = intent.getIntExtra(EXTRA_BITRATE, 2000_000);
-            mIFrameInterval = intent.getIntExtra(EXTRA_IFRAME_INTERVAL, 2);
+            mBitrate = intent.getIntExtra(EXTRA_BITRATE, 1000_000);
+            mIFrameInterval = intent.getIntExtra(EXTRA_IFRAME_INTERVAL, 1);
             mDpi = intent.getIntExtra(EXTRA_DPI, dpi);
 
             LogUtils.i(TAG, "Recording params - width: " + mWidth +
@@ -768,9 +768,27 @@ public class ScreenShareService extends Service {
                 + ", range=" + mComplexityRange);
     }
 
+    public static String formatBandwidth(long bytesPerSecond) {
+        if (bytesPerSecond < 1024) {
+            return bytesPerSecond + " B/s";
+        }
+        double kb = bytesPerSecond / 1024.0;
+        if (kb < 1024) {
+            return String.format("%.1f KB/s", kb);
+        }
+        double mb = kb / 1024.0;
+        return String.format("%.2f MB/s", mb);
+    }
+
     private void pushFrame() {
         new Thread(() -> {
             try {
+
+                long totalBytes = 0L;         // 此次同屏推送的总字节数
+                long bytesPerSecond = 0L;     // 每秒推送字节数，计算带宽使用
+                long secCodingCount = 0;     // 每秒编译帧的数量
+                long secPushCount = 0;     // 每秒推送帧的数量
+
                 LogUtils.e(TAG, "开始推送数据：" + mIsRunning.get());
                 byte[] lastFramePacket = null;
                 long frameIntervalMs = 1000 / mFrameRate; // 帧间隔（毫秒）
@@ -780,10 +798,29 @@ public class ScreenShareService extends Service {
                 int secCount = 0;
                 int pushFps = 0;
                 long lastSecPushMs = 0;
+                long startTimeMs = System.currentTimeMillis();
 
                 while (mIsRunning.get() || !decodeQueue.isEmpty()) {
                     // 等待到下一帧时间点
                     long now = System.currentTimeMillis();
+                    if (now - startTimeMs >= 1000) {
+                        LogUtils.e(TAG, "数据计算：" + bytesPerSecond + " bytes (" + formatBandwidth(bytesPerSecond) + ")," + secPushCount + " f/s");
+
+                        if (bytesPerSecond >= 1000 * 1024) {
+                            LogUtils.e(TAG, "数据计算：阈值5：1M/s");
+                        } else if (bytesPerSecond >= 800 * 1024) {
+                            LogUtils.e(TAG, "数据计算：阈值4：800KB/s");
+                        } else if (bytesPerSecond >= 500 * 1024) {
+                            LogUtils.e(TAG, "数据计算：阈值3：500KB/s");
+                        } else if (bytesPerSecond >= 300 * 1024) {
+                            LogUtils.e(TAG, "数据计算：阈值2：300KB/s");
+                        } else if (bytesPerSecond >= 200 * 1024) {
+                            LogUtils.e(TAG, "数据计算：阈值1：200KB/s");
+                        }
+                        bytesPerSecond = 0;
+                        secPushCount = 0;
+                        startTimeMs = now;
+                    }
                     long elapsed = now - lastProcessTime;
                     if (elapsed < frameIntervalMs) {
                         Thread.sleep(frameIntervalMs - elapsed);
@@ -894,6 +931,8 @@ public class ScreenShareService extends Service {
 
                                 if (frameData != null) {
                                     sendEncodedFrame(frameData, isKey, ptsUs);
+                                    bytesPerSecond += frameData.length; // 累加每秒推送字节数
+                                    secPushCount++;                     // 累加每秒推送帧数量
                                     if (isKey) {
                                         mLastKeyFrameMs = System.currentTimeMillis();
                                     }
@@ -1657,7 +1696,9 @@ public class ScreenShareService extends Service {
             tokens -= bytes;
         }
 
-        /** 按时间补充令牌，最多不超过桶容量。 */
+        /**
+         * 按时间补充令牌，最多不超过桶容量。
+         */
         private void refill() {
             long nowNs = System.nanoTime();
             long elapsedNs = nowNs - lastRefillNs;
@@ -1669,13 +1710,17 @@ public class ScreenShareService extends Service {
             }
         }
 
-        /** 动态调整补充速率（动态码率时调用）。 */
+        /**
+         * 动态调整补充速率（动态码率时调用）。
+         */
         synchronized void updateRefillRate(int newBitrateBps) {
             refill();
             this.refillRateBytesPerSec = newBitrateBps / 8;
         }
 
-        /** 动态调整桶容量（与构造函数公式一致）。 */
+        /**
+         * 动态调整桶容量（与构造函数公式一致）。
+         */
         synchronized void updateCapacity(int newBitrateBps, int newMaxBitrateBps) {
             this.capacityBytes = Math.max(newMaxBitrateBps / 8, newBitrateBps / 8 * 2);
         }
@@ -1698,7 +1743,6 @@ public class ScreenShareService extends Service {
         mTokenBucket = null;
         mThrottleEnabled = false;
     }
-
 
 
     /**

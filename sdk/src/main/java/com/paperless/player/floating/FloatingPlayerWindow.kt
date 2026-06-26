@@ -21,6 +21,7 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import com.blankj.utilcode.util.LogUtils
+import com.blankj.utilcode.util.ToastUtils
 import com.mogujie.tt.protobuf.InterfaceDevice
 import com.mogujie.tt.protobuf.InterfaceMacro
 import com.mogujie.tt.protobuf.InterfaceMacro.Pb_Method.Pb_METHOD_MEET_INTERFACE_CLOSE_VALUE
@@ -531,6 +532,13 @@ class FloatingPlayerWindow private constructor(context: Context) {
                 if (ids.isNotEmpty()) {
                     if (start) {
                         if (currentDeviceId != 0 && currentSubId != 0) {
+                            if (ids.contains(currentDeviceId)) {
+                                ids.removeAt(ids.indexOf(currentDeviceId))
+                                LogUtils.i("视频源与同屏目标相同,进行剔除")
+                                if (ids.isEmpty()) {
+                                    ToastUtils.showShort("视频源与同屏目标相同")
+                                }
+                            }
                             jni.streamPlay(currentDeviceId, currentSubId, 0, ids, 0, triggeruserval)
                         } else if (currentMediaId != 0) {
                             jni.mediaPlay(0, currentMediaId, ids, 0, currentProgress, triggeruserval)

@@ -32,9 +32,9 @@
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:background="#99000000"
-        android:paddingBottom="20dp"
         android:gravity="center_vertical"
         android:orientation="vertical"
+        android:paddingBottom="20dp"
         android:visibility="visible"
         tools:visibility="visible">
 
@@ -96,12 +96,6 @@
         android:gravity="center_vertical"
         tools:visibility="visible">
 
-        <ImageView
-            android:id="@+id/back"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            android:scaleType="centerInside"
-            android:src="@drawable/video_back" />
 
         <TextView
             android:id="@+id/title"
@@ -110,6 +104,7 @@
             android:layout_weight="1"
             android:gravity="center_vertical"
             android:lines="1"
+            android:paddingStart="5dp"
             android:singleLine="true"
             android:textColor="@android:color/white"
             android:textSize="18sp"
@@ -129,7 +124,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginEnd="10dp"
-            android:padding="5dp"
+            android:gravity="center"
+            android:padding="2dp"
             android:background="@drawable/video_button"
             android:text="发起同屏"
             android:textColor="@android:color/white" />
@@ -138,8 +134,9 @@
             android:id="@+id/stopScreen"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:padding="5dp"
             android:layout_marginEnd="10dp"
+            android:padding="2dp"
+            android:gravity="center"
             android:background="@drawable/video_button"
             android:text="结束同屏"
             android:textColor="@android:color/white" />
@@ -151,6 +148,13 @@
             android:scaleType="centerInside"
             android:src="@drawable/video_full"
             android:visibility="visible" />
+
+        <ImageView
+            android:id="@+id/back"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:scaleType="centerInside"
+            android:src="@drawable/vector_video_close" />
 
         <ImageView
             android:id="@+id/more"
@@ -178,25 +182,25 @@
         android:layout_centerVertical="true"
         android:layout_gravity="center_vertical" />
 
-<!--    <ImageView-->
-<!--        android:id="@+id/lock_screen"-->
-<!--        android:layout_width="30dp"-->
-<!--        android:layout_height="30dp"-->
-<!--        android:layout_alignParentRight="true"-->
-<!--        android:layout_centerVertical="true"-->
-<!--        android:layout_marginRight="50dp"-->
-<!--        android:scaleType="centerInside"-->
-<!--        android:src="@drawable/vector_video_lock"-->
-<!--        android:visibility="gone"-->
-<!--        tools:visibility="visible" />-->
+    <!--    <ImageView-->
+    <!--        android:id="@+id/lock_screen"-->
+    <!--        android:layout_width="30dp"-->
+    <!--        android:layout_height="30dp"-->
+    <!--        android:layout_alignParentRight="true"-->
+    <!--        android:layout_centerVertical="true"-->
+    <!--        android:layout_marginRight="50dp"-->
+    <!--        android:scaleType="centerInside"-->
+    <!--        android:src="@drawable/vector_video_lock"-->
+    <!--        android:visibility="gone"-->
+    <!--        tools:visibility="visible" />-->
 
     <ImageView
         android:id="@+id/ivDrag"
         android:layout_width="36dp"
         android:layout_height="36dp"
-        android:visibility="gone"
-        tools:visibility="visible"
         android:layout_alignParentEnd="true"
         android:layout_alignParentBottom="true"
-        android:src="@drawable/video_shrink" />
+        android:src="@drawable/video_shrink"
+        android:visibility="gone"
+        tools:visibility="visible" />
 </RelativeLayout>

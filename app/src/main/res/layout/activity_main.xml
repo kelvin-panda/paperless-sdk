@@ -330,7 +330,7 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:inputType="number"
-                android:text="17858591" />
+                android:text="17825792" />
 
             <Button
                 android:id="@+id/btn_start_record"
