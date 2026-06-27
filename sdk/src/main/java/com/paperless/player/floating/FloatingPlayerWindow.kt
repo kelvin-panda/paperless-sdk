@@ -7,40 +7,24 @@ import android.graphics.Point
 import android.os.Build
 import android.os.Handler
 import android.os.Looper
-import android.util.AttributeSet
-import android.view.ContextThemeWrapper
 import android.view.Gravity
-import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.SurfaceView
 import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
-import android.widget.Button
-import android.widget.CheckBox
 import android.widget.FrameLayout
-import android.widget.TextView
-import androidx.recyclerview.widget.RecyclerView
-import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import com.blankj.utilcode.util.LogUtils
-import com.blankj.utilcode.util.ToastUtils
-import com.mogujie.tt.protobuf.InterfaceDevice
 import com.mogujie.tt.protobuf.InterfaceMacro
 import com.mogujie.tt.protobuf.InterfaceMacro.Pb_Method.Pb_METHOD_MEET_INTERFACE_CLOSE_VALUE
 import com.mogujie.tt.protobuf.InterfaceMacro.Pb_Method.Pb_METHOD_MEET_INTERFACE_NOTIFY_VALUE
-import com.mogujie.tt.protobuf.InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_DEVICEINFO_VALUE
-import com.mogujie.tt.protobuf.InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_DEVICEMEETSTATUS_VALUE
 import com.mogujie.tt.protobuf.InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_MEDIAPLAYPOSINFO_VALUE
 import com.mogujie.tt.protobuf.InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_MEDIAPLAY_VALUE
-import com.mogujie.tt.protobuf.InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_MEMBER_VALUE
 import com.mogujie.tt.protobuf.InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_STOPPLAY_VALUE
 import com.mogujie.tt.protobuf.InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_STREAMPLAY_VALUE
-import com.mogujie.tt.protobuf.InterfaceMember
 import com.mogujie.tt.protobuf.InterfacePlaymedia
 import com.mogujie.tt.protobuf.InterfaceStop
 import com.mogujie.tt.protobuf.InterfaceStream
-import com.paperless.MemberAdapter
-import com.paperless.ProjectAdapter
 import com.paperless.bus.Bus
 import com.paperless.bus.EventBusMessage
 import com.paperless.bus.SdkBusType
@@ -56,7 +40,6 @@ import com.paperless.sdk.MEDIA_FILE_TYPE_VIDEO
 import com.paperless.sdk.R
 import com.paperless.sdk.SUB_TYPE_BITMASK
 import com.paperless.sdk.SdkVars
-import com.paperless.sdk.isProjector
 import org.greenrobot.eventbus.EventBus
 import org.greenrobot.eventbus.Subscribe
 import org.greenrobot.eventbus.ThreadMode
@@ -86,8 +69,8 @@ class FloatingPlayerWindow private constructor(context: Context) {
 
     private val appContext = context.applicationContext
     private val windowManager = appContext.getSystemService(Context.WINDOW_SERVICE) as WindowManager
+    private val handler = Handler(Looper.getMainLooper())
     private var floatingView: View? = null
-    private var screenPopView: View? = null
     private var playerControlView: PlayerControlView? = null
     private var playerController: PlayerController? = null
     private var isShowing = false
@@ -108,21 +91,6 @@ class FloatingPlayerWindow private constructor(context: Context) {
         height = screenSize().y
         x = 0
         y = 0
-    }
-
-    // 窗口参数
-    private val popLayoutParams = WindowManager.LayoutParams().apply {
-        type = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY
-        } else {
-            WindowManager.LayoutParams.TYPE_PHONE
-        }
-        flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or
-                WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
-        format = PixelFormat.TRANSLUCENT
-        gravity = Gravity.CENTER
-        width = screenSize().x / 3 * 2
-        height = screenSize().y / 3 * 2
     }
 
     private val screenSize: Point by lazy { screenSize() }
@@ -148,11 +116,6 @@ class FloatingPlayerWindow private constructor(context: Context) {
     var currentSubId = 0
     var currentMediaId = 0
     var currentProgress = 0
-    val tempMembers: MutableList<InterfaceMember.pbui_Item_MeetMemberDetailInfo> = mutableListOf()
-    val onlineMembers: MutableList<InterfaceMember.pbui_Item_MeetMemberDetailInfo> = mutableListOf()
-    val onlineProjects: MutableList<InterfaceDevice.pbui_Item_DeviceDetailInfo> = mutableListOf()
-    val memberAdapter: MemberAdapter = MemberAdapter(onlineMembers)
-    var projectAdapter: ProjectAdapter = ProjectAdapter(onlineProjects)
 
     private var mExitFloatingPlayListener: ExitFloatingPlayListener? = null
 
@@ -192,7 +155,6 @@ class FloatingPlayerWindow private constructor(context: Context) {
         if (!EventBus.getDefault().isRegistered(this)) {
             EventBus.getDefault().register(this)
         }
-        delayQueryDeviceTask()
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
@@ -276,57 +238,7 @@ class FloatingPlayerWindow private constructor(context: Context) {
                     }
                 }
             }
-            // 设备、参会人、设备会议
-            Pb_TYPE_MEET_INTERFACE_DEVICEINFO_VALUE,// InterfaceDevice.pbui_Type_MeetDeviceBaseInfo
-            Pb_TYPE_MEET_INTERFACE_MEMBER_VALUE,
-            Pb_TYPE_MEET_INTERFACE_DEVICEMEETSTATUS_VALUE -> {
-                LogUtils.i("busEvent:变更通知更新 ${msg.type}")
-                delayQueryDeviceTask()
-            }
         }
-    }
-
-    private val handler = Handler(Looper.getMainLooper())
-    private var delayQueryDeviceTask = Runnable {
-        queryOnlineDev()
-    }
-
-    private fun delayQueryDeviceTask() {
-        handler.removeCallbacks(delayQueryDeviceTask)
-        handler.postDelayed(delayQueryDeviceTask, 1000L)
-    }
-
-    private fun queryOnlineDev() {
-        tempMembers.clear()
-        onlineMembers.clear()
-        onlineProjects.clear()
-        if (!jni.checkCache(InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_MEMBER_VALUE))
-            jni.cache(InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_MEMBER_VALUE)
-        if (!jni.checkCache(InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_MEMBERPERMISSION_VALUE))
-            jni.cache(InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_MEMBERPERMISSION_VALUE)
-        if (!jni.checkCache(InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_ROOM_VALUE))
-            jni.cache(InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_ROOM_VALUE)
-        if (!jni.checkCache(InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_MEETSEAT_VALUE))
-            jni.cache(InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_MEETSEAT_VALUE)
-        jni.queryMemberDetail()?.let {
-            tempMembers.addAll(it.itemList)
-        }
-        jni.queryDevice()?.let {
-            it.pdevList.filter { it.netstate == 1 }.forEach { dev ->
-                if (dev.devcieid.isProjector()) {
-                    onlineProjects.add(dev)
-                } else {
-                    if (dev.devcieid != SdkVars.localDeviceId && dev.facestate == 1 && dev.meetingid == SdkVars.localMeetingId) {
-                        tempMembers.find { dev.devcieid == it.devid }?.let {
-                            onlineMembers.add(it)
-                        }
-                    }
-                }
-            }
-        }
-        //LogUtils.i("queryOnlineDev: ${onlineMembers.size},${onlineProjects.size}")
-        memberAdapter.updateData(onlineMembers)
-        projectAdapter.updateData(onlineProjects)
     }
 
     fun showPlayerWindow(isMedia: Boolean = true, title: String = "", isMandatory: Boolean = false, resid: Int = curResId) {
@@ -443,19 +355,17 @@ class FloatingPlayerWindow private constructor(context: Context) {
                 when (itemId) {
                     // 开始同屏
                     1 -> {
-//                        Bus.postVararg(
-//                            SdkBusType.floating_start_screen_share,
-//                            currentDeviceId,
-//                            currentSubId,
-//                            currentMediaId,
-//                            currentProgress
-//                        )
-                        screenPop(true)
+                        Bus.postVararg(
+                            SdkBusType.floating_start_screen_share,
+                            currentDeviceId,
+                            currentSubId,
+                            currentMediaId,
+                            currentProgress
+                        )
                     }
                     // 结束同屏
                     2 -> {
-//                        Bus.post(SdkBusType.floating_stop_screen_share)
-                        screenPop(false)
+                        Bus.post(SdkBusType.floating_stop_screen_share)
                     }
                 }
             }
@@ -486,112 +396,6 @@ class FloatingPlayerWindow private constructor(context: Context) {
         floatingView = root
     }
 
-    private fun screenPop(start: Boolean) {
-        // 移除旧的弹窗
-        screenPopView?.let {
-            try {
-                windowManager.removeView(it)
-            } catch (e: Exception) {
-                // 已经移除或未添加，忽略
-            }
-            screenPopView = null
-        }
-
-        val themeWrapper = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            ContextThemeWrapper(appContext, android.R.style.Theme_DeviceDefault_DayNight)
-        } else {
-            ContextThemeWrapper(appContext, android.R.style.Theme_DeviceDefault_Light)
-        }
-//        val inflate =
-//            LayoutInflater.from(ContextThemeWrapper(appContext, androidx.appcompat.R.style.Theme_AppCompat_DayNight_Dialog))
-//                .inflate(R.layout.video_screen_pop, null)
-
-        // ★ 克隆一个新的 LayoutInflater，并移除其 Factory
-        val inflater = LayoutInflater.from(themeWrapper).cloneInContext(themeWrapper)
-        inflater.factory = object : LayoutInflater.Factory2{
-            override fun onCreateView(p0: String, p1: Context, p2: AttributeSet): View? {
-                return null
-            }
-
-            override fun onCreateView(p0: View?, p1: String, p2: Context, p3: AttributeSet): View? {
-                return null
-            }
-        }
-
-        val inflate = inflater.inflate(R.layout.video_screen_pop, null)
-
-        inflate.apply {
-            findViewById<TextView>(R.id.tv_title).apply { text = if (start) "开始同屏" else "结束同屏" }
-            val cb_force = findViewById<CheckBox>(R.id.cb_force).apply {
-                visibility = if (start) View.VISIBLE else View.GONE
-            }
-            val cb_member = findViewById<CheckBox>(R.id.cb_member)
-            val cb_projector = findViewById<CheckBox>(R.id.cb_projector)
-            val rv_member = findViewById<RecyclerView>(R.id.rv_member)
-            val rv_projector = findViewById<RecyclerView>(R.id.rv_projector)
-
-            memberAdapter.setOnItemCheckedChangeListener(object : MemberAdapter.OnItemCheckedChangeListener {
-                override fun onCheckedAll(value: Boolean) {
-                    cb_member.isChecked = value
-                }
-            })
-            rv_member.layoutManager = StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL)
-            rv_member.adapter = memberAdapter
-            projectAdapter.setOnItemCheckedChangeListener(object : ProjectAdapter.OnItemCheckedChangeListener {
-                override fun onCheckedAll(value: Boolean) {
-                    cb_projector.isChecked = value
-                }
-            })
-            rv_projector.layoutManager = StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL)
-            rv_projector.adapter = projectAdapter
-            cb_member.isChecked = memberAdapter.isChooseAll()
-            cb_member.setOnClickListener {
-                val check = cb_member.isChecked
-                cb_member.isChecked = check
-                memberAdapter.chooseAll(check)
-            }
-            cb_projector.isChecked = projectAdapter.isChooseAll()
-            cb_projector.setOnClickListener {
-                val check = cb_projector.isChecked
-                cb_projector.isChecked = check
-                projectAdapter.chooseAll(check)
-            }
-
-            findViewById<Button>(R.id.btn_ensure).setOnClickListener {
-                val ids = memberAdapter.selectedIds
-                ids.addAll(projectAdapter.selectedIds)
-                LogUtils.i("${if (start) "开始同屏" else "结束同屏"}: ${ids.size}")
-                val triggeruserval =
-                    if (cb_force.isChecked) InterfaceMacro.Pb_TriggerUsedef.Pb_EXCEC_USERDEF_FLAG_NOCREATEWINOPER_VALUE else 0
-                if (ids.isNotEmpty()) {
-                    if (start) {
-                        if (currentDeviceId != 0 && currentSubId != 0) {
-                            if (ids.contains(currentDeviceId)) {
-                                ids.removeAt(ids.indexOf(currentDeviceId))
-                                LogUtils.i("视频源与同屏目标相同,进行剔除")
-                                if (ids.isEmpty()) {
-                                    ToastUtils.showShort("视频源与同屏目标相同")
-                                }
-                            }
-                            jni.streamPlay(currentDeviceId, currentSubId, 0, ids, 0, triggeruserval)
-                        } else if (currentMediaId != 0) {
-                            jni.mediaPlay(0, currentMediaId, ids, 0, currentProgress, triggeruserval)
-                        }
-                    } else {
-                        jni.stopResource(0, ids)
-                    }
-                    windowManager.removeView(screenPopView)
-                    screenPopView = null
-                }
-            }
-            findViewById<Button>(R.id.btn_cancel).setOnClickListener {
-                windowManager.removeView(screenPopView)
-                screenPopView = null
-            }
-        }
-        screenPopView = inflate
-        windowManager.addView(screenPopView, popLayoutParams)
-    }
 
     // 拖拽监听器
     @SuppressLint("ClickableViewAccessibility")
@@ -733,18 +537,6 @@ class FloatingPlayerWindow private constructor(context: Context) {
         playerController?.setPlayerViewResetListener(null)
         playerController?.release()
         playerController = null
-        memberAdapter.setOnItemCheckedChangeListener(null)
-        projectAdapter.setOnItemCheckedChangeListener(null)
-
-        if (screenPopView != null) {
-            try {
-                windowManager.removeView(screenPopView)
-            } catch (e: Exception) {
-
-            }
-            screenPopView = null
-            LogUtils.i("FloatingPlayerWindow remove screenPopView")
-        }
 
         mExitFloatingPlayListener = null
         currentDeviceId = 0
