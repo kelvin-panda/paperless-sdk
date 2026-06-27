@@ -38,5 +38,10 @@ class SdkConfig {
          * 使用悬浮窗口播放，默认false
          */
         var floatingPlayEnable: Boolean = false
+
+        /**
+         * EventBus调用栈打印
+         */
+        var enabledBusCallStack: Boolean = false
     }
 }

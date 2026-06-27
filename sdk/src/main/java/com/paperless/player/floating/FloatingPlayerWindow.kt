@@ -356,7 +356,7 @@ class FloatingPlayerWindow private constructor(context: Context) {
                     // 开始同屏
                     1 -> {
                         Bus.postVararg(
-                            SdkBusType.floating_start_screen_share,
+                            type = SdkBusType.floating_start_screen_share,
                             currentDeviceId,
                             currentSubId,
                             currentMediaId,

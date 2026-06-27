@@ -9,7 +9,7 @@ import com.paperless.data.YuvData
  */
 class SdkBusType {
     companion object {
-        private const val base_value = 10000
+        private const val base_value = 100000
 
         /**
          * [Int] =2 屏幕  =3 摄像头

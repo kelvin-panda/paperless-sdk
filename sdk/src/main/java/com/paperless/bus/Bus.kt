@@ -1,5 +1,6 @@
 package com.paperless.bus
 
+import com.paperless.sdk.SdkConfig
 import org.greenrobot.eventbus.EventBus
 
 /**
@@ -21,10 +22,24 @@ object Bus {
     }
 
     fun post(msg: EventBusMessage) {
+        if (SdkConfig.enabledBusCallStack) {
+            try {
+                throw Exception("EventBus调用栈 post")
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
         EventBus.getDefault().post(msg)
     }
 
     fun postSticky(msg: EventBusMessage) {
+        if (SdkConfig.enabledBusCallStack) {
+            try {
+                throw Exception("EventBus调用栈 postSticky")
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
         EventBus.getDefault().postSticky(msg)
     }
 }

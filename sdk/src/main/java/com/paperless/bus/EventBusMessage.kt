@@ -27,4 +27,9 @@ class EventBusMessage(
     companion object {
         inline fun build(block: Builder.() -> Unit) = Builder().apply(block).build()
     }
+
+    override fun toString(): String {
+        return "EventBusMessage(type=$type, method=$method, data=${data?.contentToString()}, obj=$obj, objs=${objs?.contentToString()})"
+    }
+
 }
