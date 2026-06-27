@@ -486,12 +486,13 @@ class FloatingPlayerWindow private constructor(context: Context) {
             }
             screenPopView = null
         }
-        val themeWrapper = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            ContextThemeWrapper(appContext, android.R.style.Theme_DeviceDefault_DayNight)
-        } else {
-            ContextThemeWrapper(appContext, android.R.style.Theme_DeviceDefault_Light_Dialog)
-        }
-        val inflate = LayoutInflater.from(themeWrapper)
+
+//        val themeWrapper = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+//            ContextThemeWrapper(appContext, androidx.appcompat.R.style.Theme_AppCompat_DayNight_Dialog)
+//        } else {
+//            ContextThemeWrapper(appContext, androidx.appcompat.R.style.Theme_AppCompat_DayNight_Dialog)
+//        }
+        val inflate = LayoutInflater.from(ContextThemeWrapper(appContext, androidx.appcompat.R.style.Theme_AppCompat_DayNight_Dialog))
             .inflate(R.layout.video_screen_pop,null)
         inflate.apply {
             findViewById<TextView>(R.id.tv_title).apply { text = if (start) "开始同屏" else "结束同屏" }

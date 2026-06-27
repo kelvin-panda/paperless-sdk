@@ -87,7 +87,7 @@ afterEvaluate {
                 artifactId = "sdk-library"
                 //定义：大更新.库更新.java层更新
                 // 移除 version 的硬编码，让 JitPack 从 Git Tag 获取
-                version = "1.4.0"
+                version = "1.4.1"
                 from(components["release"])
             }
         }
@@ -99,5 +99,6 @@ dependencies {
     api(files("libs/ini4j-0.5.2.jar"))
     api(files("libs/protobuf-java-3.3.0.jar"))
     implementation(libs.androidx.recyclerview)
+    implementation(libs.androidx.appcompat)
 }
 
