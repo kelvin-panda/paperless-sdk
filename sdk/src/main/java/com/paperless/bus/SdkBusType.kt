@@ -35,11 +35,11 @@ class SdkBusType {
          * 播放悬浮窗，通知开始同屏
          * - `srcDevId,subId,mediaId,secProgress`
          */
-        const val floating_start_screen_share = base_value + 4
+        const val floating_start_screen_share = base_value + 5
 
         /**
          * 播放悬浮窗，通知结束同屏
          */
-        const val floating_stop_screen_share = base_value + 5
+        const val floating_stop_screen_share = base_value + 6
     }
 }

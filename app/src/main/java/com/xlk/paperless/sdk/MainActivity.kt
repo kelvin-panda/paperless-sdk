@@ -204,12 +204,12 @@ class MainActivity : AppCompatActivity() {
 
                 val intent = Intent(this, ScreenShareService::class.java).apply {
                     action = ScreenShareService.ACTION_START
-                    putExtra(ScreenShareService.EXTRA_RESULT_CODE,resultCode)
-                    putExtra(ScreenShareService.EXTRA_RESULT_DATA,resultData)
+                    putExtra(ScreenShareService.EXTRA_RESULT_CODE, resultCode)
+                    putExtra(ScreenShareService.EXTRA_RESULT_DATA, resultData)
                 }
                 if (Build.VERSION.SDK_INT >= VERSION_CODES.O) {
                     startForegroundService(intent)
-                }else{
+                } else {
                     startService(intent)
                 }
 
@@ -739,6 +739,15 @@ class MainActivity : AppCompatActivity() {
 //                    setAction(ScreenRecordService.ACTION_STOP)
 //                })
             }
+
+            SdkBusType.floating_start_screen_share -> {
+                LogUtils.i("busEvent: 同屏 ${msg.objs?.size}")
+                msg.objs?.forEachIndexed { index, any ->
+                    LogUtils.i("busEvent: index:$index , any:${any as Int}")
+                }
+            }
+
+            SdkBusType.floating_stop_screen_share -> {}
         }
     }
 

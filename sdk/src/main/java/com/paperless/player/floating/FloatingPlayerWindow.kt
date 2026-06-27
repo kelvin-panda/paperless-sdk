@@ -15,6 +15,7 @@ import android.view.ViewGroup
 import android.view.WindowManager
 import android.widget.FrameLayout
 import com.blankj.utilcode.util.LogUtils
+import com.blankj.utilcode.util.ScreenUtils
 import com.mogujie.tt.protobuf.InterfaceMacro
 import com.mogujie.tt.protobuf.InterfaceMacro.Pb_Method.Pb_METHOD_MEET_INTERFACE_CLOSE_VALUE
 import com.mogujie.tt.protobuf.InterfaceMacro.Pb_Method.Pb_METHOD_MEET_INTERFACE_NOTIFY_VALUE
@@ -87,6 +88,7 @@ class FloatingPlayerWindow private constructor(context: Context) {
                 WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
         format = PixelFormat.TRANSLUCENT
         gravity = Gravity.TOP or Gravity.START
+
         width = screenSize().x
         height = screenSize().y
         x = 0
@@ -355,6 +357,7 @@ class FloatingPlayerWindow private constructor(context: Context) {
                 when (itemId) {
                     // 开始同屏
                     1 -> {
+                        LogUtils.i("onMoreMenuItemClick: $currentDeviceId，$currentSubId,$currentMediaId,$currentProgress")
                         Bus.postVararg(
                             type = SdkBusType.floating_start_screen_share,
                             currentDeviceId,
@@ -366,6 +369,10 @@ class FloatingPlayerWindow private constructor(context: Context) {
                     // 结束同屏
                     2 -> {
                         Bus.post(SdkBusType.floating_stop_screen_share)
+
+//                        Bus.postAnyVararg(
+//                            obj = "com.paperless.player.floating.FloatingPlayerWindow.stopScreen"
+//                        )
                     }
                 }
             }
@@ -557,8 +564,12 @@ class FloatingPlayerWindow private constructor(context: Context) {
 
     private fun dp2px(dp: Int) = (dp * appContext.resources.displayMetrics.density).toInt()
     private fun screenSize(): Point {
-        val point = Point()
-        windowManager.defaultDisplay.getSize(point)
+        val point = Point().apply {
+            x = ScreenUtils.getScreenWidth()
+            y = ScreenUtils.getScreenHeight()
+        }
+//        windowManager.defaultDisplay.getSize(point)
+
         return point
     }
 
