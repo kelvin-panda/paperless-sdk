@@ -7,6 +7,7 @@ import android.graphics.Point
 import android.os.Build
 import android.os.Handler
 import android.os.Looper
+import android.util.AttributeSet
 import android.view.ContextThemeWrapper
 import android.view.Gravity
 import android.view.LayoutInflater
@@ -507,10 +508,14 @@ class FloatingPlayerWindow private constructor(context: Context) {
 
         // ★ 克隆一个新的 LayoutInflater，并移除其 Factory
         val inflater = LayoutInflater.from(themeWrapper).cloneInContext(themeWrapper)
-        inflater.factory = null          // 清除可能存在的皮肤工厂
-        // 如果宿主用的是 factory2，也需要置空
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
-            inflater.factory2 = null
+        inflater.factory = object : LayoutInflater.Factory2{
+            override fun onCreateView(p0: String, p1: Context, p2: AttributeSet): View? {
+                return null
+            }
+
+            override fun onCreateView(p0: View?, p1: String, p2: Context, p3: AttributeSet): View? {
+                return null
+            }
         }
 
         val inflate = inflater.inflate(R.layout.video_screen_pop, null)
