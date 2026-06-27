@@ -40,6 +40,7 @@ import com.mogujie.tt.protobuf.InterfaceStop
 import com.mogujie.tt.protobuf.InterfaceStream
 import com.paperless.MemberAdapter
 import com.paperless.ProjectAdapter
+import com.paperless.bus.Bus
 import com.paperless.bus.EventBusMessage
 import com.paperless.bus.SdkBusType
 import com.paperless.player.DecodeQueue
@@ -441,10 +442,18 @@ class FloatingPlayerWindow private constructor(context: Context) {
                 when (itemId) {
                     // 开始同屏
                     1 -> {
+//                        Bus.postVararg(
+//                            SdkBusType.floating_start_screen_share,
+//                            currentDeviceId,
+//                            currentSubId,
+//                            currentMediaId,
+//                            currentProgress
+//                        )
                         screenPop(true)
                     }
                     // 结束同屏
                     2 -> {
+//                        Bus.post(SdkBusType.floating_stop_screen_share)
                         screenPop(false)
                     }
                 }
@@ -487,13 +496,25 @@ class FloatingPlayerWindow private constructor(context: Context) {
             screenPopView = null
         }
 
-//        val themeWrapper = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-//            ContextThemeWrapper(appContext, androidx.appcompat.R.style.Theme_AppCompat_DayNight_Dialog)
-//        } else {
-//            ContextThemeWrapper(appContext, androidx.appcompat.R.style.Theme_AppCompat_DayNight_Dialog)
-//        }
-        val inflate = LayoutInflater.from(ContextThemeWrapper(appContext, androidx.appcompat.R.style.Theme_AppCompat_DayNight_Dialog))
-            .inflate(R.layout.video_screen_pop,null)
+        val themeWrapper = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            ContextThemeWrapper(appContext, android.R.style.Theme_DeviceDefault_DayNight)
+        } else {
+            ContextThemeWrapper(appContext, android.R.style.Theme_DeviceDefault_Light)
+        }
+//        val inflate =
+//            LayoutInflater.from(ContextThemeWrapper(appContext, androidx.appcompat.R.style.Theme_AppCompat_DayNight_Dialog))
+//                .inflate(R.layout.video_screen_pop, null)
+
+        // ★ 克隆一个新的 LayoutInflater，并移除其 Factory
+        val inflater = LayoutInflater.from(themeWrapper).cloneInContext(themeWrapper)
+        inflater.factory = null          // 清除可能存在的皮肤工厂
+        // 如果宿主用的是 factory2，也需要置空
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+            inflater.factory2 = null
+        }
+
+        val inflate = inflater.inflate(R.layout.video_screen_pop, null)
+
         inflate.apply {
             findViewById<TextView>(R.id.tv_title).apply { text = if (start) "开始同屏" else "结束同屏" }
             val cb_force = findViewById<CheckBox>(R.id.cb_force).apply {

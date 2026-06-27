@@ -30,5 +30,16 @@ class SdkBusType {
          * `[Int,Int]` fps 和 资源id
          */
         const val fps = base_value + 4
+
+        /**
+         * 播放悬浮窗，通知开始同屏
+         * - `srcDevId,subId,mediaId,secProgress`
+         */
+        const val floating_start_screen_share = base_value + 4
+
+        /**
+         * 播放悬浮窗，通知结束同屏
+         */
+        const val floating_stop_screen_share = base_value + 5
     }
 }
