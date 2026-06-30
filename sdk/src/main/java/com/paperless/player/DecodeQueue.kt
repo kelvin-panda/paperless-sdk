@@ -44,13 +44,11 @@ object DecodeQueue {
             if (!queue.offer(frameData)) {
                 // 仍然添加失败，回收帧数据
                 FrameDataPool.recycle(frameData)
-                PerformanceMonitor.logFrameDropped(frameData.res)
                 LogUtils.d("player_log", "添加帧数据失败，队列已满")
             }
         } else {
             // 没有非关键帧可移除，回收当前帧
             FrameDataPool.recycle(frameData)
-            PerformanceMonitor.logFrameDropped(frameData.res)
             LogUtils.d("player_log", "队列已满且无非关键帧可移除")
         }
     }

@@ -8,8 +8,8 @@ import com.paperless.bus.SdkBusType
 import com.paperless.data.FrameData
 import com.paperless.data.YuvData
 import com.paperless.player.DecodeQueue
+import com.paperless.player.Fps
 import com.paperless.player.FrameDataPool
-import com.paperless.player.PerformanceMonitor
 import java.nio.ByteBuffer
 import java.util.concurrent.LinkedBlockingQueue
 
@@ -268,6 +268,36 @@ object Call {
         return 0
     }
 
+    fun callback_videodecode(
+        isKeyframe: Int,
+        res: Int,
+        codecid: Int,
+        w: Int,
+        h: Int,
+        packet: ByteArray,
+        pts: Long,
+        codecdata: ByteArray
+    ): Int {
+        if (SdkConfig.logEnable) LogUtils.e("后台接收 datalen：${packet.size}")
+        // 优化内存使用对象池
+        val frameData = FrameDataPool.obtain()
+        frameData.isKeyFrame = isKeyframe
+        frameData.res = res
+        frameData.codecid = codecid
+        frameData.w = w
+        frameData.h = h
+        frameData.pts = pts
+        frameData.setPacketBytes(packet)
+        frameData.setCodecDataBytes(codecdata)
+        Fps.add(res)
+        // 放入到待处理解码的集合中
+        if (!DecodeQueue.offer(res, frameData)) {
+            // 队列已满，尝试移除最旧的非关键帧
+            DecodeQueue.remove(frameData)
+        }
+        return 0
+    }
+
     fun callback_startdisplay(res: Int): Int {
         return 0
     }
@@ -363,70 +393,12 @@ object Call {
         frameData.pts = pts
         frameData.setPacketBuffer(m_dbuf)
         frameData.setCodecDataBuffer(m_dexbuf)
-        if (res == 0) {
-            receivedCount++
-            if (lastReceivedTime == 0L) {
-                lastReceivedTime = System.currentTimeMillis()
-            } else if (System.currentTimeMillis() - lastReceivedTime >= 1000L) {
-                lastReceivedTime = System.currentTimeMillis()
-                Bus.postVararg(type = SdkBusType.fps, receivedCount, res)
-                receivedCount = 0
-            }
-        }
-        // 记录接收帧的数量
-        PerformanceMonitor.logFrameReceived(frameData.res)
-        // 放入到待处理解码的集合中
-        if (DecodeQueue.offer(res, frameData)) {
-            //把帧数据添加进队列中
-            //Log.d("", "debugPlayer: 把帧数据添加进队列中 ${DecodeQueue.getSize(res)}")
-        } else {
-            // 队列已满，尝试移除最旧的非关键帧
-            if (SdkConfig.logEnable) Log.d("", "debugPlayer: 队列已满，尝试移除最旧的非关键帧")
-            DecodeQueue.remove(frameData)
-        }
-    }
-
-    private var lastReceivedTime = 0L
-    private var receivedCount = 0
-
-    fun callback_videodecode(
-        isKeyframe: Int,
-        res: Int,
-        codecid: Int,
-        w: Int,
-        h: Int,
-        packet: ByteArray,
-        pts: Long,
-        codecdata: ByteArray
-    ): Int {
-        if (SdkConfig.logEnable) LogUtils.e("后台接收 datalen：${packet.size}")
-        // 优化内存使用对象池
-        val frameData = FrameDataPool.obtain()
-        frameData.isKeyFrame = isKeyframe
-        frameData.res = res
-        frameData.codecid = codecid
-        frameData.w = w
-        frameData.h = h
-        frameData.pts = pts
-        frameData.setPacketBytes(packet)
-        frameData.setCodecDataBytes(codecdata)
-        if (res == 0) {
-            receivedCount++
-            if (lastReceivedTime == 0L) {
-                lastReceivedTime = System.currentTimeMillis()
-            } else if (System.currentTimeMillis() - lastReceivedTime >= 1000L) {
-                lastReceivedTime = System.currentTimeMillis()
-                Bus.postVararg(type = SdkBusType.fps, receivedCount, res)
-                receivedCount = 0
-            }
-        }
-        // 记录接收帧的数量
-        PerformanceMonitor.logFrameReceived(frameData.res)
+        Fps.add(res)
         // 放入到待处理解码的集合中
         if (!DecodeQueue.offer(res, frameData)) {
             // 队列已满，尝试移除最旧的非关键帧
+            if (SdkConfig.logEnable) Log.d("", "sdkPlayer: 队列已满，尝试移除最旧的非关键帧")
             DecodeQueue.remove(frameData)
         }
-        return 0
     }
 }

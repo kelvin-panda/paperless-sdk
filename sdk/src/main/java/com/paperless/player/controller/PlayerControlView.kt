@@ -3,7 +3,6 @@ package com.paperless.player.controller
 import android.app.Activity
 import android.app.Dialog
 import android.content.Context
-import android.media.AudioManager
 import android.util.AttributeSet
 import android.view.GestureDetector
 import android.view.GestureDetector.SimpleOnGestureListener
@@ -14,19 +13,17 @@ import android.view.ScaleGestureDetector
 import android.view.View
 import android.view.ViewGroup
 import android.view.Window
-import android.view.WindowManager
 import android.widget.Button
 import android.widget.FrameLayout
 import android.widget.ImageView
-import android.widget.LinearLayout
 import android.widget.ProgressBar
 import android.widget.RelativeLayout
 import android.widget.SeekBar
 import android.widget.TextView
 import com.blankj.utilcode.util.LogUtils
+import com.blankj.utilcode.util.ScreenUtils
 import com.paperless.player.ENDownloadView
 import com.paperless.player.ENPlayView
-import com.paperless.player.controller.listener.AudioFocusListener
 import com.paperless.player.controller.listener.ControlCallback
 import com.paperless.sdk.R
 import com.paperless.util.CommonUtil
@@ -35,7 +32,7 @@ import java.util.Locale
 import kotlin.math.abs
 
 class PlayerControlView(context: Context, attrs: AttributeSet? = null) : FrameLayout(context, attrs), View.OnClickListener,
-    SeekBar.OnSeekBarChangeListener, View.OnTouchListener, AudioFocusListener {
+    SeekBar.OnSeekBarChangeListener, View.OnTouchListener {
 
     companion object {
 
@@ -62,68 +59,60 @@ class PlayerControlView(context: Context, attrs: AttributeSet? = null) : FrameLa
     }
 
     private var curPlayFlag = video_flag
+    private var isMandatory = false
+    private var isStream = false
+    private var isVideo = false
+
     private var mScreenWidth = 0
     private var mScreenHeight = 0
     var callback: ControlCallback? = null
 
-
-    private var mAudioFocusManager: AudioFocusManager? = null
+    private var mEnableSeekGesture = false      // 是否允许进度滑动
     private var mDismissControlTime: Long = 5_000L
     private var mPostDismiss: Boolean = false
-    private var mLockCurScreen: Boolean = false
 
-    // 悬浮窗模式：禁用亮度调节和所有 Dialog
+    // 悬浮窗模式：禁用所有 Dialog
     private var mFloatingMode = false
 
-    // 功能开关：默认启用
-    private var mEnableSeekGesture = false      // 是否允许进度滑动
-    private var mEnableBrightnessGesture = false // 是否允许亮度滑动（仅在非悬浮窗模式有效）
-    private var mEnableVolumeGesture = false // 是否允许音量滑动调节（仅在非悬浮窗模式有效）
     private var mEnableFull = false // 是否展示全屏按钮
 
     // Dialog 相关
     private var mProgressDialog: Dialog? = null
-    private var mVolumeDialog: Dialog? = null
-    private var mBrightnessDialog: Dialog? = null
     private var mDialogProgressBar: ProgressBar? = null
     private var mDialogSeekTime: TextView? = null
     private var mDialogTotalTime: TextView? = null
     private var mDialogIcon: ImageView? = null
-    private var mDialogVolumeProgressBar: ProgressBar? = null
-    private var mBrightnessDialogTv: TextView? = null
 
-    // 手势相关变量 (省略注释，保持原样)
+    //<editor-fold desc="手势相关变量">
     private var mSeekTimePosition: Long = 80L
     private var mThreshold: Int = 80
     private var mSeekEndOffset: Int = 0
     private var mDownPosition: Long = 0
     private var mCurPosition: Long = 0
     private var mTotalPosition: Long = 0
-    private var mGestureDownVolume: Int = 0
     private var mDownX: Float = 0f
     private var mDownY: Float = 0f
     private var mMoveY: Float = 0f
     private var mSeekRatio: Float = 1f
     private var mTouchingProgressBar: Boolean = false
-    private var mChangeVolume: Boolean = false
     private var mChangePosition: Boolean = false
     private var mShowVKey: Boolean = false
-    private var mBrightness: Boolean = false
     private var mFirstTouch: Boolean = false
 
+    //</editor-fold>
+
+    //<editor-fold desc="控件">
     // 控件
     private var mTopContainer: ViewGroup? = null
     private var mBackButton: ImageView? = null
     private var mTitleTextView: TextView? = null
     private var mFpsTextView: TextView? = null
     private var mFullImageView: ImageView? = null
-    private var mMoreButton: ImageView? = null
     private var mStartScreen: View? = null
     private var mStopScreen: View? = null
     private var mTextureViewContainer: ViewGroup? = null
     private var mThumbImageViewLayout: RelativeLayout? = null
     private var mThumbImageView: View? = null
-    private var mLockScreen: ImageView? = null
     private var mBottomContainer: ViewGroup? = null
     private var mCurrentTimeTextView: TextView? = null
     private var mProgressBar: SeekBar? = null
@@ -136,6 +125,8 @@ class PlayerControlView(context: Context, attrs: AttributeSet? = null) : FrameLa
     private var mBtnCapture: Button? = null
     private var mBtnSameScreen: Button? = null
     private var mBtnStop: Button? = null
+
+    //</editor-fold>
 
     // 播放状态
     private val CURRENT_STATE_NORMAL = 0
@@ -157,13 +148,14 @@ class PlayerControlView(context: Context, attrs: AttributeSet? = null) : FrameLa
     private var mActivePointerId = MotionEvent.INVALID_POINTER_ID
 
     init {
-        mScreenWidth = context.resources.displayMetrics.widthPixels
-        mScreenHeight = context.resources.displayMetrics.heightPixels
+        mScreenWidth = ScreenUtils.getScreenWidth() // context.resources.displayMetrics.widthPixels
+        mScreenHeight = ScreenUtils.getScreenHeight() // context.resources.displayMetrics.heightPixels
         LogUtils.i("播放界面宽高: [$mScreenWidth] [$mScreenHeight]")
         initInflate(context)
         initView()
         viewEvent()
-        initAudioFocusManager()
+        mScaleGestureDetector = ScaleGestureDetector(context, ScaleListener())
+        mTextureViewContainer?.clipChildren = false
     }
 
     fun setFullEnabled(enabled: Boolean) {
@@ -190,27 +182,6 @@ class PlayerControlView(context: Context, attrs: AttributeSet? = null) : FrameLa
         mEnableSeekGesture = enabled
     }
 
-    /**
-     * 设置是否允许亮度调节手势（右侧滑动）
-     * 注意：悬浮窗模式下（mFloatingMode = true）亮度调节会被强制禁用
-     */
-    fun setBrightnessGestureEnabled(enabled: Boolean) {
-        if (mFloatingMode && enabled) {
-            LogUtils.w("Brightness gesture is disabled in floating mode")
-            mEnableBrightnessGesture = false
-        } else {
-            mEnableBrightnessGesture = enabled
-        }
-    }
-
-    /**
-     * 设置是否允许音量调节手势（左侧滑动）
-     */
-    fun setVolumeGestureEnabled(enabled: Boolean) {
-        mEnableVolumeGesture = enabled
-    }
-
-
     private fun viewEvent() {
         mStartButton?.setOnClickListener(this)
         mTextureViewContainer?.setOnClickListener(this)
@@ -228,10 +199,8 @@ class PlayerControlView(context: Context, attrs: AttributeSet? = null) : FrameLa
             resolveThumbImage(mThumbImageView!!)
         }
         mBackButton?.setOnClickListener(this)
-        mMoreButton?.setOnClickListener(this)
         mStartScreen?.setOnClickListener(this)
         mStopScreen?.setOnClickListener(this)
-        mLockScreen?.setOnClickListener(this)
         mFullImageView?.setOnClickListener(this)
     }
 
@@ -243,25 +212,22 @@ class PlayerControlView(context: Context, attrs: AttributeSet? = null) : FrameLa
         mFullImageView = findViewById<ImageView>(R.id.full)?.apply {
             visibility = if (mEnableFull) VISIBLE else GONE
         }
-        mMoreButton = findViewById(R.id.more)
         mStartScreen = findViewById(R.id.startScreen)
         mStopScreen = findViewById(R.id.stopScreen)
         mTextureViewContainer = findViewById(R.id.surface_container)
         mThumbImageViewLayout = findViewById<RelativeLayout?>(R.id.thumb)?.apply { visibility = INVISIBLE }
         mBottomContainer = findViewById<ViewGroup?>(R.id.layout_bottom)?.apply {
-            visibility = if (isVideo() && !isMandatory()) VISIBLE else INVISIBLE
+            visibility = if (isVideo && !isMandatory) VISIBLE else INVISIBLE
         }
         mCurrentTimeTextView = findViewById(R.id.current)
         mProgressBar = findViewById(R.id.progress)
         mTotalTimeTextView = findViewById(R.id.total)
-        mStartButton =
-            findViewById<View?>(R.id.start)?.apply {
-                visibility = if (isVideo() && !isMandatory()) VISIBLE else INVISIBLE
-            }
+        mStartButton = findViewById<View?>(R.id.start)?.apply {
+            visibility = if (isVideo && !isMandatory) VISIBLE else INVISIBLE
+        }
         mLoadingProgressBar = findViewById(R.id.loading)
-        mLockScreen = findViewById<ImageView?>(R.id.lock_screen)?.apply { visibility = INVISIBLE }
         mBottomProgressBar = findViewById<ProgressBar?>(R.id.bottom_progressbar)?.apply {
-            visibility = if (isVideo()) VISIBLE else INVISIBLE
+            visibility = if (isVideo) VISIBLE else INVISIBLE
         }
     }
 
@@ -269,74 +235,46 @@ class PlayerControlView(context: Context, attrs: AttributeSet? = null) : FrameLa
         inflate(context, R.layout.video_control_layout, this)
     }
 
-    private fun isMandatory() = (curPlayFlag.and(mandatory_flag) == mandatory_flag)
-    private fun isStream() = (curPlayFlag.and(stream_flag) == stream_flag)
-    private fun isVideo() = (curPlayFlag.and(video_flag) == video_flag)
+    private fun isPlayingMandatory() = (curPlayFlag.and(mandatory_flag) == mandatory_flag)
+    private fun isPlayingStream() = (curPlayFlag.and(stream_flag) == stream_flag)
+    private fun isPlayingVideo() = (curPlayFlag.and(video_flag) == video_flag)
 
     fun setupPlayFlag(flag: Int) {
         curPlayFlag = flag
-        LogUtils.i("setupPlayFlag: flag=$flag,isVideo=${isVideo()},isStream=${isStream()},isMandatory=${isMandatory()}")
+        isMandatory = isPlayingMandatory()
+        isStream = isPlayingStream()
+        isVideo = isPlayingVideo()
+        LogUtils.i("setupPlayFlag: flag=$flag,isVideo=${isVideo},isStream=${isStream},isMandatory=${isMandatory}")
         setupMandatoryStatus()
     }
 
-    private fun exitMandatoryPlayUi() {
-        // 顶部强制状态下隐藏的进行恢复
-        mBackButton?.visibility = VISIBLE
-        mStartScreen?.visibility = VISIBLE
-        mStopScreen?.visibility = VISIBLE
-
-        // 根据播放video的模式恢复其它ui
-        mBottomContainer?.visibility = if (isVideo()) VISIBLE else INVISIBLE
-        mBottomProgressBar?.visibility = if (isVideo()) VISIBLE else INVISIBLE
-        mStartButton?.visibility = if (isVideo()) VISIBLE else INVISIBLE
-    }
-
     private fun setupMandatoryStatus() {
-        if (isMandatory()) {
+        if (isMandatory) {
             // 显示顶部栏（标题、FPS、全屏）
-            mTopContainer?.visibility = VISIBLE
+            setViewShowState(mTopContainer, VISIBLE)
 
-//             强制模式不锁屏，保证单击可切换标题栏
-//            mLockCurScreen = false
-//            mLockScreen?.visibility = GONE
+            setViewShowState(mBottomContainer, INVISIBLE)
+            setViewShowState(mStartButton, INVISIBLE)
+            setViewShowState(mBottomProgressBar, INVISIBLE)
+            setViewShowState(mLoadingProgressBar, INVISIBLE)
+            setViewShowState(mThumbImageViewLayout, INVISIBLE)
 
-            // 隐藏所有其他操作控件
-            mBottomContainer?.visibility = INVISIBLE
-            mStartButton?.visibility = INVISIBLE
-            mBottomProgressBar?.visibility = INVISIBLE
-            mLoadingProgressBar?.visibility = INVISIBLE
-            mThumbImageViewLayout?.visibility = INVISIBLE
-            mBackButton?.visibility = GONE
-            mMoreButton?.visibility = GONE
-            mStartScreen?.visibility = GONE
-            mStopScreen?.visibility = GONE
+            setViewShowState(mBackButton, GONE)
+            setViewShowState(mStartScreen, GONE)
+            setViewShowState(mStopScreen, GONE)
 
             // 禁用所有手势调节
             mEnableSeekGesture = false
-            mEnableBrightnessGesture = false
-            mEnableVolumeGesture = false
         } else {
-            exitMandatoryPlayUi()
-        }
-    }
+            // 顶部强制状态下隐藏的进行恢复
+            setViewShowState(mBackButton, VISIBLE)
+            setViewShowState(mStartScreen, VISIBLE)
+            setViewShowState(mStopScreen, VISIBLE)
 
-    private fun initAudioFocusManager() {
-        if (mAudioFocusManager == null) {
-            mAudioFocusManager = AudioFocusManager()
-        }
-        mAudioFocusManager!!.initialize(context, this)
-        mScaleGestureDetector = ScaleGestureDetector(context, ScaleListener())
-        mTextureViewContainer?.clipChildren = false
-    }
-
-    private fun getAudioManager(): AudioManager? {
-        return mAudioFocusManager?.getAudioManager()
-    }
-
-    private fun releaseAudioFocusManager() {
-        if (mAudioFocusManager != null) {
-            mAudioFocusManager!!.release()
-            mAudioFocusManager = null
+            // 根据播放video的模式恢复其它ui
+            setViewShowState(mBottomContainer, if (isVideo) VISIBLE else INVISIBLE)
+            setViewShowState(mBottomProgressBar, if (isVideo) VISIBLE else INVISIBLE)
+            setViewShowState(mStartButton, if (isVideo) VISIBLE else INVISIBLE)
         }
     }
 
@@ -352,7 +290,6 @@ class PlayerControlView(context: Context, attrs: AttributeSet? = null) : FrameLa
     }
 
     fun preparePlay() {
-        mAudioFocusManager?.requestAudioFocus()
         setStateAndUi(CURRENT_STATE_PREPAREING)
         startDismissControlViewTimer()
     }
@@ -402,7 +339,6 @@ class PlayerControlView(context: Context, attrs: AttributeSet? = null) : FrameLa
         v?.let {
             when (it.id) {
                 R.id.surface_container -> {
-                    LogUtils.e("播放器点击")
                     startDismissControlViewTimer()
                 }
 
@@ -411,18 +347,13 @@ class PlayerControlView(context: Context, attrs: AttributeSet? = null) : FrameLa
                 }
 
                 else -> {
-                    if (isMandatory()) return // 强制播放时某些按钮点击无效
+                    if (isMandatory) return // 强制播放时某些按钮点击无效
                     when (it.id) {
                         R.id.start -> clickStartIcon()
                         R.id.back -> callback?.onBack()
                         R.id.more -> callback?.onMoreMenuItemClick(0)
                         R.id.startScreen -> callback?.onMoreMenuItemClick(1)
                         R.id.stopScreen -> callback?.onMoreMenuItemClick(2)
-                        // ⭐ 暂时注释掉锁屏的功能（与强制播放模式有冲突）
-//                        R.id.lock_screen -> {
-//                            if (mCurrentState == CURRENT_STATE_AUTO_COMPLETE || mCurrentState == CURRENT_STATE_ERROR) return
-//                            lockTouchLogic()
-//                        }
 
                         else -> {}
                     }
@@ -433,11 +364,6 @@ class PlayerControlView(context: Context, attrs: AttributeSet? = null) : FrameLa
     }
 
     override fun onTouch(v: View?, event: MotionEvent?): Boolean {
-        if (mLockCurScreen) {
-            onClickUiToggle(event!!)
-            startDismissControlViewTimer()
-            return true
-        }
         val x = event!!.x
         val y = event.y
         when (v!!.id) {
@@ -464,14 +390,14 @@ class PlayerControlView(context: Context, attrs: AttributeSet? = null) : FrameLa
                         val deltaY = y - mDownY
                         val absDeltaX = abs(deltaX)
                         val absDeltaY = abs(deltaY)
-                        if (!mChangePosition && !mChangeVolume && !mBrightness) {
+                        if (!mChangePosition) {
                             touchSurfaceMoveFullLogic(absDeltaX, absDeltaY)
                         }
                         touchSurfaceMove(deltaX, deltaY, y)
                     }
 
                     MotionEvent.ACTION_UP -> {
-                        LogUtils.e("触摸抬起: mChangePosition[$mChangePosition] mChangeVolume[$mChangeVolume] mBrightness[$mBrightness]")
+                        LogUtils.e("触摸抬起: mChangePosition[$mChangePosition]")
                         startDismissControlViewTimer()
                         touchSurfaceUp()
                     }
@@ -480,7 +406,7 @@ class PlayerControlView(context: Context, attrs: AttributeSet? = null) : FrameLa
             }
 
             R.id.progress -> {
-                if (isMandatory()) return true   // 强制播放时直接消费事件，不处理
+                if (isMandatory) return true   // 强制播放时直接消费事件，不处理
                 when (event.action) {
                     MotionEvent.ACTION_DOWN -> cancelDismissControlViewTimer()
                     MotionEvent.ACTION_MOVE -> {
@@ -584,15 +510,11 @@ class PlayerControlView(context: Context, attrs: AttributeSet? = null) : FrameLa
         mDownY = y
         mMoveY = 0f
         // 强制播放禁止所有滑动调节
-        if (isMandatory()) {
-            mChangeVolume = false
+        if (isMandatory) {
             mChangePosition = false
-            mBrightness = false
             mFirstTouch = false
         } else {
-            mChangeVolume = false
             mChangePosition = false
-            mBrightness = false
             mFirstTouch = true
         }
     }
@@ -601,7 +523,7 @@ class PlayerControlView(context: Context, attrs: AttributeSet? = null) : FrameLa
         val curWidth = mScreenWidth
         val curHeight = mScreenHeight
         if (mChangePosition) {
-            if (!isVideo()) return // 媒体文件模式才可操作
+            if (!isVideo) return // 媒体文件模式才可操作
             val totalTimeDuration: Long = mTotalPosition
             mSeekTimePosition = (mDownPosition + (deltaX * totalTimeDuration / curWidth) / mSeekRatio).toInt().toLong()
             if (mSeekTimePosition < 0) mSeekTimePosition = 0
@@ -609,21 +531,6 @@ class PlayerControlView(context: Context, attrs: AttributeSet? = null) : FrameLa
             val seekTime: String = stringForTime(mSeekTimePosition)
             val totalTime: String = stringForTime(totalTimeDuration)
             showProgressDialog(deltaX, seekTime, mSeekTimePosition, totalTime, totalTimeDuration)
-        } else if (mChangeVolume) {
-            val newDeltaY = -deltaY
-            getAudioManager()?.let {
-                val max = it.getStreamMaxVolume(AudioManager.STREAM_MUSIC)
-                val deltaV = (max * newDeltaY * 3 / curHeight).toInt()
-                it.setStreamVolume(AudioManager.STREAM_MUSIC, mGestureDownVolume + deltaV, 0)
-                val volumePercent = (mGestureDownVolume * 100 / max + newDeltaY * 3 * 100 / curHeight).toInt()
-                showVolumeDialog(-newDeltaY, volumePercent)
-            }
-        } else if (mBrightness) {
-            if (Math.abs(deltaY) > mThreshold) {
-                val percent = (-deltaY / curHeight)
-                onBrightnessSlide(percent)
-                mDownY = y
-            }
         }
     }
 
@@ -635,8 +542,6 @@ class PlayerControlView(context: Context, attrs: AttributeSet? = null) : FrameLa
         }
         mTouchingProgressBar = false
         dismissProgressDialog()
-        dismissVolumeDialog()
-        dismissBrightnessDialog()
         if (mChangePosition && (mCurrentState == CURRENT_STATE_PLAYING || mCurrentState == CURRENT_STATE_PAUSE)) {
             val duration: Long = mTotalPosition
             val progress = mSeekTimePosition * 100 / (if (duration == 0L) 1 else duration)
@@ -647,10 +552,8 @@ class PlayerControlView(context: Context, attrs: AttributeSet? = null) : FrameLa
 
     private fun touchSurfaceMoveFullLogic(absDeltaX: Float, absDeltaY: Float) {
         // 强制播放：禁止进度、音量、亮度手势
-        if (isMandatory()) {
+        if (isMandatory) {
             mChangePosition = false
-            mChangeVolume = false
-            mBrightness = false
             return
         }
         val curWidth = mScreenWidth
@@ -671,94 +574,10 @@ class PlayerControlView(context: Context, attrs: AttributeSet? = null) : FrameLa
                 val noEnd: Boolean = abs((screenHeight - mDownY).toDouble()) > mSeekEndOffset
                 if (mFirstTouch) {
                     // 悬浮窗模式下禁用亮度调节，判断是否允许
-                    mBrightness = if (!mFloatingMode && mEnableBrightnessGesture) (mDownX < curWidth * 0.5f) && noEnd else false
                     mFirstTouch = false
-                }
-                if (!mBrightness && mEnableVolumeGesture) {
-                    mChangeVolume = noEnd
-                    val audioManager: AudioManager? = mAudioFocusManager?.getAudioManager()
-                    if (audioManager != null) {
-                        mGestureDownVolume = audioManager.getStreamVolume(AudioManager.STREAM_MUSIC)
-                    }
-                } else if (!mBrightness) {
-                    // 音量被禁用，确保 mChangeVolume 为 false
-                    mChangeVolume = false
                 }
                 mShowVKey = !noEnd
             }
-        }
-    }
-
-    private fun onBrightnessSlide(percent: Float) {
-        if (mFloatingMode || !mEnableBrightnessGesture) {
-            // 悬浮窗模式下不调节亮度
-            return
-        }
-        // 确保 context 是 Activity，否则无法调节窗口亮度
-        if (context !is Activity) {
-            LogUtils.w("当前 Context 不是 Activity，无法调节亮度")
-            return
-        }
-        val act = context as Activity
-        var brightness = act.window.attributes.screenBrightness
-        if (brightness <= 0.00f) brightness = 0.5f
-        else if (brightness < 0.01f) brightness = 0.01f
-        val lpa = act.window.attributes
-        lpa.screenBrightness = (brightness + percent).coerceIn(0.01f, 1.0f)
-        showBrightnessDialog(lpa.screenBrightness)
-        act.window.attributes = lpa
-    }
-
-    private fun showBrightnessDialog(percent: Float) {
-        if (mFloatingMode) return
-        if (mBrightnessDialog == null && context is Activity) {
-            val localView = LayoutInflater.from(context).inflate(R.layout.video_brightness, null)
-            mBrightnessDialogTv = localView.findViewById(R.id.app_video_brightness)
-            mBrightnessDialog = Dialog(context, R.style.video_style_dialog_progress).apply {
-                setContentView(localView)
-                window!!.addFlags(WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE)
-                window!!.addFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL)
-                window!!.addFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE)
-                window!!.decorView.systemUiVisibility = SYSTEM_UI_FLAG_HIDE_NAVIGATION
-                window!!.setLayout(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT)
-            }
-            val attributes = mBrightnessDialog!!.window!!.attributes
-            mBrightnessDialog!!.window!!.attributes = attributes.apply {
-                gravity = Gravity.CENTER_VERTICAL or Gravity.END
-                width = mScreenWidth
-                x = 0
-                y = 0
-            }
-        }
-        mBrightnessDialog?.let {
-            if (!it.isShowing) it.show()
-            mBrightnessDialogTv?.text = "${(percent * 100).toInt()} %"
-        }
-    }
-
-    private fun showVolumeDialog(deltaY: Float, volumePercent: Int) {
-        if (mFloatingMode) return  // 悬浮窗模式下不显示音量弹窗
-        if (mVolumeDialog == null && context is Activity) {
-            val localView = LayoutInflater.from(context).inflate(R.layout.video_volume_dialog, null)
-            mDialogVolumeProgressBar = localView.findViewById(R.id.volume_progressbar)
-            mVolumeDialog = Dialog(context, R.style.video_style_dialog_progress).apply {
-                setContentView(localView)
-                window!!.addFlags(WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE)
-                window!!.addFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL)
-                window!!.addFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE)
-                window!!.setLayout(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT)
-            }
-            val attributes = mVolumeDialog!!.window!!.attributes
-            mVolumeDialog!!.window!!.attributes = attributes.apply {
-                gravity = Gravity.CENTER_VERTICAL or Gravity.START
-                width = mScreenWidth
-                x = 0
-                y = 0
-            }
-        }
-        mVolumeDialog?.let {
-            if (!it.isShowing) it.show()
-            mDialogVolumeProgressBar?.progress = volumePercent
         }
     }
 
@@ -803,23 +622,14 @@ class PlayerControlView(context: Context, attrs: AttributeSet? = null) : FrameLa
         }
     }
 
-    private fun dismissBrightnessDialog() {
-        mBrightnessDialog?.dismiss(); mBrightnessDialog = null
-    }
-
     private fun dismissProgressDialog() {
         mProgressDialog?.dismiss(); mProgressDialog = null
-    }
-
-    private fun dismissVolumeDialog() {
-        mVolumeDialog?.dismiss(); mVolumeDialog = null
     }
 
     private var dismissControlTask: Runnable = object : Runnable {
         override fun run() {
             if (mCurrentState != CURRENT_STATE_NORMAL && mCurrentState != CURRENT_STATE_ERROR && mCurrentState != CURRENT_STATE_AUTO_COMPLETE) {
                 hideAllWidget()
-                setViewShowState(mLockScreen, GONE)
                 if (mPostDismiss) postDelayed(this, mDismissControlTime)
             }
         }
@@ -837,9 +647,9 @@ class PlayerControlView(context: Context, attrs: AttributeSet? = null) : FrameLa
     }
 
     private fun clickStartIcon() {
-        if (!isVideo()) return // 媒体文件模式才可操作
+        if (!isVideo) return // 媒体文件模式才可操作
         // 强制播放时，当前正在播放则不允许暂停
-        if (isMandatory() && mCurrentState == CURRENT_STATE_PLAYING) return
+        if (isMandatory && mCurrentState == CURRENT_STATE_PLAYING) return
         updateStartImage()
         when (mCurrentState) {
             CURRENT_STATE_NORMAL, CURRENT_STATE_ERROR -> setStateAndUi(CURRENT_STATE_PREPAREING)
@@ -856,17 +666,6 @@ class PlayerControlView(context: Context, attrs: AttributeSet? = null) : FrameLa
             }
 
             CURRENT_STATE_AUTO_COMPLETE -> setStateAndUi(CURRENT_STATE_PREPAREING)
-        }
-    }
-
-    private fun lockTouchLogic() {
-        if (mLockCurScreen) {
-            mLockScreen!!.setImageResource(R.drawable.vector_video_unlock)
-            mLockCurScreen = false
-        } else {
-            mLockScreen!!.setImageResource(R.drawable.vector_video_lock)
-            mLockCurScreen = true
-            hideAllWidget()
         }
     }
 
@@ -903,58 +702,52 @@ class PlayerControlView(context: Context, attrs: AttributeSet? = null) : FrameLa
     }
 
     private fun changeUiToPauseShow() {
-        if (mLockCurScreen) {
-            setViewShowState(mLockScreen, VISIBLE); return
-        }
         setViewShowState(mTopContainer, VISIBLE)
-        setViewShowState(mBottomContainer, if (isVideo() && !isMandatory()) VISIBLE else INVISIBLE)
-        setViewShowState(mStartButton, if (isVideo() && !isMandatory()) VISIBLE else INVISIBLE)
+        setViewShowState(mBottomContainer, if (isVideo && !isMandatory) VISIBLE else INVISIBLE)
+        setViewShowState(mStartButton, if (isVideo && !isMandatory) VISIBLE else INVISIBLE)
         setViewShowState(mLoadingProgressBar, INVISIBLE)
         setViewShowState(mThumbImageViewLayout, INVISIBLE)
         setViewShowState(mBottomProgressBar, INVISIBLE)
-        setViewShowState(mLockScreen, VISIBLE)
         (mLoadingProgressBar as? ENDownloadView)?.reset()
         updateStartImage()
+        requestLayout()
     }
 
     private fun changeUiToPlayingShow() {
-        if (mLockCurScreen) {
-            setViewShowState(mLockScreen, VISIBLE); return
-        }
         setViewShowState(mTopContainer, VISIBLE)
-        setViewShowState(mBottomContainer, if (isVideo() && !isMandatory()) VISIBLE else INVISIBLE)
-        setViewShowState(mStartButton, if (isVideo() && !isMandatory()) VISIBLE else INVISIBLE)
+        setViewShowState(mBottomContainer, if (isVideo && !isMandatory) VISIBLE else INVISIBLE)
+        setViewShowState(mStartButton, if (isVideo && !isMandatory) VISIBLE else INVISIBLE)
         setViewShowState(mLoadingProgressBar, INVISIBLE)
         setViewShowState(mThumbImageViewLayout, INVISIBLE)
         setViewShowState(mBottomProgressBar, INVISIBLE)
-        setViewShowState(mLockScreen, VISIBLE)
         (mLoadingProgressBar as? ENDownloadView)?.reset()
         updateStartImage()
+        requestLayout()
     }
 
     private fun changeUiToPreparingShow() {
         setViewShowState(mTopContainer, VISIBLE)
-        setViewShowState(mBottomContainer, if (isVideo() && !isMandatory()) VISIBLE else INVISIBLE)
+        setViewShowState(mBottomContainer, if (isVideo && !isMandatory) VISIBLE else INVISIBLE)
         setViewShowState(mStartButton, INVISIBLE)
         setViewShowState(mLoadingProgressBar, VISIBLE)
         setViewShowState(mThumbImageViewLayout, INVISIBLE)
         setViewShowState(mBottomProgressBar, INVISIBLE)
-        setViewShowState(mLockScreen, GONE)
         (mLoadingProgressBar as? ENDownloadView)?.let {
             if (it.currentState == ENDownloadView.STATE_PRE) it.start()
         }
+        requestLayout()
     }
 
     private fun changeUiToNormal() {
         setViewShowState(mTopContainer, VISIBLE)
         setViewShowState(mBottomContainer, INVISIBLE)
-        setViewShowState(mStartButton, if (isVideo() && !isMandatory()) VISIBLE else INVISIBLE)
+        setViewShowState(mStartButton, if (isVideo && !isMandatory) VISIBLE else INVISIBLE)
         setViewShowState(mLoadingProgressBar, INVISIBLE)
         setViewShowState(mThumbImageViewLayout, VISIBLE)
         setViewShowState(mBottomProgressBar, INVISIBLE)
-        setViewShowState(mLockScreen, VISIBLE)
         updateStartImage()
         (mLoadingProgressBar as? ENDownloadView)?.reset()
+        requestLayout()
     }
 
     fun setDragWindowTouchListener(listener: OnTouchListener, locked: Boolean = false) {
@@ -999,12 +792,11 @@ class PlayerControlView(context: Context, attrs: AttributeSet? = null) : FrameLa
 
     private fun changeUiToCompleteShow() {
         setViewShowState(mTopContainer, VISIBLE)
-        setViewShowState(mBottomContainer, if (isVideo() && !isMandatory()) VISIBLE else INVISIBLE)
-        setViewShowState(mStartButton, if (isVideo() && !isMandatory()) VISIBLE else INVISIBLE)
+        setViewShowState(mBottomContainer, if (isVideo && !isMandatory) VISIBLE else INVISIBLE)
+        setViewShowState(mStartButton, if (isVideo && !isMandatory) VISIBLE else INVISIBLE)
         setViewShowState(mLoadingProgressBar, INVISIBLE)
         setViewShowState(mThumbImageViewLayout, VISIBLE)
         setViewShowState(mBottomProgressBar, INVISIBLE)
-        setViewShowState(mLockScreen, VISIBLE)
         (mLoadingProgressBar as? ENDownloadView)?.reset()
         updateStartImage()
     }
@@ -1012,17 +804,16 @@ class PlayerControlView(context: Context, attrs: AttributeSet? = null) : FrameLa
     private fun changeUiToCompleteClear() {
         setViewShowState(mTopContainer, INVISIBLE)
         setViewShowState(mBottomContainer, INVISIBLE)
-        setViewShowState(mStartButton, if (isVideo() && !isMandatory()) VISIBLE else INVISIBLE)
+        setViewShowState(mStartButton, if (isVideo && !isMandatory) VISIBLE else INVISIBLE)
         setViewShowState(mLoadingProgressBar, INVISIBLE)
         setViewShowState(mThumbImageViewLayout, VISIBLE)
-        setViewShowState(mBottomProgressBar, if (isVideo()) VISIBLE else INVISIBLE)
-        setViewShowState(mLockScreen, VISIBLE)
+        setViewShowState(mBottomProgressBar, if (isVideo) VISIBLE else INVISIBLE)
         (mLoadingProgressBar as? ENDownloadView)?.reset()
         updateStartImage()
     }
 
     private fun changeUiToPauseClear() {
-        changeUiToClear(); setViewShowState(mBottomProgressBar, if (isVideo()) VISIBLE else INVISIBLE)
+        changeUiToClear(); setViewShowState(mBottomProgressBar, if (isVideo) VISIBLE else INVISIBLE)
     }
 
     private fun changeUiToPrepareingClear() {
@@ -1030,7 +821,7 @@ class PlayerControlView(context: Context, attrs: AttributeSet? = null) : FrameLa
     }
 
     private fun changeUiToPlayingClear() {
-        changeUiToClear(); setViewShowState(mBottomProgressBar, if (isVideo()) VISIBLE else INVISIBLE)
+        changeUiToClear(); setViewShowState(mBottomProgressBar, if (isVideo) VISIBLE else INVISIBLE)
     }
 
     private fun changeUiToClear() {
@@ -1040,21 +831,20 @@ class PlayerControlView(context: Context, attrs: AttributeSet? = null) : FrameLa
         setViewShowState(mLoadingProgressBar, INVISIBLE)
         setViewShowState(mThumbImageViewLayout, INVISIBLE)
         setViewShowState(mBottomProgressBar, INVISIBLE)
-        setViewShowState(mLockScreen, GONE)
         (mLoadingProgressBar as? ENDownloadView)?.reset()
     }
 
     override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {}
     override fun onStartTrackingTouch(seekBar: SeekBar?) {}
     override fun onStopTrackingTouch(seekBar: SeekBar?) {
-        if (isMandatory()) return
+        if (isMandatory) return
         callback?.seekTo(seekBar?.progress!!)
     }
 
     private fun hideAllWidget() {
         setViewShowState(mBottomContainer, INVISIBLE)
         setViewShowState(mTopContainer, INVISIBLE)
-        setViewShowState(mBottomProgressBar, if (isVideo()) VISIBLE else INVISIBLE)
+        setViewShowState(mBottomProgressBar, if (isVideo) VISIBLE else INVISIBLE)
         setViewShowState(mStartButton, INVISIBLE)
     }
 
@@ -1067,12 +857,14 @@ class PlayerControlView(context: Context, attrs: AttributeSet? = null) : FrameLa
             override fun onDoubleTap(e: MotionEvent): Boolean {
                 touchDoubleUp(e)
                 resetVideoScale()
+                LogUtils.i("onDoubleTap: ${mTopContainer?.top} ${mTopContainer?.bottom}")
                 return super.onDoubleTap(e)
             }
 
             override fun onSingleTapConfirmed(e: MotionEvent): Boolean {
                 // 点击后会有大约300毫秒的时间用来确认这次点击不是双击的第一击，所以回调会比 onClick 晚大约 300ms，感官上UI不能及时的显示出来
                 onClickUiToggle(e)
+                LogUtils.i("onDoubleTap: ${mTopContainer?.top} ${mTopContainer?.bottom}")
                 return super.onSingleTapConfirmed(e)
             }
 
@@ -1094,11 +886,8 @@ class PlayerControlView(context: Context, attrs: AttributeSet? = null) : FrameLa
 
     private fun touchLongPress(e: MotionEvent) {}
     private fun onClickUiToggle(e: MotionEvent) {
-        if (mLockCurScreen) {
-            setViewShowState(mLockScreen, VISIBLE); return
-        }
         // 强制播放模式下，仅切换顶部标题栏（标题、FPS、全屏按钮）
-        if (isMandatory()) {
+        if (isMandatory) {
             if (mTopContainer?.visibility == VISIBLE) {
                 setViewShowState(mTopContainer, INVISIBLE)
             } else {
@@ -1124,13 +913,9 @@ class PlayerControlView(context: Context, attrs: AttributeSet? = null) : FrameLa
      * 外部（如悬浮窗）在销毁时需调用此方法。
      */
     fun release() {
-        // 释放音频焦点管理器
-        releaseAudioFocusManager()
         // 取消定时器
         cancelDismissControlViewTimer()
         // 清理弹窗
-        dismissVolumeDialog()
-        dismissBrightnessDialog()
         dismissProgressDialog()
         // 清空视图引用
         mVideoView = null
@@ -1144,11 +929,6 @@ class PlayerControlView(context: Context, attrs: AttributeSet? = null) : FrameLa
         super.onDetachedFromWindow()
         release()
     }
-
-    override fun onAudioFocusGain() {}
-    override fun onAudioFocusLoss() {}
-    override fun onAudioFocusLossTransient() {}
-    override fun onAudioFocusLossTransientCanDuck() {}
 
     private fun clampTranslation() {
         val view = mVideoView ?: return

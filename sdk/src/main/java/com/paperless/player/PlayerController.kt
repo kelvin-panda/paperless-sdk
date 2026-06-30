@@ -417,8 +417,6 @@ class PlayerController(
                         }
                         //LogUtils.i("discardRender: $render")
                         mediaCodec?.releaseOutputBuffer(outputBufferIndex, render)
-                        // 记录性能
-                        PerformanceMonitor.logFrameDecoded(resId)
                     }
                 }
                 // 获取下一个输出缓冲区
@@ -464,7 +462,6 @@ class PlayerController(
         LogUtils.i(TAG, "release ")
         stop()
         DecodeQueue.cleanup(resId)
-        PerformanceMonitor.cleanup(resId)
         surface?.release()
         surface = null
         glSurfaceView?.setOnSurfaceReadyListener(null)

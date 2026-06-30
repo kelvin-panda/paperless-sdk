@@ -30,6 +30,7 @@ import com.paperless.bus.Bus
 import com.paperless.bus.EventBusMessage
 import com.paperless.bus.SdkBusType
 import com.paperless.player.DecodeQueue
+import com.paperless.player.Fps
 import com.paperless.player.PlayerController
 import com.paperless.player.controller.PlayerControlView
 import com.paperless.player.controller.listener.ControlCallback
@@ -164,9 +165,8 @@ class FloatingPlayerWindow private constructor(context: Context) {
         when (msg.type) {
             //接收的帧数
             SdkBusType.fps -> {
-//                val fps = msg.obj as Int
                 val fps = msg.objs?.get(0) as Int
-                val resId = msg.objs?.get(1) as Int
+                val resId = msg.objs[1] as Int
                 if (resId == curResId) {
                     updateFps(fps)
                 }
@@ -226,15 +226,19 @@ class FloatingPlayerWindow private constructor(context: Context) {
             Pb_TYPE_MEET_INTERFACE_STOPPLAY_VALUE -> {
                 if (msg.method == Pb_METHOD_MEET_INTERFACE_CLOSE_VALUE) {
                     InterfaceStop.pbui_Type_MeetStopResWork.parseFrom(msg.data)?.let {
-                        it.resList.find { it == 0 }?.let {
-                            LogUtils.e("流播放停止资源通知")
-                            delayDismiss()
+                        it.resList.forEach { resId ->
+                            LogUtils.e("流播放停止资源通知 $resId")
+                            if(resId == 0){
+                                delayDismiss()
+                            }
+                            Fps.clear(resId)
                         }
                     }
                 } else if (msg.method == Pb_METHOD_MEET_INTERFACE_NOTIFY_VALUE) {
                     InterfaceStop.pbui_Type_MeetStopPlay.parseFrom(msg.data)?.let {
                         LogUtils.i("流播放停止通知: res[${it.res}] createdeviceid[${it.createdeviceid}] triggerid[${it.triggerid}]")
                         if (it.res == 0) {
+                            Fps.clear(it.res)
                             delayDismiss()
                         }
                     }
@@ -244,7 +248,7 @@ class FloatingPlayerWindow private constructor(context: Context) {
     }
 
     fun showPlayerWindow(isMedia: Boolean = true, title: String = "", isMandatory: Boolean = false, resid: Int = curResId) {
-        LogUtils.i("showPlayerWindow: isMedia=$isMedia,isMandatory=$isMandatory,title=$title")
+        //LogUtils.i("showPlayerWindow: isMedia=$isMedia,isMandatory=$isMandatory,title=$title")
         hasNewPlay = true
         if (isShowing) {
             updateTitle(title)
@@ -285,7 +289,6 @@ class FloatingPlayerWindow private constructor(context: Context) {
         createFloatingView(surfaceView, title, isMedia, isMandatory)
         windowManager.addView(floatingView, layoutParams)
         isShowing = true
-        LogUtils.i("FloatingPlayerWindow shown")
     }
 
     fun setProgressAndTime(progress: Long, secProgress: Long, currentTime: Long, totalTime: Long, forceChange: Boolean) {
@@ -325,7 +328,6 @@ class FloatingPlayerWindow private constructor(context: Context) {
             preparePlay()
             startPlay()
             setDragWindowTouchListener(dragBarTouchListener) // 拖动顶部标题栏实现拖动窗口
-            setSeekGestureEnabled(false) // 禁用屏幕滑动进度调节
         }
         playerControlView?.callback = object : ControlCallback {
             override fun seekTo(progress: Int) {
@@ -357,7 +359,7 @@ class FloatingPlayerWindow private constructor(context: Context) {
                 when (itemId) {
                     // 开始同屏
                     1 -> {
-                        LogUtils.i("onMoreMenuItemClick: $currentDeviceId，$currentSubId,$currentMediaId,$currentProgress")
+                        //LogUtils.i("onMoreMenuItemClick: $currentDeviceId，$currentSubId,$currentMediaId,$currentProgress")
                         Bus.postVararg(
                             type = SdkBusType.floating_start_screen_share,
                             currentDeviceId,
@@ -369,10 +371,6 @@ class FloatingPlayerWindow private constructor(context: Context) {
                     // 结束同屏
                     2 -> {
                         Bus.post(SdkBusType.floating_stop_screen_share)
-
-//                        Bus.postAnyVararg(
-//                            obj = "com.paperless.player.floating.FloatingPlayerWindow.stopScreen"
-//                        )
                     }
                 }
             }
@@ -391,10 +389,8 @@ class FloatingPlayerWindow private constructor(context: Context) {
                     dp2px(RESIZE_HOTSPOT_SIZE_DP)
                 ).apply {
                     gravity = Gravity.BOTTOM or Gravity.END
-//                bottomMargin = dp2px(8)
-//                rightMargin = dp2px(8)
                 }
-                setBackgroundResource(R.drawable.video_shrink) // 替换为实际图标
+                setBackgroundResource(R.drawable.video_shrink)
                 setOnTouchListener(resizeHandleTouchListener)
             }
             root.addView(resizeHandle)
