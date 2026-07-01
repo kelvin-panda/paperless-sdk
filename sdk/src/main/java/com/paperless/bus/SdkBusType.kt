@@ -41,5 +41,6 @@ class SdkBusType {
          * 播放悬浮窗，通知结束同屏
          */
         const val floating_stop_screen_share = base_value + 6
+        const val floating_same_play_progress = base_value + 7
     }
 }

@@ -740,6 +740,10 @@ class MainActivity : AppCompatActivity() {
 //                })
             }
 
+            SdkBusType.floating_same_play_progress -> {
+                val pos = msg.obj as Int
+                LogUtils.i("busEvent: 同步进度：$pos")
+            }
             SdkBusType.floating_start_screen_share -> {
                 LogUtils.i("busEvent: 同屏 ${msg.objs?.size}")
                 msg.objs?.forEachIndexed { index, any ->

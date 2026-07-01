@@ -228,7 +228,7 @@ class FloatingPlayerWindow private constructor(context: Context) {
                     InterfaceStop.pbui_Type_MeetStopResWork.parseFrom(msg.data)?.let {
                         it.resList.forEach { resId ->
                             LogUtils.e("流播放停止资源通知 $resId")
-                            if(resId == 0){
+                            if (resId == 0) {
                                 delayDismiss()
                             }
                             Fps.clear(resId)
@@ -331,6 +331,7 @@ class FloatingPlayerWindow private constructor(context: Context) {
         }
         playerControlView?.callback = object : ControlCallback {
             override fun seekTo(progress: Int) {
+                Bus.postObj(type = SdkBusType.floating_same_play_progress, progress)
                 jni.mediaPlayPos(0, progress, mutableListOf(SdkVars.localDeviceId), 0, 0)
             }
 
