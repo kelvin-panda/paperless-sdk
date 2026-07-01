@@ -5,7 +5,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:gravity="center|end"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    tools:background="#000">
 
     <RelativeLayout
         android:id="@+id/content"

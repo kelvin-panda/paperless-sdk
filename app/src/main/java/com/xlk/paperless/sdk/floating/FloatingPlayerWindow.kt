@@ -1,4 +1,4 @@
-package com.paperless.player.floating
+package com.xlk.paperless.sdk.floating
 
 import android.annotation.SuppressLint
 import android.content.Context
@@ -46,7 +46,11 @@ import org.greenrobot.eventbus.EventBus
 import org.greenrobot.eventbus.Subscribe
 import org.greenrobot.eventbus.ThreadMode
 
-class FloatingPlayerWindow private constructor(context: Context) {
+/**
+ *  @author : Administrator
+ *  created on 2026/7/1 16:20
+ */
+class FloatingPlayerWindow private constructor(val context: Context){
 
     companion object {
         private const val MIN_SIZE_RATIO = 1 / 3f
@@ -166,7 +170,7 @@ class FloatingPlayerWindow private constructor(context: Context) {
             //接收的帧数
             SdkBusType.fps -> {
                 val fps = msg.objs?.get(0) as Int
-                val resId = msg.objs[1] as Int
+                val resId = msg.objs?.get(1) as Int
                 if (resId == curResId) {
                     updateFps(fps)
                 }
@@ -177,7 +181,7 @@ class FloatingPlayerWindow private constructor(context: Context) {
                     val isMandatory =
                         it.triggeruserval == InterfaceMacro.Pb_TriggerUsedef.Pb_EXCEC_USERDEF_FLAG_NOCREATEWINOPER_VALUE
                     val type = it.mediaid and MAIN_TYPE_BITMASK.toInt()
-                    val subType = it.mediaid and SUB_TYPE_BITMASK
+                    it.mediaid and SUB_TYPE_BITMASK
                     if (type == MEDIA_FILE_TYPE_AUDIO
                         || type == MEDIA_FILE_TYPE_VIDEO
                         || type == MEDIA_FILE_TYPE_RECORD

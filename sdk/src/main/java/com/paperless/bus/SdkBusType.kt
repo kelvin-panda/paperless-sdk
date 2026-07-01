@@ -27,7 +27,7 @@ class SdkBusType {
         const val yuv_data = base_value + 3
 
         /**
-         * `[Int,Int]` fps 和 资源id
+         * `[fps:Int,resId:Int]` fps 和 资源id
          */
         const val fps = base_value + 4
 

@@ -12,9 +12,9 @@ import com.mogujie.tt.protobuf.InterfacePlaymedia
 import com.mogujie.tt.protobuf.InterfaceStop
 import com.paperless.bus.EventBusMessage
 import com.paperless.player.SplitSurfaceView
-import com.paperless.player.floating.FloatingPlayerWindow
 import com.paperless.sdk.Protocol
 import com.paperless.sdk.SdkVars
+import com.xlk.paperless.sdk.floating.FloatingPlayerWindow
 import org.greenrobot.eventbus.EventBus
 import org.greenrobot.eventbus.Subscribe
 import org.greenrobot.eventbus.ThreadMode

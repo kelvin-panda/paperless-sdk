@@ -33,13 +33,11 @@ object Fps {
 
             // 核心优化：遍历 Entry，使用 put 原子地替换为 0 并获取旧值
             for (entry in mFpsMap.entries) {
-                val key = entry.key
+                val resId = entry.key
                 // put 操作是原子的，返回旧值，然后立即将 map 中的值置为 0
-                val value = mFpsMap.put(key, 0) ?: 0
-                if (value > 0) {
-                    // 发送 FPS 数据（每秒帧数）
-                    Bus.postVararg(type = SdkBusType.fps, value, key)
-                }
+                val fps = mFpsMap.put(resId, 0) ?: 0
+                // 发送 FPS 数据（每秒帧数）
+                Bus.postVararg(type = SdkBusType.fps, fps, resId)
             }
 
             // 如果仍在运行，1 秒后再次执行
@@ -92,7 +90,7 @@ object Fps {
      */
     fun clear(res: Int) {
         mFpsMap.remove(res)
-        if(mFpsMap.isEmpty()){
+        if (mFpsMap.isEmpty()) {
             stopPost()
         }
     }
