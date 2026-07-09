@@ -40,33 +40,44 @@ class SplitSurfaceView(cxt: Context, attrs: AttributeSet?) :
     private fun measureChild(parentWidth: Int, parentHeight: Int) {
         LogUtils.e("measureChild -->viewGroup的宽高：$parentWidth, $parentHeight")
         val params2_1 = LayoutParams(parentWidth / 2, parentHeight / 2)
-        getChildAt(0).layoutParams = params2_1
-        getChildAt(1).layoutParams = params2_1
-        getChildAt(2).layoutParams = params2_1
-        getChildAt(3).layoutParams = params2_1
+        if (childCount == 4) {
+            getChildAt(0).layoutParams = params2_1
+            getChildAt(1).layoutParams = params2_1
+            getChildAt(2).layoutParams = params2_1
+            getChildAt(3).layoutParams = params2_1
+        } else {
+            getChildAt(0).layoutParams = LayoutParams(parentWidth, parentHeight)
+        }
         measureChildren(widthMeasureSpec, heightMeasureSpec)
     }
 
     override fun onLayout(changed: Boolean, l: Int, t: Int, r: Int, b: Int) {
-        val p1 = getChildAt(0) as SurfaceView
-        val w1 = p1.measuredWidth
-        val h1 = p1.measuredHeight
-        p1.layout(0, 0, w1, h1)
+        if (childCount == 4) {
+            val p1 = getChildAt(0) as SurfaceView
+            val w1 = p1.measuredWidth
+            val h1 = p1.measuredHeight
+            p1.layout(0, 0, w1, h1)
 
-        val p2 = getChildAt(1) as SurfaceView
-        val w2 = p2.measuredWidth
-        val h2 = p2.measuredHeight
-        p2.layout(w1, 0, w1 + w2, h2)
+            val p2 = getChildAt(1) as SurfaceView
+            val w2 = p2.measuredWidth
+            val h2 = p2.measuredHeight
+            p2.layout(w1, 0, w1 + w2, h2)
 
-        val p3 = getChildAt(2) as SurfaceView
-        val w3 = p3.measuredWidth
-        val h3 = p3.measuredHeight
-        p3.layout(0, h1, w3, h1 + h3)
+            val p3 = getChildAt(2) as SurfaceView
+            val w3 = p3.measuredWidth
+            val h3 = p3.measuredHeight
+            p3.layout(0, h1, w3, h1 + h3)
 
-        val p4 = getChildAt(3) as SurfaceView
-        val w4 = p4.measuredWidth
-        val h4 = p4.measuredHeight
-        p4.layout(w3, h2, w3 + w4, h2 + h4)
+            val p4 = getChildAt(3) as SurfaceView
+            val w4 = p4.measuredWidth
+            val h4 = p4.measuredHeight
+            p4.layout(w3, h2, w3 + w4, h2 + h4)
+        } else {
+            val p1 = getChildAt(0) as SurfaceView
+            val w1 = p1.measuredWidth
+            val h1 = p1.measuredHeight
+            p1.layout(0, 0, w1, h1)
+        }
     }
 
     fun createView(ids: MutableList<Int>) {
@@ -79,7 +90,7 @@ class SplitSurfaceView(cxt: Context, attrs: AttributeSet?) :
             controller.initialize(p)
             controllerMap[it] = controller
             val id = it
-            p.setOnClickListener { listener?.onClick(id,p) }
+            p.setOnClickListener { listener?.onClick(id, p) }
             p.setBackgroundResource(R.drawable.player_select_bg)
             p.isClickable = true
             addView(p)
@@ -120,7 +131,7 @@ class SplitSurfaceView(cxt: Context, attrs: AttributeSet?) :
         val controller = PlayerController(resId)
         controllerMap[resId] = controller
         controller.initialize(p)
-        p.setOnClickListener { listener?.onClick(resId,p) }
+        p.setOnClickListener { listener?.onClick(resId, p) }
         p.setBackgroundResource(R.drawable.player_select_bg)
         p.isClickable = true
         addView(p, index)

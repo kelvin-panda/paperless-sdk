@@ -55,10 +55,10 @@ class SplitPlayActivity : AppCompatActivity() {
         }
         splitScreenPlayer?.createView(
             mutableListOf(
-                Protocol.resource_id_1,
+                Protocol.resource_id_1/*,
                 Protocol.resource_id_2,
                 Protocol.resource_id_3,
-                Protocol.resource_id_4
+                Protocol.resource_id_4*/
             )
         )
         splitScreenPlayer?.listener = object : SplitSurfaceView.SplitScreenPlayerClickListener {
