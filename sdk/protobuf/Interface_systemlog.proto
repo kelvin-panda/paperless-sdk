@@ -1,0 +1,240 @@
+syntax = "proto3";
+option java_package = "com.mogujie.tt.protobuf";
+option optimize_for = LITE_RUNTIME;
+
+//界面ID
+enum PB_SYSTEMLOG_PAGEID
+{
+	PB_SYSTEMLOG_PAGE_ZERO=0;
+	PB_SYSTEMLOG_PAGE_MAIN= 1; //主界面
+	PB_SYSTEMLOG_PAGE_FRONTMAIN= 2; //前端界面
+	PB_SYSTEMLOG_PAGE_BACKMAIN= 3; //后端界面
+	PB_SYSTEMLOG_PAGE_VIDEO= 4; //播放界面
+	PB_SYSTEMLOG_PAGE_MEETINGFILE= 5; //会议资料界面
+	PB_SYSTEMLOG_PAGE_MEETINGAGEND=6 ; //会议议程界面
+	PB_SYSTEMLOG_PAGE_MEETINGNOTE= 7; //查看批注界面
+	PB_SYSTEMLOG_PAGE_DOWNLOAD= 8; //下载界面
+	PB_SYSTEMLOG_PAGE_UPLOAD= 9; //上传界面
+	PB_SYSTEMLOG_PAGE_WHITEBOARD= 10; //白板界面
+	PB_SYSTEMLOG_PAGE_DOCUMENT= 11;//文档界面(office)
+	PB_SYSTEMLOG_PAGE_BACKPREMEETMANAGEMENT= 12;//后台->会前->会议管理
+	PB_SYSTEMLOG_PAGE_BACKPREMEETFILE= 13;//后台->会前->会议资料
+	PB_SYSTEMLOG_PAGE_BACKMIDVOTE= 14;//后台->会中->投票管理
+	PB_SYSTEMLOG_PAGE_BACKMIDELECTION= 15;//后台->会中->选举管理
+	PB_SYSTEMLOG_PAGE_BACKMIDCAMERA= 16;//后台->会中->摄像机控制
+	PB_SYSTEMLOG_PAGE_BACKMIDSCREEN= 17;//后台->会中->屏幕管理
+	PB_SYSTEMLOG_PAGE_BACKENDNOTATION= 18;//后台->会后->批注查看
+	PB_SYSTEMLOG_PAGE_SECVOTEMANAGEMENT= 19;//前端->秘书管理->投票管理
+	PB_SYSTEMLOG_PAGE_SECELECTORALMANAGEMENT= 20;//前端->秘书管理->选举管理
+	PB_SYSTEMLOG_PAGE_SECVIDEOCONTROL= 21;//前端->秘书管理->视频管理
+	PB_SYSTEMLOG_PAGE_LOGON= 22; //登陆界面
+	PB_SYSTEMLOG_PAGE_BACKMEMBER= 23; //参会人界面
+	PB_SYSTEMLOG_PAGE_BACKPEOPLE= 24; //常用人员界面
+	PB_SYSTEMLOG_PAGE_BACKADMIN= 25; //管理界面
+	PB_SYSTEMLOG_PAGE_BACKROOM= 26; //会场管理界面
+	PB_SYSTEMLOG_PAGE_ROOMSET= 27; //会场布局界面
+	PB_SYSTEMLOG_PAGE_PREVOTE= 28; //会前投票界面
+	PB_SYSTEMLOG_PAGE_MIDVOTE= 29; //会中投票界面
+	PB_SYSTEMLOG_PAGE_SIGNUP= 30; //会后签到界面
+}
+
+//日志统计操作ID
+//用于标识会议中的业务操作,已经定义的值，请不要变更，不要数据库中的数据会解析错
+//数据日志记录会自动删除30天之前的
+//可以自行添加日志操作的定义
+enum PB_SYSTEMLOG_OPERID 
+{
+	PB_SYSTEMLOG_OPER_ZERO=0;
+	PB_SYSTEMLOG_OPER_SCREENSHARE=1; //桌面同屏
+	PB_SYSTEMLOG_OPER_FILESCREENSHARE=2;//文件同屏（param[0]=fileid）
+	PB_SYSTEMLOG_OPER_OPENFILE=3; //查看文件（param[0]=fileid）
+	PB_SYSTEMLOG_OPER_OPENVIDEOSTREAM=4; //查看流  （param[0]=device,param[1]=subid）
+	PB_SYSTEMLOG_OPER_SCREENVIDEOSTREAM=5;//同屏视频流  （param[0]=device,param[1]=subid）
+	PB_SYSTEMLOG_OPER_UPLOADFILE=6;//上传文件（param[0]=fileid,param[1]=dirid）
+	PB_SYSTEMLOG_OPER_DOWNLOADFILE=7;//下载文件（param[0]=fileid,param[1]=dirid）
+	PB_SYSTEMLOG_OPER_DELETEFILE=8;//删除文件（param[0]=fileid,param[1]=dirid）
+	PB_SYSTEMLOG_OPER_MODIFYFILE=9;//修改文件（param[0]=fileid,param[1]=dirid）
+	PB_SYSTEMLOG_OPER_ENTERMEET=10 ;//进入会议
+	PB_SYSTEMLOG_OPER_EXITMEET=11 ;//退出会议
+	PB_SYSTEMLOG_OPER_STARTVOTE=12 ;//开始投票（param[0]=voteid）
+	PB_SYSTEMLOG_OPER_SUBMITVOTE= 13;//提交投票（param[0]=voteid）
+	PB_SYSTEMLOG_OPER_STOPVOTE=14 ;//停止投票（param[0]=voteid）
+	PB_SYSTEMLOG_OPER_STOPPLAY= 15;//停止播放媒体（param[0]=fileid）
+	PB_SYSTEMLOG_OPER_STOPSCREENSHARE=16 ;//停止同屏（param[0]=device,param[1]=subid）
+	PB_SYSTEMLOG_OPER_STOPPROJECTFILE=17 ;//停止投影文件（param[0]=fileid）
+	PB_SYSTEMLOG_OPER_STOPPROJECTSTREAM=18 ;//停止投影流（param[0]=device,param[1]=subid）
+	PB_SYSTEMLOG_OPER_STARTPROJECTFILE=19 ;//投影文件（param[0]=fileid,param[1]=dirid）
+	PB_SYSTEMLOG_OPER_STARTPROJECTSTREAM=20 ;//投影流（param[0]=fileid,param[1]=dirid）
+	PB_SYSTEMLOG_OPER_ADMINLOGON=21 ;//管理员登陆（param[0]=fileid,param[1]=dirid）
+	PB_SYSTEMLOG_OPER_ADMINLOGOUT=22 ;//管理员退出（param[0]=fileid,param[1]=dirid）
+	PB_SYSTEMLOG_OPER_STARTWHITEBOARD=23 ;//开始白板
+	PB_SYSTEMLOG_OPER_ENTERWHITEBOARD=24 ;//进入白板
+	PB_SYSTEMLOG_OPER_REJECTWHITEBOARD=25 ;//拒绝加入白板
+	PB_SYSTEMLOG_OPER_EXITWHITEBOARD=26 ;//退出白板
+	PB_SYSTEMLOG_OPER_JOINSCREEN=27 ;//加入同屏
+	PB_SYSTEMLOG_OPER_STARTMUTILPOSTIL=28 ;//开始多人书写
+	PB_SYSTEMLOG_OPER_ENTERMUTILPOSTIL=29 ;//进入多人书写
+	PB_SYSTEMLOG_OPER_REJECTMUTILPOSTIL=30 ;//拒绝加入多人书写
+	PB_SYSTEMLOG_OPER_EXITMUTILPOSTIL=31 ;//退出多人书写
+	PB_SYSTEMLOG_OPER_SCREENSHOT=32 ;//桌面截图
+	PB_SYSTEMLOG_OPER_SCANDOWNLOAD=33 ;//扫描下载
+	PB_SYSTEMLOG_OPER_SAVELOCAL=34 ;//保存文件到本地
+	PB_SYSTEMLOG_OPER_SAVESERVER=35 ;//保存文件到服务器
+	PB_SYSTEMLOG_OPER_SHOTPOSTIL=36 ;//截图批注
+	PB_SYSTEMLOG_OPER_QUERYMEET=37 ;//查询会议
+	PB_SYSTEMLOG_OPER_ADDMEET=38 ;//添加会议
+	PB_SYSTEMLOG_OPER_MODIFYMEET=39 ;//修改会议
+	PB_SYSTEMLOG_OPER_DELETEMEET=40 ;//删除会议
+	PB_SYSTEMLOG_OPER_STARTMEET=41 ;//开始会议
+	PB_SYSTEMLOG_OPER_PAUSEMEET=42 ;//暂停会议
+	PB_SYSTEMLOG_OPER_STOPEMEET=43 ;//结束会议
+	
+	PB_SYSTEMLOG_OPER_DUMPMEET= 44;//复制会议
+	PB_SYSTEMLOG_OPER_MODELMEET=  45;//添加模板会议
+	PB_SYSTEMLOG_OPER_ADMINLOGONERR= 46 ;//管理员登陆出错
+	PB_SYSTEMLOG_OPER_ADDDIR=  47;//添加目录
+	PB_SYSTEMLOG_OPER_MODIFYDIR= 48 ;//修改目录（param[0]=dirid）
+	PB_SYSTEMLOG_OPER_DELETEDIR= 49 ;//删除目录（param[0]=dirid）
+	PB_SYSTEMLOG_OPER_CLOSEFILE=  50;//退出文件查看器（param[0]=dirid）
+	PB_SYSTEMLOG_OPER_REBOOT= 51 ;//设备重启
+	PB_SYSTEMLOG_OPER_POWEROFF= 52 ;//设备关机
+	PB_SYSTEMLOG_OPER_LIFTUP= 53 ;//设备上升
+	PB_SYSTEMLOG_OPER_LIFTDOWN= 54 ;//设备下降
+	PB_SYSTEMLOG_OPER_LIFTSTOP=  55;//设备停止
+	PB_SYSTEMLOG_OPER_SOFTREBOOT=  56;//软件重启
+	PB_SYSTEMLOG_OPER_WAKUP=  57;//设备唤醒
+	PB_SYSTEMLOG_OPER_NETTEST=  58;//设备网络测试
+	PB_SYSTEMLOG_OPER_HELPSIGN=  59;//辅助签到
+	PB_SYSTEMLOG_OPER_NOSIGNENTER= 60 ;//免签
+	PB_SYSTEMLOG_OPER_OPENOUTSIDE=  61;//外部打开文档
+	PB_SYSTEMLOG_OPER_PROTECTDATA=  62;//资料保护
+	PB_SYSTEMLOG_OPER_MODIFYDEVICE=  63;//修改设备信息
+	PB_SYSTEMLOG_OPER_DELDEVICE=  64;//删除设备
+	PB_SYSTEMLOG_OPER_SETINI=  65;//参数配置
+	PB_SYSTEMLOG_OPER_COMMONADD= 66 ;//添加
+	PB_SYSTEMLOG_OPER_COMMONMODIFY=67  ;//修改
+	PB_SYSTEMLOG_OPER_COMMONDELETE=  68;//删除
+	PB_SYSTEMLOG_OPER_COMMONSAVE=  69;//保存
+	PB_SYSTEMLOG_OPER_COMMONIMPORT=  70;//导入
+	PB_SYSTEMLOG_OPER_COMMONEXPORT=  71;//导出
+	PB_SYSTEMLOG_OPER_COMMONSTART=  72;//开始
+	PB_SYSTEMLOG_OPER_COMMONSTOP=  73;//结束
+	PB_SYSTEMLOG_OPER_COMMONDETAIL=  74;//查询详情
+	PB_SYSTEMLOG_OPER_SETHOST=  75;//设置主持人
+	PB_SYSTEMLOG_OPER_COMMONADDGROUP= 76 ;//添加分组
+	PB_SYSTEMLOG_OPER_COMMONMODIFYGROUP=77  ;//修改分组
+	PB_SYSTEMLOG_OPER_COMMONDELETEGROUP=  78;//删除分组
+	PB_SYSTEMLOG_OPER_MEETARCHIVE=  79;//会议归档
+	PB_SYSTEMLOG_OPER_ADDCONTROLROOM= 80 ;//添加可控会场
+	PB_SYSTEMLOG_OPER_DELCONTROLROOM=  81;//删除可控会场
+	PB_SYSTEMLOG_OPER_DELSYSLOG=  82;//执行日志清理
+}
+
+//////////////////////////////////////////////////////////////////////////
+message pbui_Item_MeetSystemLog
+{
+	fixed32 pageid=1;//界面ID  参见systemlogoperid.h  PB_SYSTEMLOG_PAGEID
+	fixed32 operid=2;//操作类别  参见systemlogoperid.h  SYSTEMLOG_OPERID
+	fixed32 meetid=3;//操作的会议ID
+	fixed32 roomid=4;//操作的会场ID
+	fixed32 deviceid=5;//操作的设备ID
+	fixed32 urole=6;//人员角色 参见Pb_MeetMemberRole 如果是管理员--人员ID是管理ID
+	fixed32 uid=7;//人员ID
+
+	fixed64 opertime=8;//操作utc时间 微秒
+
+	repeated fixed32 param=9;//目前最多四个参数，根据操作对应的操作参数，用于快速统计，eg:播放的文件ID，播放的流设备ID,
+}
+
+//管理日志 
+//type：Pb_TYPE_MEET_INTERFACE_SYSTEMLOG
+//method:查询(数据库返回)
+message pbui_Type_MeetingMeetSystemLog
+{
+	fixed32   totalrecord=1;//本次查询总记录数
+	fixed32   startrow=2;//查询返回用户传过来的开始行
+	fixed32	  isfirst=3;//是否为第一帧,如果评分太多,接下来的帧会在下次接收到后回调
+	repeated pbui_Item_MeetSystemLog item=4;
+}
+
+//添加日志 
+//call callback
+//type：Pb_TYPE_MEET_INTERFACE_SYSTEMLOG
+//method:add
+message pbui_Add_MeetSystemLog
+{
+	fixed32 pageid=1;//界面ID  参见systemlogoperid.h  PB_SYSTEMLOG_PAGEID
+	fixed32 operid=2;//操作类别  参见systemlogoperid.h  SYSTEMLOG_OPERID
+	fixed32 meetid=3;//操作的会议ID
+	fixed32 roomid=4;//操作的会场ID
+	fixed32 deviceid=5;//操作的设备ID （添加时不需要填写）
+	fixed32 urole=6;//人员角色 参见Pb_MeetMemberRole 如果是管理员--人员ID是管理ID
+	fixed32 uid=7;//人员ID
+
+	fixed64 opertime=8;//操作utc时间 微秒 （添加时不需要填写）
+
+	repeated fixed32 param=9;//目前最多四个参数，根据操作对应的操作参数，用于快速统计，eg:播放的文件ID，播放的流设备ID,
+}
+
+//管理日志 
+//type：Pb_TYPE_MEET_INTERFACE_SYSTEMLOG
+//method:查询
+message pbui_Type_QueryMeetSystemLog
+{
+	fixed32 pageid=1;//界面ID  参见systemlogoperid.h  PB_SYSTEMLOG_PAGEID
+	fixed32 operid=2;//操作类别  为0表示不作为查询条件
+	fixed32 meetid=3;//操作的会议ID 为0表示不作为查询条件
+	fixed32 roomid=4;//操作的会场ID 为0表示不作为查询条件
+	fixed32 deviceid=5;//操作的设备ID 为0表示不作为查询条件
+	fixed32 urole=6;//人员角色 参见Pb_MeetMemberRole 为0表示不作为查询条件
+	fixed32 uid=7;//人员ID 为0表示不作为查询条件
+
+	repeated fixed32 param=8;//目前最多四个参数，根据操作对应的操作参数，为0表示不作为查询条件
+
+	fixed64 startopertime=9;//查询的起始记录utc时间 微秒 必须有效
+	fixed64 endopertime=10;//查询的结束记录utc时间 微秒 必须有效
+	fixed32 startrow=11;//查询开始行 实现分页查询 必须有效
+}
+
+////////////newsyslog//////////////////////////////////////////////////////////////
+//call
+//type:TYPE_MEET_INTERFACE_NEWSYSLOG
+//method: 
+//add|使用Interface_base.proto 中的pbui_Type_SmartJsonProtol  
+//query|使用Interface_base.proto 中的pbui_Type_SmartJsonProtol  
+
+
+//stages：STAGE_NewSystemLog
+//fun: FUN_One 
+//method:查询、添加
+/*
+{
+
+"data":[
+{"pageid":1,"operid":1,"meetid":1,"roomid":1,"devid",:"0x110000","urole":1,"uid","text":"test", "time":"123145645"}
+]
+}
+*/
+
+/*
+//查询使用
+//查询 字段指定值不为0是指定查询,为0表示匹配全部,maxrow默认100，每次不能超过500
+//startrow表示从第几条记录返回,获取下一页时使用
+{"startrow":0,"maxrow":100, "pageid":1,"operid":1,"meetid":1,"roomid":1,"devid",:"0x110000","urole":1,"uid","text":"test", "start":"123145645","end":"123145645"}
+
+返回查询
+{
+"total":999,//本次查询的记录条数
+"maxrow":"100",//单次最多查询多少行，默认100条记录
+"start":0,//开始的行号
+"data":[
+{"pageid":1,"operid":1,"meetid":1,"roomid":1,"devid",:"0x110000","urole":1,"uid":1,"text":"test", "time":"123145645"},
+{"pageid":1,"operid":1,"meetid":1,"roomid":1,"devid",:"0x110000","urole":1,"uid":1,"text":"123456", "time":"123145645"}
+]
+}
+*/
+
+//callback 使用使用Interface_base.proto 中的pbui_Type_SmartJsonProtolNotify
+//type:TYPE_MEET_INTERFACE_NEWSYSLOG
+//method: METHOD_MEET_INTERFACE_QUERY
+

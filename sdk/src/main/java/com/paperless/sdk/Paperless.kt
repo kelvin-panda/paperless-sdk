@@ -22,19 +22,9 @@ import java.util.concurrent.LinkedBlockingQueue
 object Paperless {
     fun init(context: Context) {
         loadLibrary()
-        initDefaultDecodeMap()
         initScreenSize(context)
         initScreenRecordParameter()
         initDirPath(context)
-    }
-
-    /**
-     * 初始化除了0-4号资源的帧存储列表
-     */
-    fun initDecodeMap(resIds: MutableList<Int>) {
-        resIds.forEach {
-            SdkVars.decodeMap.put(it, LinkedBlockingQueue<FrameData>(SdkVars.CAPACITY))
-        }
     }
 
     private fun loadLibrary() {
@@ -61,14 +51,6 @@ object Paperless {
         System.loadLibrary("native-lib")
         System.loadLibrary("z")
         LogUtils.e("loadLibrary end")
-    }
-
-    private fun initDefaultDecodeMap() {
-        SdkVars.decodeMap.put(Protocol.resource_id_0, LinkedBlockingQueue<FrameData>(SdkVars.CAPACITY))
-        SdkVars.decodeMap.put(Protocol.resource_id_1, LinkedBlockingQueue<FrameData>(SdkVars.CAPACITY))
-        SdkVars.decodeMap.put(Protocol.resource_id_2, LinkedBlockingQueue<FrameData>(SdkVars.CAPACITY))
-        SdkVars.decodeMap.put(Protocol.resource_id_3, LinkedBlockingQueue<FrameData>(SdkVars.CAPACITY))
-        SdkVars.decodeMap.put(Protocol.resource_id_4, LinkedBlockingQueue<FrameData>(SdkVars.CAPACITY))
     }
 
     private fun initScreenSize(context: Context) {

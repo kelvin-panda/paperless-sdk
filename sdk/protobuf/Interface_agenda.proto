@@ -1,0 +1,151 @@
+syntax = "proto3";
+option java_package = "com.mogujie.tt.protobuf";
+option optimize_for = LITE_RUNTIME;
+
+import "Interface_Macro.proto";
+
+enum Pb_MeetAgenda_Flag
+{
+Pb_MEETAGENDA_FLAG_ZERO=0;
+Pb_MEETAGENDA_FLAG_SHOWSTATUS= 0x0001; //该标志位表示隐藏属性 0=显示 1=表示隐藏
+Pb_MEETAGENDA_FLAG_VOTE=	     0x0002; //该标志位表示设置投票属性 0=不绑定 1=表示绑定
+Pb_MEETAGENDA_FLAG_PASSWD=		0x0004; //该标志位表示设置密码属性 0=不绑定 1=表示绑定
+}
+
+//#define MEETAGENDA_AUTOADDBINDDIR 0xff000000 //自动添加目录
+message pbui_ItemAgendaTimeInfo
+{
+	fixed32  agendaid=1;  //议程ID
+	fixed32  status=2;  //议程状态 参见Pb_AgendaStatus
+	fixed32  dirid=3;  //绑定目录ID  MEETAGENDA_AUTOADDBINDDIR=表示自动关联目录
+	fixed64  startutctime=4;//单位秒
+	fixed64  endutctime=5;  //单位秒
+	bytes    desctext=6; //描述内容
+	fixed32	 flag=7; //目录标志 Pb_MeetAgenda_Flag
+	fixed32	 voteid=8; //关联的投票ID
+	bytes	 passwd=9; //密码 , 为空表示无密码 密码最大长度为6
+	fixed32  encryptlevel=10;// 占用flag的高4位
+}
+
+//指定的媒体作议程 agendatype=Pb_MEET_AGENDA_TYPE_FILE(modify,query)
+//指定的文本作议程 agendatype=Pb_MEET_AGENDA_TYPE_TEXT(modify,query)
+//时间轴式议程     agendatype=Pb_MEET_AGENDA_TYPE_TIME(modify,query,add,del,set)
+//Pb_MEET_AGENDA_TYPE_NOSET= 0xff000000; //未指定类型，如果查询时agendatype等于该值会返回会议当前设置的议程类型
+//call ,callreturn
+//type: Pb_TYPE_MEET_INTERFACE_MEETAGENDA
+message pbui_meetAgenda
+{
+	fixed32	 meetagendatype=1;//如果需要设置当前会议类型，在这里指定 Pb_MEET_AGENDA_TYPE_NOSET
+	fixed32	 agendatype=2;//议程类型 参见Pb_AgendaType 查询时可以指定议程的类型查询
+	fixed32  mediaid=3;// 媒体ID
+	bytes    text=4;// 议程文本
+	repeated pbui_ItemAgendaTimeInfo  item=5;// 时间轴式议程
+}
+
+//call
+//时间轴议程的交换
+//type: Pb_TYPE_MEET_INTERFACE_MEETAGENDA
+//method:Pb_METHOD_MEET_INTERFACE_MOVE
+message pbui_Type_meetAgendaPos
+{
+	fixed32 agendaid1=1;  //议程ID
+	fixed32 agendaid2=2;  //议程ID
+}
+
+//时间轴议程的位置保存
+//call
+//type: Pb_TYPE_MEET_INTERFACE_MEETAGENDA
+//method:Pb_METHOD_MEET_INTERFACE_SAVE
+message pbui_Type_MeetingAgendaTimeSavePos
+{
+	repeated fixed32 agendaid=1;  //议程ID
+}
+
+//////////////////////////以下是席位方案相关的协议///////////////////////////////////////////////////////////
+message pbui_SubItem_SeatPlanBindItem
+{
+	fixed32  type=1;//=0 agenda,=1 dir,=2 file
+	fixed32  id=2;//type=0是，这个是议程的ID
+}
+
+message pbui_SubItem_SeatPlanMemItem
+{
+	fixed32 memberid=1;//
+	fixed32 deviceid=2;
+	fixed32 role=3;//查询参会人时会返回参会人员的角色 需要提前缓存席位绑定的数据 参见Interface_Macro.proto Pb_MeetMemberRole
+}
+
+message pbui_Item_SeatPlanDetailInfo
+{
+	fixed32 planid=1;//方案id
+	fixed32 flag=2;
+	bytes   pjson=3;//{"name":""}
+	repeated pbui_SubItem_SeatPlanBindItem pbinditem=4;//方案的绑定的
+	repeated pbui_SubItem_SeatPlanMemItem pmemitem=5;//方案的参会人员
+}
+
+//#define MEETSEATPLAN_QUERYFLAG_MEMINFO  0x00000001 //不需要返回人员 默认返回
+//#define MEETSEATPLAN_QUERYFLAG_BINDINFO 0x00000002 //不需要返回绑定 默认返回
+//#define MEETSEATPLAN_QUERYFLAG_JSONINFO 0x00000004 //不需要返回JSON 默认返回
+//#define MEETSEATPLAN_QUERYFLAG_AGENDA   0x00000008 //planid为议程id传入，查询绑定了该议程的方案
+//#define MEETSEATPLAN_QUERYFLAG_DIR      0x00000010 //planid为目录id传入，查询绑定了该目录的方案
+//#define MEETSEATPLAN_QUERYFLAG_FILE     0x00000020 //planid为文件id传入，查询绑定了该文件的方案
+
+//type:TYPE_MEET_INTERFACE_SEATPLAN
+//call
+//method: query,singlequery
+message pbui_Type_MeetSeatPlanInfo
+{
+	fixed32   planid=1;//指定ID查询时需要指定这个值
+	fixed32   queryflag=2;//MEETSEATPLAN_QUERYFLAG_MEMINFO
+	repeated pbui_Item_SeatPlanDetailInfo item =3;
+}
+
+//type:TYPE_MEET_INTERFACE_SEATPLAN-TYPE_MEET_INTERFACE_SEATPLANMEM
+//callback
+//method: notify
+message pbui_Type_MeetSeatPlanNotify
+{
+	fixed32 opermethod=1;//本次通知是因为opermethod方法触发的
+	fixed32 planid=2;//如果指定了ID刚表示是对特定ID的操作,为0表示全部
+	fixed64 markid=3;//添加时指定的标识ID，成功添加后会返回该值
+	fixed32 id=4;
+}
+
+//type:TYPE_MEET_INTERFACE_SEATPLAN
+//call
+//method: add,modify
+message pbui_Type_AddMeetSeatPlanInfo
+{
+	fixed64 markid=1;//添加时指定的标识ID，成功添加后会返回该值
+	fixed32 planid=2;//方案id
+	fixed32 flag=3;
+	bytes   pjson=4;//{"name":""}
+}
+
+//type:TYPE_MEET_INTERFACE_SEATPLAN
+//call
+//method: delete,start
+message pbui_Type_MeetDelSeatPlan
+{
+	repeated fixed32 planid=1;//方案id
+}
+
+//type:TYPE_MEET_INTERFACE_SEATPLAN
+//call
+//method: save
+message pbui_Type_MeetModSeatPlanBindInfo
+{
+	fixed32 planid=1;//方案id
+	repeated pbui_SubItem_SeatPlanBindItem pbinditem=2;//方案的绑定的
+}
+
+//type:TYPE_MEET_INTERFACE_SEATPLANMEM
+//call
+//method: add,modify,delete
+message pbui_Type_MeetModSeatPlanMemInfo
+{
+	fixed32 planid=1;//方案id
+	repeated pbui_SubItem_SeatPlanMemItem pmemitem=2;//方案的参会人员
+}
+

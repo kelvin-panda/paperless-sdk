@@ -1,0 +1,204 @@
+syntax = "proto3";
+option java_package = "com.mogujie.tt.protobuf";
+option optimize_for = LITE_RUNTIME;
+
+import "Interface_Macro.proto";
+
+//会议自定义数据项ID
+enum Pb_MeetUserDefFlag 
+{
+Pb_MeetUserDef_ZERO=0;
+Pb_MeetUserDef_SLOGAN =1;//会议标语
+}
+
+message pbui_Type_MeetUserdefItemInfo
+{
+	fixed32 id=1;   //数据id 用户自行约定
+	bytes  text=2;  //
+}
+
+//call
+//type:TYPE_MEET_INTERFACE_MEETUSERDEF
+//method: 
+//METHOD_MEET_INTERFACE_SINGLEQUERYBYID|使用pbui_QueryInfoByID 
+//modify|delete|使用pbui_Type_MeetUserdefInfo
+message pbui_Type_MeetUserdefInfo
+{
+	fixed32 meetid=1;   //指定会议id 为0表示当前会议
+	repeated pbui_Type_MeetUserdefItemInfo item =2;
+}
+
+///////////comlexmeetuserdef///////////////////////////////////////////////////////////////
+enum PB_COMPLEX_MEET_FLAG 
+{
+PB_COMPLEX_MEET_FLAG_ZERO=0;
+PB_COMPLEX_MEET_FLAG_CLEARSAVE=0x000000001;//表示清空再修改，否则就是更新
+}
+
+//会根据typ和id1，在删除指定的id1时会关联删除这些自定义数据
+//typ最大值不能超过255
+//datid最大值不能超过255
+enum Pb_COMPLEX_MEET_TYP 
+{
+Pb_COMPLEX_MEET_TYP_ZERO=0;
+Pb_COMPLEX_MEET_TYP_MEMBER=		1;///typ=1指参会人员,id1是人员id，id2=0,id3=0
+Pb_COMPLEX_MEET_TYP_AGENDA=		2;//typ=2指议题,id1是议题id，id2=0,id3=0
+Pb_COMPLEX_MEET_TYP_DIR=		3;//typ=3指目录,id1是目录id，id2=0,id3=0
+Pb_COMPLEX_MEET_TYP_FILE=		4;//typ=4指目录文件,id1是目录id，id2=文件id,id3=0
+Pb_COMPLEX_MEET_TYP_MEMFILE=	5;//typ=5指参会人文件,id1是参会人员id，id2=目录id,id3=文件id
+Pb_COMPLEX_MEET_TYP_VOTE=		6;//typ=6指投票,id1是投票id，id2=0,id3=0
+Pb_COMPLEX_MEET_TYP_NEWVOTE=	7;//typ=6指新投票,id1是投票id，id2=0,id3=0
+}
+
+//约定各typ下的dataid=1用于存放基本信息
+//typ=COMPLEX_MEET_TYP_MEMBER
+enum Pb_CMX_MEET_MEM_DATAID 
+{
+Pb_CMX_MEET_MEM_DATAID_ZERO=0;
+Pb_CMX_MEET_MEM_DATAID_BASE= 1; //目录文件的基本信息
+}
+
+/*
+{
+}
+*/
+//typ=COMPLEX_MEET_TYP_AGENDA
+enum Pb_CMX_MEET_AGENDA_DATAID 
+{
+Pb_CMX_MEET_AGENDA_DATAID_ZERO=0;
+Pb_CMX_MEET_AGENDA_DATAID_BASE= 1; //目录文件的基本信息
+}
+/*
+{
+}
+*/
+//typ=COMPLEX_MEET_TYP_DIR
+enum Pb_CMX_MEET_DIR_DATAID 
+{
+Pb_CMX_MEET_DIR_DATAID_ZERO=0;
+Pb_CMX_MEET_DIR_DATAID_BASE= 1; //目录文件的基本信息
+}
+/*
+{
+}
+*/
+//typ=COMPLEX_MEET_TYP_FILE
+enum Pb_CMX_MEET_FILE_DATAID 
+{
+Pb_CMX_MEET_FILE_DATAID_ZERO=0;
+Pb_CMX_MEET_FILE_DATAID_BASE= 1; //目录文件的基本信息
+}
+/*
+{
+"pagenum":3,//页码
+}
+*/
+//typ=COMPLEX_MEET_TYP_MEMFILE
+enum Pb_CMX_MEET_MEEFILE_DATAID 
+{
+Pb_CMX_MEET_MEEFILE_DATAID_ZERO=0;
+Pb_CMX_MEET_MEEFILE_DATAID_BASE= 1; //目录文件的基本信息
+}
+/*
+{
+}
+*/
+//typ=COMPLEX_MEET_TYP_VOTE
+enum Pb_CMX_MEET_VOTE_DATAID 
+{
+Pb_CMX_MEET_VOTE_DATAID_ZERO=0;
+Pb_CMX_MEET_VOTE_DATAID_BASE= 1; //目录文件的基本信息
+}
+/*
+{
+}
+*/
+//typ=COMPLEX_MEET_TYP_NEWVOTE
+enum Pb_CMX_MEET_NEWVOTE_DATAID 
+{
+Pb_CMX_MEET_NEWVOTE_DATAID_ZERO=0;
+Pb_CMX_MEET_NEWVOTE_DATAID_BASE= 1; //目录文件的基本信息
+}
+/*
+{
+}
+*/
+//stages：STAGE_ComplexMeetUserInfo
+//fun: FUN_One 
+//method:查询、修改
+
+/*修改使用PD_SmartJsonProtol
+{
+"typ":1,//Pb_COMPLEX_MEET_TYP_MEMBER
+"flag":1,//PB_COMPLEX_MEET_FLAG_CLEARSAVE表示针对typ的项清空再修改，否则就是更新
+"data":[
+{"id1":"1,"id2":"0","id3":"0","item":[{"datid":"1","str":"abc"},{"datid":"2","str":"efg"}]},//如果是删除则不需要设置str字段值
+{"id1":"2,"item":[{"datid":"1","str":"abc"},{"datid":"2","str":"efg"}]},
+
+]
+}
+*/
+
+/*
+查询使用PD_SmartJsonProtol，仅支持查询指定会议的全部
+返回查询使用PD_SmartJsonProtolEx
+{
+"data":[
+{"typ":1,"id1":"1,"id2":"0","id3":"0","datid":"1","str":"abc"},
+{"typ":2,"id1":"1,"id2":"1","id3":"0","datid":"2","str":"abc"},
+{"typ":1,"id1":"2,"id2":"0","id3":"1","datid":"3","str":"abc"},
+]
+}
+*/
+
+message pbui_Item_ComplexMeetInfo
+{
+	fixed32   typ=1;
+	fixed32   id1=2;
+	fixed32   id2=3;
+	fixed32   id3=4;
+	fixed32   dataid=5;
+	bytes     ptext=6; 
+}
+
+//call
+//type:TYPE_MEET_INTERFACE_COMPLEXMEETUSERDEF
+//method: 
+//query|使用Type_QueComplexPubInfo
+message pbui_Type_QueComplexMeetInfo
+{
+	fixed32   typ=1;//指定typ  定义 COMPLEX_PUBLIC_TYP_ADMIN
+	fixed32   id1=2;//匹配id1 为0表示typ下的所有id
+	fixed32   id2=3;//匹配id2 为0表示typ下的所有id
+	fixed32   id3=4;//匹配id3 为0表示typ下的所有id
+	repeated pbui_Item_ComplexMeetInfo item=5;
+}
+
+//call
+//type:TYPE_MEET_INTERFACE_COMPLEXMEETUSERDEF
+//method: 
+//modify|使用Interface_base.proto 中的pbui_Type_SmartJsonProtol  
+//METHOD_MEET_INTERFACE_SINGLEQUERYBYID|使用Type_SingleQueComplexMeetInfo 
+message pbui_Type_SingleQueComplexMeetInfo
+{
+	fixed32   typ=1;
+	fixed32   id1=2;
+	fixed32   id2=3;
+	fixed32   id3=4;
+	fixed32   dataid=5;
+	bytes     ptext=6; 
+}
+
+//callback
+//type:TYPE_MEET_INTERFACE_COMPLEXMEETUSERDEF
+//method: notify
+message pbui_Type_ComplexMeetUserdefNotify
+{
+	fixed32   opermethod=1;//本次通知是因为opermethod方法触发的
+	fixed32   typ=2;
+	fixed32   id1=3;
+	fixed32   id2=4;
+	fixed32   id3=5;
+	fixed32   dataid=6;
+
+}

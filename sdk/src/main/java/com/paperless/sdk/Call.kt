@@ -1,17 +1,14 @@
 package com.paperless.sdk
 
-import android.util.Log
 import com.blankj.utilcode.util.LogUtils
 import com.mogujie.tt.protobuf.InterfaceMacro
 import com.paperless.bus.Bus
 import com.paperless.bus.SdkBusType
-import com.paperless.data.FrameData
 import com.paperless.data.YuvData
 import com.paperless.player.DecodeQueue
 import com.paperless.player.Fps
 import com.paperless.player.FrameDataPool
 import java.nio.ByteBuffer
-import java.util.concurrent.LinkedBlockingQueue
 
 /**
  *  @author : Administrator
@@ -21,10 +18,20 @@ object Call {
 
     lateinit var m_dbuf: ByteBuffer
     lateinit var m_dexbuf: ByteBuffer
+    var callback: DataChangeCallback? = null
     fun initSetDirectBuf() {
-        m_dbuf = ByteBuffer.allocateDirect(SdkVars.frame_size)
-        m_dexbuf = ByteBuffer.allocateDirect(SdkVars.frame_codec_size)
+        m_dbuf = ByteBuffer.allocateDirect(1024 * 500)
+        m_dexbuf = ByteBuffer.allocateDirect(600)
         initDirectBuf(m_dbuf, m_dexbuf)
+    }
+
+    // 数据变更回调接口
+    interface DataChangeCallback {
+        fun onDataChanged(type: Int, method: Int, data: ByteArray?, dataLen: Int)
+    }
+
+    fun setDataChangeCallback(callback: DataChangeCallback) {
+        this.callback = callback
     }
 
     /**
@@ -311,6 +318,7 @@ object Call {
     }
 
     fun callback_method(type: Int, method: Int, data: ByteArray?, datalen: Int): Int {
+        callback?.onDataChanged(type, method, data, datalen)
         if (type != 1) {
             if (SdkConfig.logEnable) LogUtils.e("callback_method：type=$type,method=$method,datalen=$datalen")
         }
@@ -328,57 +336,6 @@ object Call {
         pts: Long,
         codecdatalen: Int
     ): Int {
-        if (SdkConfig.isUseSdkPlayer) {
-            sdkPlayer(isKeyframe, res, codecid, w, h, datalen, pts, codecdatalen)
-        } else {
-            m_dbuf.position(0)
-            m_dbuf.limit(datalen)
-            m_dexbuf.position(0)
-            m_dexbuf.limit(codecdatalen)
-            if (res == Protocol.resource_id_0) {
-                SdkVars.frame_count++
-            }
-            var decodeQueue = SdkVars.decodeMap[res]
-            if (decodeQueue == null) {
-                if (SdkConfig.logEnable) LogUtils.e("player_log", "新建 LinkedBlockingQueue<FrameData>")
-                val value = LinkedBlockingQueue<FrameData>(SdkVars.CAPACITY)
-                SdkVars.decodeMap.put(res, value)
-                decodeQueue = value
-            }
-            var frameData = SdkVars.frameDataPool.poll()
-            if (frameData == null) {
-                frameData = FrameData()
-                if (SdkConfig.logEnable) LogUtils.e("player_log", "新建对象 size=${decodeQueue.size}")
-            }
-            frameData.isKeyFrame = isKeyframe
-            frameData.res = res
-            frameData.codecid = codecid
-            frameData.w = w
-            frameData.h = h
-            frameData.pts = pts
-            frameData.setPacketBuffer(m_dbuf)
-            frameData.setCodecDataBuffer(m_dexbuf)
-            if (!decodeQueue.offer(frameData)) {
-                //添加失败就把最旧的数据删除后再添加
-                if (decodeQueue.poll() != null) {
-                    val offer = decodeQueue.offer(frameData)
-                    if (SdkConfig.logEnable) LogUtils.e("player_log", "添加失败就把最旧的数据删除后再添加，offer=$offer")
-                }
-            }
-        }
-        return 0
-    }
-
-    fun sdkPlayer(
-        isKeyframe: Int,
-        res: Int,
-        codecid: Int,
-        w: Int,
-        h: Int,
-        datalen: Int,
-        pts: Long,
-        codecdatalen: Int
-    ) {
         m_dbuf.position(0)
         m_dbuf.limit(datalen)
         m_dexbuf.position(0)
@@ -397,8 +354,9 @@ object Call {
         // 放入到待处理解码的集合中
         if (!DecodeQueue.offer(res, frameData)) {
             // 队列已满，尝试移除最旧的非关键帧
-            if (SdkConfig.logEnable) Log.d("", "sdkPlayer: 队列已满，尝试移除最旧的非关键帧")
+            if (SdkConfig.logEnable) LogUtils.d("队列已满，尝试移除最旧的非关键帧")
             DecodeQueue.remove(frameData)
         }
+        return 0
     }
 }

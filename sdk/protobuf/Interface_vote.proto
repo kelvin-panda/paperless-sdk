@@ -1,0 +1,376 @@
+syntax = "proto3";
+option java_package = "com.mogujie.tt.protobuf";
+option optimize_for = LITE_RUNTIME;
+
+import "Interface_Macro.proto";
+
+
+message pbui_Item_MeetOnVotingDetailInfo
+{
+	fixed32		voteid=1;//即时投票需要指定目录ID =0表示所有向参会人员发起投票
+	bytes		content=2; //投票内容 
+	fixed32			maintype=3; //投票 选举 调查问卷 即时投票 参见Pb_MeetVoteType
+	fixed32			mode=4; //匿名投票 记名投票 参见Pb_MeetVoteMode
+	fixed32			type=5; //多选 单选 参见Pb_MeetVote_SelType
+	fixed32		timeouts=6;  //超时值 单位 秒
+	fixed32		selectcount=7; //有效选项
+	repeated bytes		text=8;  //选项描述文字
+}
+
+//查询会议发起投票信息
+//type:Pb_TYPE_MEET_INTERFACE_MEETONVOTING
+//method: query/add/mod/
+message pbui_Type_MeetOnVotingDetailInfo
+{
+	repeated pbui_Item_MeetOnVotingDetailInfo item=1;//投票信息
+}
+
+//设置投投票计时值
+//type:Pb_TYPE_MEET_INTERFACE_MEETONVOTING
+//method: set
+message pbui_Type_MeetSetVoteTimeouts
+{
+	fixed32	  voteid=1; //投票ID
+	fixed32   timeouts=2;//计时 单位 秒
+}
+
+//会议停止、删除投票信息
+//type:Pb_TYPE_MEET_INTERFACE_MEETONVOTING
+//method: stop/del
+message pbui_Type_MeetStopVoteInfo
+{
+	repeated fixed32		voteid=1;
+}
+
+message pbui_ItemVoteStart
+{
+	fixed32 voteid=1;//发起的投票ID
+	fixed32 voteflag=2; //发起投票标志 Pb_VoteStartFlag 定义
+	fixed32 timeouts=3; //计时结束 单位：秒
+	repeated fixed32 memberid=4;//参与投票的参会人员ID null表示所示参会人员
+}
+
+//投票标志 selitem高8位
+// Pb_VOTE_SELFLAG_CHECKIN  0x80000000 //该位为1表示已经签到
+
+
+//发起投票
+//type:TYPE_MEET_INTERFACE_MEETONVOTING
+//method: start
+message pbui_Type_MeetStartVoteInfo
+{
+	repeated pbui_ItemVoteStart item=1;//投票信息
+}
+
+//提交会议投票信息
+message pbui_Item_MeetSubmitVote
+{
+	fixed32		voteid=1;
+	fixed32		selcnt=2;//有效选项数
+	fixed32		selitem=3;//选择的项 0x00000001 选择了第一项 0x00000002第二项 对应项位置1表示选择 |高8位参见 Pb_VOTE_SELFLAG_CHECKIN
+	bytes       mark=4;//投票备注
+}
+
+//提交会议投票信息
+//call
+//type:Pb_TYPE_MEET_INTERFACE_MEETONVOTING
+//method: submit
+message pbui_Type_MeetSubmitVote
+{
+	repeated pbui_Item_MeetSubmitVote item=1;
+}
+
+//会议投票信息
+message pbui_SubItem_VoteItemInfo
+{
+	bytes    text=1;//描述文字
+	fixed32  selcnt=2;	 //投票数
+}
+
+message pbui_Item_MeetVoteDetailInfo
+{
+	fixed32		voteid=1;
+	bytes		content=2; //投票内容 
+	fixed32		maintype=3;//类别 投票 选举 调查问卷 参见Pb_MeetVoteType
+	fixed32		mode=4; //匿名投票 记名投票 参见Pb_MeetVoteMode
+	fixed32		type=5; //多选 单选 参见Pb_MeetVote_SelType
+	fixed32		votestate=6; //投票状态 参见Pb_MeetVoteStatus
+	fixed32		timeouts=7;  //超时值
+	fixed32     selcnt=8; //投票选项 0x00000001 选择了第一项 0x00000002第二项 对应项位置1表示选择
+	fixed32		selectcount=9; //有效选项
+	repeated pbui_SubItem_VoteItemInfo		item=10;  //选项描述文字
+}
+
+//type:Pb_TYPE_MEET_INTERFACE_MEETVOTEINFO
+//method: query
+message pbui_Type_MeetVoteDetailInfo
+{
+	repeated pbui_Item_MeetVoteDetailInfo item=1;
+}
+
+enum Pb_VoteComplexFlag 
+{
+Pb_VOTE_COMPLEX_FLAG_ZERO= 0;  //暂不使用
+Pb_VOTE_COMPLEX_FLAG_MAITYPE=	0x00000001; //maintype有效
+Pb_VOTE_COMPLEX_FLAG_MODE=		0x00000002; //mode有效
+Pb_VOTE_COMPLEX_FLAG_TYPE=		0x00000003; //type有效
+Pb_VOTE_COMPLEX_FLAG_STATE=		0x00000004; //votestate有效
+}
+
+//type:Pb_TYPE_MEET_INTERFACE_MEETVOTEINFO
+//method: complexquery
+message pbui_Type_MeetVoteComplexQuery
+{
+	fixed32   		queryflag=1;//在此指定那里有效 注：指定后当投票的数据等于指定的值时才会返回
+	fixed32	 		maintype=2; //指定大类 参见本文件中的maintype 定义
+	fixed32		 	mode=3; //匿名投票 记名投票
+	fixed32		 	type=4; //多选 单选
+	fixed32		 	votestate=5; //投票状态
+}
+
+//会议投票人
+message pbui_Item_MeetVoteSignInDetailInfo
+{
+	fixed32		 id=1;//投票人员
+	fixed32      selcnt=2; //投票选项 0x00000001 选择了第一项 0x00000002第二项 对应项位置1表示选择|高8位参见 Pb_VOTE_SELFLAG_CHECKIN
+	bytes        mark=3;//投票备注
+}
+
+//type:Pb_TYPE_MEET_INTERFACE_MEETVOTESIGNED
+//method: query
+message pbui_Type_MeetVoteSignInDetailInfo
+{
+	fixed32   voteid=1;
+	repeated pbui_Item_MeetVoteSignInDetailInfo item=2;
+}
+
+//查询会议投票人属性信息
+//call
+//type:Pb_TYPE_MEET_INTERFACE_MEETVOTESIGNED
+//method: queryproperty
+message pbui_Type_MeetVoteQueryProperty
+{
+	fixed32 propertyid=1;//数据ID
+	fixed32 voteid=2;//传入参数
+	fixed32 memberid=3;//传入参数 为0表示本身
+}
+
+////////////////////////20230318 以下是新投票///////////////////////////////////
+enum Pb_AVoteType 
+{
+Pb_MEET_AVOTEBASE_TYPE_VOTE=  0x00; //投票
+Pb_MEET_AVOTEBASE_TYPE_ELE=   0x01; //选举
+Pb_MEET_AVOTEBASE_TYPE_QUE=   0x02; //问卷调查
+}
+
+enum Pb_AVoteMode 
+{
+Pb_MEET_AVOTEBASE_MODE_AGONYMOUS=   0x00; //匿名
+Pb_MEET_AVOTEBASE_MODE_SIGNED=      0x01; //记名
+}
+
+enum Pb_AVoteSelType 
+{
+Pb_MEET_AVOTEBASE_SELTYPE_SINGLE=   0x00; //单选
+Pb_MEET_AVOTEBASE_SELTYPE_MANY=     0x01; //多选
+}
+
+enum Pb_AVoteStatus
+{
+Pb_MEET_AVOTEBASE_STATUS_IDLE=     0x00; //未发起的投票
+Pb_MEET_AVOTEBASE_STATUS_ING=      0x01; //正在进行的投票
+Pb_MEET_AVOTEBASE_STATUS_END=      0x02; //已经结束的投票
+}
+
+enum Pb_AVoteBaseFlag 
+{
+//投票添加，修改指定的标志
+Pb_MEET_AVOTEBASE_FLAG_ZERO=   0; //
+Pb_MEET_AVOTEBASE_FLAG_MARK=   		0x0000001; //表示投票要提交备注
+Pb_MEET_AVOTEBASE_FLAG_SCORE=  		0x0000002; //表示投票要提交选项分数
+Pb_MEET_AVOTEBASE_FLAG_START=  		0x0000004; //表示添加成功后立即发起
+Pb_MEET_AVOTEBASE_FLAG_DIRID=  		0x0000008; //表示添加时从目录ID获取投票发起的参会人
+Pb_MEET_AVOTEBASE_FLAG_SIGNPNG=		0x0000010; //表示提交时需要签名
+Pb_MEET_AVOTEBASE_FLAG_PSW=			0x0000020; //表示提交时需要参会人密码认证
+Pb_MEET_AVOTEBASE_FLAG_RAND=		0x0000040; //表示投票发起选项随机显示
+Pb_MEET_AVOTEBASE_FLAG_LAST=		0x0000080; //表示投票末位表决
+}
+
+enum Pb_AVotingFlag 
+{
+//发起投票标志
+Pb_MEET_AVOTING_FLAG_ZERO=0;
+Pb_MEET_AVOTING_FLAG_NOPOST=		0x00000001; //不在投影机上显示投票结果
+Pb_MEET_AVOTING_FLAG_SECRETARY=		0x00000002; //投票选项保密投票模式
+Pb_MEET_AVOTING_FLAG_FINISHEXIT=	0x00000004; //全部提交完成后立即结束
+Pb_MEET_AVOTING_FLAG_REVOTE=		0x00000008; //重投 清空之前的记录
+Pb_MEET_AVOTING_FLAG_SCORE=		    0x00000010; //表示投票提交选项分数
+}
+
+//会议发起投票信息
+message pbui_Item_MeetOnNewVotingDetailInfo
+{
+	fixed32		voteid=1;//即时投票需要指定目录ID =0表示所有向参会人员发起投票
+	fixed32     fileid=2;//允许修改文件ID，服务器会处理是否删除旧文件ID不需要用户担心，但是没有执行添加前上传的文件ID服务器无法删除需要用户自己判断删除
+	bytes		jsontext=3; //投票内容 //{"content":"","item":["1","2"]} 注：这个是指针
+	fixed32		maintype=4; //投票 选举 调查问卷 即时投票 MEET_AVOTEBASE_TYPE_VOTE
+	fixed32		mode=5; //匿名投票 记名投票MEET_AVOTEBASE_MODE_AGONYMOUS
+	fixed32		seltype=6; //多选 单选 MEET_AVOTEBASE_SELTYPE_SINGLE
+	fixed32		status=7;//MEET_AVOTEBASE_STATUS_IDLE
+	fixed32		timeouts=8;  //超时值
+	fixed32		flag=9;//MEET_AVOTEBASE_FLAG_MARK
+	fixed32		per=10;//投票通过率  0,10,15% 选项1已投人数占应到人数的比例
+
+	//发起投票的参数,只在使用查询方法时有效,其它方法要忽略
+	fixed32      voteflag=11; //发起投票标志 参见MEET_AVOTING_FLAG_NOPOST 定义
+	repeated fixed32	memberids=12;	
+}
+
+//type:TYPE_MEET_INTERFACE_MEETONNEWVOTING
+//method: query/add/mod/
+message pbui_Type_MeetOnNewVotingDetailInfo
+{
+	repeated pbui_Item_MeetOnNewVotingDetailInfo item = 1; //
+}
+
+//type:TYPE_MEET_INTERFACE_MEETONNEWVOTING
+//method: start
+message pbui_Type_MeetStartNewVoteInfo
+{
+	fixed32 voteflag=1; //发起投票标志 MEET_AVOTING_FLAG_NOPOST
+	fixed32 timeouts=2; //计时结束 单位：秒
+	repeated fixed32 voteid=3;
+	repeated fixed32 members=4;
+}
+
+//投票标志 
+//#define AVOTE_SELFLAG_CHECKIN  0x00000001 //该位为1表示已经签到
+//#define AVOTE_SELFLAG_SUBMIT   0x00000002 //该位为1表示已经提交
+//#define AVOTE_SELFLAG_SIGNDATA 0x00000004 //该位为1表示有签名
+//#define AVOTE_SELFLAG_PSWCHECK 0x00000008 //该位为1表示经过参会人密码认证
+
+//提交会议投票信息
+message pbui_Item_MeetSubmitNewVote
+{
+	fixed32 voteid=1; //投票ID
+	fixed32 memberid=2;//提交的人员ID
+	fixed32 flag=3;//AVOTE_SELFLAG_CHECKIN
+
+	//{"mark":"","item":[{"a":1,"b":"1"},{"a":2,"b":"1"}]} mark是提交时的备注 a是提交的项序号eg:1,2,3  b表示提交的项对应的内容如评分时就是分数
+	bytes  pjsontext=4; //投票内容  
+	bytes  pngdata=5;//如果有图片签到则为png图片数据(二进制转hex编码)
+}
+
+//type:TYPE_MEET_INTERFACE_MEETONNEWVOTING
+//method: submit
+message pbui_Type_MeetSubmitNewVote
+{
+	repeated pbui_Item_MeetSubmitNewVote item=1; //
+}
+
+//会议停止、删除投票信息
+//type:TYPE_MEET_INTERFACE_MEETONNEWVOTING
+//method: stop/del
+message pbui_Type_MeetStopNewVoteInfo
+{
+	repeated fixed32 voteid=1; //
+}
+
+
+message pbui_SubItem_NewVote
+{
+	float   sum=1;     //如果是评分投票这个值为每个选项对应的总分
+	fixed32  selcnt=2;	 //每个选项提交数
+}
+
+message pbui_Item_MeetNewVoteDetailInfo
+{
+	fixed32		voteid=1;
+	fixed32     fileid=2;//
+	bytes		jsontext=3; //投票内容 //{"content":"","item":["1","2"]} 注：这个是指针
+	fixed32		maintype=4; //投票 选举 调查问卷 即时投票 MEET_AVOTEBASE_TYPE_VOTE
+	fixed32		mode=5; //匿名投票 记名投票MEET_AVOTEBASE_MODE_AGONYMOUS
+	fixed32		seltype=6; //多选 单选 MEET_AVOTEBASE_SELTYPE_SINGLE
+	fixed32		status=7;//MEET_AVOTEBASE_STATUS_IDLE
+	fixed32		timeouts=8;//超时值
+	fixed32		flag=9;//MEET_AVOTEBASE_FLAG_MARK
+	fixed32		per=10;//投票通过率  0,10,15% 选项1已投人数占应到人数的比例
+	repeated pbui_SubItem_NewVote item=11;//
+}
+
+//type:TYPE_MEET_INTERFACE_MEETNEWVOTEINFO
+//method: query
+message pbui_Type_MeetNewVoteDetailInfo
+{
+	repeated pbui_Item_MeetNewVoteDetailInfo item=1; //
+}
+
+//#define NEWVOTE_COMPLEX_FLAG_MAITYPE	0x00000001 //maintype有效 
+//#define NEWVOTE_COMPLEX_FLAG_MODE		0x00000002 //mode有效
+//#define NEWVOTE_COMPLEX_FLAG_TYPE		0x00000003 //type有效
+//#define NEWVOTE_COMPLEX_FLAG_STATE		0x00000004 //votestate有效
+
+//type:TYPE_MEET_INTERFACE_MEETNEWVOTEINFO
+//method: complexquery
+message pbui_Type_MeetNewVoteComplexQuery
+{
+	fixed32   queryflag=1;//在此指定那里有效 注：指定后当投票的数据等于指定的值时才会返回
+	fixed32	 maintype=2; //指定大类 参见本文件中的maintype 定义
+	fixed32	 mode=3; //匿名投票 记名投票
+	fixed32		 seltype=4; //多选 单选
+	fixed32		 votestate=5; //投票状态
+}
+
+//会议投票人
+message pbui_Item_MeetNewVoteSignInDetailInfo
+{
+	fixed32		 memberid=1;//投票人员
+	fixed32       flag=2; //AVOTE_SELFLAG_CHECKIN
+	bytes  pjsontext=3; //投票内容  //{"mark":"","item":[{"a":1,"b":"1"},{"a":2,"b":"1"}]} mark是提交时的备注 a是提交的项序号eg:1,2,3  b表示提交的项对应的内容如评分时就是分数
+	bytes  pngdata=4;//如果有图片签到则为png图片数据(二进制转hex编码)
+}
+
+//#define NEWVOTE_QUERYFLAG_JSON 0x00000001 //需要返回json
+//#define NEWVOTE_QUERYFLAG_PNG  0x00000002 //需要返回png
+
+//type:TYPE_MEET_INTERFACE_MEETNEWVOTESIGNED
+//method: query
+message pbui_Type_MeetNewVoteSignInDetailInfo
+{
+	fixed32   queryflag=1;//NEWVOTE_QUERYFLAG_JSON
+	fixed32   voteid=2;
+	repeated pbui_Item_MeetNewVoteSignInDetailInfo	 item=3; //
+}
+
+//查询会议投票人属性信息
+//property id
+//#define MEETNEWVOTE_PROPERTY_HADSIGNIN			    1 //按投票ID\人员ID返回是否已经投票 query
+//#define MEETNEWVOTE_PROPERTY_HADCHECKINNUM		    2 //按投票ID\人员ID返回是否已经投票签到 query
+//#define MEETNEWVOTE_PROPERTY_CHECKINNUM				3 //按投票ID\返回投票实际签到总人数  query
+//#define MEETNEWVOTE_PROPERTY_ATTENDNUM		        4 //按投票ID\返回投票应到总人数  query
+//#define MEETNEWVOTE_PROPERTY_VOTEDNUM		        5 //按投票ID\返回投票已经投票总人数  query
+
+//type:TYPE_MEET_INTERFACE_MEETNEWVOTESIGNED
+//method: queryproperty
+message pbui_Type_MeetNewVoteQueryProperty
+{
+	fixed32 propertyid=1;//数据ID
+	fixed32 voteid=2;//传入参数
+	fixed32 memberid=3;//传入参数 为0表示本身
+}
+
+//orderid
+enum Pb_NewVoteOrderId 
+{
+Pb_MEET_NEWVOTE_ORDERID_ZERO=0;
+Pb_MEET_NEWVOTE_ORDERID_FTJDPT=1;//1=方图戒毒平台订制投票推送
+}
+
+//type:TYPE_MEET_INTERFACE_MEETONNEWVOTING
+//method: METHOD_MEET_INTERFACE_PUSH
+message pbui_Type_MeetNotifyPushNewVoteInfo
+{
+	fixed32  orderid=1;//MEET_NEWVOTE_ORDERID_FTJDPT
+	bytes    pjson=2;	//{"meetid":1,"voteid":[1,2,3]} //voteid 为空表示全部投票
+}
+

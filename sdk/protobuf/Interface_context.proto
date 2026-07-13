@@ -1,0 +1,46 @@
+syntax = "proto3";
+option java_package = "com.mogujie.tt.protobuf";
+option optimize_for = LITE_RUNTIME;
+
+import "Interface_Macro.proto";
+
+//MEETCONTEXT_PROPERTY_LOCALMODE
+//设备会议控制模式
+//propertyid=Pb_MEETCONTEXT_PROPERTY_LOCALMODE
+enum Pb_LocalMode 
+{
+Pb_MEET_LOCALMODE_AUTO=		0; //程序控制模式
+Pb_MEET_LOCALMODE_UNAUTO=	1; //人工干预模式
+}
+
+//MEETCONTEXT_PROPERTY_LOCALMODE
+//登陆模式
+//propertyid=Pb_MEETCONTEXT_PROPERTY_LOGONMODE
+enum Pb_LogonMode 
+{
+Pb_MEET_ADMINLOGON_MODE_ADMIN=    0;  //管理模式
+Pb_MEET_ADMINLOGON_MODE_COMMON=   1;  //常用人员模式
+Pb_MEET_ADMINLOGON_MODE_LOCAL=    2;  //离线模式
+}
+
+//会议上下文  查询属性数据
+//type: Pb_TYPE_MEET_INTERFACE_MEETCONTEXT
+//method: queryproperty
+message pbui_QueryMeetContextInfo
+{
+	fixed32 propertyid=1;//数据ID 参见Pb_ContextPropertyID
+	fixed32 propertyval=2;//参数值 
+}
+
+//会议上下文  返回整形数据
+//type: Pb_TYPE_MEET_INTERFACE_MEETCONTEXT
+//method: queryproperty/setproperty
+message pbui_MeetContextInfo
+{
+	fixed32 propertyid=1;//数据ID 参见Pb_ContextPropertyID
+	
+	//返回的有效数据,根据propertyid来判断
+	fixed32 propertyval=2;//32位整数值 
+	fixed64 property64val=3;//64位整数值 
+	bytes   propertytext=4;//字符串
+}

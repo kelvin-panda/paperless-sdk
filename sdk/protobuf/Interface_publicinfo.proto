@@ -1,0 +1,184 @@
+syntax = "proto3";
+option java_package = "com.mogujie.tt.protobuf";
+option optimize_for = LITE_RUNTIME;
+
+import "Interface_Macro.proto";
+
+//会议自定义数据项ID
+enum Pb_PublicDefFlag 
+{
+Pb_MEET_PUBLIINFO_ZERO=0;
+Pb_MEET_PUBLIINFO_SYSTEMUSE=1;
+Pb_MEET_PUBLIINFO_MAXHUBSERVERURL=       2; //MAXHUB白板系统的服务器地址 {"scanServerIp":"10.248.6.208","scanServerPort":"8889","serverIp":"10.248.6.11","serverPort":"61000"}
+Pb_MEET_PUBLIINFO_DATACACHE=	3;  //会议资料缓存 {"enable":"1","size":"150"} enable:是否启用 size:超过指定大小的 单位:M
+Pb_MEET_PUBLIINFO_MEETRECYCLE=	4; //会议定期清理 {"enable":"1","day":"7"} enable:是否启用 day:清理指定天数前的 单位:天
+Pb_MEET_PUBLIINFO_OFFICEBINDPDF= 5; //office绑定的pdf文件 {"arr":[{"a":"0xb0000001","b":"0xb0000002"}]} a=office文件id,b=pdf文件Id V2协议才支持
+}
+
+//查询系统全局字串
+//call
+//TYPE_MEET_INTERFACE_PUBLICINFO
+//method:notify/query(call)
+message pbui_Type_meetQueryPublicInfo
+{
+	repeated fixed32 dataid = 1; //要查询的项
+}
+
+//返回查询系统全局字串
+//单个全局字串
+message pbui_Item_meetPublicInfo
+{
+	fixed32 dataid=1;//字串ID
+	bytes   dataval=2;//最大长度 MEET_PUBLICINFO_DATALEN=260;
+}
+
+//call
+//TYPE_MEET_INTERFACE_PUBLICINFO
+//method:set/query(return)
+message pbui_Type_meetPublicInfo
+{
+	repeated pbui_Item_meetPublicInfo item=1;
+}
+
+//查询指定系统全局字串的某项属性
+//property id
+enum Pb_PublicPropertyId 
+{
+Pb_PUBLICINFO_PROPERT_ZERO=0;
+Pb_PUBLICINFO_PROPERTY_OFFICEBINDID=1; //查询Office文档绑定的Pdfid parameterval=officemediaid 返回intval
+Pb_PUBLICINFO_PROPERTY_LXTABLECARDID=			    8008; // 领显网络桌牌全局自定义
+
+}
+
+//method: queryproperty
+message pbui_Type_MeetPublicInfoProperty
+{
+	fixed32 propertyid=1;//数据ID Pb_PublicPropertyId
+	fixed32 parameterval=2;//传入参数
+}
+
+//method: queryproperty
+message pbui_Type_MeetPublicInfoPropertyVal
+{
+	fixed32 intval=1;//根据属性ID判断使用
+	bytes   textval=2;//根据属性ID判断使用
+}
+
+/////2026.4.23/////////////////////////////////////////////////////////////////////
+//////////////////////////// 复合自定义数据 2026.4.20//////////////////////////////////////////////
+enum PB_PUBLICUSERINFO_FLAG 
+{
+PB_PUBLICUSERINFO_FLAG_ZERO=0;
+PB_PUBLICUSERINFO_FLAG_CLEARSAVE=0x000000001;//表示清空再修改，否则就是更新
+}
+
+//typ最大值不能超过65535
+//datid最大值不能超过65535
+enum PB_COMPLEX_PUBLIC_TYP 
+{
+PB_COMPLEX_PUBLIC_TYP_ZERO=0;
+PB_COMPLEX_PUBLIC_TYP_ADMIN=   1;//typ=1指管理员,id1是管理员id
+PB_COMPLEX_PUBLIC_TYP_PEOPLE=  2;//typ=2指常用人员,id1是常用人员id
+PB_COMPLEX_PUBLIC_TYP_DEVICE=  3;//typ=3指设备,id1是设备id
+}
+
+//typ=COMPLEX_PUBLIC_TYP_ADMIN
+enum Pb_CMX_PUBFILE_DATAID
+{
+Pb_CMX_PUBFILE_DATAID_ZERO=0;
+Pb_CMX_PUBFILE_DATAID_BASE= 1; //管理员的基本信息
+}
+/*
+{
+}
+*/
+//typ=COMPLEX_PUBLIC_TYP_PEOPLE
+enum Pb_CMX_PUBPEOPLE_DATAID 
+{
+Pb_CMX_PUBPEOPLE_DATAID_ZERO=0;
+Pb_CMX_PUBPEOPLE_DATAID_BASE= 1; //常用人员的基本信息
+}
+/*
+{
+}
+*/
+//typ=COMPLEX_PUBLIC_TYP_DEVICE
+enum Pb_CMX_PUBDEVICE_DATAID
+{
+Pb_CMX_PUBDEVICE_DATAID_ZERO=0;
+Pb_CMX_PUBDEVICE_DATAID_BASE= 1; //设备的基本信息
+}
+/*
+{
+}
+*/
+
+//stages：STAGE_ComplexPublicUserInfo
+//fun: FUN_One 
+//method:查询、修改
+
+/*修改使用PD_SmartJsonProtol
+{
+"typ":1,//PB_COMPLEX_PUBLIC_TYP_ADMIN
+"flag":1,//PB_PUBLICUSERINFO_FLAG_CLEARSAVE表示针对typ对应的项执行清空再修改，否则就是更新
+"data":[
+{"id1":"1","item":[{"datid":"1","str":"abc"},{"datid":2,"str":"efg"}]},//如果是删除则不需要设置str字段值
+{"id1":"2","item":[{"datid":"1","str":"abc"},{"datid":2,"str":"efg"}]}
+
+]
+}
+*/
+/*
+查询使用PD_SmartJsonProtol，仅支持查询全部
+返回查询使用PD_SmartJsonProtolEx
+{
+"data":[
+{"typ":1,"id1":"1,"datid":"1","str":"abc"},
+{"typ":2,"id1":"1,"datid":"2","str":"abc"},
+{"typ":1,"id1":"2,"datid":"3","str":"abc"},
+]
+}
+*/
+
+message pbui_Item_ComplexPubInfo
+{
+	fixed32   typ=1;
+	fixed32   id1=2;
+	fixed32   dataid=3;
+	bytes     ptext=4; 
+}
+
+//call
+//type:TYPE_MEET_INTERFACE_COMPLEXPUBLICUSERDEF
+//method: 
+//query|使用Type_QueComplexPubInfo
+message pbui_Type_QueComplexPubInfo
+{
+	fixed32   typ=1;//指定typ 定义 COMPLEX_PUBLIC_TYP_ADMIN
+	fixed32   id1=2;//匹配id1 为0表示typ下的所有id
+	repeated pbui_Item_ComplexPubInfo item=3;
+}
+
+//call
+//type:TYPE_MEET_INTERFACE_COMPLEXPUBLICUSERDEF
+//method: 
+//modify|使用Interface_base.proto 中的pbui_Type_SmartJsonProtol  
+//METHOD_MEET_INTERFACE_SINGLEQUERYBYID|使用Type_SingleQueComplexPubInfo 
+message pbui_Type_SingleQueComplexPubInfo
+{
+	fixed32   typ=1;
+	fixed32   id1=2;
+	fixed32   dataid=3;
+	bytes 	  ptext=4; 
+}
+
+//callback
+//type:TYPE_MEET_INTERFACE_COMPLEXPUBLICUSERDEF
+//method: notify
+message pbui_Type_ComplexPublicUserdefNotify
+{
+	fixed32 opermethod=1;//本次通知是因为opermethod方法触发的
+	fixed32 typ=2;//如果指定了ID刚表示是对特定ID的操作,为0表示全部
+	fixed32 id1=3;
+	fixed32 dataid=4;
+}

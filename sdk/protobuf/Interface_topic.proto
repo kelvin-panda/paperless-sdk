@@ -1,0 +1,95 @@
+syntax = "proto3";
+option java_package = "com.mogujie.tt.protobuf";
+option optimize_for = LITE_RUNTIME;
+
+import "Interface_Macro.proto";
+
+//////////////////////////// topic 议题 //////////////////////////////////////////////
+//会场议题
+//callback
+//type:TYPE_MEET_INTERFACE_TOPIC
+//method: notify
+message pbui_
+{
+	Type_HeaderInfo hdr;
+	int32u opermethod;//本次通知是因为opermethod方法触发的
+	int32u id;//如果指定了ID刚表示是对特定ID的操作,为0表示全部
+
+}Type_MeetTopicNotify, *pType_MeetTopicNotify;
+
+//status
+#define MEET_TOPIC_STATUS_OFF		 0 //未开始
+#define MEET_TOPIC_STATUS_ON         1 //开始
+
+message pbui_
+{
+	int32u  topiciid;  //议题ID
+	int32u  status;  //议题状态 参见 MEET_TOPIC_STATUS_OFF
+	int32u  fileid;  //绑定文件ID
+	int64u	startutctime;//单位秒
+	int64u	endutctime;  //单位秒
+	char	topicname[DEFAULT_DESCRIBE_LENG]; //议题名称
+	char	reporter[DEFAULT_NAME_MAXLEN];//汇报单位
+}Item_TopicItemInfo, *pItem_TopicItemInfo;
+
+//call
+//type:TYPE_MEET_INTERFACE_TOPIC
+//method: query\add\modify\del
+message pbui_
+{
+	Type_HeaderInfo hdr;
+
+	int num;
+	//Item_TopicItemInfo; //根据前面总数列写Item_TopicItemInfo
+
+}Type_MeetTopics, *pType_MeetTopics;
+
+//call
+//type:TYPE_MEET_INTERFACE_TOPIC
+//method: METHOD_MEET_INTERFACE_SAVE
+message pbui_
+{
+	Type_HeaderInfo hdr;
+
+	int32u num;//
+	//int32u topicids[num];//议题ID的顺序
+}Type_SetMeetTopicPos, *pType_SetMeetTopicPos;
+
+//////////////////////////// topic group //////////////////////////////////////////////
+message pbui_Item_TopicGroupItemInfo
+{
+	int32u  topiciid;  //议题ID
+	int32u  groupid;  //分组ID
+	char	groupname[DEFAULT_NAME_MAXLEN];//分组名称
+}
+
+//call
+//type:TYPE_MEET_INTERFACE_TOPICGROUP
+//method: query\add\modify\del
+message pbui_Type_MeetTopicGroups
+{
+	Type_HeaderInfo hdr;
+
+	int num;
+	int32u topicid;
+	//Item_TopicGroupItemInfo; //根据前面总数列写Item_TopicGroupItemInfo
+}
+
+//////////////////////////// topic nopermission //////////////////////////////////////////////
+message pbui_Item_TopicPermItemInfo
+{
+	int32u  topiciid;  //议题ID
+	int32u  memberid;  //参会人员ID
+}
+
+//call
+//type:TYPE_MEET_INTERFACE_TOPICPERMISSION
+//method: query\add\modify\del
+message pbui_Type_MeetTopicPerms
+{
+	Type_HeaderInfo hdr;
+
+	int num;
+	int32u topicid;
+	//Item_TopicPermItemInfo; //根据前面总数列写Item_TopicPermItemInfo
+}

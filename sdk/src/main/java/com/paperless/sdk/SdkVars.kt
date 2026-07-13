@@ -78,24 +78,5 @@ class SdkVars {
         var rationW: Int = 4
         var rationH: Int = 3
         //</editor-fold>
-
-        //<editor-fold desc="播放帧">
-
-        var frame_size: Int = 1024 * 500
-        var frame_codec_size: Int = 600
-
-        //后台解码数据最大存放数量,默认是{@link Integer#MAX_VALUE}
-        var CAPACITY: Int = 50
-
-        //根据资源id存放，jni回调的解码数据
-        var decodeMap: HashMap<Int, LinkedBlockingQueue<FrameData>> = hashMapOf()
-
-        //后台解码数据对象池
-        var frameDataPool: LinkedBlockingQueue<FrameData> = LinkedBlockingQueue(CAPACITY)
-
-        //播放资源的帧总数
-        var frame_count: Int = 0
-
-        //</editor-fold>
     }
 }

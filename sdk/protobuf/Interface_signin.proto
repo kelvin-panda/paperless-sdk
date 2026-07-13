@@ -1,0 +1,95 @@
+syntax = "proto3";
+option java_package = "com.mogujie.tt.protobuf";
+option optimize_for = LITE_RUNTIME;
+
+import "Interface_Macro.proto";
+
+//会议签到
+message pbui_Item_MeetSignInDetailInfo
+{
+	fixed32		nameId=1; //人员ID
+	fixed64		utcseconds=2;  //日期 时间 单位:秒
+	fixed32		signin_type=3;//签到方式 参见Pb_MeetSignType
+	bytes		password=4;//签到密码
+	bytes		psigndata=5; //如果有图片签到则为png图片数据(二进制转hex编码)
+}
+
+//type:Pb_TYPE_MEET_INTERFACE_MEETSIGN
+//method: query
+message pbui_Type_MeetSignInDetailInfo
+{
+	repeated pbui_Item_MeetSignInDetailInfo item=1;
+}
+
+//发送会议签到
+//type:Pb_TYPE_MEET_INTERFACE_MEETSIGN
+//method: add
+message pbui_Type_DoMeetSignIno
+{
+	fixed32     memberid=1;//指定签到的人员ID,为0表示当前绑定的人员
+	fixed32		signin_type=2;//签到方式 参见Pb_MeetSignType
+
+	bytes		password=3;//签到密码
+	bytes		psigndata=4; //如果有图片签到则为png图片数据(二进制转hex编码)
+}
+
+//删除会议签到
+//type:Pb_TYPE_MEET_INTERFACE_MEETVOTESIGNED
+//method: del
+message pbui_Type_DoDeleteMeetSignIno
+{
+	fixed32      meetingid = 1;//指定会议ID 0表示绑定的会议
+	repeated fixed32    memberids=2;//为空表示删除指定会议的全部人员签到
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////
+//生物认证删除
+enum Pb_MeetIdentifyFlag 
+{
+Pb_MEET_IDENTIFY_FLAG_ZERO =0;
+Pb_MEET_IDENTIFY_FLAG_ISLASTFRAME= 0x00000001; //标记为最后一帧
+Pb_MEET_IDENTIFY_FLAG_NEEDDATA =   0x00000002; //标记只返回数据的长度
+}
+
+//call
+//type:TYPE_MEET_INTERFACE_ZKIDENTIFY
+//method:del,query
+message pbui_Type_ZKIdentify_Simple
+{
+	fixed32 flag=1;//查询标志  Pb_MeetIdentifyFlag
+	repeated bytes   phone=2;  //电话 //当方法为删除时,为0表示删除全部,当方法为query时,为0表示查询全部
+}
+
+//生物认证
+//callback
+//type:TYPE_MEET_INTERFACE_ZKIDENTIFY
+//method: query（callback）
+message pbui_Type_ZKIdentify_QueryReturn
+{
+	fixed32 flag=1;//查询标志  Pb_MeetIdentifyFlag
+	fixed32 personid=2;//暂时未使用 设置为0即可 
+	bytes   idcard=3;  //卡号 可以为身份证号或者其它打卡机的卡号 暂时未使用
+	bytes   phone=4;  //电话
+	fixed32 figer1len=5;
+	bytes   pfingerimg1=6;//1手指指纹模板 为0表示没有模板数据,如果Pb_MEET_IDENTIFY_FLAG_NEEDDATA有效则figer1len为数据的长度
+	fixed32 figer2len=7;
+	bytes   pfingerimg2=8;////2手指指纹模板 为0表示没有模板数据
+	fixed32 facelen=9;
+	bytes   pfaceimg=10;//人脸模板 为0表示没有模板数据
+	fixed64 addtime=11;//录入的时间
+}
+
+//生物认证
+//call,callback
+//type:TYPE_MEET_INTERFACE_ZKIDENTIFY
+//method: modify(call)
+message pbui_Type_ZKIdentify_Oper
+{
+	fixed32 personid=1;//暂时未使用 设置为0即可 
+	bytes   idcard=2;  //卡号 可以为身份证号或者其它打卡机的卡号 暂时未使用
+	bytes   phone=3;  //电话
+	bytes   pfingerimg1=4;//1手指指纹模板 为0表示没有模板数据
+	bytes   pfingerimg2=5;////2手指指纹模板 为0表示没有模板数据
+	bytes   pfaceimg=6;//人脸模板 为0表示没有模板数据
+}
+
