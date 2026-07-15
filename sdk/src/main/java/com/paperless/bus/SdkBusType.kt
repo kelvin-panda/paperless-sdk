@@ -42,5 +42,7 @@ class SdkBusType {
          */
         const val floating_stop_screen_share = base_value + 6
         const val floating_same_play_progress = base_value + 7
+        const val show_new_vote = base_value + 8
+        const val close_new_vote = base_value + 9
     }
 }

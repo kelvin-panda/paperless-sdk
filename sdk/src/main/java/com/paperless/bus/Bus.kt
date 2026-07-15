@@ -12,6 +12,10 @@ object Bus {
         post(EventBusMessage.build { type(type).method(method).data(data) })
     }
 
+    fun postType(type: Int) {
+        post(EventBusMessage.build { type(type) })
+    }
+
     fun postObj(type: Int, obj: Any? = null) {
         post(EventBusMessage.build { type(type).obj(obj) })
     }

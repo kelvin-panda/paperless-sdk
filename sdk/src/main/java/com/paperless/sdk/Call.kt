@@ -30,7 +30,7 @@ object Call {
         fun onDataChanged(type: Int, method: Int, data: ByteArray?, dataLen: Int)
     }
 
-    fun setDataChangeCallback(callback: DataChangeCallback) {
+    fun setDataChangeCallback(callback: DataChangeCallback?) {
         this.callback = callback
     }
 

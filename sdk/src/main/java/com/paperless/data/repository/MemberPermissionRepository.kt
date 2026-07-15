@@ -6,12 +6,12 @@ import com.paperless.data.repository.base.BaseRepository
 import com.paperless.sdk.SdkJni
 import kotlinx.coroutines.launch
 
-class MemberDetailRepository : BaseRepository<InterfaceMember.pbui_Item_MemberDetailInfo>(
-    InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_MEMBER_VALUE
+class MemberPermissionRepository : BaseRepository<InterfaceMember.pbui_Item_MemberPermission>(
+    InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_MEMBERPERMISSION_VALUE
 ) {
     override fun query() {
         scope.launch {
-            SdkJni.queryMember()?.let { info ->
+            SdkJni.queryMemberPermissions()?.let { info ->
                 _data.postValue(info.itemList)
             } ?: _data.postValue(emptyList())
         }

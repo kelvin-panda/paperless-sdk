@@ -48,6 +48,7 @@ import com.mogujie.tt.protobuf.InterfacePlaymedia
 import com.mogujie.tt.protobuf.InterfaceStream
 import com.paperless.bus.EventBusMessage
 import com.paperless.bus.SdkBusType
+import com.paperless.data.repository.base.DataRepositoryManager
 import com.paperless.player.DecodeQueue
 import com.paperless.sdk.Call
 import com.paperless.sdk.MAIN_TYPE_BITMASK
@@ -62,6 +63,7 @@ import com.paperless.sdk.SdkConfig
 import com.paperless.sdk.SdkVars
 import com.paperless.sdk.SdkVars.Companion.localDeviceId
 import com.paperless.util.IniUtil
+import com.xlk.paperless.sdk.databinding.ActivityMainBinding
 import com.xlk.paperless.sdk.helper.AppNetworkMonitor
 import com.xlk.paperless.sdk.screen.ScreenRecordService
 import com.xlk.paperless.sdk.service.ScreenShareService
@@ -70,24 +72,13 @@ import org.greenrobot.eventbus.Subscribe
 import org.greenrobot.eventbus.ThreadMode
 import java.io.File
 import kotlin.system.exitProcess
+import kotlin.toString
 
 class MainActivity : AppCompatActivity() {
-    lateinit var edtIp: EditText
-    lateinit var edtPort: EditText
-    lateinit var tvOnline: TextView
-    lateinit var tvDevId: TextView
-    lateinit var tvDevName: TextView
-    lateinit var tvMemberId: TextView
-    lateinit var tvMemberName: TextView
-    lateinit var tvMeetingId: TextView
-    lateinit var tvMeetingName: TextView
-    lateinit var cbMandatory: CheckBox
-    lateinit var edtType: EditText
-    lateinit var edtCacheId: EditText
+    lateinit var mBinding: ActivityMainBinding
+    private var mTvNetworkSpeed: TextView? = null
 
     var networkMonitor: AppNetworkMonitor? = null
-    var mTextView: TextView? = null
-    lateinit var tvShowBlackList: TextView
 
     private val onBackPressedCallback = object : OnBackPressedCallback(true) {
         override fun handleOnBackPressed() {
@@ -96,116 +87,16 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private var mRecordService: ScreenRecordService? = null
-    private var resultCode: Int = 0
-    private var resultData: Intent? = null
-    private var mIsBound: Boolean = false
-
-    private val mConnection: ServiceConnection = object : ServiceConnection {
-        override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
-            val binder: ScreenRecordService.LocalBinder = service as ScreenRecordService.LocalBinder
-            mRecordService = binder.service
-            LogUtils.d("onServiceConnected:${mRecordService != null}")
-            mIsBound = true
-            mRecordService?.setCallback(object : ScreenRecordService.ServiceCallback {
-                override fun onServiceStarted() {
-                    // 服务启动成功
-                    LogUtils.d("服务启动成功")
-                }
-
-                override fun onServiceStopped() {
-                    // 服务停止
-                    LogUtils.d("服务停止")
-//                    val dstDevId = Integer.parseInt(edt_dst_id.text.toString())
-                    Jni.stopResource(0, 17858581, resource_id_0, 0)
-                }
-
-                override fun onRecordingStarted() {
-                    // 录制开始
-                    LogUtils.d("录制开始")
-                }
-
-                override fun onRecordingStopped() {
-                    // 录制停止
-                    LogUtils.d("录制停止")
-                }
-
-                override fun onRecordingPaused() {
-                    // 录制暂停
-                    LogUtils.d("录制暂停")
-                }
-
-                override fun onRecordingResumed() {
-                    // 录制恢复
-                    LogUtils.d("录制恢复")
-                }
-
-                override fun onError(error: String?) {
-                    // 错误处理
-                    LogUtils.d("错误处理")
-                }
-
-                override fun onRecordingProgress(frames: Int) {
-                    // 录制进度
-                    LogUtils.d("录制进度：$frames")
-                }
-
-                override fun onRecordingStateChanged(isRecording: Boolean) {
-                    // 录制状态变化
-                    LogUtils.d("录制状态变化：$isRecording")
-                }
-            })
-            if (resultCode != 0 && resultData != null) {
-                // 开始录制
-                mRecordService?.startRecording(resultCode, resultData)
-                // 重置，避免重复启动
-                resultCode = 0
-                resultData = null
-            }
-        }
-
-        override fun onServiceDisconnected(name: ComponentName?) {
-            LogUtils.d("onServiceDisconnected")
-            mIsBound = false
-            mRecordService = null
-        }
-    }
-
     private val applyScreenRecorder = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
     ) { result: ActivityResult? ->
         if (result != null) {
             if (result.resultCode == RESULT_OK) {
-                resultCode = result.resultCode
-                resultData = result.data
-                // 绑定服务
-//                val serviceIntent = Intent(this, ScreenRecordService::class.java)
-//                bindService(serviceIntent, mConnection, Context.BIND_AUTO_CREATE)
-//                LogUtils.d("进行绑定服务")
-
-
-//                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-//                    startForegroundService(
-//                        Intent(this@MainActivity, ForegroundService::class.java)
-//                            .apply {
-//                                putExtra("intent_extra_code", result.resultCode)
-//                                putExtra("intent_extra_data", result.data)
-//                            })
-//                } else {
-//                    startService(
-//                        Intent(this@MainActivity, ForegroundService::class.java)
-//                            .apply {
-//                                putExtra("intent_extra_code", result.resultCode)
-//                                putExtra("intent_extra_data", result.data)
-//                            })
-//                }
-
-//                 3. 获取 MediaProjection
 
                 val intent = Intent(this, ScreenShareService::class.java).apply {
                     action = ScreenShareService.ACTION_START
-                    putExtra(ScreenShareService.EXTRA_RESULT_CODE, resultCode)
-                    putExtra(ScreenShareService.EXTRA_RESULT_DATA, resultData)
+                    putExtra(ScreenShareService.EXTRA_RESULT_CODE, result.resultCode)
+                    putExtra(ScreenShareService.EXTRA_RESULT_DATA, result.data)
                 }
                 if (Build.VERSION.SDK_INT >= VERSION_CODES.O) {
                     startForegroundService(intent)
@@ -218,208 +109,163 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun launchService(resultCode: Int, data: Intent) {
-        val intent = Intent(this@MainActivity, ScreenRecordService::class.java)
-            .apply {
-                setAction(ScreenRecordService.ACTION_START)
-                putExtra(ScreenRecordService.EXTRA_RESULT_CODE, resultCode)
-                putExtra(ScreenRecordService.EXTRA_RESULT_DATA, data)
-                putExtra(ScreenRecordService.EXTRA_WIDTH, SdkVars.record_width)
-                putExtra(ScreenRecordService.EXTRA_HEIGHT, SdkVars.record_height)
-                putExtra(ScreenRecordService.EXTRA_FRAME_RATE, SdkVars.frameRate)
-                putExtra(ScreenRecordService.EXTRA_BITRATE, SdkVars.bitrate)
-                putExtra(ScreenRecordService.EXTRA_IFRAME_INTERVAL, SdkVars.iframeInterval)
-                putExtra(ScreenRecordService.EXTRA_DPI, SdkVars.dpi)
-            }
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            startForegroundService(intent)
-        } else {
-            startService(intent)
-        }
-    }
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
-            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
-            insets
-        }
+        mBinding = ActivityMainBinding.inflate(layoutInflater)
+        setContentView(mBinding.root)
+        viewEvent()
         EventBus.getDefault().register(this)
         applyPermissions()
         checkUsageStatsPermission()
-        edtIp = findViewById<EditText>(R.id.edtIp)
-        edtPort = findViewById<EditText>(R.id.edtPort)
-        findViewById<Button>(R.id.btnModify).setOnClickListener {
-            IniUtil.loadFile(SdkVars.root_dir + "client.ini")
-            IniUtil.ip = edtIp.text.toString()
-            IniUtil.port = edtPort.text.toString()
-            IniUtil.store()
-            AppUtils.relaunchApp(true)
-        }
-        findViewById<Button>(R.id.btn_network).setOnClickListener {
-            networkSpeedWindow()
-        }
-        tvOnline = findViewById<TextView>(R.id.tvOnline)
-        tvDevId = findViewById<TextView>(R.id.tvDevId)
-        tvDevName = findViewById<TextView>(R.id.tvDevName)
-        tvMemberId = findViewById<TextView>(R.id.tvMemberId)
-        tvMemberName = findViewById<TextView>(R.id.tvMemberName)
-        tvMeetingId = findViewById<TextView>(R.id.tvMeetingId)
-        tvMeetingName = findViewById<TextView>(R.id.tvMeetingName)
-        cbMandatory = findViewById<CheckBox>(R.id.cbMandatory)
-        val id_0 = findViewById<CheckBox>(R.id.id_0)
-        val id_1 = findViewById<CheckBox>(R.id.id_1)
-        val id_2 = findViewById<CheckBox>(R.id.id_2)
-        val id_3 = findViewById<CheckBox>(R.id.id_3)
-        val id_4 = findViewById<CheckBox>(R.id.id_4)
-        val edt_device_id = findViewById<EditText>(R.id.edt_device_id)
-        val edt_media_id = findViewById<EditText>(R.id.edt_media_id)
-        val edt_page_code = findViewById<EditText>(R.id.edt_page_code)
-        //修改界面状态
-        findViewById<Button>(R.id.btn_page).setOnClickListener {
-            //InterfaceMacro.Pb_MeetFaceStatus.Pb_MemState_MemFace_VALUE
-            val pageCode = Integer.parseInt(edt_page_code.text.toString())
-            Jni.modPageStatus(pageCode)
-        }
-        //播放页面
-        findViewById<Button>(R.id.btnPlayPage).setOnClickListener {
-            startActivity(Intent(this, ControlViewActivity::class.java))
-        }
-        //四分屏播放页面
-        findViewById<Button>(R.id.btn_split).setOnClickListener {
-            startActivity(Intent(this, SplitPlayActivity::class.java))
-        }
-
-        //<editor-fold desc="缓存数据">
-        edtType = findViewById<EditText>(R.id.edtType)
-        edtCacheId = findViewById<EditText>(R.id.edtCacheId)
-        findViewById<Button>(R.id.btnCacheData).setOnClickListener {
-            Jni.cache(edtType.text.toString().toInt(), edtCacheId.text.toString().toInt())
-        }
-        //</editor-fold>
-
-        //下载文件
-        findViewById<Button>(R.id.btn_download_media).setOnClickListener {
-            val str = edt_media_id.text.toString()
-            val id = Integer.parseInt(str)
-            val fileName = Jni.queryFileName(id)
-            val filePath = cacheDir.absolutePath + File.separator + fileName
-            Jni.downloadFile(id, filePath, "")
-        }
-        //播放媒体文件
-        findViewById<Button>(R.id.btn_play_media).setOnClickListener {
-            val str = edt_media_id.text.toString()
-            val id = Integer.parseInt(str)
-            val temp = mutableListOf<Int>()
-            if (id_0.isChecked) temp.add(0)
-            if (id_1.isChecked) temp.add(1)
-            if (id_2.isChecked) temp.add(2)
-            if (id_3.isChecked) temp.add(3)
-            if (id_4.isChecked) temp.add(4)
-            Jni.mediaPlay(
-                temp,
-                id,
-                localDeviceId,
-                0,
-                0,
-                if (cbMandatory.isChecked) InterfaceMacro.Pb_TriggerUsedef.Pb_EXCEC_USERDEF_FLAG_NOCREATEWINOPER_VALUE else 0
-            )
-        }
-        //播放终端屏幕
-        findViewById<Button>(R.id.btn_stream_play).setOnClickListener {
-            val temp = mutableListOf<Int>()
-            if (id_0.isChecked) temp.add(0)
-            if (id_1.isChecked) temp.add(1)
-            if (id_2.isChecked) temp.add(2)
-            if (id_3.isChecked) temp.add(3)
-            if (id_4.isChecked) temp.add(4)
-            val str = edt_device_id.text.toString()
-            val id = Integer.parseInt(str)
-            Jni.streamPlay(
-                id,
-                2,
-                temp,
-                localDeviceId,
-                0,
-                if (cbMandatory.isChecked) InterfaceMacro.Pb_TriggerUsedef.Pb_EXCEC_USERDEF_FLAG_NOCREATEWINOPER_VALUE else 0
-            )
-        }
         onBackPressedDispatcher.addCallback(this, onBackPressedCallback)
-        initConfigFile()
-        Jni.initialization(
-            InterfaceMacro.Pb_ProgramType.Pb_MEET_PROGRAM_TYPE_MEETCLIENT_VALUE,
-            SdkVars.root_dir + "client.ini", DeviceUtils.getUniqueDeviceId(), 4, 0
-        )
+        Thread {
+            initConfigFile()
+            Jni.initialization(
+                InterfaceMacro.Pb_ProgramType.Pb_MEET_PROGRAM_TYPE_MEETCLIENT_VALUE,
+                SdkVars.root_dir + "client.ini", DeviceUtils.getUniqueDeviceId(), 4, 0
+            )
+        }.start()
+    }
 
-        //<editor-fold desc="同屏">
-        val edt_record_width = findViewById<EditText>(R.id.edt_record_width)
-        val edt_record_height = findViewById<EditText>(R.id.edt_record_height)
-        val edt_bitrate = findViewById<EditText>(R.id.edt_bitrate)
-        val edt_framerate = findViewById<EditText>(R.id.edt_framerate)
-        val edt_i_frame_interval = findViewById<EditText>(R.id.edt_i_frame_interval)
+    private fun viewEvent() {
+        mBinding.apply {
+            //修改配置并重启应用
+            btnModify.setOnClickListener {
+                IniUtil.loadFile(SdkVars.root_dir + "client.ini")
+                IniUtil.ip = edtIp.text.toString()
+                IniUtil.port = edtPort.text.toString()
+                IniUtil.store()
+                AppUtils.relaunchApp(true)
+            }
+            //网络监控
+            btnNetwork.setOnClickListener {
+                networkSpeedWindow()
+            }
+            //修改界面状态
+            btnPage.setOnClickListener {
+                //InterfaceMacro.Pb_MeetFaceStatus.Pb_MemState_MemFace_VALUE
+                val pageCode = Integer.parseInt(edtPageCode.text.toString())
+                Jni.modPageStatus(pageCode)
+            }
+            //播放页面
+            btnPlayPage.setOnClickListener {
+                startActivity(Intent(this@MainActivity, ControlViewActivity::class.java))
+            }
+            //四分屏播放页面
+            btnSplit.setOnClickListener {
+                startActivity(Intent(this@MainActivity, SplitPlayActivity::class.java))
+            }
+            //缓存数据
+            btnCacheData.setOnClickListener {
+                Jni.cache(edtType.text.toString().toInt(), edtCacheId.text.toString().toInt())
+            }
+            //下载文件
+            btnDownloadMedia.setOnClickListener {
+                val str = edtMediaId.text.toString()
+                val id = Integer.parseInt(str)
+                val fileName = Jni.queryFileName(id)
+                val filePath = cacheDir.absolutePath + File.separator + fileName
+                Jni.downloadFile(id, filePath, "")
+            }
+            //播放媒体文件
+            btnPlayMedia.setOnClickListener {
+                val str = edtMediaId.text.toString()
+                val id = Integer.parseInt(str)
+                val temp = mutableListOf<Int>()
+                if (id0.isChecked) temp.add(0)
+                if (id1.isChecked) temp.add(1)
+                if (id2.isChecked) temp.add(2)
+                if (id3.isChecked) temp.add(3)
+                if (id4.isChecked) temp.add(4)
+                Jni.mediaPlay(
+                    temp,
+                    id,
+                    localDeviceId,
+                    0,
+                    0,
+                    if (cbMandatory.isChecked) InterfaceMacro.Pb_TriggerUsedef.Pb_EXCEC_USERDEF_FLAG_NOCREATEWINOPER_VALUE else 0
+                )
+            }
+            //播放终端屏幕
+            btnStreamPlay.setOnClickListener {
+                val temp = mutableListOf<Int>()
+                if (id0.isChecked) temp.add(0)
+                if (id1.isChecked) temp.add(1)
+                if (id2.isChecked) temp.add(2)
+                if (id3.isChecked) temp.add(3)
+                if (id4.isChecked) temp.add(4)
+                val str = edtDeviceId.text.toString()
+                val id = Integer.parseInt(str)
+                Jni.streamPlay(
+                    id,
+                    2,
+                    temp,
+                    localDeviceId,
+                    0,
+                    if (cbMandatory.isChecked) InterfaceMacro.Pb_TriggerUsedef.Pb_EXCEC_USERDEF_FLAG_NOCREATEWINOPER_VALUE else 0
+                )
+            }
+            //开始同屏
+            btnStartRecord.setOnClickListener {
+                val w = Integer.parseInt(edtRecordWidth.text.toString())
+                val h = Integer.parseInt(edtRecordHeight.text.toString())
+                val bitrate = Integer.parseInt(edtBitrate.text.toString())
+                val framerate = Integer.parseInt(edtFramerate.text.toString())
+                val i = Integer.parseInt(edtIFrameInterval.text.toString())
+                SdkVars.record_width = w
+                SdkVars.record_height = h
+                SdkVars.bitrate = bitrate * 1000
+                SdkVars.frameRate = framerate
+                SdkVars.iframeInterval = i
 
-        val edt_dst_id = findViewById<EditText>(R.id.edt_dst_id)
-        findViewById<Button>(R.id.btn_start_record).setOnClickListener {
-            val w = Integer.parseInt(edt_record_width.text.toString())
-            val h = Integer.parseInt(edt_record_height.text.toString())
-            val bitrate = Integer.parseInt(edt_bitrate.text.toString())
-            val framerate = Integer.parseInt(edt_framerate.text.toString())
-            val i = Integer.parseInt(edt_i_frame_interval.text.toString())
-            SdkVars.record_width = w
-            SdkVars.record_height = h
-            SdkVars.bitrate = bitrate * 1000
-            SdkVars.frameRate = framerate
-            SdkVars.iframeInterval = i
-
-            val dstDevId = Integer.parseInt(edt_dst_id.text.toString())
-            Jni.streamPlay(localDeviceId, 2, resource_id_0, dstDevId)
-        }
-        findViewById<Button>(R.id.btn_stop_record).setOnClickListener {
-            val dstDevId = Integer.parseInt(edt_dst_id.text.toString())
-            Jni.stopResource(0, dstDevId, resource_id_0, 0)
-        }
-        //</editor-fold>
-
-        //<editor-fold desc="目录与文件黑名单查询">
-        tvShowBlackList = findViewById<TextView>(R.id.tvShowBlackList)
-        findViewById<Button>(R.id.btnDirBlackList).setOnClickListener {
-            val sb = StringBuilder()
-            sb.append("无权限目录：")
-            Jni.queryDir()?.let {
-                it.itemList.forEach {
-                    if (Jni.isNoDirPermission(it.id, SdkVars.localMemberId)) {
-                        sb.append("\n").append(it.name.toStringUtf8())
+                val dstDevId = Integer.parseInt(edtDstId.text.toString())
+                Jni.streamPlay(localDeviceId, 2, resource_id_0, dstDevId)
+            }
+            //结束同屏
+            btnStopRecord.setOnClickListener {
+                val dstDevId = Integer.parseInt(edtDstId.text.toString())
+                Jni.stopResource(0, dstDevId, resource_id_0, 0)
+            }
+            //本机黑名单目录
+            btnDirBlackList.setOnClickListener {
+                val sb = StringBuilder()
+                sb.append("无权限目录：")
+                Jni.queryDir()?.let {
+                    it.itemList.forEach {
+                        if (Jni.isNoDirPermission(it.id, SdkVars.localMemberId)) {
+                            sb.append("\n").append(it.name.toStringUtf8())
+                        }
                     }
                 }
+                LogUtils.d(sb.toString())
+                tvShowBlackList.text = sb.toString()
             }
-            LogUtils.d(sb.toString())
-            tvShowBlackList.text = sb.toString()
-        }
-        findViewById<Button>(R.id.btnFileBlackList).setOnClickListener {
-            val sb = StringBuilder()
-            sb.append("无权限文件：")
-            Jni.queryDir()?.let {
-                it.itemList.forEach {
-                    Jni.queryFile(it.id)?.let {
-                        it.forEach {
-                            if (Jni.isNoFilePermission(it.mediaid, SdkVars.localMemberId)) {
-                                sb.append("\n").append(it.name.toStringUtf8())
+            //本机黑名单文件
+            btnFileBlackList.setOnClickListener {
+                val sb = StringBuilder()
+                sb.append("无权限文件：")
+                Jni.queryDir()?.let {
+                    it.itemList.forEach {
+                        Jni.queryFile(it.id)?.let {
+                            it.forEach {
+                                if (Jni.isNoFilePermission(it.mediaid, SdkVars.localMemberId)) {
+                                    sb.append("\n").append(it.name.toStringUtf8())
+                                }
                             }
                         }
                     }
                 }
+                LogUtils.d(sb.toString())
+                tvShowBlackList.text = sb.toString()
             }
-            LogUtils.d(sb.toString())
-            tvShowBlackList.text = sb.toString()
+            btnTest.setOnClickListener {
+                dataRepositoryListener()
+            }
         }
-        //</editor-fold>
-
     }
 
     private fun networkSpeedWindow() {
-        if (mTextView != null) {
+        if (mTvNetworkSpeed != null) {
             closeNetworkMonitorWindow()
             return
         }
@@ -444,10 +290,10 @@ class MainActivity : AppCompatActivity() {
         params.height = FrameLayout.LayoutParams.WRAP_CONTENT
         params.x = 0
         params.y = metrics.heightPixels - params.height
-        mTextView = TextView(this)
-        mTextView!!.setTextColor(Color.argb(200, 255, 255, 255))
-        mTextView!!.setBackgroundColor(Color.argb(50, 0, 0, 0))
-        windowManager!!.addView(mTextView, params)
+        mTvNetworkSpeed = TextView(this)
+        mTvNetworkSpeed!!.setTextColor(Color.argb(200, 255, 255, 255))
+        mTvNetworkSpeed!!.setBackgroundColor(Color.argb(50, 0, 0, 0))
+        windowManager!!.addView(mTvNetworkSpeed, params)
 
         networkMonitor = AppNetworkMonitor(this)
         networkMonitor!!.startMonitoring(object : AppNetworkMonitor.NetworkInfoListener {
@@ -457,7 +303,7 @@ class MainActivity : AppCompatActivity() {
                             + "\n" +*/ "下载: " + AppNetworkMonitor.formatSpeed(downloadSpeed)
                             + "\n" + "上传: " + AppNetworkMonitor.formatSpeed(uploadSpeed))
                     LogUtils.e("onNetworkInfoUpdated: $msg")
-                    mTextView?.text = msg
+                    mTvNetworkSpeed?.text = msg
                 }
             }
 
@@ -471,16 +317,14 @@ class MainActivity : AppCompatActivity() {
 
     // 检查并请求权限
     private fun checkUsageStatsPermission() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            val appOps: AppOpsManager = getSystemService(Context.APP_OPS_SERVICE) as AppOpsManager
-            val mode = appOps.checkOpNoThrow(
-                AppOpsManager.OPSTR_GET_USAGE_STATS,
-                android.os.Process.myUid(), packageName
-            )
-            if (mode != AppOpsManager.MODE_ALLOWED) {
-                val intent = Intent(ACTION_USAGE_ACCESS_SETTINGS)
-                startActivity(intent);
-            }
+        val appOps: AppOpsManager = getSystemService(Context.APP_OPS_SERVICE) as AppOpsManager
+        val mode = appOps.checkOpNoThrow(
+            AppOpsManager.OPSTR_GET_USAGE_STATS,
+            android.os.Process.myUid(), packageName
+        )
+        if (mode != AppOpsManager.MODE_ALLOWED) {
+            val intent = Intent(ACTION_USAGE_ACCESS_SETTINGS)
+            startActivity(intent)
         }
     }
 
@@ -494,31 +338,114 @@ class MainActivity : AppCompatActivity() {
         Jni.initialResource(SdkVars.screen_width, SdkVars.screen_height, 4)
         //修改本机界面状态
         Jni.modPageStatus(InterfaceMacro.Pb_MeetFaceStatus.Pb_MemState_MainFace_VALUE)
-        queryDeviceMeetInfo()
+
+        DataRepositoryManager.init()
+        DataRepositoryManager.refreshAll()
+
+//        dataRepositoryListener()
     }
 
-    private fun queryDeviceMeetInfo() {
-        var memberName = ""
-        var meetingname = ""
-        var memberId = 0
-        var meetingId = 0
-        var roomid = 0
-        Jni.queryDeviceMeetInfo()?.let {
-            memberName = it.membername.toStringUtf8()
-            memberId = it.memberid
-            meetingId = it.meetingid
-            roomid = it.roomid
-            meetingname = it.meetingname.toStringUtf8()
+    private fun dataRepositoryListener() {
+        DataRepositoryManager.deviceMeetInfoRepository.data.observe(this) {
+            SdkVars.localMeetingId = it?.meetingid ?: 0
+            SdkVars.localMeetingName = it?.meetingname?.toStringUtf8() ?: ""
+            SdkVars.localMemberId = it?.memberid ?: 0
+            SdkVars.localMemberName = it?.membername?.toStringUtf8() ?: ""
+            SdkVars.localRoomId = it?.roomid ?: 0
+            mBinding.tvMemberId.text = "人员id：${SdkVars.localMemberId}"
+            mBinding.tvMemberName.text = "人员名称：${SdkVars.localMemberName}"
+            mBinding.tvMeetingId.text = "会议id：${SdkVars.localMeetingId}"
+            mBinding.tvMeetingName.text = "会议名称：${SdkVars.localMeetingName}"
         }
-        SdkVars.localMeetingId = meetingId
-        SdkVars.localMeetingName = meetingname
-        SdkVars.localMemberId = memberId
-        SdkVars.localRoomId = roomid
-        LogUtils.i("queryDeviceMeetInfo: roomid=$roomid")
-        tvMemberId.text = "人员id：$memberId"
-        tvMemberName.text = "人员名称：$memberName"
-        tvMeetingId.text = "会议id：$meetingId"
-        tvMeetingName.text = "会议名称：$meetingname"
+        DataRepositoryManager.roomRepository.data.observe(this) {
+            LogUtils.i("roomRepository: ${it.size}")
+        }
+        DataRepositoryManager.memberDetailRepository.data.observe(this) {
+            LogUtils.i("memberDetailRepository: ${it.size}")
+        }
+        DataRepositoryManager.deviceInfoRepository.data.observe(this) {
+            LogUtils.i("deviceInfoRepository: ${it.size}")
+        }
+        DataRepositoryManager.meetingInfoRepository.data.observe(this) {
+            LogUtils.i("meetingInfoRepository: ${it.size}")
+        }
+        DataRepositoryManager.agendaRepository.data.observe(this) {
+            LogUtils.i("agendaRepository: ${it.size}")
+        }
+        DataRepositoryManager.bulletinRepository.data.observe(this) {
+            LogUtils.i("bulletinRepository: ${it.size}")
+        }
+        DataRepositoryManager.directoryRepository.data.observe(this) {
+            LogUtils.i("directoryRepository: ${it.size}")
+        }
+        DataRepositoryManager.directoryFileRepository.data.observe(this){
+            LogUtils.i("directoryFileRepository: ${it.size}")
+        }
+        DataRepositoryManager.voteRepository.data.observe(this) {
+            LogUtils.i("voteRepository: ${it.size}")
+        }
+        DataRepositoryManager.signInRepository.data.observe(this) {
+            LogUtils.i("signInRepository: ${it.size}")
+        }
+        DataRepositoryManager.adminRepository.data.observe(this) {
+            LogUtils.i("adminRepository: ${it.size}")
+        }
+        DataRepositoryManager.peopleRepository.data.observe(this) {
+            LogUtils.i("peopleRepository: ${it.size}")
+        }
+        DataRepositoryManager.memberPermissionRepository.data.observe(this) {
+            LogUtils.i("memberPermissionRepository: ${it.size}")
+        }
+        DataRepositoryManager.tableCardRepository.data.observe(this) {
+            LogUtils.i("tableCardRepository: ${it.size}")
+        }
+        DataRepositoryManager.functionConfigRepository.data.observe(this) {
+            LogUtils.i("functionConfigRepository: ${it.size}")
+        }
+        DataRepositoryManager.newVoteRepository.data.observe(this) {
+            LogUtils.i("newVoteRepository: ${it.size}")
+        }
+
+        DataRepositoryManager.interfaceConfigRepository.data.observe(this) {
+            LogUtils.i("interfaceConfigRepository: data:${it?.size}")
+        }
+        DataRepositoryManager.interfaceConfigRepository.mainFilePath.observe(this) {
+            LogUtils.i("interfaceConfigRepository: mainFilePath:${it}")
+        }
+        DataRepositoryManager.interfaceConfigRepository.subFilePath.observe(this) {
+            LogUtils.i("interfaceConfigRepository: subFilePath:${it}")
+        }
+        DataRepositoryManager.interfaceConfigRepository.logoFilePath.observe(this) {
+            LogUtils.i("interfaceConfigRepository: logoFilePath:${it}")
+        }
+        DataRepositoryManager.interfaceConfigRepository.bulletinBgFilePath.observe(this) {
+            LogUtils.i("interfaceConfigRepository: bulletinBgFilePath:${it}")
+        }
+        DataRepositoryManager.interfaceConfigRepository.bulletinLogoFilePath.observe(this) {
+            LogUtils.i("interfaceConfigRepository: bulletinLogoFilePath:${it}")
+        }
+        DataRepositoryManager.interfaceConfigRepository.companyName.observe(this) {
+            LogUtils.i("interfaceConfigRepository: companyName:${it}")
+        }
+        //本机设备名称
+        DataRepositoryManager.deviceInfoRepository.devName.observe(this) {
+            LogUtils.i("deviceInfoRepository: devName:${it}")
+            mBinding.tvDevName.text = it ?: ""
+        }
+        //本机在线状态
+        DataRepositoryManager.deviceInfoRepository.online.observe(this) {
+            LogUtils.i("deviceInfoRepository: online:${it}")
+            mBinding.tvOnline.text = if (it) "在线" else "离线"
+        }
+    }
+
+    private suspend fun repositoryFlow() {
+        DataRepositoryManager.roomRepository.dataFlow().collect {
+            LogUtils.i("repositoryFlow: roomRepository:${it.size}")
+        }
+        DataRepositoryManager.memberDetailRepository.dataFlow().collect {
+            LogUtils.i("repositoryFlow: memberDetailRepository:${it.size}")
+        }
     }
 
     private fun applyPermissions() {
@@ -586,8 +513,10 @@ class MainActivity : AppCompatActivity() {
             IniUtil.configDir = SdkVars.root_dir
             IniUtil.mediaDir = SdkVars.root_dir + "mediadir" + File.separator
             IniUtil.store()
-            edtIp.setText(ip)
-            edtPort.setText(port)
+            runOnUiThread {
+                mBinding.edtIp.setText(ip)
+                mBinding.edtPort.setText(port)
+            }
         }
         FileUtils.delete(SdkVars.root_dir + "client.dev")
         ResourceUtils.copyFileFromAssets("client.dev", SdkVars.root_dir + "client.dev")
@@ -620,7 +549,7 @@ class MainActivity : AppCompatActivity() {
                             1 -> {
                                 LogUtils.e("设备ID：$code")
                                 localDeviceId = code
-                                tvDevId.text = "$code(0x${Integer.toHexString(code)})"
+                                mBinding.tvDevId.text = "$code(0x${Integer.toHexString(code)})"
                             }
 
                             2 -> {
@@ -667,19 +596,6 @@ class MainActivity : AppCompatActivity() {
                     afterSysInitial()
                 }
             }
-            // 设备寄存器
-            Pb_TYPE_MEET_INTERFACE_DEVICEINFO_VALUE -> {
-                val info = InterfaceDevice.pbui_Type_MeetDeviceBaseInfo.parseFrom(msg.data)
-                //寄存器id 0:net status  50:res status  63:base info
-                if (info.deviceid == localDeviceId) {
-                    if (info.attribid == 0) {
-                        updateOnLineStatus()
-                    } else if (info.attribid == 63) {
-                        updateDeviceName()
-                    }
-                }
-            }
-
             // 媒体播放
             Pb_TYPE_MEET_INTERFACE_MEDIAPLAY_VALUE -> {
                 if (SdkConfig.floatingPlayEnable) return
@@ -722,10 +638,6 @@ class MainActivity : AppCompatActivity() {
                     }
                 }
             }
-            //设备会议信息
-            Pb_TYPE_MEET_INTERFACE_DEVICEFACESHOW_VALUE -> {
-                queryDeviceMeetInfo()
-            }
 
             SdkBusType.capture_start -> {
                 val mediaProjectionManager = getSystemService(MEDIA_PROJECTION_SERVICE) as MediaProjectionManager
@@ -733,17 +645,18 @@ class MainActivity : AppCompatActivity() {
             }
 
             SdkBusType.capture_stop -> {
-                mRecordService?.stopRecording()
+//                mRecordService?.stopRecording()
 //                stopService(Intent(this, ForegroundService::class.java))
-//                stopService(Intent(this, ScreenRecordService::class.java).apply {
-//                    setAction(ScreenRecordService.ACTION_STOP)
-//                })
+                stopService(Intent(this, ScreenShareService::class.java).apply {
+                    setAction(ScreenShareService.ACTION_STOP)
+                })
             }
 
             SdkBusType.floating_same_play_progress -> {
                 val pos = msg.obj as Int
                 LogUtils.i("busEvent: 同步进度：$pos")
             }
+
             SdkBusType.floating_start_screen_share -> {
                 LogUtils.i("busEvent: 同屏 ${msg.objs?.size}")
                 msg.objs?.forEachIndexed { index, any ->
@@ -753,14 +666,6 @@ class MainActivity : AppCompatActivity() {
 
             SdkBusType.floating_stop_screen_share -> {}
         }
-    }
-
-    private fun updateDeviceName() {
-        tvDevName.text = Jni.queryDeviceNameById(localDeviceId)
-    }
-
-    private fun updateOnLineStatus() {
-        tvOnline.text = if (Jni.isOnline(localDeviceId)) "在线" else "离线"
     }
 
     override fun onStart() {
@@ -780,18 +685,17 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun closeNetworkMonitorWindow() {
-        windowManager?.removeView(mTextView)
-        mTextView = null
+        windowManager?.removeView(mTvNetworkSpeed)
+        mTvNetworkSpeed = null
         networkMonitor?.stopMonitoring()
         networkMonitor = null
     }
 
     override fun onDestroy() {
+        stopService(Intent(this, ScreenShareService::class.java).apply {
+            setAction(ScreenShareService.ACTION_STOP)
+        })
         super.onDestroy()
-        if (mIsBound) {
-            unbindService(mConnection)
-            mIsBound = false;
-        }
         closeNetworkMonitorWindow()
     }
 

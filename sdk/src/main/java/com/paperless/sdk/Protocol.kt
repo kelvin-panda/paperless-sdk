@@ -13,7 +13,7 @@ class Protocol {
          */
         const val PB_VOTE_SELFLAG_CHECKIN = 0x80000000
 
-        //<editor-fold desc="固定目录">
+        //<editor-fold desc="固定目录ID">
         const val share_file_dir = 1
         const val annotation_file_dir = 2
         //</editor-fold>
