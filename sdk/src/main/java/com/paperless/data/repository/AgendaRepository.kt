@@ -6,6 +6,9 @@ import com.paperless.data.repository.base.BaseRepository
 import com.paperless.sdk.SdkJni
 import kotlinx.coroutines.launch
 
+/**
+ * 时间轴式议题
+ */
 class AgendaRepository : BaseRepository<InterfaceAgenda.pbui_ItemAgendaTimeInfo>(
     InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_MEETAGENDA_VALUE
 ) {

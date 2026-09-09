@@ -945,8 +945,16 @@ class PlayerControlView(context: Context, attrs: AttributeSet? = null) : FrameLa
         val scaledHeight = view.height * scale
         val maxTranslateX = (scaledWidth - parentWidth) / 2
         val maxTranslateY = (scaledHeight - parentHeight) / 2
-        view.translationX = view.translationX.coerceIn(-maxTranslateX, maxTranslateX)
-        view.translationY = view.translationY.coerceIn(-maxTranslateY, maxTranslateY)
+        view.translationX = if (maxTranslateX > 0f) {
+            view.translationX.coerceIn(-maxTranslateX, maxTranslateX)
+        } else {
+            0f
+        }
+        view.translationY = if (maxTranslateY > 0f) {
+            view.translationY.coerceIn(-maxTranslateY, maxTranslateY)
+        } else {
+            0f
+        }
     }
 
     private inner class ScaleListener : ScaleGestureDetector.OnScaleGestureListener {

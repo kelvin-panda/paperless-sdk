@@ -8,6 +8,332 @@ public final class InterfaceMeet {
   public static void registerAllExtensions(
       com.google.protobuf.ExtensionRegistryLite registry) {
   }
+  /**
+   * <pre>
+   *----------会议类型----------
+   *会议类型
+   * </pre>
+   *
+   * Protobuf enum {@code Pb_MeetType}
+   */
+  public enum Pb_MeetType
+      implements com.google.protobuf.Internal.EnumLite {
+    /**
+     * <pre>
+     *一般会议
+     * </pre>
+     *
+     * <code>Pb_type_meeting_normal = 0;</code>
+     */
+    Pb_type_meeting_normal(0),
+    /**
+     * <pre>
+     *机密会议-兼容以前的保密会议
+     * </pre>
+     *
+     * <code>Pb_type_meeting_executive = 1;</code>
+     */
+    Pb_type_meeting_executive(1),
+    /**
+     * <pre>
+     *党委会
+     * </pre>
+     *
+     * <code>Pb_type_meeting_Party = 2;</code>
+     */
+    Pb_type_meeting_Party(2),
+    /**
+     * <pre>
+     *常委会
+     * </pre>
+     *
+     * <code>Pb_type_meeting_Standing = 3;</code>
+     */
+    Pb_type_meeting_Standing(3),
+    /**
+     * <pre>
+     *董事会
+     * </pre>
+     *
+     * <code>Pb_type_meeting_Director = 4;</code>
+     */
+    Pb_type_meeting_Director(4),
+    /**
+     * <pre>
+     *专委会
+     * </pre>
+     *
+     * <code>Pb_type_meeting_Special = 5;</code>
+     */
+    Pb_type_meeting_Special(5),
+    /**
+     * <pre>
+     *财审会
+     * </pre>
+     *
+     * <code>Pb_type_meeting_Finance = 6;</code>
+     */
+    Pb_type_meeting_Finance(6),
+    /**
+     * <pre>
+     *政务会
+     * </pre>
+     *
+     * <code>Pb_type_meeting_gov = 7;</code>
+     */
+    Pb_type_meeting_gov(7),
+    /**
+     * <pre>
+     *法务会
+     * </pre>
+     *
+     * <code>Pb_type_meeting_law = 8;</code>
+     */
+    Pb_type_meeting_law(8),
+    /**
+     * <pre>
+     *企业会
+     * </pre>
+     *
+     * <code>Pb_type_meeting_company = 9;</code>
+     */
+    Pb_type_meeting_company(9),
+    /**
+     * <pre>
+     *学校会
+     * </pre>
+     *
+     * <code>Pb_type_meeting_school = 10;</code>
+     */
+    Pb_type_meeting_school(10),
+    /**
+     * <pre>
+     *机构会
+     * </pre>
+     *
+     * <code>Pb_type_meeting_org = 11;</code>
+     */
+    Pb_type_meeting_org(11),
+    /**
+     * <pre>
+     *自由会
+     * </pre>
+     *
+     * <code>Pb_type_meeting_free = 12;</code>
+     */
+    Pb_type_meeting_free(12),
+    /**
+     * <pre>
+     *标志位，和上面的类型组合
+     * </pre>
+     *
+     * <code>Pb_type_meeting_autoclose = 16;</code>
+     */
+    Pb_type_meeting_autoclose(16),
+    /**
+     * <pre>
+     *保密
+     * </pre>
+     *
+     * <code>Pb_type_meeting_secret = 32;</code>
+     */
+    Pb_type_meeting_secret(32),
+    /**
+     * <pre>
+     *自动开始
+     * </pre>
+     *
+     * <code>Pb_type_meeting_autostart = 64;</code>
+     */
+    Pb_type_meeting_autostart(64),
+    UNRECOGNIZED(-1),
+    ;
+
+    /**
+     * <pre>
+     *一般会议
+     * </pre>
+     *
+     * <code>Pb_type_meeting_normal = 0;</code>
+     */
+    public static final int Pb_type_meeting_normal_VALUE = 0;
+    /**
+     * <pre>
+     *机密会议-兼容以前的保密会议
+     * </pre>
+     *
+     * <code>Pb_type_meeting_executive = 1;</code>
+     */
+    public static final int Pb_type_meeting_executive_VALUE = 1;
+    /**
+     * <pre>
+     *党委会
+     * </pre>
+     *
+     * <code>Pb_type_meeting_Party = 2;</code>
+     */
+    public static final int Pb_type_meeting_Party_VALUE = 2;
+    /**
+     * <pre>
+     *常委会
+     * </pre>
+     *
+     * <code>Pb_type_meeting_Standing = 3;</code>
+     */
+    public static final int Pb_type_meeting_Standing_VALUE = 3;
+    /**
+     * <pre>
+     *董事会
+     * </pre>
+     *
+     * <code>Pb_type_meeting_Director = 4;</code>
+     */
+    public static final int Pb_type_meeting_Director_VALUE = 4;
+    /**
+     * <pre>
+     *专委会
+     * </pre>
+     *
+     * <code>Pb_type_meeting_Special = 5;</code>
+     */
+    public static final int Pb_type_meeting_Special_VALUE = 5;
+    /**
+     * <pre>
+     *财审会
+     * </pre>
+     *
+     * <code>Pb_type_meeting_Finance = 6;</code>
+     */
+    public static final int Pb_type_meeting_Finance_VALUE = 6;
+    /**
+     * <pre>
+     *政务会
+     * </pre>
+     *
+     * <code>Pb_type_meeting_gov = 7;</code>
+     */
+    public static final int Pb_type_meeting_gov_VALUE = 7;
+    /**
+     * <pre>
+     *法务会
+     * </pre>
+     *
+     * <code>Pb_type_meeting_law = 8;</code>
+     */
+    public static final int Pb_type_meeting_law_VALUE = 8;
+    /**
+     * <pre>
+     *企业会
+     * </pre>
+     *
+     * <code>Pb_type_meeting_company = 9;</code>
+     */
+    public static final int Pb_type_meeting_company_VALUE = 9;
+    /**
+     * <pre>
+     *学校会
+     * </pre>
+     *
+     * <code>Pb_type_meeting_school = 10;</code>
+     */
+    public static final int Pb_type_meeting_school_VALUE = 10;
+    /**
+     * <pre>
+     *机构会
+     * </pre>
+     *
+     * <code>Pb_type_meeting_org = 11;</code>
+     */
+    public static final int Pb_type_meeting_org_VALUE = 11;
+    /**
+     * <pre>
+     *自由会
+     * </pre>
+     *
+     * <code>Pb_type_meeting_free = 12;</code>
+     */
+    public static final int Pb_type_meeting_free_VALUE = 12;
+    /**
+     * <pre>
+     *标志位，和上面的类型组合
+     * </pre>
+     *
+     * <code>Pb_type_meeting_autoclose = 16;</code>
+     */
+    public static final int Pb_type_meeting_autoclose_VALUE = 16;
+    /**
+     * <pre>
+     *保密
+     * </pre>
+     *
+     * <code>Pb_type_meeting_secret = 32;</code>
+     */
+    public static final int Pb_type_meeting_secret_VALUE = 32;
+    /**
+     * <pre>
+     *自动开始
+     * </pre>
+     *
+     * <code>Pb_type_meeting_autostart = 64;</code>
+     */
+    public static final int Pb_type_meeting_autostart_VALUE = 64;
+
+
+    public final int getNumber() {
+      return value;
+    }
+
+    /**
+     * @deprecated Use {@link #forNumber(int)} instead.
+     */
+    @java.lang.Deprecated
+    public static Pb_MeetType valueOf(int value) {
+      return forNumber(value);
+    }
+
+    public static Pb_MeetType forNumber(int value) {
+      switch (value) {
+        case 0: return Pb_type_meeting_normal;
+        case 1: return Pb_type_meeting_executive;
+        case 2: return Pb_type_meeting_Party;
+        case 3: return Pb_type_meeting_Standing;
+        case 4: return Pb_type_meeting_Director;
+        case 5: return Pb_type_meeting_Special;
+        case 6: return Pb_type_meeting_Finance;
+        case 7: return Pb_type_meeting_gov;
+        case 8: return Pb_type_meeting_law;
+        case 9: return Pb_type_meeting_company;
+        case 10: return Pb_type_meeting_school;
+        case 11: return Pb_type_meeting_org;
+        case 12: return Pb_type_meeting_free;
+        case 16: return Pb_type_meeting_autoclose;
+        case 32: return Pb_type_meeting_secret;
+        case 64: return Pb_type_meeting_autostart;
+        default: return null;
+      }
+    }
+
+    public static com.google.protobuf.Internal.EnumLiteMap<Pb_MeetType>
+        internalGetValueMap() {
+      return internalValueMap;
+    }
+    private static final com.google.protobuf.Internal.EnumLiteMap<
+        Pb_MeetType> internalValueMap =
+          new com.google.protobuf.Internal.EnumLiteMap<Pb_MeetType>() {
+            public Pb_MeetType findValueByNumber(int number) {
+              return Pb_MeetType.forNumber(number);
+            }
+          };
+
+    private final int value;
+
+    private Pb_MeetType(int value) {
+      this.value = value;
+    }
+
+    // @@protoc_insertion_point(enum_scope:Pb_MeetType)
+  }
+
   public interface pbui_Type_ComplexQueryMeetInfoOrBuilder extends
       // @@protoc_insertion_point(interface_extends:pbui_Type_ComplexQueryMeetInfo)
       com.google.protobuf.MessageLiteOrBuilder {
@@ -1012,7 +1338,7 @@ public final class InterfaceMeet {
 
     /**
      * <pre>
-     *是否为保密会议 1为密保会议
+     *会议类型 参见Pb_MeetType
      * </pre>
      *
      * <code>optional fixed32 secrecy = 5;</code>
@@ -1250,7 +1576,7 @@ public final class InterfaceMeet {
     private int secrecy_;
     /**
      * <pre>
-     *是否为保密会议 1为密保会议
+     *会议类型 参见Pb_MeetType
      * </pre>
      *
      * <code>optional fixed32 secrecy = 5;</code>
@@ -1260,7 +1586,7 @@ public final class InterfaceMeet {
     }
     /**
      * <pre>
-     *是否为保密会议 1为密保会议
+     *会议类型 参见Pb_MeetType
      * </pre>
      *
      * <code>optional fixed32 secrecy = 5;</code>
@@ -1271,7 +1597,7 @@ public final class InterfaceMeet {
     }
     /**
      * <pre>
-     *是否为保密会议 1为密保会议
+     *会议类型 参见Pb_MeetType
      * </pre>
      *
      * <code>optional fixed32 secrecy = 5;</code>
@@ -1857,7 +2183,7 @@ public final class InterfaceMeet {
 
       /**
        * <pre>
-       *是否为保密会议 1为密保会议
+       *会议类型 参见Pb_MeetType
        * </pre>
        *
        * <code>optional fixed32 secrecy = 5;</code>
@@ -1867,7 +2193,7 @@ public final class InterfaceMeet {
       }
       /**
        * <pre>
-       *是否为保密会议 1为密保会议
+       *会议类型 参见Pb_MeetType
        * </pre>
        *
        * <code>optional fixed32 secrecy = 5;</code>
@@ -1879,7 +2205,7 @@ public final class InterfaceMeet {
       }
       /**
        * <pre>
-       *是否为保密会议 1为密保会议
+       *会议类型 参见Pb_MeetType
        * </pre>
        *
        * <code>optional fixed32 secrecy = 5;</code>
@@ -4268,7 +4594,7 @@ public final class InterfaceMeet {
      *"meetname":"", //会议名称
      *"roomId":"", //会场ID，即会议室
      *"roomname":"", //会议室名称
-     *"secrecy":"",  //是否为保密会议 1为密保会议
+     *"secrecy":"",  //会议类型  参见Pb_MeetType
      *"starttime":"", //开始时间 单位:秒
      *"endtime":"",  //结束时间 单位:秒
      *"signin_type":"", //签到类型
@@ -4341,7 +4667,7 @@ public final class InterfaceMeet {
      *"meetname":"", //会议名称
      *"roomId":"", //会场ID，即会议室
      *"roomname":"", //会议室名称
-     *"secrecy":"",  //是否为保密会议 1为密保会议
+     *"secrecy":"",  //会议类型  参见Pb_MeetType
      *"starttime":"", //开始时间 单位:秒
      *"endtime":"",  //结束时间 单位:秒
      *"signin_type":"", //签到类型
@@ -4396,7 +4722,7 @@ public final class InterfaceMeet {
      *"meetname":"", //会议名称
      *"roomId":"", //会场ID，即会议室
      *"roomname":"", //会议室名称
-     *"secrecy":"",  //是否为保密会议 1为密保会议
+     *"secrecy":"",  //会议类型  参见Pb_MeetType
      *"starttime":"", //开始时间 单位:秒
      *"endtime":"",  //结束时间 单位:秒
      *"signin_type":"", //签到类型
@@ -4455,7 +4781,7 @@ public final class InterfaceMeet {
      *"meetname":"", //会议名称
      *"roomId":"", //会场ID，即会议室
      *"roomname":"", //会议室名称
-     *"secrecy":"",  //是否为保密会议 1为密保会议
+     *"secrecy":"",  //会议类型  参见Pb_MeetType
      *"starttime":"", //开始时间 单位:秒
      *"endtime":"",  //结束时间 单位:秒
      *"signin_type":"", //签到类型
@@ -4620,7 +4946,7 @@ public final class InterfaceMeet {
        *"meetname":"", //会议名称
        *"roomId":"", //会场ID，即会议室
        *"roomname":"", //会议室名称
-       *"secrecy":"",  //是否为保密会议 1为密保会议
+       *"secrecy":"",  //会议类型  参见Pb_MeetType
        *"starttime":"", //开始时间 单位:秒
        *"endtime":"",  //结束时间 单位:秒
        *"signin_type":"", //签到类型
@@ -4675,7 +5001,7 @@ public final class InterfaceMeet {
        *"meetname":"", //会议名称
        *"roomId":"", //会场ID，即会议室
        *"roomname":"", //会议室名称
-       *"secrecy":"",  //是否为保密会议 1为密保会议
+       *"secrecy":"",  //会议类型  参见Pb_MeetType
        *"starttime":"", //开始时间 单位:秒
        *"endtime":"",  //结束时间 单位:秒
        *"signin_type":"", //签到类型
@@ -4732,7 +5058,7 @@ public final class InterfaceMeet {
        *"meetname":"", //会议名称
        *"roomId":"", //会场ID，即会议室
        *"roomname":"", //会议室名称
-       *"secrecy":"",  //是否为保密会议 1为密保会议
+       *"secrecy":"",  //会议类型  参见Pb_MeetType
        *"starttime":"", //开始时间 单位:秒
        *"endtime":"",  //结束时间 单位:秒
        *"signin_type":"", //签到类型

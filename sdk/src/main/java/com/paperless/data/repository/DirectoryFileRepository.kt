@@ -1,5 +1,7 @@
 package com.paperless.data.repository
 
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import com.mogujie.tt.protobuf.InterfaceFile
 import com.mogujie.tt.protobuf.InterfaceMacro
 import com.paperless.data.repository.base.BaseRepository
@@ -28,10 +30,14 @@ class DirectoryFileRepository : BaseRepository<InterfaceFile.pbui_Item_MeetDirFi
             field = value
             query()  // 切换目录时自动刷新
         }
+    private val _directoryBlacklist = MutableLiveData<List<Int>>()
+    val directoryBlacklist: LiveData<List<Int>> = _directoryBlacklist
 
     override fun query() {
-        if (dirId == 0) return
         scope.launch {
+            SdkJni.queryDirPermission(dirId)?.let {
+                _directoryBlacklist.postValue(it.memberidList)
+            } ?: _directoryBlacklist.postValue(emptyList())
             SdkJni.queryFile(dirId)?.let {
                 _data.postValue(it)
             } ?: _data.postValue(emptyList())

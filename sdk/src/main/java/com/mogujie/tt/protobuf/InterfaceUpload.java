@@ -974,6 +974,24 @@ public final class InterfaceUpload {
      * <code>optional fixed32 filepos = 10;</code>
      */
     int getFilepos();
+
+    /**
+     * <pre>
+     *可以指定自定义文本数据 {"uptime":"45678997"} 为空表示不指定
+     * </pre>
+     *
+     * <code>optional bytes userdata = 11;</code>
+     */
+    com.google.protobuf.ByteString getUserdata();
+
+    /**
+     * <pre>
+     *指定文件的md5 为空表示不指定  固定16字节
+     * </pre>
+     *
+     * <code>optional bytes md5 = 12;</code>
+     */
+    com.google.protobuf.ByteString getMd5();
   }
   /**
    * <pre>
@@ -995,6 +1013,8 @@ public final class InterfaceUpload {
       pathname_ = com.google.protobuf.ByteString.EMPTY;
       userstr_ = com.google.protobuf.ByteString.EMPTY;
       passwd_ = com.google.protobuf.ByteString.EMPTY;
+      userdata_ = com.google.protobuf.ByteString.EMPTY;
+      md5_ = com.google.protobuf.ByteString.EMPTY;
     }
     public static final int UPLOADFLAG_FIELD_NUMBER = 1;
     private int uploadflag_;
@@ -1358,6 +1378,82 @@ public final class InterfaceUpload {
       filepos_ = 0;
     }
 
+    public static final int USERDATA_FIELD_NUMBER = 11;
+    private com.google.protobuf.ByteString userdata_;
+    /**
+     * <pre>
+     *可以指定自定义文本数据 {"uptime":"45678997"} 为空表示不指定
+     * </pre>
+     *
+     * <code>optional bytes userdata = 11;</code>
+     */
+    public com.google.protobuf.ByteString getUserdata() {
+      return userdata_;
+    }
+    /**
+     * <pre>
+     *可以指定自定义文本数据 {"uptime":"45678997"} 为空表示不指定
+     * </pre>
+     *
+     * <code>optional bytes userdata = 11;</code>
+     */
+    private void setUserdata(com.google.protobuf.ByteString value) {
+      if (value == null) {
+    throw new NullPointerException();
+  }
+  
+      userdata_ = value;
+    }
+    /**
+     * <pre>
+     *可以指定自定义文本数据 {"uptime":"45678997"} 为空表示不指定
+     * </pre>
+     *
+     * <code>optional bytes userdata = 11;</code>
+     */
+    private void clearUserdata() {
+      
+      userdata_ = getDefaultInstance().getUserdata();
+    }
+
+    public static final int MD5_FIELD_NUMBER = 12;
+    private com.google.protobuf.ByteString md5_;
+    /**
+     * <pre>
+     *指定文件的md5 为空表示不指定  固定16字节
+     * </pre>
+     *
+     * <code>optional bytes md5 = 12;</code>
+     */
+    public com.google.protobuf.ByteString getMd5() {
+      return md5_;
+    }
+    /**
+     * <pre>
+     *指定文件的md5 为空表示不指定  固定16字节
+     * </pre>
+     *
+     * <code>optional bytes md5 = 12;</code>
+     */
+    private void setMd5(com.google.protobuf.ByteString value) {
+      if (value == null) {
+    throw new NullPointerException();
+  }
+  
+      md5_ = value;
+    }
+    /**
+     * <pre>
+     *指定文件的md5 为空表示不指定  固定16字节
+     * </pre>
+     *
+     * <code>optional bytes md5 = 12;</code>
+     */
+    private void clearMd5() {
+      
+      md5_ = getDefaultInstance().getMd5();
+    }
+
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
       if (uploadflag_ != 0) {
@@ -1389,6 +1485,12 @@ public final class InterfaceUpload {
       }
       if (filepos_ != 0) {
         output.writeFixed32(10, filepos_);
+      }
+      if (!userdata_.isEmpty()) {
+        output.writeBytes(11, userdata_);
+      }
+      if (!md5_.isEmpty()) {
+        output.writeBytes(12, md5_);
       }
     }
 
@@ -1436,6 +1538,14 @@ public final class InterfaceUpload {
       if (filepos_ != 0) {
         size += com.google.protobuf.CodedOutputStream
           .computeFixed32Size(10, filepos_);
+      }
+      if (!userdata_.isEmpty()) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBytesSize(11, userdata_);
+      }
+      if (!md5_.isEmpty()) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBytesSize(12, md5_);
       }
       memoizedSerializedSize = size;
       return size;
@@ -1880,6 +1990,76 @@ public final class InterfaceUpload {
         return this;
       }
 
+      /**
+       * <pre>
+       *可以指定自定义文本数据 {"uptime":"45678997"} 为空表示不指定
+       * </pre>
+       *
+       * <code>optional bytes userdata = 11;</code>
+       */
+      public com.google.protobuf.ByteString getUserdata() {
+        return instance.getUserdata();
+      }
+      /**
+       * <pre>
+       *可以指定自定义文本数据 {"uptime":"45678997"} 为空表示不指定
+       * </pre>
+       *
+       * <code>optional bytes userdata = 11;</code>
+       */
+      public Builder setUserdata(com.google.protobuf.ByteString value) {
+        copyOnWrite();
+        instance.setUserdata(value);
+        return this;
+      }
+      /**
+       * <pre>
+       *可以指定自定义文本数据 {"uptime":"45678997"} 为空表示不指定
+       * </pre>
+       *
+       * <code>optional bytes userdata = 11;</code>
+       */
+      public Builder clearUserdata() {
+        copyOnWrite();
+        instance.clearUserdata();
+        return this;
+      }
+
+      /**
+       * <pre>
+       *指定文件的md5 为空表示不指定  固定16字节
+       * </pre>
+       *
+       * <code>optional bytes md5 = 12;</code>
+       */
+      public com.google.protobuf.ByteString getMd5() {
+        return instance.getMd5();
+      }
+      /**
+       * <pre>
+       *指定文件的md5 为空表示不指定  固定16字节
+       * </pre>
+       *
+       * <code>optional bytes md5 = 12;</code>
+       */
+      public Builder setMd5(com.google.protobuf.ByteString value) {
+        copyOnWrite();
+        instance.setMd5(value);
+        return this;
+      }
+      /**
+       * <pre>
+       *指定文件的md5 为空表示不指定  固定16字节
+       * </pre>
+       *
+       * <code>optional bytes md5 = 12;</code>
+       */
+      public Builder clearMd5() {
+        copyOnWrite();
+        instance.clearMd5();
+        return this;
+      }
+
       // @@protoc_insertion_point(builder_scope:pbui_Type_AddUploadFile)
     }
     protected final Object dynamicMethod(
@@ -1921,6 +2101,10 @@ public final class InterfaceUpload {
               other.passwd_ != com.google.protobuf.ByteString.EMPTY, other.passwd_);
           filepos_ = visitor.visitInt(filepos_ != 0, filepos_,
               other.filepos_ != 0, other.filepos_);
+          userdata_ = visitor.visitByteString(userdata_ != com.google.protobuf.ByteString.EMPTY, userdata_,
+              other.userdata_ != com.google.protobuf.ByteString.EMPTY, other.userdata_);
+          md5_ = visitor.visitByteString(md5_ != com.google.protobuf.ByteString.EMPTY, md5_,
+              other.md5_ != com.google.protobuf.ByteString.EMPTY, other.md5_);
           if (visitor == com.google.protobuf.GeneratedMessageLite.MergeFromVisitor
               .INSTANCE) {
           }
@@ -1993,6 +2177,16 @@ public final class InterfaceUpload {
                 case 85: {
 
                   filepos_ = input.readFixed32();
+                  break;
+                }
+                case 90: {
+
+                  userdata_ = input.readBytes();
+                  break;
+                }
+                case 98: {
+
+                  md5_ = input.readBytes();
                   break;
                 }
               }

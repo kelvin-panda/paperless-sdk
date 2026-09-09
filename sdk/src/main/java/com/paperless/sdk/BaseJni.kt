@@ -3962,11 +3962,12 @@ open class BaseJni {
         return null
     }
 
-    open fun modCustomInfo(id: Int, text: String) {
+    open fun modCustomInfo(id: Int, text: String, meetId: Int = 0) {
         Call.callMethod(
             Pb_Type.Pb_TYPE_MEET_INTERFACE_MEETUSERDEF.number,
             Pb_Method.Pb_METHOD_MEET_INTERFACE_MODIFY.number,
             InterfaceMeetuserdef.pbui_Type_MeetUserdefInfo.newBuilder()
+                .setMeetid(meetId)
                 .addItem(
                     InterfaceMeetuserdef.pbui_Type_MeetUserdefItemInfo.newBuilder()
                         .setId(id)

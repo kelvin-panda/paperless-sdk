@@ -1,6 +1,7 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
+    alias(libs.plugins.kotlin.kapt)
 }
 
 android {
@@ -43,6 +44,7 @@ android {
     buildFeatures {
         buildConfig = true
         viewBinding = true
+        dataBinding = true
     }
 }
 
@@ -56,6 +58,7 @@ dependencies {
     api(libs.xxPermissions)
     api(libs.eventbus)
     api(libs.utilcodex)
+    api(libs.brv)
 //    implementation("com.gitee.xlk_gitee:paperless_sdk:1.3.11")
     api(project(":sdk"))
 }

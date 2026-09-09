@@ -35,6 +35,8 @@ eventbus = { group = "org.greenrobot", name = "eventbus", version = "3.3.1" }
 utilcodex = { group = "com.blankj", name = "utilcodex", version = "1.31.1" }
 # 权限请求框架：https://github.com/getActivity/XXPermissions
 xxPermissions = { group = "com.github.getActivity", name = "XXPermissions", version = "28.0" }
+# https://github.com/liangjingkanji/BRV
+brv = { group = "com.github.liangjingkanji", name = "BRV", version = "1.6.1" }
 
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
@@ -48,5 +50,6 @@ lifecycleKtxLib = ["lifecycle-extensions", "lifecycle-runtime-ktx", "lifecycle-l
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
+kotlin-kapt = { id = "org.jetbrains.kotlin.kapt", version.ref = "kotlin" }
 android-library = { id = "com.android.library", version.ref = "agp" }
 

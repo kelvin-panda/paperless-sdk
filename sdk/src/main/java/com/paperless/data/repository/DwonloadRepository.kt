@@ -1,4 +1,4 @@
-package com.paperless.data.repository
+﻿package com.paperless.data.repository
 
 import com.mogujie.tt.protobuf.InterfaceDownload
 import com.mogujie.tt.protobuf.InterfaceMacro
@@ -11,7 +11,7 @@ import com.paperless.data.repository.base.BaseEventRepository
 class DwonloadRepository : BaseEventRepository(InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_DOWNLOAD_VALUE) {
     var onDownloadCompleted: ((userstr: String, filePath: String) -> Unit)? = null
 
-    override fun handleNotifyCallback(data: ByteArray?) {
+    override fun handleNotifyCallback(type: Int, data: ByteArray?) {
         InterfaceDownload.pbui_Type_DownloadCb.parseFrom(data)?.let {
             if (it.nstate == InterfaceMacro.Pb_Download_State.Pb_STATE_MEDIA_DOWNLOAD_EXIT_VALUE
                 && (it.err == InterfaceMacro.Pb_Download_Erro.Pb_ERROR_MEDIA_DOWNLOAD_OK_VALUE

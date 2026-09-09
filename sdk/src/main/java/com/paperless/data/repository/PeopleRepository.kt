@@ -6,6 +6,9 @@ import com.paperless.data.repository.base.BaseRepository
 import com.paperless.sdk.SdkJni
 import kotlinx.coroutines.launch
 
+/**
+ * 常用参会人
+ */
 class PeopleRepository : BaseRepository<InterfacePerson.pbui_Item_PersonDetailInfo>(
     InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_PEOPLE_VALUE
 ) {

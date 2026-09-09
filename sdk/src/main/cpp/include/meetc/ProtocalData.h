@@ -10,739 +10,766 @@
 #include "base.h"
 #include "owbase.h"
 
-/*                    åè®®åŸºæœ¬ç»“æ„
+/*                    Ğ­Òé»ù±¾½á¹¹
   ---------------------------------------------------
- |  è¯·æ±‚å¤´requestheader   æˆ–  åº”ç­”å¤´responseheader   |
+ |  ÇëÇóÍ·requestheader   »ò  Ó¦´ğÍ·responseheader   |
   ---------------------------------------------------
- |                     æ•°æ®ä¿¡æ¯å¤´                    |
+ |                     Êı¾İĞÅÏ¢Í·                    |
   ---------------------------------------------------
- |                       æ•°æ®                        |
+ |                       Êı¾İ                        |
   ---------------------------------------------------
-  "æ•°æ®"éƒ¨åˆ†ä¸­çš„å„ç§æ•°æ®æŒ‰åœ¨"æ•°æ®ä¿¡æ¯å¤´"å‡ºç°é¡ºåºä¸å¤§å°ï¼ˆå­—èŠ‚ï¼‰å­˜å‚¨  */
+  "Êı¾İ"²¿·ÖÖĞµÄ¸÷ÖÖÊı¾İ°´ÔÚ"Êı¾İĞÅÏ¢Í·"³öÏÖË³ĞòÓë´óĞ¡£¨×Ö½Ú£©´æ´¢  */
 
-//åè®®ç‰ˆæœ¬
+//Ğ­Òé°æ±¾
 //#define PROTOCOL_VERSION 20160608
 #define PROTOCOL_VERSION_V1_0 20180803
 #define PROTOCOL_VERSION2_0 20211018
 #if SUPPORTVERUPDATE ==1
-#define PROTOCOL_VERSION PROTOCOL_VERSION2_0 //å°†ä¼šè®®\ç›®å½•\æ–‡ä»¶åç§°æ”¹ä¸ºä¸å®šé•¿
+#define PROTOCOL_VERSION PROTOCOL_VERSION2_0 //½«»áÒé\Ä¿Â¼\ÎÄ¼şÃû³Æ¸ÄÎª²»¶¨³¤
 #else
 #define PROTOCOL_VERSION PROTOCOL_VERSION_V1_0
 #endif
-//å…¨å±€æ•°æ®æŒ‡é’ˆ
+//È«¾ÖÊı¾İÖ¸Õë
 //void *pm = NULL;
 
+#define MAX_LEVEL_NUM  16 //¼¶±ğ×î´óÖµ
 
-//ä¸ºäº†æ•´ä¸ªç¨‹åºæ¯”è¾ƒæ¸…æ™°ï¼ŒæŠŠæšä¸¾ç±»å‹ç»Ÿä¸€æ”¾åˆ°ç±»é‡Œé¢ç®¡ç†
+//ÎªÁËÕû¸ö³ÌĞò±È½ÏÇåÎú£¬°ÑÃ¶¾ÙÀàĞÍÍ³Ò»·Åµ½ÀàÀïÃæ¹ÜÀí
 class ProtocalData
 {
 	public:
-#define NAME_LENG	48  //åç§°æœ€å¤§é•¿åº¦ï¼ŒåŒ…å«å­—ç¬¦ä¸²ç»“æŸç¬¦ï¼ŒåŒ…æ‹¬äººå‘˜åå­—ï¼Œè®¾å¤‡åç§°
-#define DESCRIBE_LENG 100  //ä¸€èˆ¬æè¿°å­—ç¬¦é•¿åº¦
-#define TIMECHARACTER_LENG	25 //æ—¶é—´å­—ç¬¦é•¿åº¦ï¼Œè¿™é‡Œå­˜æœ‰ä½™é‡ï¼Œæ–¹ä¾¿ä¸åŒæ ¼å¼æ—¶é—´å­—ç¬¦ä¼ è¾“
-#define FILENAME_LENG	150	//æ–‡ä»¶åç§°ï¼Œæ–‡ä»¶å¤¹åç§°é•¿åº¦é™åˆ¶
-#define VOTE_CONTENTLENG  200	//æŠ•ç¥¨è¡¨å†³æœ‰å…³å­—ç¬¦é•¿åº¦é™åˆ¶
-#define VOTE_LENG		  60	//æŠ•ç¥¨è¡¨å†³é€‰æ‹©é¡¹å­—ç¬¦é•¿åº¦é™åˆ¶
-#define CHATTEXT_LENG	300 //èŠå¤©å†…å®¹æœ€å¤§é•¿åº¦
-#define PASSWORD_LENG	40	//å¯†ç æœ€å¤§é•¿åº¦
-#define SHORT_DESCRIBE_LENG	    40  //ä¸€èˆ¬æè¿°å­—ç¬¦è¾ƒçŸ­é•¿åº¦
-#define ONESIGNPASSWORD_LENG    16  //ä¸€æ¬¡ä¼šè®®ç­¾åˆ°å¯†ç é•¿åº¦
-#define PD_SHORT_PASSWORD_LENG   8 //é»˜è®¤çŸ­å¯†ç é•¿åº¦
+#define NAME_LENG	48  //Ãû³Æ×î´ó³¤¶È£¬°üº¬×Ö·û´®½áÊø·û£¬°üÀ¨ÈËÔ±Ãû×Ö£¬Éè±¸Ãû³Æ
+#define DESCRIBE_LENG 100  //Ò»°ãÃèÊö×Ö·û³¤¶È
+#define TIMECHARACTER_LENG	25 //Ê±¼ä×Ö·û³¤¶È£¬ÕâÀï´æÓĞÓàÁ¿£¬·½±ã²»Í¬¸ñÊ½Ê±¼ä×Ö·û´«Êä
+#define FILENAME_LENG	150	//ÎÄ¼şÃû³Æ£¬ÎÄ¼ş¼ĞÃû³Æ³¤¶ÈÏŞÖÆ
+#define VOTE_CONTENTLENG  200	//Í¶Æ±±í¾öÓĞ¹Ø×Ö·û³¤¶ÈÏŞÖÆ
+#define VOTE_LENG		  60	//Í¶Æ±±í¾öÑ¡ÔñÏî×Ö·û³¤¶ÈÏŞÖÆ
+#define CHATTEXT_LENG	300 //ÁÄÌìÄÚÈİ×î´ó³¤¶È
+#define PASSWORD_LENG	40	//ÃÜÂë×î´ó³¤¶È
+#define SHORT_DESCRIBE_LENG	    40  //Ò»°ãÃèÊö×Ö·û½Ï¶Ì³¤¶È
+#define ONESIGNPASSWORD_LENG    16  //Ò»´Î»áÒéÇ©µ½ÃÜÂë³¤¶È
+#define PD_SHORT_PASSWORD_LENG   8 //Ä¬ÈÏ¶ÌÃÜÂë³¤¶È
 
-	//**********é˜¶æ®µå®šä¹‰éƒ¨åˆ†**************
+	//**********½×¶Î¶¨Òå²¿·Ö**************
 
-	//é˜¶æ®µstagesä¿¡æ¯
+	//½×¶ÎstagesĞÅÏ¢
 	enum STARG_ENUM {  
-		STAGE_SysTime,  //ç³»ç»Ÿæ—¶é—´ï¼Œè¿™é‡Œæš‚æ—¶åªæœ‰æ—¶é—´å†…å®¹ï¼Œå¯èƒ½è¿˜ä¼šå¢åŠ å…¬å¸åç§°ä¹‹ç±»æ ‡é¢˜çš„
-		STAGE_DeviceId, //å¼€æœºæ—¶è·å–çš„è®¾å¤‡ç¼–å·ä¿¡æ¯
-		STAGE_SystemSet, //ç³»ç»Ÿè®¾ç½®æœ‰å…³
-		STAGE_MemberManage,//å‚ä¼šäººå‘˜ç®¡ç†é˜¶æ®µ
-		STAGE_PeopleManage,//äººå‘˜ç®¡ç†
-		STAGE_MeetingManage, //ä¼šåœºç®¡ç†
-		STAGE_StartUpMeeting, //å‘èµ·ä¼šè®®
-		STAGE_MeetingAgenda, //ä¼šè®®è®®ç¨‹
-		STAGE_MeetingDatum,  //ä¼šè®®èµ„æ–™
-		STAGE_MeetingVideo,  //ä¼šè®®è§†é¢‘
-		STAGE_MeetingSeat,  //ä¼šè®®æ’ä½
-		STAGE_MeetingChat,	//èŠå¤©
-		STAGE_MeetingVote, //æŠ•ç¥¨ç®¡ç†
-		STAGE_SignIn,	//ç­¾åˆ°æƒ…å†µ
-		STAGE_Postil,	//æ‰¹æ³¨æŸ¥çœ‹
-		STAGE_BaiBan,	//ç”µå­ç™½æ¿
-		STAGE_MeetingStatus, //ä¼šè®®çŠ¶æ€ç®¡ç†
-		STAGE_DeviceASGN,   //è®¾å¤‡åˆ†é…é˜¶æ®µ
-		STAGE_Wait4User,	//ç­‰å¾…ç”¨æˆ· ä¼šè®®ç»ˆç«¯æ˜¾ç¤ºä¿¡æ¯
-		STAGE_PushFile,		//æ–‡ä»¶æ¨é€åˆ°ä¼šè®®ç»ˆç«¯
-		STAGE_PushStream,	//æµæ¨é€åˆ°ä¼šè®®ç»ˆç«¯
-		STAGE_RePushStream,	//å‘ä¸»æŒäººè¯·æ±‚æµæ¨é€åˆ°ä¼šè®®ç»ˆç«¯
-		STAGE_PushUpdate,	//å‘æ‰€æœ‰è®¾å¤‡æ¨é€æ•°æ®æ›´æ–°
-		STAGE_Admin,		//ç®¡ç†å‘˜
-		STAGE_FunConf,		//ä¼šè®®åŠŸèƒ½é…ç½®
-		STAGE_PeopleGroup,	//äººå‘˜åˆ†ç»„
-		STAGE_MemberGroup,	//å‚ä¼šäººå‘˜åˆ†ç»„
-		STAGE_StreamControl,	//å±å¹•æµçš„é¼ æ ‡é”®ç›˜æ§åˆ¶æŒ‡ä»¤
-		STAGE_DeviceOper,	//è®¾å¤‡æ§åˆ¶
-		STAGE_ManagerRoom,   //ç®¡ç†å‘˜ä¼šè®®å®¤
-		STAGE_MeetStatistic,   //ä¼šè®®æ•°æ®ç»Ÿè®¡
-		STAGE_MeetingFace,    //ä¼šè®®ç•Œé¢é…ç½®
-		STAGE_FileScore,    //ä¼šè®®æ–‡ä»¶è¯„åˆ†ç›¸å…³
-		STAGE_FileEvaluate,    //ä¼šè®®æ–‡ä»¶è¯„ä»·ç›¸å…³
-		STAGE_MeetEvaluate,    //ä¼šè®®è¯„ä»·ç›¸å…³
-		STAGE_SystemLog,    //ç®¡ç†å‘˜æ“ä½œæ—¥å¿—ç›¸å…³
-		STAGE_PublicInfo,    //ä¸€äº›ç³»ç»Ÿå…¨å±€ä½¿ç”¨çš„å­—ä¸²
-		STAGE_FileScoreVote, //è‡ªå®šä¹‰æ–‡ä»¶è¯„åˆ†
-		STAGE_PDFWHITEBOARD, //PDFæ–‡ä»¶å¤šäººåŒæ—¶ä¹¦å†™
-		STAGE_ZKIDENTIFY, //ç”Ÿç‰©è®¤è¯
-		STAGE_MeetTopic, //ä¼šè®®è®®é¢˜
-		STAGE_Lecture, //ä¼šè®®æ¼”è®²æ–‡ç¨¿
-		STAGE_HomePage, //ä¼šè®®æ¬¢è¿ç•Œé¢
-		STAGE_MeetUserDef,//ä¼šè®®ç”¨æˆ·è‡ªå®šä¹‰æ•°æ®
-		STAGE_RoomUserDef,//ä¼šåœºç”¨æˆ·è‡ªå®šä¹‰æ•°æ®
-		STAGE_MeetOrder,//ä¼šè®®é¢„çº¦
-		STAGE_AVote,//æ–°æŠ•ç¥¨
-		STAGE_SeatPlan,//å¸­ä½æ–¹æ¡ˆ
-		STAGE_NewMeetAgenda,//æ–°è®®é¢˜
-		STAGE_SearchData,//æ•°æ®åº“æŸ¥è¯¢
-		STAGE_DeviceFaceState,//æ•°æ®åº“çŠ¶æ€äº¤äº’
-		STAGE_MergePushUpdate,	//åˆå¹¶å‘æ‰€æœ‰è®¾å¤‡æ¨é€æ•°æ®æ›´æ–°
-		STAGE_ComplexPublicUserInfo,	//å…¨å±€å¤åˆè‡ªå®šä¹‰æ•°æ®
-		STAGE_ComplexMeetUserInfo,	//ä¼šè®®å¤åˆè‡ªå®šä¹‰æ•°æ®
-		STAGE_NewSystemLog,    //æ–°æ“ä½œæ—¥å¿—ç›¸å…³
-		STAGE_End,    //ç»“æŸ
+		STAGE_SysTime,  //ÏµÍ³Ê±¼ä£¬ÕâÀïÔİÊ±Ö»ÓĞÊ±¼äÄÚÈİ£¬¿ÉÄÜ»¹»áÔö¼Ó¹«Ë¾Ãû³ÆÖ®Àà±êÌâµÄ
+		STAGE_DeviceId, //¿ª»úÊ±»ñÈ¡µÄÉè±¸±àºÅĞÅÏ¢
+		STAGE_SystemSet, //ÏµÍ³ÉèÖÃÓĞ¹Ø
+		STAGE_MemberManage,//²Î»áÈËÔ±¹ÜÀí½×¶Î
+		STAGE_PeopleManage,//ÈËÔ±¹ÜÀí
+		STAGE_MeetingManage, //»á³¡¹ÜÀí
+		STAGE_StartUpMeeting, //·¢Æğ»áÒé
+		STAGE_MeetingAgenda, //»áÒéÒé³Ì
+		STAGE_MeetingDatum,  //»áÒé×ÊÁÏ
+		STAGE_MeetingVideo,  //»áÒéÊÓÆµ
+		STAGE_MeetingSeat,  //»áÒéÅÅÎ»
+		STAGE_MeetingChat,	//ÁÄÌì
+		STAGE_MeetingVote, //Í¶Æ±¹ÜÀí
+		STAGE_SignIn,	//Ç©µ½Çé¿ö
+		STAGE_Postil,	//Åú×¢²é¿´
+		STAGE_BaiBan,	//µç×Ó°×°å
+		STAGE_MeetingStatus, //»áÒé×´Ì¬¹ÜÀí
+		STAGE_DeviceASGN,   //Éè±¸·ÖÅä½×¶Î
+		STAGE_Wait4User,	//µÈ´ıÓÃ»§ »áÒéÖÕ¶ËÏÔÊ¾ĞÅÏ¢
+		STAGE_PushFile,		//ÎÄ¼şÍÆËÍµ½»áÒéÖÕ¶Ë
+		STAGE_PushStream,	//Á÷ÍÆËÍµ½»áÒéÖÕ¶Ë
+		STAGE_RePushStream,	//ÏòÖ÷³ÖÈËÇëÇóÁ÷ÍÆËÍµ½»áÒéÖÕ¶Ë
+		STAGE_PushUpdate,	//ÏòËùÓĞÉè±¸ÍÆËÍÊı¾İ¸üĞÂ
+		STAGE_Admin,		//¹ÜÀíÔ±
+		STAGE_FunConf,		//»áÒé¹¦ÄÜÅäÖÃ
+		STAGE_PeopleGroup,	//ÈËÔ±·Ö×é
+		STAGE_MemberGroup,	//²Î»áÈËÔ±·Ö×é
+		STAGE_StreamControl,	//ÆÁÄ»Á÷µÄÊó±ê¼üÅÌ¿ØÖÆÖ¸Áî
+		STAGE_DeviceOper,	//Éè±¸¿ØÖÆ
+		STAGE_ManagerRoom,   //¹ÜÀíÔ±»áÒéÊÒ
+		STAGE_MeetStatistic,   //»áÒéÊı¾İÍ³¼Æ
+		STAGE_MeetingFace,    //»áÒé½çÃæÅäÖÃ
+		STAGE_FileScore,    //»áÒéÎÄ¼şÆÀ·ÖÏà¹Ø
+		STAGE_FileEvaluate,    //»áÒéÎÄ¼şÆÀ¼ÛÏà¹Ø
+		STAGE_MeetEvaluate,    //»áÒéÆÀ¼ÛÏà¹Ø
+		STAGE_SystemLog,    //¹ÜÀíÔ±²Ù×÷ÈÕÖ¾Ïà¹Ø
+		STAGE_PublicInfo,    //Ò»Ğ©ÏµÍ³È«¾ÖÊ¹ÓÃµÄ×Ö´®
+		STAGE_FileScoreVote, //×Ô¶¨ÒåÎÄ¼şÆÀ·Ö
+		STAGE_PDFWHITEBOARD, //PDFÎÄ¼ş¶àÈËÍ¬Ê±ÊéĞ´
+		STAGE_ZKIDENTIFY, //ÉúÎïÈÏÖ¤
+		STAGE_MeetTopic, //»áÒéÒéÌâ
+		STAGE_Lecture, //»áÒéÑİ½²ÎÄ¸å
+		STAGE_HomePage, //»áÒé»¶Ó­½çÃæ
+		STAGE_MeetUserDef,//»áÒéÓÃ»§×Ô¶¨ÒåÊı¾İ
+		STAGE_RoomUserDef,//»á³¡ÓÃ»§×Ô¶¨ÒåÊı¾İ
+		STAGE_MeetOrder,//»áÒéÔ¤Ô¼
+		STAGE_AVote,//ĞÂÍ¶Æ±
+		STAGE_SeatPlan,//Ï¯Î»·½°¸
+		STAGE_NewMeetAgenda,//ĞÂÒéÌâ
+		STAGE_SearchData,//Êı¾İ¿â²éÑ¯
+		STAGE_DeviceFaceState,//Êı¾İ¿â×´Ì¬½»»¥
+		STAGE_MergePushUpdate,	//ºÏ²¢ÏòËùÓĞÉè±¸ÍÆËÍÊı¾İ¸üĞÂ
+		STAGE_ComplexPublicUserInfo,	//È«¾Ö¸´ºÏ×Ô¶¨ÒåÊı¾İ
+		STAGE_ComplexMeetUserInfo,	//»áÒé¸´ºÏ×Ô¶¨ÒåÊı¾İ
+		STAGE_NewSystemLog,    //ĞÂ²Ù×÷ÈÕÖ¾Ïà¹Ø
+		STAGE_End,    //½áÊø
 	};
 
-	//*************åŠŸèƒ½å®šä¹‰åˆ†ç±»********************
+	//*************¹¦ÄÜ¶¨Òå·ÖÀà********************
 
 	enum FUNCTION_ENUM{
-		 //ç³»ç»Ÿè®¾ç½® åŠŸèƒ½åˆ†ç±»
-		FUN_TerminalControl,		//ç»ˆç«¯å‡é™æ§åˆ¶
-		FUN_CompereControlAll,		//ä¸»æŒäººæ§åˆ¶å¤šç»ˆç«¯
-		FUN_CompereControlOne,		//ä¸»æŒäººæ§åˆ¶å•ç»ˆç«¯
-		FUN_AdminPassword,			//ç®¡ç†å‘˜ç™»å½•å¯†ç   ç®¡ç†å‘˜ç™»å½•è¿™é‡Œå¯†ç ç™»å½•ï¼Œå–æ¶ˆç”¨æˆ·å
-		//		FUN_PermissionAll,			//å¤šäººå‘˜æƒé™ç®¡ç†
-		//		FUN_PermissionOne,			//å•äººå‘˜æƒé™ç®¡ç†
-		FUN_MeetingStatus,			//ä¼šè®®çŠ¶æ€ç®¡ç†
-		FUN_URL,					//é»˜è®¤æ‰“å¼€ç½‘å€
-		FUN_FontColorBgp_welcome,	//é¦–é¡µæ¬¢è¿ç•Œé¢æœ‰å…³å­—ä½“å¤§å°,èƒŒæ™¯å›¾ï¼Œé¢œè‰²çš„è®¾ç½®
-		FUN_FontColorBgp_desk,		//æ¡Œç‰Œæœ‰å…³å­—ä½“å¤§å°,èƒŒæ™¯å›¾ï¼Œé¢œè‰²çš„è®¾ç½®
+		 //ÏµÍ³ÉèÖÃ ¹¦ÄÜ·ÖÀà
+		FUN_TerminalControl,		//ÖÕ¶ËÉı½µ¿ØÖÆ
+		FUN_CompereControlAll,		//Ö÷³ÖÈË¿ØÖÆ¶àÖÕ¶Ë
+		FUN_CompereControlOne,		//Ö÷³ÖÈË¿ØÖÆµ¥ÖÕ¶Ë
+		FUN_AdminPassword,			//¹ÜÀíÔ±µÇÂ¼ÃÜÂë  ¹ÜÀíÔ±µÇÂ¼ÕâÀïÃÜÂëµÇÂ¼£¬È¡ÏûÓÃ»§Ãû
+		//		FUN_PermissionAll,			//¶àÈËÔ±È¨ÏŞ¹ÜÀí
+		//		FUN_PermissionOne,			//µ¥ÈËÔ±È¨ÏŞ¹ÜÀí
+		FUN_MeetingStatus,			//»áÒé×´Ì¬¹ÜÀí
+		FUN_URL,					//Ä¬ÈÏ´ò¿ªÍøÖ·
+		FUN_FontColorBgp_welcome,	//Ê×Ò³»¶Ó­½çÃæÓĞ¹Ø×ÖÌå´óĞ¡,±³¾°Í¼£¬ÑÕÉ«µÄÉèÖÃ
+		FUN_FontColorBgp_desk,		//×ÀÅÆÓĞ¹Ø×ÖÌå´óĞ¡,±³¾°Í¼£¬ÑÕÉ«µÄÉèÖÃ
 
-		FUN_All,					//å¯¹æ‰€æœ‰æ“ä½œ
-		FUN_One,					//å¯¹å•ä¸ªæ“ä½œ
+		FUN_All,					//¶ÔËùÓĞ²Ù×÷
+		FUN_One,					//¶Ôµ¥¸ö²Ù×÷
 
-		FUN_Agenda,					//ä¼šè®®è®®ç¨‹
-		FUN_Bulletin,				//ä¼šè®®å…¬å‘Š
+		FUN_Agenda,					//»áÒéÒé³Ì
+		FUN_Bulletin,				//»áÒé¹«¸æ
 
-		FUN_Dir_All,				//å…¨éƒ¨ç›®å½•
-		FUN_Dir_One,				//ç›®å½•
-		FUN_File_All,				//å…¨éƒ¨æ–‡ä»¶
-		FUN_File_One,				//æ–‡ä»¶
-
-
-		FUN_File_Access,			//æ–‡ä»¶æƒé™
+		FUN_Dir_All,				//È«²¿Ä¿Â¼
+		FUN_Dir_One,				//Ä¿Â¼
+		FUN_File_All,				//È«²¿ÎÄ¼ş
+		FUN_File_One,				//ÎÄ¼ş
 
 
-		FUN_StartVote,	//å‘èµ·æŠ•ç¥¨
-		FUN_Vote,		//æŠ•ç¥¨
-		FUN_VoteInfo,   //æŸ¥è¯¢æŠ•ç¥¨ä¿¡æ¯
-		FUN_VoteCount,	 //æŸ¥è¯¢æŠ•ç¥¨è®¡æ•°
-		FUN_Device_Asgn,  //è®¾å¤‡åˆ†é…
-		FUN_Wait4User,	  //ç­‰å¾…ç”¨æˆ· ä¼šè®®ç»ˆç«¯æ˜¾ç¤ºä¿¡æ¯
-		FUN_PushFile,	  //æ–‡ä»¶æ¨é€åˆ°ä¼šè®®ç»ˆç«¯
-		FUN_PushStream,	  //æµæ¨é€åˆ°ä¼šè®®ç»ˆç«¯
-		FUN_RePushStream,  //å‘ä¸»æŒäººè¯·æ±‚æµæ¨é€åˆ°ä¼šè®®ç»ˆç«¯
-		FUN_PushUpdate,		//å‘æ‰€æœ‰è®¾å¤‡æ¨é€æ•°æ®æ›´æ–°
-		FUN_VoteRecord,		//æŸ¥è¯¢è®°åæŠ•ç¥¨è®°å½•
+		FUN_File_Access,			//ÎÄ¼şÈ¨ÏŞ
 
-		FUN_ColorConfig,		//å‚ä¼šäººå‘˜-ç™½æ¿é¢œè‰²é…ç½®
-		FUN_STREAMCONTROL,	    //å±å¹•æµçš„é¼ æ ‡é”®ç›˜æ§åˆ¶æŒ‡ä»¤
-		FUN_MemberPermission,	//å‚ä¼šäººå‘˜æƒé™
-		FUN_DirPermission,		//ç›®å½•å‚ä¼šäººæƒé™
-		FUN_DevicePoint,  //è®¾å¤‡æŒ‡å¼•è½¨è¿¹
+
+		FUN_StartVote,	//·¢ÆğÍ¶Æ±
+		FUN_Vote,		//Í¶Æ±
+		FUN_VoteInfo,   //²éÑ¯Í¶Æ±ĞÅÏ¢
+		FUN_VoteCount,	 //²éÑ¯Í¶Æ±¼ÆÊı
+		FUN_Device_Asgn,  //Éè±¸·ÖÅä
+		FUN_Wait4User,	  //µÈ´ıÓÃ»§ »áÒéÖÕ¶ËÏÔÊ¾ĞÅÏ¢
+		FUN_PushFile,	  //ÎÄ¼şÍÆËÍµ½»áÒéÖÕ¶Ë
+		FUN_PushStream,	  //Á÷ÍÆËÍµ½»áÒéÖÕ¶Ë
+		FUN_RePushStream,  //ÏòÖ÷³ÖÈËÇëÇóÁ÷ÍÆËÍµ½»áÒéÖÕ¶Ë
+		FUN_PushUpdate,		//ÏòËùÓĞÉè±¸ÍÆËÍÊı¾İ¸üĞÂ
+		FUN_VoteRecord,		//²éÑ¯¼ÇÃûÍ¶Æ±¼ÇÂ¼
+
+		FUN_ColorConfig,		//²Î»áÈËÔ±-°×°åÑÕÉ«ÅäÖÃ
+		FUN_STREAMCONTROL,	    //ÆÁÄ»Á÷µÄÊó±ê¼üÅÌ¿ØÖÆÖ¸Áî
+		FUN_MemberPermission,	//²Î»áÈËÔ±È¨ÏŞ
+		FUN_DirPermission,		//Ä¿Â¼²Î»áÈËÈ¨ÏŞ
+		FUN_DevicePoint,  //Éè±¸Ö¸Òı¹ì¼£
 	};
 
-		//*****************æ–¹æ³•å®šä¹‰åˆ†ç±»********************
+		//*****************·½·¨¶¨Òå·ÖÀà********************
 	enum METHOD_ENUM{
-		METHOD_Control,//æ§åˆ¶
-		METHOD_Set,   //è®¾ç½®
-		METHOD_Query, //æŸ¥è¯¢
-		METHOD_Add,  //æ·»åŠ 
-		METHOD_Modify,//ä¿®æ”¹
-		METHOD_Delete,//åˆ é™¤
-		METHOD_Report,//å‘ŠçŸ¥
-		METHOD_Stop, //å…³é—­
-		METHOD_Notify, //é€šçŸ¥
-		METHOD_Search, //æœç´¢
-		METHOD_QueryData, //æŸ¥è¯¢æ•°æ®
-		METHOD_QueryResult, //æŸ¥è¯¢ç»“æœ
-		METHOD_Dump, //å¤åˆ¶
-		METHOD_Start, //å¼€å§‹
-		METHOD_Sign, //ç­¾åˆ°
-		METHOD_Import, //å¯¼å…¥
+		METHOD_Control,//¿ØÖÆ
+		METHOD_Set,   //ÉèÖÃ
+		METHOD_Query, //²éÑ¯
+		METHOD_Add,  //Ìí¼Ó
+		METHOD_Modify,//ĞŞ¸Ä
+		METHOD_Delete,//É¾³ı
+		METHOD_Report,//¸æÖª
+		METHOD_Stop, //¹Ø±Õ
+		METHOD_Notify, //Í¨Öª
+		METHOD_Search, //ËÑË÷
+		METHOD_QueryData, //²éÑ¯Êı¾İ
+		METHOD_QueryResult, //²éÑ¯½á¹û
+		METHOD_Dump, //¸´ÖÆ
+		METHOD_Start, //¿ªÊ¼
+		METHOD_Sign, //Ç©µ½
+		METHOD_Import, //µ¼Èë
 	};
 
-	//**************å…·ä½“æ¯ä¸ªåŠŸèƒ½æ§åˆ¶å®šä¹‰å‚æ•°**************************
+	//**************¾ßÌåÃ¿¸ö¹¦ÄÜ¿ØÖÆ¶¨Òå²ÎÊı**************************
 	enum TerminalControl_ENUM{
-		Control_Restart, //é‡å¯
-		Control_Up,      //ä¸Šå‡
-		Control_Down,    //ä¸‹é™
-		Control_Stop,    //åœæ­¢å…³æœº
-		Control_SoftRestart,    //è½¯ä»¶é‡å¯
-		Control_ChangeLOGO,//æ›´æ¢LOGO
-		Control_ChangeMainBG,//æ›´æ¢ä¸»ç•Œé¢èƒŒæ™¯
-		Control_ChangeSubBG,//æ›´æ¢å­èƒŒæ™¯
-		Control_ChangeProjectiveBG,//æ›´æ¢æŠ•å½±æœºèƒŒæ™¯
-		Control_ChangeFontColor,//æ›´æ¢å­—ä½“é¢œè‰²
-		Control_LiftStop,    //åœæ­¢å‡é™
-		Control_MonitorON,//æ§åˆ¶æ˜¾ç¤ºå™¨äº®å±
-		Control_MonitorOFF,//æ˜¾ç¤ºå™¨ç†„å±
-		Control_LiftOpen,//å¼€å¯è¯ç­’/ä¸»æœºå¼€æœº
-		Control_LiftClose,//å…³é—­è¯ç­’/ä¸»æœºå…³æœº
-		Control_CHECKIN, ////éšè—æŠ•å½±ç­¾åˆ°ä¿¡æ¯
-		Control_LIFTON,//			//ä¸Šå‡å¼€æœº
-		Control_LIFTOFF,//			//ä¸Šå‡å…³æœº
-		Control_RATOTE15,//			//ç¿»è½¬15
-		Control_RATOTE30,//		//ç¿»è½¬30
-		Control_PANELENABLE,//			//é¢æ¿å¯ç”¨
-		Control_PANELDISABLE,//		//é¢æ¿ç¦ç”¨
-		Control_SWITCHHDMI1,//			//åˆ‡æ¢hdmi1
-		Control_SWITCHHDMI2,//			//åˆ‡æ¢hdmi2
-		Control_ROTATESPEED,//		//ç¿»è½¬é€Ÿåº¦
-		Control_LIFTSPEED,//			//å‡é™é€Ÿåº¦
-		Control_RATATEANGLE,//			//ç¿»è½¬æŒ‡å®šè§’åº¦
+		Control_Restart, //ÖØÆô
+		Control_Up,      //ÉÏÉı
+		Control_Down,    //ÏÂ½µ
+		Control_Stop,    //Í£Ö¹¹Ø»ú
+		Control_SoftRestart,    //Èí¼şÖØÆô
+		Control_ChangeLOGO,//¸ü»»LOGO
+		Control_ChangeMainBG,//¸ü»»Ö÷½çÃæ±³¾°
+		Control_ChangeSubBG,//¸ü»»×Ó±³¾°
+		Control_ChangeProjectiveBG,//¸ü»»Í¶Ó°»ú±³¾°
+		Control_ChangeFontColor,//¸ü»»×ÖÌåÑÕÉ«
+		Control_LiftStop,    //Í£Ö¹Éı½µ
+		Control_MonitorON,//¿ØÖÆÏÔÊ¾Æ÷ÁÁÆÁ
+		Control_MonitorOFF,//ÏÔÊ¾Æ÷Ï¨ÆÁ
+		Control_LiftOpen,//¿ªÆô»°Í²/Ö÷»ú¿ª»ú
+		Control_LiftClose,//¹Ø±Õ»°Í²/Ö÷»ú¹Ø»ú
+		Control_CHECKIN, ////Òş²ØÍ¶Ó°Ç©µ½ĞÅÏ¢
+		Control_LIFTON,//			//ÉÏÉı¿ª»ú
+		Control_LIFTOFF,//			//ÉÏÉı¹Ø»ú
+		Control_RATOTE15,//			//·­×ª15
+		Control_RATOTE30,//		//·­×ª30
+		Control_PANELENABLE,//			//Ãæ°åÆôÓÃ
+		Control_PANELDISABLE,//		//Ãæ°å½ûÓÃ
+		Control_SWITCHHDMI1,//			//ÇĞ»»hdmi1
+		Control_SWITCHHDMI2,//			//ÇĞ»»hdmi2
+		Control_ROTATESPEED,//		//·­×ªËÙ¶È
+		Control_LIFTSPEED,//			//Éı½µËÙ¶È
+		Control_RATATEANGLE,//			//·­×ªÖ¸¶¨½Ç¶È
+		Control_ResetSystem,    //ÖØÖÃÏµÍ³
 	};
 
 	enum SEAT_DIRECTION{
-		SEAT_UP,//æœä¸Š
-		SEAT_DOWN,//æœä¸Š
-		SEAT_LEFT,//æœå·¦
-		SEAT_RIGHT,//æœå³
+		SEAT_UP,//³¯ÉÏ
+		SEAT_DOWN,//³¯ÉÏ
+		SEAT_LEFT,//³¯×ó
+		SEAT_RIGHT,//³¯ÓÒ
 	};
 
 	enum VOTEMAIN_TYPE{
-		MAINTYPE_vote,//æŠ•ç¥¨
-		MAINTYPE_election,//é€‰ä¸¾
-		MAINTYPE_questionnaire,//é—®å·è°ƒæŸ¥
-		MAINTYPE_vote_start,//å³æ—¶æŠ•ç¥¨
-		MAINTYPE_vote_agenda,//è®®é¢˜æ–‡ä»¶æŠ•ç¥¨
+		MAINTYPE_vote,//Í¶Æ±
+		MAINTYPE_election,//Ñ¡¾Ù
+		MAINTYPE_questionnaire,//ÎÊ¾íµ÷²é
+		MAINTYPE_vote_start,//¼´Ê±Í¶Æ±
+		MAINTYPE_vote_agenda,//ÒéÌâÎÄ¼şÍ¶Æ±
 	};
 
 	enum VOTE_MODE{
-		VOTE_agonymous,//åŒ¿åæŠ•ç¥¨
-		VOTE_signed,//è®°åæŠ•ç¥¨
+		VOTE_agonymous,//ÄäÃûÍ¶Æ±
+		VOTE_signed,//¼ÇÃûÍ¶Æ±
 	};
 
 	enum VOTE_TYPE{
-		VOTE_Many, //å¤šé€‰
-		VOTE_Single,//å•é€‰ 
-		VOTE_4_5,	//å¤šé€‰
-		VOTE_3_5,	//å¤šé€‰
-		VOTE_2_5,	//å¤šé€‰
-		VOTE_2_3,	//å¤šé€‰
+		VOTE_Many, //¶àÑ¡
+		VOTE_Single,//µ¥Ñ¡ 
+		VOTE_4_5,	//¶àÑ¡
+		VOTE_3_5,	//¶àÑ¡
+		VOTE_2_5,	//¶àÑ¡
+		VOTE_2_3,	//¶àÑ¡
 	};
 
 	enum CHAT_TYPE_ENUM {
-		CHAT_Message, //æ–‡æœ¬æ¶ˆæ¯
-		CHAT_Link,	  //å¤šåª’ä½“é“¾æ¥
-		CHAT_Water,		//æ°´
-		CHAT_Tea,		//èŒ¶
-		CHAT_Coffee,    //å’–å•¡
-		CHAT_Pen,		//ç¬”
-		CHAT_Paper,		//çº¸
-		CHAT_Technical,	//æŠ€æœ¯å‘˜
-		CHAT_Waiter,	//æœåŠ¡å‘˜
-		CHAT_Other,		//å…¶ä»–æœåŠ¡
-		CHAT_Emecc,		//ç”³è¯·ä¸»æŒ
+		CHAT_Message, //ÎÄ±¾ÏûÏ¢
+		CHAT_Link,	  //¶àÃ½ÌåÁ´½Ó
+		CHAT_Water,		//Ë®
+		CHAT_Tea,		//²è
+		CHAT_Coffee,    //¿§·È
+		CHAT_Pen,		//±Ê
+		CHAT_Paper,		//Ö½
+		CHAT_Technical,	//¼¼ÊõÔ±
+		CHAT_Waiter,	//·şÎñÔ±
+		CHAT_Other,		//ÆäËû·şÎñ
+		CHAT_Emecc,		//ÉêÇëÖ÷³Ö
 	};
 	
-	//é€šè®¯åè®®åº”ç­”PD_Responseheaderå¤´é‡Œé¢çš„ è¯·æ±‚çŠ¶æ€å¤„ç†å†…å®¹åŒ…å«
+	//Í¨Ñ¶Ğ­ÒéÓ¦´ğPD_ResponseheaderÍ·ÀïÃæµÄ ÇëÇó×´Ì¬´¦ÀíÄÚÈİ°üº¬
 	enum STARTU_ENUM{
-		STATUS_MULTIRECORD,		  //å¤šæ¡æŸ¥è¯¢è®°å½•
-		STATUS_SINGLERECORD,	  //å•æ¡æŸ¥è¯¢è®°å½•
-		STATUS_NORECORED,		  //æ— è¿”å›è®°å½•
-		STATUS_DONE,			  //æ“ä½œæˆåŠŸ
-		STATUS_FAIL,			  //è¯·æ±‚å¤±è´¥
-		STATUS_EXCPT_DB,		//æ•°æ®åº“å¼‚å¸¸
-		STATUS_EXCPT_SV,		//æœåŠ¡å™¨å¼‚å¸¸
-		STATUS_ACCESSDENIED,	//æƒé™é™åˆ¶
-		STATUS_PSWFAILED,		//å¯†ç é”™è¯¯
-		STATUS_COLL_MEETING,		//åˆ›å»ºä¼šè®®æœ‰å†²çª	
-		STATUS_PARAMETERZERO,		//å‚æ•°é”™è¯¯,ä¸åº”è¯¥ä¸º0
-		STATUS_NOTEXIST,		//ä¸å­˜åœ¨çš„æ•°æ®
-		STATUS_PROTOLDISMATCH,		//åè®®ç‰ˆæœ¬ä¸åŒºé…
+		STATUS_MULTIRECORD,		  //¶àÌõ²éÑ¯¼ÇÂ¼
+		STATUS_SINGLERECORD,	  //µ¥Ìõ²éÑ¯¼ÇÂ¼
+		STATUS_NORECORED,		  //ÎŞ·µ»Ø¼ÇÂ¼
+		STATUS_DONE,			  //²Ù×÷³É¹¦
+		STATUS_FAIL,			  //ÇëÇóÊ§°Ü
+		STATUS_EXCPT_DB,		//Êı¾İ¿âÒì³£
+		STATUS_EXCPT_SV,		//·şÎñÆ÷Òì³£
+		STATUS_ACCESSDENIED,	//È¨ÏŞÏŞÖÆ
+		STATUS_PSWFAILED,		//ÃÜÂë´íÎó
+		STATUS_COLL_MEETING,		//´´½¨»áÒéÓĞ³åÍ»	
+		STATUS_PARAMETERZERO,		//²ÎÊı´íÎó,²»Ó¦¸ÃÎª0
+		STATUS_NOTEXIST,		//²»´æÔÚµÄÊı¾İ
+		STATUS_PROTOLDISMATCH,		//Ğ­Òé°æ±¾²»ÇøÅä
 	};
 	
 	enum MEETING_STATUS{
-		MEETING_Ready = 0,//ä¼šè®®åˆ›å»ºä¸­ï¼Œç­‰å¾…å¼€å§‹
-		MEETING_Start = 1,//ä¼šè®®å¼€å§‹è¿›è¡Œä¸­
-		MEETING_End = 2,//ä¼šè®®ç»“æŸ
-		MEETING_PAUSE = 3,//ä¼šè®®æš‚åœ
-		MEETING_MODEL = 4,//æ¨¡æ¿ä¼šè®®
-		MEETING_UNACTIVE = 5,//æœªæ¿€æ´»
-		MEETING_APPROVALPED = 6,//ç­‰å¾…å®¡æ‰¹
-		MEETING_APPROVALING = 7,//å®¡æ‰¹ä¸­
-		MEETING_APPROVALOK = 8,//å®¡æ‰¹é€šè¿‡
-		MEETING_APPROVALFAILED = 9,//å®¡æ‰¹ä¸é€šè¿‡
-		MEETING_RESETDATA = 10,//é‡ç½®ä¼šè®®ï¼Œä¼šè®®é¢„æ¼”ç»“æŸæ¸…ç©ºæ•°æ®æ¢å¤åˆ°ä¼šè®®å¼€å§‹å‰çš„çŠ¶æ€
+		MEETING_Ready = 0,//»áÒé´´½¨ÖĞ£¬µÈ´ı¿ªÊ¼
+		MEETING_Start = 1,//»áÒé¿ªÊ¼½øĞĞÖĞ
+		MEETING_End = 2,//»áÒé½áÊø
+		MEETING_PAUSE = 3,//»áÒéÔİÍ£
+		MEETING_MODEL = 4,//Ä£°å»áÒé
+		MEETING_UNACTIVE = 5,//Î´¼¤»î
+		MEETING_APPROVALPED = 6,//µÈ´ıÉóÅú
+		MEETING_APPROVALING = 7,//ÉóÅúÖĞ
+		MEETING_APPROVALOK = 8,//ÉóÅúÍ¨¹ı
+		MEETING_APPROVALFAILED = 9,//ÉóÅú²»Í¨¹ı
+		MEETING_RESETDATA = 10,//ÖØÖÃ»áÒé£¬»áÒéÔ¤Ñİ½áÊøÇå¿ÕÊı¾İ»Ö¸´µ½»áÒé¿ªÊ¼Ç°µÄ×´Ì¬
 
 	};
 
 	enum MEETING_DEVICEOPER{
-		MEETING_STOPRESWORK,//åœæ­¢ä¼šè®®ä»»åŠ¡
-		MEETING_ZOOMPER,//æ”¾å¤§å°ç¼©å°æ’­æ”¾çª—å£æ“ä½œ
-		MEETING_ENTERMEETFACE,//ä¼šè®®ç­¾åˆ°è¿›å…¥
-		MEETING_RETURNMAINFACE,//ä¸»ç•Œé¢è¿”å›
-		MEETING_NOTIFYMEMBERNUM,//å¹¿æ’­æŸä¼šè®®å½“å‰çš„å‚ä¼šäººå‘˜æ•°
-		MEETING_NOTIFYMEMBERSTATE,//è®¾å¤‡å¹¿æ’­çŠ¶æ€
-		MEETING_REQUESTMEMBERSTATE,//è¯·æ±‚è®¾å¤‡çš„çŠ¶æ€
-		MEETING_PREPAGEREQUEST,//è®¾ç½®å½“å‰é¡µä¸Šä¸€é¡µæ“ä½œ
-		MEETING_NEXTPAGEREQUEST,//è®¾ç½®å½“å‰é¡µä¸‹ä¸€é¡µæ“ä½œ
-		MEETING_SETPAGENUMREQUEST,//å®šä½åˆ°æŸé¡µæ“ä½œ
-		MEETING_REQUESTTOMANAGE,//è¯·æ±‚æˆä¸ºç®¡ç†å‘˜
-		MEETING_RESPONSETOMANAGE,//å›å¤è¯·æ±‚æˆä¸ºç®¡ç†å‘˜
-		MEETING_REQUESTPRIVELIGE,//è¯·æ±‚æŸäº›æƒé™
-		MEETING_RESPONSEPRIVELIGE,//å›å¤è¯·æ±‚æŸäº›æƒé™
-		MEETING_TEXTBRODCAST,//æ–‡æœ¬ä¿¡æ¯å¹¿æ’­
-		MEETING_STOPBULLET,//åœæ­¢å…¬å‘Š
-		MEETING_REMEDIAUPDATEPLAY,//è·Ÿéšæ’­æ”¾éŸ³è§†é¢‘æ–‡ä»¶
-		MEETING_DEVICELOCATE,//è®¾å¤‡å®šä½
-		MEETING_REQUESTCHAT,//é‚€è¯·èŠå¤©
-		MEETING_RESPONSECHAT,//å›å¤é‚€è¯·èŠå¤©
-		MEETING_EXITCHAT,//é€€å‡ºèŠå¤©å¹¿æ’­
-		MEETING_NETBANDTEST,//å¸¦å®½ä¸¢åŒ…æµ‹è¯•
-		MEETING_WELCOMEFACE,//åˆ‡æ¢åˆ°æ¬¢è¿ç•Œé¢
-		MEETING_REMOTESET,//è¿œç¨‹é…ç½®å‚æ•°
-		MEETING_PAUSEPLAY,//æ¨é€è§†é¢‘çš„æš‚åœæ¢å¤
-		MEETING_SETPLAYPOS,//æ¨é€è§†é¢‘çš„è¿›åº¦æ‹–åŠ¨
-		MEETING_PUSH,//è®¾å¤‡è‡ªç”±äº¤äº’çš„æ•°æ®
-		MEETING_DUMPSTACK,//è®¾å¤‡è‡ªç”±äº¤äº’çš„æ•°æ®
+		MEETING_STOPRESWORK,//Í£Ö¹»áÒéÈÎÎñ
+		MEETING_ZOOMPER,//·Å´óĞ¡ËõĞ¡²¥·Å´°¿Ú²Ù×÷
+		MEETING_ENTERMEETFACE,//»áÒéÇ©µ½½øÈë
+		MEETING_RETURNMAINFACE,//Ö÷½çÃæ·µ»Ø
+		MEETING_NOTIFYMEMBERNUM,//¹ã²¥Ä³»áÒéµ±Ç°µÄ²Î»áÈËÔ±Êı
+		MEETING_NOTIFYMEMBERSTATE,//Éè±¸¹ã²¥×´Ì¬
+		MEETING_REQUESTMEMBERSTATE,//ÇëÇóÉè±¸µÄ×´Ì¬
+		MEETING_PREPAGEREQUEST,//ÉèÖÃµ±Ç°Ò³ÉÏÒ»Ò³²Ù×÷
+		MEETING_NEXTPAGEREQUEST,//ÉèÖÃµ±Ç°Ò³ÏÂÒ»Ò³²Ù×÷
+		MEETING_SETPAGENUMREQUEST,//¶¨Î»µ½Ä³Ò³²Ù×÷
+		MEETING_REQUESTTOMANAGE,//ÇëÇó³ÉÎª¹ÜÀíÔ±
+		MEETING_RESPONSETOMANAGE,//»Ø¸´ÇëÇó³ÉÎª¹ÜÀíÔ±
+		MEETING_REQUESTPRIVELIGE,//ÇëÇóÄ³Ğ©È¨ÏŞ
+		MEETING_RESPONSEPRIVELIGE,//»Ø¸´ÇëÇóÄ³Ğ©È¨ÏŞ
+		MEETING_TEXTBRODCAST,//ÎÄ±¾ĞÅÏ¢¹ã²¥
+		MEETING_STOPBULLET,//Í£Ö¹¹«¸æ
+		MEETING_REMEDIAUPDATEPLAY,//¸úËæ²¥·ÅÒôÊÓÆµÎÄ¼ş
+		MEETING_DEVICELOCATE,//Éè±¸¶¨Î»
+		MEETING_REQUESTCHAT,//ÑûÇëÁÄÌì
+		MEETING_RESPONSECHAT,//»Ø¸´ÑûÇëÁÄÌì
+		MEETING_EXITCHAT,//ÍË³öÁÄÌì¹ã²¥
+		MEETING_NETBANDTEST,//´ø¿í¶ª°ü²âÊÔ
+		MEETING_WELCOMEFACE,//ÇĞ»»µ½»¶Ó­½çÃæ
+		MEETING_REMOTESET,//Ô¶³ÌÅäÖÃ²ÎÊı
+		MEETING_PAUSEPLAY,//ÍÆËÍÊÓÆµµÄÔİÍ£»Ö¸´
+		MEETING_SETPLAYPOS,//ÍÆËÍÊÓÆµµÄ½ø¶ÈÍÏ¶¯
+		MEETING_PUSH,//Éè±¸×ÔÓÉ½»»¥µÄÊı¾İ
+		MEETING_DUMPSTACK,//Éè±¸×ÔÓÉ½»»¥µÄÊı¾İ
 	};
 
 	enum MEET_DEVFACESTATEOPER{
-		MEET_DEVFACESTATEOPER_REQ,//è¯·æ±‚æ‰€æœ‰è®¾å¤‡çš„çŠ¶æ€
-		MEET_DEVFACESTATEOPER_SET,//æ›´æ–°è®¾å¤‡çš„çŠ¶æ€
-		MEET_DEVFACESTATEOPER_NOTIFY,//å¹¿æ’­è®¾å¤‡çš„çŠ¶æ€
+		MEET_DEVFACESTATEOPER_REQ,//ÇëÇóËùÓĞÉè±¸µÄ×´Ì¬
+		MEET_DEVFACESTATEOPER_SET,//¸üĞÂÉè±¸µÄ×´Ì¬
+		MEET_DEVFACESTATEOPER_NOTIFY,//¹ã²¥Éè±¸µÄ×´Ì¬
 	};
 };
 
 
-//----------ç‰¹æ®Šid----------
-#define ID_Send2AllDevice	0x00	//è¡¨ç¤ºæ‰€æœ‰è®¾å¤‡
+//----------ÌØÊâid----------
+#define ID_Send2AllDevice	0x00	//±íÊ¾ËùÓĞÉè±¸
 
 
 
-//----------ä¼šè®®ç±»å‹----------
-#define TYPEMEET_LITTLEMASK    0x0F //ä¼šè®®ç±»å‹ä½ä½æ©ç  ä¿å­˜ä¼šè®®ç±»å‹
-#define TYPEMEET_BIGMASK       0xF0 //ä¼šè®®ç±»å‹é«˜ä½æ©ç  ä¿å­˜ä¼šè®®å±æ€§
+//----------»áÒéÀàĞÍ----------
+#define TYPEMEET_LITTLEMASK    0x1F //»áÒéÀàĞÍµÍÎ»ÑÚÂë ±£´æ»áÒéÀàĞÍ - ×î´ó31ÖÖ»áÒé
+#define TYPEMEET_BIGMASK       0xE0 //»áÒéÀàĞÍ¸ßÎ»ÑÚÂë ±£´æ»áÒéÊôĞÔ
 
-#define type_meeting_autoclose 0x10 //è‡ªåŠ¨ç»“æŸ
-#define type_meeting_secret    0x20 //ä¿å¯†
+#define type_meeting_autoclose 0x10 //×Ô¶¯½áÊø
+#define type_meeting_secret    0x20 //±£ÃÜ
+#define type_meeting_autostart 0x40 //×Ô¶¯¿ªÊ¼
 
-#define type_meeting_normal    0x01 //ä¸€èˆ¬ä¼šè®®
-#define type_meeting_team      0x02 //å…šå§”ä¼šè®®
-#define type_meeting_gov       0x03 //æ”¿åŠ¡ä¼šè®®
-#define type_meeting_law       0x04 //æ³•åŠ¡ä¼šè®®
-#define type_meeting_company   0x04 //ä¼ä¸šä¼šè®®
-#define type_meeting_school    0x05 //å­¦æ ¡ä¼šè®®
-#define type_meeting_org       0x06 //æœºæ„ä¼šè®®
-#define type_meeting_free      0x07 //è‡ªç”±ä¼šè®®
+#define type_meeting_normal    0x00 //Ò»°ã»áÒé
+#define type_meeting_executive 0x01 //»úÃÜ»áÒé-¼æÈİÒÔÇ°µÄ±£ÃÜ»áÒé
+#define type_meeting_Party     0x02 //µ³Î¯»á
+#define type_meeting_Standing  0x03 //³£Î¯»á
+#define type_meeting_Director  0x04 //¶­ÊÂ»á
+#define type_meeting_Special   0x05 //×¨Î¯»á
+#define type_meeting_Finance   0x06 //²ÆÉó»á
+#define type_meeting_gov       0x07 //ÕşÎñ»á
+#define type_meeting_law       0x08 //·¨Îñ»á
+#define type_meeting_company   0x09 //ÆóÒµ»á
+#define type_meeting_school    0x0a //Ñ§Ğ£»á
+#define type_meeting_org       0x0b //»ú¹¹»á
+#define type_meeting_free      0x0c //×ÔÓÉ»á
 
-//----------å‚ä¼šäººå‘˜è§’è‰²----------
-#define role_member_nouser 		0x00  //æœªä½¿ç”¨
-#define role_member_normal 		0x01  //ä¸€èˆ¬å‚ä¼šäººå‘˜
-#define role_member_compere 	0x03  //ä¸»æŒäºº
-#define role_member_secretary 	0x04  //ç§˜ä¹¦
-#define role_device_projector	0x08  //æŠ•å½±ä»ª
-#define role_admin				0x09  //ç®¡ç†å‘˜
-#define role_root				0x10  //åå°ç®¡ç†å‘˜
-#define role_sever				0x11  //æœåŠ¡å™¨ç¨‹åº
-#define role_oa					0x12  //ç¬¬ä¸‰æ–¹ç³»ç»Ÿ
-#define role_liexi				0x13  //åˆ—å¸­äººå‘˜
-#define role_report				0x14  //æ±‡æŠ¥äººå‘˜
-#define role_record				0x15  //è®°å½•äººå‘˜
+#define GET_MEET_HTYPE(T)  (T & TYPEMEET_BIGMASK) //»ñÈ¡»áÒé±êÖ¾
+#define GET_MEET_TYPE(T)  (T & TYPEMEET_LITTLEMASK) //»ñÈ¡»áÒéÀàĞÍ
+#define IS_SECRET_MEET(T)  (((T & TYPEMEET_LITTLEMASK) == type_meeting_executive) || (T & type_meeting_secret)) //ÅĞ¶Ï»áÒéÊÇ·ñÓĞ±£ÃÜÊôĞÔ
+
+//----------²Î»áÈËÔ±½ÇÉ«----------
+#define role_member_nouser 		0x00  //Î´Ê¹ÓÃ
+#define role_member_normal 		0x01  //Ò»°ã²Î»áÈËÔ±
+#define role_member_compere 	0x03  //Ö÷³ÖÈË
+#define role_member_secretary 	0x04  //ÃØÊé
+#define role_device_projector	0x08  //Í¶Ó°ÒÇ
+#define role_admin				0x09  //¹ÜÀíÔ±
+#define role_service			0x0a  //»áÒé·şÎñÈËÔ± ²»²ÎÓëÍ¶Æ±±í¾ö£¬Ç©µ½
+#define role_root				0x10  //ºóÌ¨¹ÜÀíÔ±
+#define role_sever				0x11  //·şÎñÆ÷³ÌĞò
+#define role_oa					0x12  //µÚÈı·½ÏµÍ³
+#define role_liexi				0x13  //ÁĞÏ¯ÈËÔ±
+#define role_report				0x14  //»ã±¨ÈËÔ±
+#define role_record				0x15  //¼ÇÂ¼ÈËÔ±
 
 typedef char  TYPE_MEETING; //type_meeting_normal
 typedef char  ROLE_MEMBER;  //role_member_nouser
 
-//ç™½æ¿æ“ä½œç±»å‹
-#define  FIGURETYPE_INK			1 //çº¿æ¡
-#define  FIGURETYPE_LINE		2 //ç›´çº¿
-#define  FIGURETYPE_ELLIPSE		3 //æ¤­åœ†
-#define  FIGURETYPE_RECTANGLE	4 //çŸ©å½¢
-#define  FIGURETYPE_FREETEXT	5 //æ–‡å­—
+//°×°å²Ù×÷ÀàĞÍ
+#define  FIGURETYPE_INK			1 //ÏßÌõ
+#define  FIGURETYPE_LINE		2 //Ö±Ïß
+#define  FIGURETYPE_ELLIPSE		3 //ÍÖÔ²
+#define  FIGURETYPE_RECTANGLE	4 //¾ØĞÎ
+#define  FIGURETYPE_FREETEXT	5 //ÎÄ×Ö
 #define  FIGURETYPE_PICTURE		6 //
-#define  FIGURETYPE_ARROW		7 //ç®­å¤´
+#define  FIGURETYPE_ARROW		7 //¼ıÍ·
 typedef int8u WHITEBOAD_FIGURETYPE;
 
-#define PROTOCAL_STARTID		1 //åˆ†å¸§æ•°æ®åŒ…çš„èµ·å§‹å¸–åºå·
+#define PROTOCAL_STARTID		1 //·ÖÖ¡Êı¾İ°üµÄÆğÊ¼ÌûĞòºÅ
 
-#define ID_SharedDir			1 //é»˜è®¤å…±äº«ç›®å½•IDï¼Œä¸å¯æ›´æ”¹æˆ–åˆ é™¤
-#define ID_PostilDir			2 //é»˜è®¤æ‰¹æ³¨ç›®å½•IDï¼Œä¸å¯æ›´æ”¹æˆ–åˆ é™¤
+#define ID_SharedDir			1 //Ä¬ÈÏ¹²ÏíÄ¿Â¼ID£¬²»¿É¸ü¸Ä»òÉ¾³ı
+#define ID_PostilDir			2 //Ä¬ÈÏÅú×¢Ä¿Â¼ID£¬²»¿É¸ü¸Ä»òÉ¾³ı
 
-#define Count_FontConf			3 //å­—ä½“é¢œè‰²é…ç½®æ•°é‡
+#define Count_FontConf			3 //×ÖÌåÑÕÉ«ÅäÖÃÊıÁ¿
 
-//----------ä¼šè®®ç­¾åˆ°ç±»å‹----------
-typedef char TYPE_SIGNIN;			//ç­¾åˆ°ç±»å‹
-#define signin_direct	0x00		//ç±»å‹--ç›´æ¥ç­¾åˆ°
-#define signin_psw		0x01		//ç±»å‹--ä¸ªäººå¯†ç ç­¾åˆ°
-#define signin_photo	0x02		//ç±»å‹--æ‹ç…§(æ‰‹å†™)ç­¾åˆ°
-#define signin_onepsw	0x03		//ç±»å‹--ä¼šè®®å¯†ç ç­¾åˆ°
-#define signin_onepsw_photo	0x04	//ç±»å‹--ä¼šè®®å¯†ç +æ‹ç…§(æ‰‹å†™)ç­¾åˆ°
-#define signin_psw_photo	0x05	//ç±»å‹--ä¸ªäººå¯†ç +æ‹ç…§(æ‰‹å†™)ç­¾åˆ°
-#define signin_idcard				0x06	//ç±»å‹--èº«ä»½è¯ç­¾åˆ°
-#define signin_finger				0x07	//ç±»å‹--æŒ‡çº¹è¯†åˆ«ç­¾åˆ°
-#define signin_face					0x08	//ç±»å‹--äººè„¸è¯†åˆ«ç­¾åˆ°
-#define signin_idcard_finger		0x09	//ç±»å‹--èº«ä»½è¯+æŒ‡çº¹è¯†åˆ«ç­¾åˆ°
-#define signin_idcard_face			0x10	//ç±»å‹--èº«ä»½è¯+äººè„¸è¯†åˆ«ç­¾åˆ°
-#define signin_finger_face			0x11	//ç±»å‹--æŒ‡çº¹è¯†åˆ«+äººè„¸è¯†åˆ«ç­¾åˆ°
-#define signin_idcard_finger_face	0x12	//ç±»å‹--èº«ä»½è¯+æŒ‡çº¹è¯†åˆ«+äººè„¸è¯†åˆ«ç­¾åˆ°
-#define signin_ask					0x13	//è¯·å‡
-#define meet_signin_late			0x14	//è¿Ÿåˆ°
+//----------»áÒéÇ©µ½ÀàĞÍ----------
+typedef char TYPE_SIGNIN;			//Ç©µ½ÀàĞÍ
+#define signin_direct	0x00		//ÀàĞÍ--Ö±½ÓÇ©µ½
+#define signin_psw		0x01		//ÀàĞÍ--¸öÈËÃÜÂëÇ©µ½
+#define signin_photo	0x02		//ÀàĞÍ--ÅÄÕÕ(ÊÖĞ´)Ç©µ½
+#define signin_onepsw	0x03		//ÀàĞÍ--»áÒéÃÜÂëÇ©µ½
+#define signin_onepsw_photo	0x04	//ÀàĞÍ--»áÒéÃÜÂë+ÅÄÕÕ(ÊÖĞ´)Ç©µ½
+#define signin_psw_photo	0x05	//ÀàĞÍ--¸öÈËÃÜÂë+ÅÄÕÕ(ÊÖĞ´)Ç©µ½
+#define signin_idcard				0x06	//ÀàĞÍ--Éí·İÖ¤Ç©µ½
+#define signin_finger				0x07	//ÀàĞÍ--Ö¸ÎÆÊ¶±ğÇ©µ½
+#define signin_face					0x08	//ÀàĞÍ--ÈËÁ³Ê¶±ğÇ©µ½
+#define signin_idcard_finger		0x09	//ÀàĞÍ--Éí·İÖ¤+Ö¸ÎÆÊ¶±ğÇ©µ½
+#define signin_idcard_face			0x10	//ÀàĞÍ--Éí·İÖ¤+ÈËÁ³Ê¶±ğÇ©µ½
+#define signin_finger_face			0x11	//ÀàĞÍ--Ö¸ÎÆÊ¶±ğ+ÈËÁ³Ê¶±ğÇ©µ½
+#define signin_idcard_finger_face	0x12	//ÀàĞÍ--Éí·İÖ¤+Ö¸ÎÆÊ¶±ğ+ÈËÁ³Ê¶±ğÇ©µ½
+#define signin_ask					0x13	//Çë¼Ù
+#define signin_late					0x14	//³Ùµ½
+#define signin_complex				0x15	//¸´ºÏÇ©µ½--½«ÀàĞÍ·Åµ½Êı¾İÀï£¬Êı¾İÀïÔö¼ÓÒ»¸ö½á¹¹Í·PD_ComplexSignInHdrInfo
 
-//----------æŸ¥è¯¢åˆ†é¡µå¤§å°----------
+typedef struct
+{
+	int32u		flag;
+	TYPE_SIGNIN signin_type;	//Ç©µ½ÀàĞÍ
+	int8u       fill;
+	int16u		param;
+	int32u      jsonlen;//jsonÊı¾İ³¤¶È
+	int32u      lenth;  //Í¼Æ¬Êı¾İ³¤¶È
+
+	//char json[jsonlen];		//jsonÎÄ±¾³¤¶È+1
+	//char signin_photo[];		//ÊÓÆµÇ©µ½Í¼Æ¬
+}PD_ComplexSignInHdrInfo, *pPD_ComplexSignInHdrInfo;
+
+//----------²éÑ¯·ÖÒ³´óĞ¡----------
 #define PageSize_query	16
 
-//FONT align å­—ä½“å¯¹é½
-#define MEET_FONTFLAG_LEFT			0x0001 //å·¦å¯¹é½
-#define MEET_FONTFLAG_RIGHT			0x0002 //å³å¯¹é½
-#define MEET_FONTFLAG_HCENTER		0x0004 //æ°´å¹³å¯¹é½
-#define MEET_FONTFLAG_TOP			0x0008 //ä¸Šå¯¹é½
-#define MEET_FONTFLAG_BOTTOM		0x0010 //ä¸‹å¯¹é½
-#define MEET_FONTFLAG_VCENTER		0x0020 //å‚ç›´å¯¹é½
+//FONT align ×ÖÌå¶ÔÆë
+#define MEET_FONTFLAG_LEFT			0x0001 //×ó¶ÔÆë
+#define MEET_FONTFLAG_RIGHT			0x0002 //ÓÒ¶ÔÆë
+#define MEET_FONTFLAG_HCENTER		0x0004 //Ë®Æ½¶ÔÆë
+#define MEET_FONTFLAG_TOP			0x0008 //ÉÏ¶ÔÆë
+#define MEET_FONTFLAG_BOTTOM		0x0010 //ÏÂ¶ÔÆë
+#define MEET_FONTFLAG_VCENTER		0x0020 //´¹Ö±¶ÔÆë
 
-//********************åè®®å¤´*****************************
-#define MEETPROTOL_FLAG_MASKRESERVE			0xFF000000 //ä¿ç•™å†…éƒ¨ä½¿ç”¨
-#define MEETPROTOL_FLAG_ENCRYPT				0x01000000 //åŠ å¯†ä¼ è¾“
-#define MEETPROTOL_FLAG_SM4ecbENCRYPT		0x02000000 //å›½æ ‡SM4 ecbåŠ å¯†ä¼ è¾“
-#define MEETPROTOL_FLAG_SM4cbcENCRYPT		0x04000000 //å›½æ ‡SM4 cbcåŠ å¯†ä¼ è¾“
-#define MEETPROTOL_FLAG_SM2ENCRYPT			0x08000000 //å›½æ ‡SM2åŠ å¯†ä¼ è¾“
+//********************Ğ­ÒéÍ·*****************************
+#define MEETPROTOL_FLAG_MASKRESERVE			0xFF000000 //±£ÁôÄÚ²¿Ê¹ÓÃ
+#define MEETPROTOL_FLAG_ENCRYPT				0x01000000 //¼ÓÃÜ´«Êä
+#define MEETPROTOL_FLAG_SM4ecbENCRYPT		0x02000000 //¹ú±êSM4 ecb¼ÓÃÜ´«Êä
+#define MEETPROTOL_FLAG_SM4cbcENCRYPT		0x04000000 //¹ú±êSM4 cbc¼ÓÃÜ´«Êä
+#define MEETPROTOL_FLAG_SM2ENCRYPT			0x08000000 //¹ú±êSM2¼ÓÃÜ´«Êä
 
-/*é€šè®¯åè®®è¯·æ±‚å¤´*/
+/*Í¨Ñ¶Ğ­ÒéÇëÇóÍ·*/
 typedef struct
 {
-	 unsigned int datalength;		  //æ•°æ®é•¿åº¦
-	 unsigned int version;			  //ç‰ˆæœ¬
-	 unsigned int stage;			  //ä¼šè®®é˜¶æ®µ -- 
-	 unsigned int fun;				  //åŠŸèƒ½
+	 unsigned int datalength;		  //Êı¾İ³¤¶È
+	 unsigned int version;			  //°æ±¾
+	 unsigned int stage;			  //»áÒé½×¶Î -- 
+	 unsigned int fun;				  //¹¦ÄÜ
 
 	 //int16u  method;
 	 //int8u   fill;
 	 //int8u   flag;
-	 unsigned int method;			  //æ–¹æ³• --é«˜16ä½ç•™ç©ºï¼Œå–é«˜16ä½çš„é«˜8ä½æ¥å½“æ ‡å¿—
-	 unsigned int sessionid;		  //æˆæƒid
-	 unsigned long long utctime;	  //å‘é€æ—¶é—´
+	 unsigned int method;			  //·½·¨ --¸ß16Î»Áô¿Õ£¬È¡¸ß16Î»µÄ¸ß8Î»À´µ±±êÖ¾
+	 unsigned int sessionid;		  //ÊÚÈ¨id
+	 unsigned long long utctime;	  //·¢ËÍÊ±¼ä
 }PD_Requestheader;
 
-/*é€šè®¯åè®®åº”ç­”å¤´*/
+/*Í¨Ñ¶Ğ­ÒéÓ¦´ğÍ·*/
 typedef struct
 {
-	 unsigned int datalength;		  //æ•°æ®é•¿åº¦
-	 unsigned int status;			  //è¯·æ±‚å¤„ç†çŠ¶æ€
-	 unsigned int stage;			  //ä¼šè®®é˜¶æ®µ
-	 unsigned int fun;				  //åŠŸèƒ½	
+	 unsigned int datalength;		  //Êı¾İ³¤¶È
+	 unsigned int status;			  //ÇëÇó´¦Àí×´Ì¬
+	 unsigned int stage;			  //»áÒé½×¶Î
+	 unsigned int fun;				  //¹¦ÄÜ	
 
 	 //int16u  method;
 	 //int8u   fill;
 	 //int8u   flag;
-	 unsigned int method;			  //æ–¹æ³• --é«˜16ä½ç•™ç©ºï¼Œå–é«˜16ä½çš„é«˜8ä½æ¥å½“æ ‡å¿—
-	 unsigned int deviceid;			  //è®¾å¤‡ID
-	 unsigned long long utctime;	  //å‘é€æ—¶é—´
+	 unsigned int method;			  //·½·¨ --¸ß16Î»Áô¿Õ£¬È¡¸ß16Î»µÄ¸ß8Î»À´µ±±êÖ¾
+	 unsigned int deviceid;			  //Éè±¸ID
+	 unsigned long long utctime;	  //·¢ËÍÊ±¼ä
 }PD_Responseheader;
 
 
-/*åè®®åº”ç­”å¤´åæ¥è¯¥ç»“æ„ä½“,ç”¨æ¥åŒºåˆ«ä¸åŒè¯·æ±‚çš„å›å¤*/
+/*Ğ­ÒéÓ¦´ğÍ·ºó½Ó¸Ã½á¹¹Ìå,ÓÃÀ´Çø±ğ²»Í¬ÇëÇóµÄ»Ø¸´*/
 typedef struct
 {
-	unsigned int meetingid;	//ä¼šè®®id,å½“è¯·æ±‚å†…å®¹ä¸ä¼šè®®æ— å…³æ—¶ä¸º0
-	unsigned int fid_req;		//è¯·æ±‚å†…å®¹çš„é™„åŠ id
-	unsigned int id_req;		//è¯·æ±‚å†…å®¹çš„id		
+	unsigned int meetingid;	//»áÒéid,µ±ÇëÇóÄÚÈİÓë»áÒéÎŞ¹ØÊ±Îª0
+	unsigned int fid_req;		//ÇëÇóÄÚÈİµÄ¸½¼Óid
+	unsigned int id_req;		//ÇëÇóÄÚÈİµÄid		
 }PD_ResponseStatus;
 
-//************************ç»†é¡¹ç»“æ„ä½“å®šä¹‰********************************
+//************************Ï¸Ïî½á¹¹Ìå¶¨Òå********************************
 
-/*è®¾å¤‡IDï¼Œè®¾å¤‡åç§°*/
+/*Éè±¸ID£¬Éè±¸Ãû³Æ*/
 typedef struct
 {
-	unsigned int id;  //è®¾å¤‡ID
+	unsigned int id;  //Éè±¸ID
 	char name[NAME_LENG];
 }PD_Device;
 
 //flag
-#define MEET_TABLECARDFLAG_SHOW			0x00000001 //è¯¥ä½ç”¨äºè¡¨ç¤ºè¯¥é¡¹æ˜¯å¦å¯è§
-#define MEET_TABLECARDFLAG_BOLD			0x00000002 //åŠ ç²—
-#define MEET_TABLECARDFLAG_LEAN			0x00000004 //å€¾æ–œ
-#define MEET_TABLECARDFLAG_UNDERLINE	0x00000008 //ä¸‹åˆ’çº¿
+#define MEET_TABLECARDFLAG_SHOW			0x00000001 //¸ÃÎ»ÓÃÓÚ±íÊ¾¸ÃÏîÊÇ·ñ¿É¼û
+#define MEET_TABLECARDFLAG_BOLD			0x00000002 //¼Ó´Ö
+#define MEET_TABLECARDFLAG_LEAN			0x00000004 //ÇãĞ±
+#define MEET_TABLECARDFLAG_UNDERLINE	0x00000008 //ÏÂ»®Ïß
 
-/*å­—ä½“ä¸é¢œè‰²*/
+/*×ÖÌåÓëÑÕÉ«*/
 typedef struct
 {
-	/* æ¡Œé¢å­—ä½“å¤§å°è®¡ç®—æ–¹æ³•
-	fontsize * å½“å‰å±å¹•é«˜åº¦ / åŸºå‡†å±å¹•é«˜åº¦
-	eg: æ”¶åˆ°å­—ä½“å¤§å°æ˜¯100ï¼Œå½“å‰çš„å±å¹•é«˜åº¦æ˜¯720ï¼Œæ¨ç®—å‡ºçœŸå®çš„å­—ä½“å¤§å°ä¸ºï¼š100 * 720 / 1080 = 67
+	/* ×ÀÃæ×ÖÌå´óĞ¡¼ÆËã·½·¨
+	fontsize * µ±Ç°ÆÁÄ»¸ß¶È / »ù×¼ÆÁÄ»¸ß¶È
+	eg: ÊÕµ½×ÖÌå´óĞ¡ÊÇ100£¬µ±Ç°µÄÆÁÄ»¸ß¶ÈÊÇ720£¬ÍÆËã³öÕæÊµµÄ×ÖÌå´óĞ¡Îª£º100 * 720 / 1080 = 67
 	*/
-	int font;  //å­—ä½“å¤§å°
-	unsigned int Argb;  //è¯´æ˜ï¼šAn ARGB quadruplet on the format #AARRGGBB
-	float Lx;	//Lå·¦åæ ‡ Rå³åæ ‡
+	int font;  //×ÖÌå´óĞ¡
+	unsigned int Argb;  //ËµÃ÷£ºAn ARGB quadruplet on the format #AARRGGBB
+	float Lx;	//L×ó×ø±ê RÓÒ×ø±ê
 	float Ly;
 	float Rx;
 	float Ry;
-	unsigned int    flag;	//å±æ€§å€¼
-	unsigned short  align;  //å¯¹é½
-	char type;			//é…ç½®ç±»å‹ï¼šconf_mtgname conf_memname conf_job conf_company  conf_position
+	unsigned int    flag;	//ÊôĞÔÖµ
+	unsigned short  align;  //¶ÔÆë
+	char type;			//ÅäÖÃÀàĞÍ£ºconf_mtgname conf_memname conf_job conf_company  conf_position
 	char fill;			
-	char fontname[NAME_LENG];//å­—ä½“åç§° utf8
+	char fontname[NAME_LENG];//×ÖÌåÃû³Æ utf8
 
 }PD_Color;
 
 
-//äººå‘˜ä¿¡æ¯æœ‰å…³ç»„æˆ
+//ÈËÔ±ĞÅÏ¢ÓĞ¹Ø×é³É
 typedef struct 
 {
-	unsigned int id;		//äººå‘˜ID;  //ä»1å¼€å§‹åˆ†é…ï¼Œ0è¡¨ç¤ºæ²¡æœ‰å¯¹åº”çš„IDä¿¡æ¯ï¼Œå°±æ²¡åˆ†é…ID
-	char name[NAME_LENG];  //åå­—ï¼Œå­—ç¬¦ä¸²ä¿¡æ¯
-	char company[DESCRIBE_LENG]; //å•ä½
-	char job[DESCRIBE_LENG];		//èŒä½
-	char comment[DESCRIBE_LENG];		//æè¿°
-	char phone[SHORT_DESCRIBE_LENG];  //ç”µè¯
-	char email[SHORT_DESCRIBE_LENG];  //é‚®ç®±
-	char password[PASSWORD_LENG];  //å¯†ç 
+	unsigned int id;		//ÈËÔ±ID;  //´Ó1¿ªÊ¼·ÖÅä£¬0±íÊ¾Ã»ÓĞ¶ÔÓ¦µÄIDĞÅÏ¢£¬¾ÍÃ»·ÖÅäID
+	char name[NAME_LENG];  //Ãû×Ö£¬×Ö·û´®ĞÅÏ¢
+	char company[DESCRIBE_LENG]; //µ¥Î»
+	char job[DESCRIBE_LENG];		//Ö°Î»
+	char comment[DESCRIBE_LENG];		//ÃèÊö
+	char phone[SHORT_DESCRIBE_LENG];  //µç»°
+	char email[SHORT_DESCRIBE_LENG];  //ÓÊÏä
+	char password[PASSWORD_LENG];  //ÃÜÂë
 }PD_PersonnelInfo;
 
 
-//ä¼šè®®å®¤ä¿¡æ¯ç»„æˆ
+//»áÒéÊÒĞÅÏ¢×é³É
 typedef struct 
 {
-	unsigned int id;		//ä¼šåœºID
-	char name[DESCRIBE_LENG];	//å­—ç¬¦ä¸²ä¿¡æ¯
-	char addr[DESCRIBE_LENG];   //ä¼šåœºåœ°ç‚¹
-	char comment[DESCRIBE_LENG];   //å¤‡æ³¨
-	unsigned int mapid;			//ä¼šåœºæ’ä½å›¾id
-	unsigned int fill;			//å ä½ æœªä½¿ç”¨
+	unsigned int id;		//»á³¡ID
+	char name[DESCRIBE_LENG];	//×Ö·û´®ĞÅÏ¢
+	char addr[DESCRIBE_LENG];   //»á³¡µØµã
+	char comment[DESCRIBE_LENG];   //±¸×¢
+	unsigned int mapid;			//»á³¡ÅÅÎ»Í¼id
+	unsigned int fill;			//Õ¼Î» Î´Ê¹ÓÃ
 }PD_FieldInfo;
 
 typedef struct 
 {
-	long long utctime;//UTCæ—¶é—´
+	long long utctime;//UTCÊ±¼ä
 }PD_Time;
 
-//ä¼šè®®åä¿¡æ¯ç»„æˆ
+//»áÒéÃûĞÅÏ¢×é³É
 typedef struct 
 {
-	unsigned int id;  //ä¼šè®®ç¼–å·
-	char name[DESCRIBE_LENG];  //ä¼šè®®åç§°
-	unsigned int roomId; //ä¼šè®®å®¤ID
-	TYPE_MEETING type ;			 //ä¼šè®®ç±»å‹
+	unsigned int id;  //»áÒé±àºÅ
+	char name[DESCRIBE_LENG];  //»áÒéÃû³Æ
+	unsigned int roomId; //»áÒéÊÒID
+	TYPE_MEETING type ;			 //»áÒéÀàĞÍ
 	PD_Time startTime;
 	PD_Time endTime;
-	TYPE_SIGNIN signin_type;			//ç­¾åˆ°ç±»å‹
-	unsigned int managerid;				//ç®¡ç†å‘˜id
-	char meeting_psw[ONESIGNPASSWORD_LENG];				//ä¼šè®®ç­¾åˆ°å¯†ç  æ˜æ–‡utf8
-	unsigned int status;				//ä¼šè®®çŠ¶æ€ MEETING_STATUS
-	char ordername[NAME_LENG];  //ä¼šè®®é¢„çº¦äººå‘˜åç§°
+	TYPE_SIGNIN signin_type;			//Ç©µ½ÀàĞÍ
+	unsigned int managerid;				//¹ÜÀíÔ±id
+	char meeting_psw[ONESIGNPASSWORD_LENG];				//»áÒéÇ©µ½ÃÜÂë Ã÷ÎÄutf8
+	unsigned int status;				//»áÒé×´Ì¬ MEETING_STATUS
+	char ordername[NAME_LENG];  //»áÒéÔ¤Ô¼ÈËÔ±Ãû³Æ
 }PD_MeetingAllInfo;
 
 
 typedef struct 
 {
-	 unsigned int id;  //ä¼šè®®ID
-	char name[DESCRIBE_LENG];			//ä¼šè®®åç§°
-	unsigned int roomId;				//ä¼šè®®å®¤ID
-	TYPE_MEETING type ;					//ä¼šè®®ç±»å‹
-	PD_Time startTime;					//å¼€å§‹æ—¶é—´
-	PD_Time endTime;					//ç»“æŸæ—¶é—´
-	TYPE_SIGNIN signin_type;			//ç­¾åˆ°ç±»å‹
-	unsigned int managerid;				//ç®¡ç†å‘˜id
-	char onepsw_signin[ONESIGNPASSWORD_LENG];			//ä¼šè®®å¯†ç ç­¾åˆ°å¯†ç  æ˜æ–‡utf8
-	char ordername[NAME_LENG];  //ä¼šè®®é¢„çº¦äººå‘˜åç§°
+	 unsigned int id;  //»áÒéID
+	char name[DESCRIBE_LENG];			//»áÒéÃû³Æ
+	unsigned int roomId;				//»áÒéÊÒID
+	TYPE_MEETING type ;					//»áÒéÀàĞÍ
+	PD_Time startTime;					//¿ªÊ¼Ê±¼ä
+	PD_Time endTime;					//½áÊøÊ±¼ä
+	TYPE_SIGNIN signin_type;			//Ç©µ½ÀàĞÍ
+	unsigned int managerid;				//¹ÜÀíÔ±id
+	char onepsw_signin[ONESIGNPASSWORD_LENG];			//»áÒéÃÜÂëÇ©µ½ÃÜÂë Ã÷ÎÄutf8
+	char ordername[NAME_LENG];  //»áÒéÔ¤Ô¼ÈËÔ±Ãû³Æ
 }PD_MeetingOneInfo;
 
-//ä¼šè®®åä¿¡æ¯ç»„æˆ
+//»áÒéÃûĞÅÏ¢×é³É
 typedef struct
 {
-	int32u id;				//ä¼šè®®ç¼–å·
-	int32u roomId;			//ä¼šè®®å®¤ID
-	int32u status;			//ä¼šè®®çŠ¶æ€ MEETING_STATUS
-	int32u managerid;		//ç®¡ç†å‘˜id
+	int32u id;				//»áÒé±àºÅ
+	int32u roomId;			//»áÒéÊÒID
+	int32u status;			//»áÒé×´Ì¬ MEETING_STATUS
+	int32u managerid;		//¹ÜÀíÔ±id
 	PD_Time startTime;
 	PD_Time endTime;
-	char   meeting_psw[ONESIGNPASSWORD_LENG];				//ä¼šè®®ç­¾åˆ°å¯†ç  æ˜æ–‡utf8
-	char   ordername[NAME_LENG];							//ä¼šè®®é¢„çº¦äººå‘˜åç§°
-	int8u  type;			 //ä¼šè®®ç±»å‹ TYPE_MEETING
-	int8u  signin_type;		 //ç­¾åˆ°ç±»å‹ TYPE_SIGNIN
-	int16u namelen;			 //åç§°é•¿åº¦=å­—ç¬¦ä¸²é•¿åº¦+ç»“å°¾å­—èŠ‚
-	//char name[namelen];    //åç§°éœ€è¦å¢åŠ ä¸€ä¸ªå­—èŠ‚0ä½œå­—ç¬¦ä¸²ç»“å°¾
+	char   meeting_psw[ONESIGNPASSWORD_LENG];				//»áÒéÇ©µ½ÃÜÂë Ã÷ÎÄutf8
+	char   ordername[NAME_LENG];							//»áÒéÔ¤Ô¼ÈËÔ±Ãû³Æ
+	int8u  type;			 //»áÒéÀàĞÍ TYPE_MEETING
+	int8u  signin_type;		 //Ç©µ½ÀàĞÍ TYPE_SIGNIN
+	int16u namelen;			 //Ãû³Æ³¤¶È=×Ö·û´®³¤¶È+½áÎ²×Ö½Ú
+	//char name[namelen];    //Ãû³ÆĞèÒªÔö¼ÓÒ»¸ö×Ö½Ú0×÷×Ö·û´®½áÎ²
 }PD_MeetingAllInfo_V2;
 
 typedef struct
 {
-	int32u id;				//ä¼šè®®ç¼–å·
-	int32u roomId;			//ä¼šè®®å®¤ID
-	int32u managerid;		//ç®¡ç†å‘˜id
+	int32u id;				//»áÒé±àºÅ
+	int32u roomId;			//»áÒéÊÒID
+	int32u managerid;		//¹ÜÀíÔ±id
 	PD_Time startTime;
 	PD_Time endTime;
-	char   meeting_psw[ONESIGNPASSWORD_LENG];				//ä¼šè®®ç­¾åˆ°å¯†ç  æ˜æ–‡utf8
-	char   ordername[NAME_LENG];							//ä¼šè®®é¢„çº¦äººå‘˜åç§°
-	int8u  type;			 //ä¼šè®®ç±»å‹ TYPE_MEETING
-	int8u  signin_type;		 //ç­¾åˆ°ç±»å‹ TYPE_SIGNIN
-	int16u namelen;			 //åç§°é•¿åº¦=å­—ç¬¦ä¸²é•¿åº¦+ç»“å°¾å­—èŠ‚
-	//char name[namelen];    //åç§°éœ€è¦å¢åŠ ä¸€ä¸ªå­—èŠ‚0ä½œå­—ç¬¦ä¸²ç»“å°¾
+	char   meeting_psw[ONESIGNPASSWORD_LENG];				//»áÒéÇ©µ½ÃÜÂë Ã÷ÎÄutf8
+	char   ordername[NAME_LENG];							//»áÒéÔ¤Ô¼ÈËÔ±Ãû³Æ
+	int8u  type;			 //»áÒéÀàĞÍ TYPE_MEETING
+	int8u  signin_type;		 //Ç©µ½ÀàĞÍ TYPE_SIGNIN
+	int16u namelen;			 //Ãû³Æ³¤¶È=×Ö·û´®³¤¶È+½áÎ²×Ö½Ú
+	//char name[namelen];    //Ãû³ÆĞèÒªÔö¼ÓÒ»¸ö×Ö½Ú0×÷×Ö·û´®½áÎ²
 }PD_MeetingOneInfo_V2;
 
 
-//appr çš„å–å€¼
-#define MEET_APPROVAL_IDLE		0 //æœªå®¡æ‰¹
-#define MEET_APPROVAL_ASK		1 //è¯·æ±‚å®¡æ‰¹
-#define MEET_APPROVAL_ING		2 //å®¡æ‰¹ä¸­
-#define MEET_APPROVAL_OK		3 //å®¡æ‰¹é€šè¿‡
-#define MEET_APPROVAL_FAIL		4 //å®¡æ‰¹ä¸é€šè¿‡
+//appr µÄÈ¡Öµ
+#define MEET_APPROVAL_IDLE		0 //Î´ÉóÅú
+#define MEET_APPROVAL_ASK		1 //ÇëÇóÉóÅú
+#define MEET_APPROVAL_ING		2 //ÉóÅúÖĞ
+#define MEET_APPROVAL_OK		3 //ÉóÅúÍ¨¹ı
+#define MEET_APPROVAL_FAIL		4 //ÉóÅú²»Í¨¹ı
 
 /*
 {
-"name":"ä¼šè®®åç§°",//ä¼šè®®åç§°
-"appr":0,//å®¡æ‰¹çŠ¶æ€
+"name":"»áÒéÃû³Æ",//»áÒéÃû³Æ
+"appr":0,//ÉóÅú×´Ì¬
 }
 */
 
-#define DIR_FLAG_SHOWSTATUS 0x01 //è¯¥æ ‡å¿—ä½è¡¨ç¤ºéšè—å±æ€§ 0=æ˜¾ç¤º 1=è¡¨ç¤ºéšè—
-#define DIR_FLAG_VOTE		0x02 //è¯¥æ ‡å¿—ä½è¡¨ç¤ºè®¾ç½®æŠ•ç¥¨å±æ€§ 0=ä¸ç»‘å®š 1=è¡¨ç¤ºç»‘å®š
-#define DIR_FLAG_PASSWD		0x04 //è¯¥æ ‡å¿—ä½è¡¨ç¤ºè®¾ç½®å¯†ç å±æ€§ 0=ä¸ç»‘å®š 1=è¡¨ç¤ºç»‘å®š
+#define DIR_FLAG_SHOWSTATUS 0x01 //¸Ã±êÖ¾Î»±íÊ¾Òş²ØÊôĞÔ 0=ÏÔÊ¾ 1=±íÊ¾Òş²Ø
+#define DIR_FLAG_VOTE		0x02 //¸Ã±êÖ¾Î»±íÊ¾ÉèÖÃÍ¶Æ±ÊôĞÔ 0=²»°ó¶¨ 1=±íÊ¾°ó¶¨
+#define DIR_FLAG_PASSWD		0x04 //¸Ã±êÖ¾Î»±íÊ¾ÉèÖÃÃÜÂëÊôĞÔ 0=²»°ó¶¨ 1=±íÊ¾°ó¶¨
 
-//ç›®å½•
+//Ä¿Â¼
 typedef struct
 {
 	int32u id;
-	int32u parentdirid;//çˆ¶ç›®å½•ID
-	int32u dirpos;	//åºå·
+	int32u parentdirid;//¸¸Ä¿Â¼ID
+	int32u dirpos;	//ĞòºÅ
 
-	int16u namelen;			 //åç§°é•¿åº¦=å­—ç¬¦ä¸²é•¿åº¦+ç»“å°¾å­—èŠ‚
-	int8u  flag;//ç›®å½•æ ‡å¿—
+	int16u namelen;			 //Ãû³Æ³¤¶È=×Ö·û´®³¤¶È+½áÎ²×Ö½Ú
+	int8u  flag;//Ä¿Â¼±êÖ¾
 	int8u  fill;
-	int32u voteid;  //ç»‘å®šé—®å·ID
-	char   passwd[PD_SHORT_PASSWORD_LENG];//å¯†ç 
-	//char name[namelen];    //åç§°éœ€è¦å¢åŠ ä¸€ä¸ªå­—èŠ‚0ä½œå­—ç¬¦ä¸²ç»“å°¾
+	int32u voteid;  //°ó¶¨ÎÊ¾íID
+	char   passwd[PD_SHORT_PASSWORD_LENG];//ÃÜÂë
+	//char name[namelen];    //Ãû³ÆĞèÒªÔö¼ÓÒ»¸ö×Ö½Ú0×÷×Ö·û´®½áÎ²
 
 }PD_DirInfo_V2;
 
-#define FILE_FLAG_SHOWSTATUS 0x01 //è¯¥æ ‡å¿—ä½è¡¨ç¤ºéšè—å±æ€§ 0=æ˜¾ç¤º 1=è¡¨ç¤ºéšè—
-#define FILE_FLAG_VOTE		 0x02 //è¯¥æ ‡å¿—ä½è¡¨ç¤ºè®¾ç½®æŠ•ç¥¨å±æ€§ 0=ä¸ç»‘å®š 1=è¡¨ç¤ºç»‘å®š
-//æ–‡ä»¶
+#define FILE_FLAG_SHOWSTATUS 0x01 //¸Ã±êÖ¾Î»±íÊ¾Òş²ØÊôĞÔ 0=ÏÔÊ¾ 1=±íÊ¾Òş²Ø
+#define FILE_FLAG_VOTE		 0x02 //¸Ã±êÖ¾Î»±íÊ¾ÉèÖÃÍ¶Æ±ÊôĞÔ 0=²»°ó¶¨ 1=±íÊ¾°ó¶¨
+//ÎÄ¼ş
 typedef struct
 {
 	int32u id;
-	int32u filepos;	//æ–‡ä»¶åºå·
+	int32u filepos;	//ÎÄ¼şĞòºÅ
 
-	int32u uploaderid;	//ä¸Šä¼ è€…id
+	int32u uploaderid;	//ÉÏ´«Õßid
 	char   uploader_name[NAME_LENG];
-	int8u  uploader_role;	//ä¸Šä¼ è€…è§’è‰²(æ–‡ä»¶ä¸ºç®¡ç†è€…ä¸Šä¼ æ—¶,uploaderidä¸å¡«)
-	int8u  flag;//ç›®å½•æ–‡ä»¶æ ‡å¿—
+	int8u  uploader_role;	//ÉÏ´«Õß½ÇÉ«(ÎÄ¼şÎª¹ÜÀíÕßÉÏ´«Ê±,uploaderid²»Ìî)
+	int8u  flag;//Ä¿Â¼ÎÄ¼ş±êÖ¾
 
-	int32u voteid;//å…³è”æŠ•ç¥¨ID -- ç±»å‹æ˜¯é—®å· flag |= FILE_FLAG_VOTE;
-	int16u namelen;			 //åç§°é•¿åº¦=å­—ç¬¦ä¸²é•¿åº¦+ç»“å°¾å­—èŠ‚
-	//char name[namelen];    //åç§°éœ€è¦å¢åŠ ä¸€ä¸ªå­—èŠ‚0ä½œå­—ç¬¦ä¸²ç»“å°¾
+	int32u voteid;//¹ØÁªÍ¶Æ±ID -- ÀàĞÍÊÇÎÊ¾í flag |= FILE_FLAG_VOTE;
+	int16u namelen;			 //Ãû³Æ³¤¶È=×Ö·û´®³¤¶È+½áÎ²×Ö½Ú
+	//char name[namelen];    //Ãû³ÆĞèÒªÔö¼ÓÒ»¸ö×Ö½Ú0×÷×Ö·û´®½áÎ²
 
 }PD_FileInfo_V2;
 
-//ç›®å½•
+//Ä¿Â¼
 typedef struct 
 {
 	unsigned int id;
 	char name[FILENAME_LENG]; 
-	unsigned int parentdirid;//çˆ¶ç›®å½•ID
-	unsigned int dirpos;	//åºå·
+	unsigned int parentdirid;//¸¸Ä¿Â¼ID
+	unsigned int dirpos;	//ĞòºÅ
 }PD_DirInfo;
 
-//æ–‡ä»¶
+//ÎÄ¼ş
 typedef struct 
 {
 	unsigned int id;
-	char		 name[FILENAME_LENG]; //è¿™é‡Œé™åˆ¶ç›®å½•åç§°æœ€å¤§ä¸º150ä¸ªå­—èŠ‚
-	unsigned int uploaderid;	//ä¸Šä¼ è€…id
-	ROLE_MEMBER  uploader_role;	//ä¸Šä¼ è€…è§’è‰²(æ–‡ä»¶ä¸ºç®¡ç†è€…ä¸Šä¼ æ—¶,uploaderidä¸å¡«)
+	char		 name[FILENAME_LENG]; //ÕâÀïÏŞÖÆÄ¿Â¼Ãû³Æ×î´óÎª150¸ö×Ö½Ú
+	unsigned int uploaderid;	//ÉÏ´«Õßid
+	ROLE_MEMBER  uploader_role;	//ÉÏ´«Õß½ÇÉ«(ÎÄ¼şÎª¹ÜÀíÕßÉÏ´«Ê±,uploaderid²»Ìî)
 	char		 uploader_name[NAME_LENG];
-	unsigned int filepos;	//æ–‡ä»¶åºå·
+	unsigned int filepos;	//ÎÄ¼şĞòºÅ
 }PD_FileInfo;
 
-//è§†é¢‘
+//ÊÓÆµ
 typedef struct 
 {
 	unsigned int id;
-	char name[DESCRIBE_LENG]; //è§†é¢‘åç§°
-	char addr[DESCRIBE_LENG]; //è§†é¢‘åœ°å€
+	char name[DESCRIBE_LENG]; //ÊÓÆµÃû³Æ
+	char addr[DESCRIBE_LENG]; //ÊÓÆµµØÖ·
 }PD_VideoStruct;
 
-//æ’ä½ä¿¡æ¯
+//ÅÅÎ»ĞÅÏ¢
 typedef struct 
 {
-	unsigned int nameId;  	//å§“åID  (è®¾å¤‡ä¸ºæŠ•å½±ä»ªæ—¶ä¸º0)
-	unsigned int seatId;	//åº§ä½ç¼–å·    ç®¡ç†ç«¯åˆ†é…ä½ç½®ç¼–å·ï¼Œç¼–å·å”¯ä¸€å¯¹åº”åº§ä½æè¿°
-	ROLE_MEMBER role;  		//å®šä¹‰å‚ä¼šäººå‘˜è§’è‰²
+	unsigned int nameId;  	//ĞÕÃûID  (Éè±¸ÎªÍ¶Ó°ÒÇÊ±Îª0)
+	unsigned int seatId;	//×ùÎ»±àºÅ    ¹ÜÀí¶Ë·ÖÅäÎ»ÖÃ±àºÅ£¬±àºÅÎ¨Ò»¶ÔÓ¦×ùÎ»ÃèÊö
+	ROLE_MEMBER role;  		//¶¨Òå²Î»áÈËÔ±½ÇÉ«
 }PD_Seat;
 
 typedef struct 
 {  
-	unsigned int nameId;		//å§“åID
-	PD_Time time;				//æ—¶é—´
-	TYPE_SIGNIN signin_type;	//ç­¾åˆ°ç±»å‹
-	unsigned int length;		//åæ¥æ•°æ®é•¿åº¦
-	//char signin_photo[];		//è§†é¢‘ç­¾åˆ°å›¾ç‰‡
+	unsigned int nameId;		//ĞÕÃûID
+	PD_Time time;				//Ê±¼ä
+	TYPE_SIGNIN signin_type;	//Ç©µ½ÀàĞÍ
+	unsigned int length;		//ºó½ÓÊı¾İ³¤¶È
+	//char signin_photo[];		//ÊÓÆµÇ©µ½Í¼Æ¬
 }PD_SignInInfo;
 
 typedef struct
 {
-	unsigned int nameId;		//å§“åID
-	PD_Time time;				//æ—¶é—´
-	TYPE_SIGNIN signin_type;	//ç­¾åˆ°ç±»å‹
-	char	signinpassword[PASSWORD_LENG];//ç­¾åˆ°å¯†ç 	
-	unsigned int length;		//åæ¥æ•°æ®é•¿åº¦
-	//char signin_photo[];		//è§†é¢‘ç­¾åˆ°å›¾ç‰‡
+	unsigned int nameId;		//ĞÕÃûID
+	PD_Time time;				//Ê±¼ä
+	TYPE_SIGNIN signin_type;	//Ç©µ½ÀàĞÍ
+	char	signinpassword[PASSWORD_LENG];//Ç©µ½ÃÜÂë	
+	unsigned int length;		//ºó½ÓÊı¾İ³¤¶È
+	//char signin_photo[];		//ÊÓÆµÇ©µ½Í¼Æ¬
 }PD_AddSignInInfo;
 
-//å¢åŠ æŠ•ç¥¨çŠ¶æ€ votestate çš„ä¸‹å‘ code log by ct 20170408 10:00
-#define vote_notvote 0 //æœªå‘èµ·çš„æŠ•ç¥¨
-#define vote_voteing 1 //æ­£åœ¨è¿›è¡Œçš„æŠ•ç¥¨
-#define vote_endvote 2 //å·²ç»ç»“æŸçš„æŠ•ç¥¨
+//Ôö¼ÓÍ¶Æ±×´Ì¬ votestate µÄÏÂ·¢ code log by ct 20170408 10:00
+#define vote_notvote 0 //Î´·¢ÆğµÄÍ¶Æ±
+#define vote_voteing 1 //ÕıÔÚ½øĞĞµÄÍ¶Æ±
+#define vote_endvote 2 //ÒÑ¾­½áÊøµÄÍ¶Æ±
 
-#define MAX_VOTEITEM_COUNT 6 //æœ€å¤§é€‰é¡¹
+#define MAX_VOTEITEM_COUNT 6 //×î´óÑ¡Ïî
 typedef struct
 {
-	unsigned int voteid; //æŠ•ç¥¨ID
-	char content[VOTE_CONTENTLENG]; //æŠ•ç¥¨å†…å®¹ 
+	unsigned int voteid; //Í¶Æ±ID
+	char content[VOTE_CONTENTLENG]; //Í¶Æ±ÄÚÈİ 
 
-	ProtocalData::VOTEMAIN_TYPE  maintype; //ç±»åˆ« æŠ•ç¥¨ é€‰ä¸¾ é—®å·è°ƒæŸ¥
-	ProtocalData::VOTE_MODE mode; //åŒ¿åæŠ•ç¥¨ è®°åæŠ•ç¥¨
-	ProtocalData::VOTE_TYPE type; //å¤šé€‰ å•é€‰
+	ProtocalData::VOTEMAIN_TYPE  maintype; //Àà±ğ Í¶Æ± Ñ¡¾Ù ÎÊ¾íµ÷²é
+	ProtocalData::VOTE_MODE mode; //ÄäÃûÍ¶Æ± ¼ÇÃûÍ¶Æ±
+	ProtocalData::VOTE_TYPE type; //¶àÑ¡ µ¥Ñ¡
 
-	unsigned int votestate;     //æŠ•ç¥¨çŠ¶æ€ 
-	unsigned int timeouts;     //è®¡æ—¶ç»“æŸ å•ä½ï¼šç§’
+	unsigned int votestate;     //Í¶Æ±×´Ì¬ 
+	unsigned int timeouts;     //¼ÆÊ±½áÊø µ¥Î»£ºÃë
 
-	unsigned int selectcount;     //æœ‰æ•ˆé€‰é¡¹æ•°é‡
-	char voteText[MAX_VOTEITEM_COUNT][VOTE_LENG];  //é€‰æ‹©1æè¿°æ–‡å­—
+	unsigned int selectcount;     //ÓĞĞ§Ñ¡ÏîÊıÁ¿
+	char voteText[MAX_VOTEITEM_COUNT][VOTE_LENG];  //Ñ¡Ôñ1ÃèÊöÎÄ×Ö
 
 }PD_VoteStart;
 
 typedef struct
 {
-	int32u voteid; //æŠ•ç¥¨ID
-	ProtocalData::VOTEMAIN_TYPE  maintype; //ç±»åˆ« æŠ•ç¥¨ é€‰ä¸¾ é—®å·è°ƒæŸ¥
-	ProtocalData::VOTE_MODE mode; //åŒ¿åæŠ•ç¥¨ è®°åæŠ•ç¥¨
-	ProtocalData::VOTE_TYPE type; //å¤šé€‰ å•é€‰
+	int32u voteid; //Í¶Æ±ID
+	ProtocalData::VOTEMAIN_TYPE  maintype; //Àà±ğ Í¶Æ± Ñ¡¾Ù ÎÊ¾íµ÷²é
+	ProtocalData::VOTE_MODE mode; //ÄäÃûÍ¶Æ± ¼ÇÃûÍ¶Æ±
+	ProtocalData::VOTE_TYPE type; //¶àÑ¡ µ¥Ñ¡
 
-	int32u votestate;     //æŠ•ç¥¨çŠ¶æ€ 
-	int32u timeouts;     //è®¡æ—¶ç»“æŸ å•ä½ï¼šç§’
+	int32u votestate;     //Í¶Æ±×´Ì¬ 
+	int32u timeouts;     //¼ÆÊ±½áÊø µ¥Î»£ºÃë
 
-	int16u selectcount;     //æœ‰æ•ˆé€‰é¡¹æ•°é‡
+	int16u selectcount;     //ÓĞĞ§Ñ¡ÏîÊıÁ¿
 	int8u  fill[2];
-	int32u jsonlen; //åç§°é•¿åº¦=å­—ç¬¦ä¸²é•¿åº¦+ç»“å°¾å­—èŠ‚
+	int32u jsonlen; //Ãû³Æ³¤¶È=×Ö·û´®³¤¶È+½áÎ²×Ö½Ú
 	
-	//char json[jsonlen]; //æŠ•ç¥¨å†…å®¹ //åç§°éœ€è¦å¢åŠ ä¸€ä¸ªå­—èŠ‚0ä½œå­—ç¬¦ä¸²ç»“å°¾
+	//char json[jsonlen]; //Í¶Æ±ÄÚÈİ //Ãû³ÆĞèÒªÔö¼ÓÒ»¸ö×Ö½Ú0×÷×Ö·û´®½áÎ²
 	//{"content":"","item":["1","2"]}
 }PD_VoteStartV3;
 
-//å‘èµ·æŠ•ç¥¨
-#define VOTING_FLAG_NOPOST		0x00000001 //ä¸åœ¨æŠ•å½±æœºä¸Šæ˜¾ç¤ºæŠ•ç¥¨ç»“æœ
-#define VOTING_FLAG_SECRETARY	0x00000002 //æŠ•ç¥¨é€‰é¡¹ä¿å¯†æŠ•ç¥¨æ¨¡å¼
-#define VOTING_FLAG_FINISHEXIT	0x00000004 //å…¨éƒ¨æäº¤å®Œæˆåç«‹å³ç»“æŸ
-#define VOTING_FLAG_REVOTE		0x00000008 //é‡æŠ• æ¸…ç©ºä¹‹å‰çš„è®°å½•
-#define VOTING_FLAG_BACKUP		0x00000010 //å¤‡ä»½æ“ä½œä¸éœ€è¦æ˜¾ç¤ºæŠ•ç¥¨
+//·¢ÆğÍ¶Æ±
+#define VOTING_FLAG_NOPOST		0x00000001 //²»ÔÚÍ¶Ó°»úÉÏÏÔÊ¾Í¶Æ±½á¹û
+#define VOTING_FLAG_SECRETARY	0x00000002 //Í¶Æ±Ñ¡Ïî±£ÃÜÍ¶Æ±Ä£Ê½
+#define VOTING_FLAG_FINISHEXIT	0x00000004 //È«²¿Ìá½»Íê³ÉºóÁ¢¼´½áÊø
+#define VOTING_FLAG_REVOTE		0x00000008 //ÖØÍ¶ Çå¿ÕÖ®Ç°µÄ¼ÇÂ¼
+#define VOTING_FLAG_BACKUP		0x00000010 //±¸·İ²Ù×÷²»ĞèÒªÏÔÊ¾Í¶Æ±
 
 typedef struct
 {
@@ -752,67 +779,67 @@ typedef struct
 typedef struct
 {
 	int32u voteid;
-	int32u voteflag; //å‘èµ·æŠ•ç¥¨æ ‡å¿—
-	int32u timeouts; //è®¡æ—¶ç»“æŸ å•ä½ï¼šç§’
-	int32u membernum;//å‚ä¸æŠ•ç¥¨çš„å‚ä¼šäººå‘˜æ•°
+	int32u voteflag; //·¢ÆğÍ¶Æ±±êÖ¾
+	int32u timeouts; //¼ÆÊ±½áÊø µ¥Î»£ºÃë
+	int32u membernum;//²ÎÓëÍ¶Æ±µÄ²Î»áÈËÔ±Êı
 	//PD_VoteMemFlag members[];
 }PD_VoteStartFlag;
 
-//æŠ•ç¥¨æ ‡å¿— selecté«˜8ä½
-#define PD_VOTE_SELFLAG_MASK     0xff000000 //æ©ç 
-#define PD_VOTE_SELFLAG_CHECKIN  0x80000000 //è¯¥ä½ä¸º1è¡¨ç¤ºå·²ç»ç­¾åˆ°
+//Í¶Æ±±êÖ¾ select¸ß8Î»
+#define PD_VOTE_SELFLAG_MASK     0xff000000 //ÑÚÂë
+#define PD_VOTE_SELFLAG_CHECKIN  0x80000000 //¸ÃÎ»Îª1±íÊ¾ÒÑ¾­Ç©µ½
 
-#define PD_VOTE_CHECKIN_BIT_INDEX 31 //ç­¾åˆ°æ ‡å¿—ä½ç´¢å¼•
+#define PD_VOTE_CHECKIN_BIT_INDEX 31 //Ç©µ½±êÖ¾Î»Ë÷Òı
 typedef struct 
 {  
-	unsigned int voteid; //æŠ•ç¥¨ID
-	unsigned int selectcount; // æœ‰æ•ˆæŠ•ç¥¨é¡¹æ•°
-	unsigned int select[MAX_VOTEITEM_COUNT];  //é€‰æ‹©1çŠ¶æ€ ,0æ²¡æœ‰é€‰æ‹©ï¼Œ1é€‰æ‹©
-	unsigned int memberid;//æäº¤çš„äººå‘˜ID
+	unsigned int voteid; //Í¶Æ±ID
+	unsigned int selectcount; // ÓĞĞ§Í¶Æ±ÏîÊı
+	unsigned int select[MAX_VOTEITEM_COUNT];  //Ñ¡Ôñ1×´Ì¬ ,0Ã»ÓĞÑ¡Ôñ£¬1Ñ¡Ôñ
+	unsigned int memberid;//Ìá½»µÄÈËÔ±ID
 }PD_VoteState;
 typedef struct
 {
-	unsigned int voteid; //æŠ•ç¥¨ID
-	unsigned int selectcount; // æœ‰æ•ˆæŠ•ç¥¨é¡¹æ•°
-	unsigned int select[MAX_VOTEITEM_COUNT];  //é€‰æ‹©1çŠ¶æ€ ,0æ²¡æœ‰é€‰æ‹©ï¼Œ1é€‰æ‹©
-	unsigned int memberid;//æäº¤çš„äººå‘˜ID
-	int16u namelen;			        //åç§°é•¿åº¦=å­—ç¬¦ä¸²é•¿åº¦+ç»“å°¾å­—èŠ‚
-	//char name[namelen];    //åç§°éœ€è¦å¢åŠ ä¸€ä¸ªå­—èŠ‚0ä½œå­—ç¬¦ä¸²ç»“å°¾
+	unsigned int voteid; //Í¶Æ±ID
+	unsigned int selectcount; // ÓĞĞ§Í¶Æ±ÏîÊı
+	unsigned int select[MAX_VOTEITEM_COUNT];  //Ñ¡Ôñ1×´Ì¬ ,0Ã»ÓĞÑ¡Ôñ£¬1Ñ¡Ôñ
+	unsigned int memberid;//Ìá½»µÄÈËÔ±ID
+	int16u namelen;			        //Ãû³Æ³¤¶È=×Ö·û´®³¤¶È+½áÎ²×Ö½Ú
+	//char name[namelen];    //Ãû³ÆĞèÒªÔö¼ÓÒ»¸ö×Ö½Ú0×÷×Ö·û´®½áÎ²
 }PD_VoteState_V2;
 typedef struct
 {
-	unsigned int voteid; //æŠ•ç¥¨ID
-	unsigned int memberid;//æäº¤çš„äººå‘˜ID
+	unsigned int voteid; //Í¶Æ±ID
+	unsigned int memberid;//Ìá½»µÄÈËÔ±ID
 
-	int16u selectcount;     //æœ‰æ•ˆé€‰é¡¹æ•°é‡
+	int16u selectcount;     //ÓĞĞ§Ñ¡ÏîÊıÁ¿
 	int8u  fill[2];
-	int32u jsonlen;//åç§°é•¿åº¦=å­—ç¬¦ä¸²é•¿åº¦+ç»“å°¾å­—èŠ‚
+	int32u jsonlen;//Ãû³Æ³¤¶È=×Ö·û´®³¤¶È+½áÎ²×Ö½Ú
 
-	//int32u select[selectcount];  //é€‰æ‹©1çŠ¶æ€ ,0æ²¡æœ‰é€‰æ‹©ï¼Œ1é€‰æ‹©
+	//int32u select[selectcount];  //Ñ¡Ôñ1×´Ì¬ ,0Ã»ÓĞÑ¡Ôñ£¬1Ñ¡Ôñ
 
-	//char json[jsonlen]; //æŠ•ç¥¨å†…å®¹ //åç§°éœ€è¦å¢åŠ ä¸€ä¸ªå­—èŠ‚0ä½œå­—ç¬¦ä¸²ç»“å°¾
+	//char json[jsonlen]; //Í¶Æ±ÄÚÈİ //Ãû³ÆĞèÒªÔö¼ÓÒ»¸ö×Ö½Ú0×÷×Ö·û´®½áÎ²
 	//{"mark":"","item":["1","2"]} 
 }PD_VoteState_V3;
 
 typedef struct 
 {  
-	unsigned int id;  //åºå·
-	char name[FILENAME_LENG]; //åç§°
+	unsigned int id;  //ĞòºÅ
+	char name[FILENAME_LENG]; //Ãû³Æ
 }PD_Postil;
 
 
 typedef struct 
 {
-	unsigned int memid; //å‚ä¼šäººå‘˜ID
-	char name[NAME_LENG];  //äººå‘˜åç§°
-	char company[DESCRIBE_LENG]; //å…¬å¸åç§°
+	unsigned int memid; //²Î»áÈËÔ±ID
+	char name[NAME_LENG];  //ÈËÔ±Ãû³Æ
+	char company[DESCRIBE_LENG]; //¹«Ë¾Ãû³Æ
 }Pd_smpl_member;
 
-//----------æ–‡ä»¶ç¦æ­¢æƒé™çŠ¶æ€----------
+//----------ÎÄ¼ş½ûÖ¹È¨ÏŞ×´Ì¬----------
 #define fileacce_reject   0x1
 typedef char FILE_PERM;
 
-//---------å­—ä½“é¢œè‰²é…ç½®ç±»å‹-----------
+//---------×ÖÌåÑÕÉ«ÅäÖÃÀàĞÍ-----------
 #define conf_mtgname	0x01
 #define conf_memname	0x02
 #define conf_job		0x03
@@ -820,23 +847,23 @@ typedef char FILE_PERM;
 #define conf_position	0x05
 
 /*
-æ–°å¢çš„ä¸ä¼šè®®ä¿¡æ¯ç›¸å…³ç»“æ„ä½“éƒ½ä¸å†æœ‰ä¼šè®®idå­—æ®µ;ä¼šè®®idå­—æ®µä¸ºå•ç‹¬ä¸ºä¸€ä¸ªç»“æ„ä½“,ç”¨åœ¨å…¶ä»–ä¼šè®®ç›¸å…³ç»“æ„ä½“å‰
+ĞÂÔöµÄÓë»áÒéĞÅÏ¢Ïà¹Ø½á¹¹Ìå¶¼²»ÔÙÓĞ»áÒéid×Ö¶Î;»áÒéid×Ö¶ÎÎªµ¥¶ÀÎªÒ»¸ö½á¹¹Ìå,ÓÃÔÚÆäËû»áÒéÏà¹Ø½á¹¹ÌåÇ°
 */
-//---------------ä¼šè®®ID--------------
+//---------------»áÒéID--------------
 typedef struct{
 	unsigned int meetingid;
 }PD_MeetingId;
 
 
 /*
-ç”¨äºæ ‡æ³¨ä¸€çº§æ ‡è¯†id
+ÓÃÓÚ±ê×¢Ò»¼¶±êÊ¶id
 */
 typedef struct{
 	unsigned int id;
 }PD_SingleId;
 
 /*
-ç”¨äºæ ‡æ³¨äºŒçº§æ ‡è¯†id
+ÓÃÓÚ±ê×¢¶ş¼¶±êÊ¶id
 */
 typedef struct{
 	unsigned int id1;
@@ -844,7 +871,7 @@ typedef struct{
 }PD_DoubleId;
 
 /*
-ç”¨äºæ ‡æ³¨åé¢ç»“æ„ä½“çš„æ•°é‡
+ÓÃÓÚ±ê×¢ºóÃæ½á¹¹ÌåµÄÊıÁ¿
 */
 typedef struct{
 	unsigned short blockcount;
@@ -852,87 +879,87 @@ typedef struct{
 
 
 /*
-é€‚ç”¨äºSTAGE_MemberManage + FUN_MemberPermission + METHOD_Query/METHOD_Modify
-è¯·æ±‚PD_MeetingId + PD_BlockCount + PD_MemberPermission + ...
-å›å¤PD_MeetingId + PD_BlockCount + PD_MemberPermission + ...
+ÊÊÓÃÓÚSTAGE_MemberManage + FUN_MemberPermission + METHOD_Query/METHOD_Modify
+ÇëÇóPD_MeetingId + PD_BlockCount + PD_MemberPermission + ...
+»Ø¸´PD_MeetingId + PD_BlockCount + PD_MemberPermission + ...
 */
-//--------------å‚ä¼šäººæƒé™------------
-#define memperm_sscreen					0x00000001		//åŒå±æƒé™
-#define memperm_projective				0x00000002		//æŠ•å½±æƒé™
-#define memperm_upload					0x00000004		//ä¸Šä¼ æƒé™
-#define memperm_download				0x00000008		//ä¸‹è½½æƒé™
-#define memperm_vote					0x00000010		//æŠ•ç¥¨æƒé™
-#define memperm_postilview				0x00000020		//æ‰¹æ³¨æŸ¥çœ‹æƒé™ -- ä¸ä¿å­˜åˆ°æ•°æ®åº“
-#define memperm_record					0x00000040		//å½•åˆ¶æƒé™ 
-#define memperm_lookvote				0x00000080		//æŠ•ç¥¨æŸ¥çœ‹æƒé™ 
+//--------------²Î»áÈËÈ¨ÏŞ------------
+#define memperm_sscreen					0x00000001		//Í¬ÆÁÈ¨ÏŞ
+#define memperm_projective				0x00000002		//Í¶Ó°È¨ÏŞ
+#define memperm_upload					0x00000004		//ÉÏ´«È¨ÏŞ
+#define memperm_download				0x00000008		//ÏÂÔØÈ¨ÏŞ
+#define memperm_vote					0x00000010		//Í¶Æ±È¨ÏŞ
+#define memperm_postilview				0x00000020		//Åú×¢²é¿´È¨ÏŞ -- ²»±£´æµ½Êı¾İ¿â
+#define memperm_record					0x00000040		//Â¼ÖÆÈ¨ÏŞ 
+#define memperm_lookvote				0x00000080		//Í¶Æ±²é¿´È¨ÏŞ 
 
 typedef struct{
 	unsigned int memberid;
-	unsigned int permission;							//å‚ä¼šäººæƒé™
+	unsigned int permission;							//²Î»áÈËÈ¨ÏŞ
 }PD_MemberPermission;
 
 
 //*******************************************************
-//**************************é€šè®¯éƒ¨åˆ†*********************
+//**************************Í¨Ñ¶²¿·Ö*********************
 //*******************************************************
 
 
-//ç³»ç»Ÿæ—¶é—´æŸ¥è¯¢
-//stagesï¼šSTAGE_SysTime
+//ÏµÍ³Ê±¼ä²éÑ¯
+//stages£ºSTAGE_SysTime
 //fun:FUN_One
-//method:æŸ¥è¯¢
+//method:²éÑ¯
 typedef struct 
 {  
 	PD_Time time;
 }PD_SysTime;
 
-//å¼€æœºæ—¶è·å–çš„æ•´ä¸ªç³»ç»Ÿè®¾å¤‡ç¼–å·ä¿¡æ¯
-//stagesï¼šSTAGE_DeviceId
+//¿ª»úÊ±»ñÈ¡µÄÕû¸öÏµÍ³Éè±¸±àºÅĞÅÏ¢
+//stages£ºSTAGE_DeviceId
 //fun:ProtocalData::FUN_All
-//method:æŸ¥è¯¢
+//method:²éÑ¯
 typedef struct 
 {  
-	unsigned int TotalNum ;	//æ€»å…±æœ‰å¤šå°‘è®¾å¤‡
-	unsigned int StartId;	//å½“å‰å¸§å¼€å§‹åºå·  
-	unsigned int  CurrNum;	//å½“å‰å¸§åŒ…æ‹¬å¤šå°‘ä¸ªè®¾å¤‡åºå·
-	//PD_Device		//è®¾å¤‡å†…å®¹
-	//PD_Device		//è®¾å¤‡å†…å®¹
-	//PD_Device		//è®¾å¤‡å†…å®¹
+	unsigned int TotalNum ;	//×Ü¹²ÓĞ¶àÉÙÉè±¸
+	unsigned int StartId;	//µ±Ç°Ö¡¿ªÊ¼ĞòºÅ  
+	unsigned int  CurrNum;	//µ±Ç°Ö¡°üÀ¨¶àÉÙ¸öÉè±¸ĞòºÅ
+	//PD_Device		//Éè±¸ÄÚÈİ
+	//PD_Device		//Éè±¸ÄÚÈİ
+	//PD_Device		//Éè±¸ÄÚÈİ
 }PD_DeviceInfoAll;
 
-//å•å…ƒæ­£å¸¸ä¸Šç”µåå‘ŠçŸ¥æœåŠ¡å™¨æœ¬è®¾å¤‡çš„IDå’Œåç§°
-//stagesï¼šSTAGE_DeviceId
+//µ¥ÔªÕı³£ÉÏµçºó¸æÖª·şÎñÆ÷±¾Éè±¸µÄIDºÍÃû³Æ
+//stages£ºSTAGE_DeviceId
 //fun:FUN_One
 //method:METHOD_Report
 typedef struct 
 {  
-	PD_Device dev;			//è®¾å¤‡å†…å®¹
+	PD_Device dev;			//Éè±¸ÄÚÈİ
 }PD_DeviceInfoReport;
 
-//ç³»ç»Ÿç®¡ç†éƒ¨åˆ†
+//ÏµÍ³¹ÜÀí²¿·Ö
 //PD_AdminPassword logonflag
-#define ADMIN_LOGONFLAG_COMMON 0x00000001 //å¸¸ç”¨äººå‘˜æ‰‹æœºæ¨¡å¼
+#define ADMIN_LOGONFLAG_COMMON 0x00000001 //³£ÓÃÈËÔ±ÊÖ»úÄ£Ê½
 
-//ç®¡ç†å‘˜å¯†ç æœ‰å…³
-//stagesï¼šSTAGE_SystemSet
+//¹ÜÀíÔ±ÃÜÂëÓĞ¹Ø
+//stages£ºSTAGE_SystemSet
 //fun:FUN_AdminPassword
-//method:æŸ¥è¯¢ï¼Œä¿®æ”¹
+//method:²éÑ¯£¬ĞŞ¸Ä
 typedef struct 
 {  
-	char pass[PASSWORD_LENG];		//å¯†ç æˆ–æ—§å¯†ç 
-	char admin_user[NAME_LENG];		//ç®¡ç†å‘˜ç™»å½•å
-	char newpass[PASSWORD_LENG];	//ä¿®æ”¹å¯†ç æ—¶çš„æ–°å¯†ç (ç™»é™†æ—¶ä¸ä½¿ç”¨)
-	int32u logonflag;//ADMIN_LOGONFLAG_COMMON é»˜è®¤ç®¡ç†å‘˜æ¨¡å¼
+	char pass[PASSWORD_LENG];		//ÃÜÂë»ò¾ÉÃÜÂë
+	char admin_user[NAME_LENG];		//¹ÜÀíÔ±µÇÂ¼Ãû
+	char newpass[PASSWORD_LENG];	//ĞŞ¸ÄÃÜÂëÊ±µÄĞÂÃÜÂë(µÇÂ½Ê±²»Ê¹ÓÃ)
+	int32u logonflag;//ADMIN_LOGONFLAG_COMMON Ä¬ÈÏ¹ÜÀíÔ±Ä£Ê½
 }PD_AdminPassword;
 
-//å‘é€å¯†ç æ ¡éªŒæ­£ç¡®æ—¶è®¾å¤‡æ¥æ”¶åˆ°çš„æˆæƒid
+//·¢ËÍÃÜÂëĞ£ÑéÕıÈ·Ê±Éè±¸½ÓÊÕµ½µÄÊÚÈ¨id
 typedef struct
 {
-	unsigned int sessionid;	//æˆæƒid
+	unsigned int sessionid;	//ÊÚÈ¨id
 }PD_LoginSessionId;
 
 
-//ç»ˆç«¯å‡é™æ§åˆ¶
+//ÖÕ¶ËÉı½µ¿ØÖÆ
 #define LIFT_FLAG_MACHICE		0x00000001
 #define LIFT_FLAG_MIC			0x00000002
 #define LIFT_FLAG_DESK			0x00000004
@@ -940,14 +967,14 @@ typedef struct
 #define LIFT_FLAG_PRESIDENT2MIC	0x00000010
 #define LIFT_FLAG_MICMASK		0x0000001a
 
-//stagesï¼šSTAGE_SystemSet
+//stages£ºSTAGE_SystemSet
 //fun:FUN_TerminalControl
-//method:METHOD_Setæ§åˆ¶
+//method:METHOD_Set¿ØÖÆ
 typedef struct 
 {  
 	 unsigned int meetingid;
 	 unsigned int devnum;  
-	 ProtocalData::TerminalControl_ENUM control;  //æ§åˆ¶å†…å®¹
+	 ProtocalData::TerminalControl_ENUM control;  //¿ØÖÆÄÚÈİ
 	 unsigned int val1;
 	 unsigned int val2;
 	// unsigned int devid[devnum];
@@ -956,72 +983,72 @@ typedef struct
 #define URL_ADDR_MAXLEN 260
 typedef struct
 {
-	unsigned int  id;	//urlid,ç”¨äºæ ‡è¯†ä¿®æ”¹åˆ é™¤æ“ä½œ
-	char name[DESCRIBE_LENG];//ç½‘å€åˆ«åå­—ç¬¦ä¸²
-	char addr[URL_ADDR_MAXLEN];//ç½‘å€å†…å®¹ï¼Œå­—ç¬¦ä¸²
+	unsigned int  id;	//urlid,ÓÃÓÚ±êÊ¶ĞŞ¸ÄÉ¾³ı²Ù×÷
+	char name[DESCRIBE_LENG];//ÍøÖ·±ğÃû×Ö·û´®
+	char addr[URL_ADDR_MAXLEN];//ÍøÖ·ÄÚÈİ£¬×Ö·û´®
 }PD_URL_item;
 
 #define MEETURL_FLAG_ISDEFAULT 0x01
-//è®¾ç½®é»˜è®¤ç½‘å€
-//stagesï¼šSTAGE_SystemSet
+//ÉèÖÃÄ¬ÈÏÍøÖ·
+//stages£ºSTAGE_SystemSet
 //fun:FUN_URL
-//method:æŸ¥è¯¢ï¼Œè®¾ç½®
-//å®¢æˆ·ç«¯å’ŒæœåŠ¡ç«¯å…¬ç”¨æ­¤æ•°æ®ç»“æ„
+//method:²éÑ¯£¬ÉèÖÃ
+//¿Í»§¶ËºÍ·şÎñ¶Ë¹«ÓÃ´ËÊı¾İ½á¹¹
 typedef struct 
 {  
-	unsigned int meetingid; //=0è¡¨ç¤ºä¿®æ”¹é»˜è®¤ç½‘å€ï¼Œæ‰€æœ‰ä¼šè®®åœ¨æœªè®¾ç½®ç½‘å€æ—¶ä½¿ç”¨é»˜è®¤çš„
+	unsigned int meetingid; //=0±íÊ¾ĞŞ¸ÄÄ¬ÈÏÍøÖ·£¬ËùÓĞ»áÒéÔÚÎ´ÉèÖÃÍøÖ·Ê±Ê¹ÓÃÄ¬ÈÏµÄ
 	int16u urlnum;
 	int8u  flag;
 	int8u  fill;
 	//PD_URL_item addr[];
 }Client_PD_URL;
 
-//åˆ é™¤ç½‘å€
-//stagesï¼šSTAGE_SystemSet
+//É¾³ıÍøÖ·
+//stages£ºSTAGE_SystemSet
 //fun:FUN_URL
-//method:åˆ é™¤
-//å®¢æˆ·ç«¯å’ŒæœåŠ¡ç«¯å…¬ç”¨æ­¤æ•°æ®ç»“æ„
+//method:É¾³ı
+//¿Í»§¶ËºÍ·şÎñ¶Ë¹«ÓÃ´ËÊı¾İ½á¹¹
 typedef struct
 {
-	unsigned int meetingid; //=0è¡¨ç¤ºåˆ é™¤é»˜è®¤ç½‘å€ï¼Œæ‰€æœ‰ä¼šè®®åœ¨æœªè®¾ç½®ç½‘å€æ—¶ä½¿ç”¨é»˜è®¤çš„
+	unsigned int meetingid; //=0±íÊ¾É¾³ıÄ¬ÈÏÍøÖ·£¬ËùÓĞ»áÒéÔÚÎ´ÉèÖÃÍøÖ·Ê±Ê¹ÓÃÄ¬ÈÏµÄ
 	unsigned int urlnum;
 	//int32u  urlid[];
 }Client_PD_URL_Delete;
 
-//è®¾ç½®å­—ä½“å¤§å°ï¼Œé¢œè‰²
-//stagesï¼šSTAGE_SystemSet
+//ÉèÖÃ×ÖÌå´óĞ¡£¬ÑÕÉ«
+//stages£ºSTAGE_SystemSet
 //fun:FUN_FontColorBgp_desk
-//method:æŸ¥è¯¢ï¼Œè®¾ç½®
+//method:²éÑ¯£¬ÉèÖÃ
 
 typedef struct 
 {  
 	 unsigned int meeintid;
-	PD_Color conf1[Count_FontConf];	//å­—ä½“é¢œè‰²é…ç½®
-	unsigned int bg_photoid;		//æ¡Œç‰ŒèƒŒæ™¯å›¾id
+	PD_Color conf1[Count_FontConf];	//×ÖÌåÑÕÉ«ÅäÖÃ
+	unsigned int bg_photoid;		//×ÀÅÆ±³¾°Í¼id
 }PD__FontColor;
 
-//å‚ä¼šäººå‘˜
+//²Î»áÈËÔ±
 typedef struct
 {
-	unsigned int memberid;		//å‚ä¼šäººå‘˜id
-	char name[NAME_LENG];  //åå­—ï¼Œå­—ç¬¦ä¸²ä¿¡æ¯
-	char company[DESCRIBE_LENG]; //å•ä½
-	char job[DESCRIBE_LENG];		//èŒä½
-	char comment[DESCRIBE_LENG];	//å¤‡æ³¨
-	char phone[SHORT_DESCRIBE_LENG];  //ç”µè¯
-	char email[SHORT_DESCRIBE_LENG];  //é‚®ç®±
-	char password[PASSWORD_LENG];  //å¯†ç 
-	int32u pos;//æŸ¥è¯¢æ—¶è¿”å›posä½ç½®ï¼Œæ·»åŠ æˆ–è€…ä¿®æ”¹æ—¶ä¸éœ€è¦æŒ‡å®š
+	unsigned int memberid;		//²Î»áÈËÔ±id
+	char name[NAME_LENG];  //Ãû×Ö£¬×Ö·û´®ĞÅÏ¢
+	char company[DESCRIBE_LENG]; //µ¥Î»
+	char job[DESCRIBE_LENG];		//Ö°Î»
+	char comment[DESCRIBE_LENG];	//±¸×¢
+	char phone[SHORT_DESCRIBE_LENG];  //µç»°
+	char email[SHORT_DESCRIBE_LENG];  //ÓÊÏä
+	char password[PASSWORD_LENG];  //ÃÜÂë
+	int32u pos;//²éÑ¯Ê±·µ»ØposÎ»ÖÃ£¬Ìí¼Ó»òÕßĞŞ¸ÄÊ±²»ĞèÒªÖ¸¶¨
 }PD_Member_Edit;
 
 
-#define IMPORT_MEET_FLAG_DELALLMEM 0x00000001 //å¯¼å…¥æ¸…åˆ é™¤å‚ä¼šäººå‘˜
+#define IMPORT_MEET_FLAG_DELALLMEM 0x00000001 //µ¼ÈëÇåÉ¾³ı²Î»áÈËÔ±
 
-//å¯¼å…¥å‚ä¼šäººå‘˜
-//stagesï¼šSTAGE_MemberManage
+//µ¼Èë²Î»áÈËÔ±
+//stages£ºSTAGE_MemberManage
 //fun: ProtocalData::FUN_All
 //method:ADD
-//å®¢æˆ·ç«¯å‘é€æ•°æ®ï¼ŒæœåŠ¡ç«¯åªè¿”å›PD_Responseheaderåº”ç­”éƒ¨åˆ†
+//¿Í»§¶Ë·¢ËÍÊı¾İ£¬·şÎñ¶ËÖ»·µ»ØPD_ResponseheaderÓ¦´ğ²¿·Ö
 typedef struct
 {
 	int32u meetingid;
@@ -1033,7 +1060,7 @@ typedef struct
 	"member":  //
 	[
 	{
-	"name::"é™ˆå·¥",
+	"name::"³Â¹¤",
 	"company":"xx",
 	"job":"xx",
 	"phone":"123456",
@@ -1051,99 +1078,99 @@ typedef struct
 
 }PD_ImportMemberManage;
 
-#define MEETSMS_OPERTEMP_START		0//=ä¼šè®®é€šçŸ¥
-#define MEETSMS_OPERTEMP_LATE		1//=ä¼šè®®å»¶æœŸ
-#define MEETSMS_OPERTEMP_CANCLE		2//=ä¼šè®®å–æ¶ˆ
-#define MEETSMS_OPERTEMP_NORMAL		3//=æ™®é€šæ–‡æœ¬
-#define MEETSMS_OPERTEMP_APPROVAL	4//=å®¡æ‰¹å‚¬ä¿ƒ
+#define MEETSMS_OPERTEMP_START		0//=»áÒéÍ¨Öª
+#define MEETSMS_OPERTEMP_LATE		1//=»áÒéÑÓÆÚ
+#define MEETSMS_OPERTEMP_CANCLE		2//=»áÒéÈ¡Ïû
+#define MEETSMS_OPERTEMP_NORMAL		3//=ÆÕÍ¨ÎÄ±¾
+#define MEETSMS_OPERTEMP_APPROVAL	4//=ÉóÅú´ß´Ù
 
-//çŸ­ä¿¡é€šçŸ¥ä¼šè®®
-//stagesï¼šSTAGE_MemberManage
-//fun: FUN_All ä¼šè®®çŸ­ä¿¡é€šçŸ¥
+//¶ÌĞÅÍ¨Öª»áÒé
+//stages£ºSTAGE_MemberManage
+//fun: FUN_All »áÒé¶ÌĞÅÍ¨Öª
 //method:METHOD_Notify
 typedef struct
 {
-	int32u   MeetingId;  //ä¼šè®®ID
-	int      templateindex;//=0ä¼šè®®é€šçŸ¥, =1ä¼šè®®å»¶æœŸ, =2ä¼šè®®å–æ¶ˆ éœ€è¦æŒ‡å®šæ¨¡æ¿ï¼Œåå°ä¼šæ ¹æ®æ¨¡æ¿å»å‘é€
+	int32u   MeetingId;  //»áÒéID
+	int      templateindex;//=0»áÒéÍ¨Öª, =1»áÒéÑÓÆÚ, =2»áÒéÈ¡Ïû ĞèÒªÖ¸¶¨Ä£°å£¬ºóÌ¨»á¸ù¾İÄ£°åÈ¥·¢ËÍ
 	int		 contentlen;
 	//char   msg[];
 }PD_MeetSMSNotify;
 
-//å‚ä¼šäººå‘˜ç®¡ç†
-//stagesï¼šSTAGE_MemberManage
+//²Î»áÈËÔ±¹ÜÀí
+//stages£ºSTAGE_MemberManage
 //fun: ProtocalData::FUN_All
-//method:æŸ¥è¯¢ ä¿®æ”¹
-//å®¢æˆ·ç«¯å‘é€æ•°æ®ï¼ŒæœåŠ¡ç«¯åªè¿”å›PD_Responseheaderåº”ç­”éƒ¨åˆ†
+//method:²éÑ¯ ĞŞ¸Ä
+//¿Í»§¶Ë·¢ËÍÊı¾İ£¬·şÎñ¶ËÖ»·µ»ØPD_ResponseheaderÓ¦´ğ²¿·Ö
 typedef struct 
 {  
 	unsigned int meetingid;
-	unsigned int TotalNum;//æ€»å…±æœ‰å¤šå°‘ä¸ªä¼šè®®
-	unsigned int StartId; //å½“å‰å¸§å¼€å§‹åºå·
-	unsigned int CurrNum;//å½“å‰å¸§åŒ…æ‹¬å¤šå°‘ä¸ªä¼šè®®ä¿¡æ¯
+	unsigned int TotalNum;//×Ü¹²ÓĞ¶àÉÙ¸ö»áÒé
+	unsigned int StartId; //µ±Ç°Ö¡¿ªÊ¼ĞòºÅ
+	unsigned int CurrNum;//µ±Ç°Ö¡°üÀ¨¶àÉÙ¸ö»áÒéĞÅÏ¢
 
-	//å¡«å……PerNUMä¸ªå‚ä¼šäººå‘˜
+	//Ìî³äPerNUM¸ö²Î»áÈËÔ±
 	//PD_Member_Edit
 }PD_OneMemberManage;
 
-//å‚ä¼šäººå‘˜  ä¿®æ”¹å‚ä¼šäººå‘˜åºå·æ’åº
-//stagesï¼šSTAGE_MemberManage
+//²Î»áÈËÔ±  ĞŞ¸Ä²Î»áÈËÔ±ĞòºÅÅÅĞò
+//stages£ºSTAGE_MemberManage
 //fun: ProtocalData::FUN_All
-//method:è®¾ç½® åˆ é™¤(åˆ é™¤å¤šä¸ª)
+//method:ÉèÖÃ É¾³ı(É¾³ı¶à¸ö)
 typedef struct
 {
-	unsigned int MeetingId;  //ä¼šè®®ID
-	unsigned int num;//å‚ä¼šäººå‘˜
-	//unsigned int memberid[];//æŒ‰IDçš„æ’åº
+	unsigned int MeetingId;  //»áÒéID
+	unsigned int num;//²Î»áÈËÔ±
+	//unsigned int memberid[];//°´IDµÄÅÅĞò
 }PD_MeetingMemberPosSet;
 
-//ä¼šåœºç®¡ç†éƒ¨åˆ†
-//stagesï¼šSTAGE_MeetingManage
-//fun: ProtocalData::FUN_All, æ‰€æœ‰ä¼šåœºä¿¡æ¯
-//method:æŸ¥è¯¢
-//å®¢æˆ·ç«¯åªå‘é€PD_Requestheaderï¼ŒæœåŠ¡ç«¯åº”ç­”å†…å®¹
-//ä¼šåœºåç§°æ˜¯å”¯ä¸€çš„ï¼Œä¸èƒ½é‡å¤
+//»á³¡¹ÜÀí²¿·Ö
+//stages£ºSTAGE_MeetingManage
+//fun: ProtocalData::FUN_All, ËùÓĞ»á³¡ĞÅÏ¢
+//method:²éÑ¯
+//¿Í»§¶ËÖ»·¢ËÍPD_Requestheader£¬·şÎñ¶ËÓ¦´ğÄÚÈİ
+//»á³¡Ãû³ÆÊÇÎ¨Ò»µÄ£¬²»ÄÜÖØ¸´
 typedef struct 
 {  
-	unsigned int count ;//æ€»å…±æœ‰å¤šå°‘ä¸ªä¼šåœº
-	//PD_FieldInfo ; //æ ¹æ®å®é™…äººå‘˜å¡«å†™PD_FieldInfoç»“æ„å›¾ä¿¡æ¯
+	unsigned int count ;//×Ü¹²ÓĞ¶àÉÙ¸ö»á³¡
+	//PD_FieldInfo ; //¸ù¾İÊµ¼ÊÈËÔ±ÌîĞ´PD_FieldInfo½á¹¹Í¼ĞÅÏ¢
 	//PD_FieldInfo ;
 	
 }PD_AllMeetingField;
 
-//ä¼šåœºç®¡ç†éƒ¨åˆ†
-//stagesï¼šSTAGE_MeetingManage
-//fun: FUN_One å•ä¸ªä¼šåœºä¿¡æ¯
-//method:ä¿®æ”¹
-//å®¢æˆ·ç«¯å‘é€æ•°æ®ï¼ŒæœåŠ¡ç«¯è¿”å›
-//ä¼šåœºåç§°æ˜¯å”¯ä¸€çš„ï¼Œä¸èƒ½é‡å¤
+//»á³¡¹ÜÀí²¿·Ö
+//stages£ºSTAGE_MeetingManage
+//fun: FUN_One µ¥¸ö»á³¡ĞÅÏ¢
+//method:ĞŞ¸Ä
+//¿Í»§¶Ë·¢ËÍÊı¾İ£¬·şÎñ¶Ë·µ»Ø
+//»á³¡Ãû³ÆÊÇÎ¨Ò»µÄ£¬²»ÄÜÖØ¸´
 typedef struct 
 {  
-	unsigned int MeetingroomId;		//ä¼šåœºID
-	char name[DESCRIBE_LENG];  //å­—ç¬¦ä¸²ä¿¡æ¯
-	char addr[DESCRIBE_LENG];  //ä¼šåœºåœ°ç‚¹
-	char comment[DESCRIBE_LENG];  //å¤‡æ³¨
-	unsigned int picid;		   //èƒŒæ™¯å›¾id
+	unsigned int MeetingroomId;		//»á³¡ID
+	char name[DESCRIBE_LENG];  //×Ö·û´®ĞÅÏ¢
+	char addr[DESCRIBE_LENG];  //»á³¡µØµã
+	char comment[DESCRIBE_LENG];  //±¸×¢
+	unsigned int picid;		   //±³¾°Í¼id
 }PD_OneMeetingField_Mod;
 
-//ä¼šåœºç®¡ç†éƒ¨åˆ†
-//stagesï¼šSTAGE_MeetingManage
-//fun: FUN_One å•ä¸ªä¼šåœºä¿¡æ¯
-//method:åˆ é™¤
-//å®¢æˆ·ç«¯å‘é€æ•°æ®ï¼ŒæœåŠ¡ç«¯è¿”å›
-//ä¼šåœºåç§°æ˜¯å”¯ä¸€çš„ï¼Œä¸èƒ½é‡å¤
+//»á³¡¹ÜÀí²¿·Ö
+//stages£ºSTAGE_MeetingManage
+//fun: FUN_One µ¥¸ö»á³¡ĞÅÏ¢
+//method:É¾³ı
+//¿Í»§¶Ë·¢ËÍÊı¾İ£¬·şÎñ¶Ë·µ»Ø
+//»á³¡Ãû³ÆÊÇÎ¨Ò»µÄ£¬²»ÄÜÖØ¸´
 typedef struct 
 {  
-	unsigned int MeetingroomId;	//ä¼šåœºID
+	unsigned int MeetingroomId;	//»á³¡ID
 }PD_OneMeetingField_Del;
 
 typedef struct
 {
-	unsigned int MeetingroomId;	//ä¼šåœºID
-	unsigned int adminid;	//ç”¨æˆ·ID
+	unsigned int MeetingroomId;	//»á³¡ID
+	unsigned int adminid;	//ÓÃ»§ID
 }PD_AdminRoomItemInfo;
 
-//ç”¨æˆ·å¯æ§çš„ä¼šåœº æŸ¥è¯¢ä¼šåœºæ—¶ä¼šè¿”å›ï¼Œä¸éœ€è¦ä¸»åŠ¨æŸ¥è¯¢
-//stagesï¼šSTAGE_MeetingManage
+//ÓÃ»§¿É¿ØµÄ»á³¡ ²éÑ¯»á³¡Ê±»á·µ»Ø£¬²»ĞèÒªÖ÷¶¯²éÑ¯
+//stages£ºSTAGE_MeetingManage
 //fun: FUN_All
 //method:METHOD_QueryData
 typedef struct
@@ -1152,37 +1179,37 @@ typedef struct
 	//PD_MGRROOM [Num];
 }PD_AdminRoomInfo;
 
-//ä¼šè®®ç®¡ç†éƒ¨åˆ†
-//stagesï¼šSTAGE_StartUpMeeting
-//fun: ProtocalData::FUN_All, æ‰€æœ‰ä¼šåœºä¿¡æ¯
-//method:æŸ¥è¯¢
-//å®¢æˆ·ç«¯åªå‘é€PD_Requestheaderï¼ŒæœåŠ¡ç«¯åº”ç­”å†…å®¹
-//ä¼šè®®åç§°æ˜¯å”¯ä¸€ï¼Œä¸èƒ½é‡å¤
+//»áÒé¹ÜÀí²¿·Ö
+//stages£ºSTAGE_StartUpMeeting
+//fun: ProtocalData::FUN_All, ËùÓĞ»á³¡ĞÅÏ¢
+//method:²éÑ¯
+//¿Í»§¶ËÖ»·¢ËÍPD_Requestheader£¬·şÎñ¶ËÓ¦´ğÄÚÈİ
+//»áÒéÃû³ÆÊÇÎ¨Ò»£¬²»ÄÜÖØ¸´
 typedef struct 
 {  
-	unsigned int TotalNum ;//æ€»å…±æœ‰å¤šå°‘ä¸ªä¼šè®®
-	unsigned int StartId; //å½“å‰å¸§å¼€å§‹åºå·
-	unsigned int CurrNum ;//å½“å‰å¸§åŒ…æ‹¬å¤šå°‘ä¸ªä¼šè®®ä¿¡æ¯
-	//PD_MeetingAllInfo ; //æ ¹æ®å®é™…ä¼šè®®å¡«å†™PD_MeetingAllInfoç»“æ„å›¾ä¿¡æ¯
+	unsigned int TotalNum ;//×Ü¹²ÓĞ¶àÉÙ¸ö»áÒé
+	unsigned int StartId; //µ±Ç°Ö¡¿ªÊ¼ĞòºÅ
+	unsigned int CurrNum ;//µ±Ç°Ö¡°üÀ¨¶àÉÙ¸ö»áÒéĞÅÏ¢
+	//PD_MeetingAllInfo ; //¸ù¾İÊµ¼Ê»áÒéÌîĞ´PD_MeetingAllInfo½á¹¹Í¼ĞÅÏ¢
 	
 }PD_AllMeetingManage;
 
 typedef struct
 {
-	unsigned int TotalNum;//æ€»å…±æœ‰å¤šå°‘ä¸ªä¼šè®®
-	unsigned int StartId; //å½“å‰å¸§å¼€å§‹åºå·
-	unsigned int CurrNum;//å½“å‰å¸§åŒ…æ‹¬å¤šå°‘ä¸ªä¼šè®®ä¿¡æ¯
-	//PD_MeetingAllInfo_V2 ; //æ ¹æ®å®é™…ä¼šè®®å¡«å†™PD_MeetingAllInfoç»“æ„å›¾ä¿¡æ¯
+	unsigned int TotalNum;//×Ü¹²ÓĞ¶àÉÙ¸ö»áÒé
+	unsigned int StartId; //µ±Ç°Ö¡¿ªÊ¼ĞòºÅ
+	unsigned int CurrNum;//µ±Ç°Ö¡°üÀ¨¶àÉÙ¸ö»áÒéĞÅÏ¢
+	//PD_MeetingAllInfo_V2 ; //¸ù¾İÊµ¼Ê»áÒéÌîĞ´PD_MeetingAllInfo½á¹¹Í¼ĞÅÏ¢
 
 }PD_AllMeetingManage_V2;
 
-//ä¼šè®®ç®¡ç†éƒ¨åˆ†  æ·»åŠ ï¼Œåˆ é™¤ä¼šè®®
-//stagesï¼šSTAGE_StartUpMeeting
-//fun: FUN_One å•ä¸ªä¼šåœºä¿¡æ¯
-//method:åˆ é™¤ï¼Œä¿®æ”¹ï¼Œå¤åˆ¶
-//æ·»åŠ æ–¹æ³•ï¼Œå®¢æˆ·ç«¯å‘é€æ•°æ®æ—¶æ²¡æœ‰å¯¹åº”IDï¼ŒæœåŠ¡ç«¯è¿”å›æ•°æ®æ—¶åˆ†é…å¥½IDå·
-//ä¿®æ”¹ï¼Œåˆ é™¤æ–¹æ³•ä»¥ä¼šè®®IDä¸ºå‡†
-//ä¼šè®®åç§°æ˜¯å”¯ä¸€ï¼Œä¸èƒ½é‡å¤
+//»áÒé¹ÜÀí²¿·Ö  Ìí¼Ó£¬É¾³ı»áÒé
+//stages£ºSTAGE_StartUpMeeting
+//fun: FUN_One µ¥¸ö»á³¡ĞÅÏ¢
+//method:É¾³ı£¬ĞŞ¸Ä£¬¸´ÖÆ
+//Ìí¼Ó·½·¨£¬¿Í»§¶Ë·¢ËÍÊı¾İÊ±Ã»ÓĞ¶ÔÓ¦ID£¬·şÎñ¶Ë·µ»ØÊı¾İÊ±·ÖÅäºÃIDºÅ
+//ĞŞ¸Ä£¬É¾³ı·½·¨ÒÔ»áÒéIDÎª×¼
+//»áÒéÃû³ÆÊÇÎ¨Ò»£¬²»ÄÜÖØ¸´
 typedef struct 
 {  
 	PD_MeetingOneInfo meeting;
@@ -1192,482 +1219,482 @@ typedef struct
 	PD_MeetingAllInfo_V2 meeting;
 }PD_OneMeetingManage_V2;
 
-//ä¼šè®®ç®¡ç†éƒ¨åˆ†  æ·»åŠ ï¼Œåˆ é™¤ä¼šè®®
-//stagesï¼šSTAGE_StartUpMeeting
-//fun: FUN_One å•ä¸ªä¼šåœºä¿¡æ¯
-//method:æ·»åŠ ï¼Œå¤åˆ¶
+//»áÒé¹ÜÀí²¿·Ö  Ìí¼Ó£¬É¾³ı»áÒé
+//stages£ºSTAGE_StartUpMeeting
+//fun: FUN_One µ¥¸ö»á³¡ĞÅÏ¢
+//method:Ìí¼Ó£¬¸´ÖÆ
 typedef struct
 {
 	PD_MeetingOneInfo meeting;
-	unsigned int status;//ä¼šè®®çŠ¶æ€ MEETING_STATUS
+	unsigned int status;//»áÒé×´Ì¬ MEETING_STATUS
 }PD_OneMeetingManageEx;
 
 typedef struct
 {
 	PD_MeetingOneInfo_V2 meeting;
-	unsigned int status;//ä¼šè®®çŠ¶æ€ MEETING_STATUS
+	unsigned int status;//»áÒé×´Ì¬ MEETING_STATUS
 }PD_OneMeetingManageEx_V2;
 
 //complex query meet flag
-#define COMPLEXQUERY_FLAG_MEETINGID 0x00000001 //meetingidæœ‰æ•ˆ è¯¥æ ‡å¿—æœ‰æ•ˆä¼šæ— è§†å…¶å®ƒæ ‡å¿—
-#define COMPLEXQUERY_FLAG_STATUS    0x00000002 //statusæœ‰æ•ˆ
-#define COMPLEXQUERY_FLAG_TIME	    0x00000004 //starttime endtimeæœ‰æ•ˆ
-#define COMPLEXQUERY_FLAG_ROOMID	0x00000008 //roomidæœ‰æ•ˆ 
-#define COMPLEXQUERY_FLAG_CACHE	    0x00000010 //ç¼“å­˜ä¼šè®®çš„ç›¸å…³èµ„æ–™ åªæœ‰ä¸COMPLEXQUERY_FLAG_MEETINGIDæ‰æœ‰æ•ˆ
-#define COMPLEXQUERY_FLAG_PHONE		0x00000020 //å¸¸ç”¨äººå‘˜ç”µè¯ 
+#define COMPLEXQUERY_FLAG_MEETINGID 0x00000001 //meetingidÓĞĞ§ ¸Ã±êÖ¾ÓĞĞ§»áÎŞÊÓÆäËü±êÖ¾
+#define COMPLEXQUERY_FLAG_STATUS    0x00000002 //statusÓĞĞ§
+#define COMPLEXQUERY_FLAG_TIME	    0x00000004 //starttime endtimeÓĞĞ§
+#define COMPLEXQUERY_FLAG_ROOMID	0x00000008 //roomidÓĞĞ§ 
+#define COMPLEXQUERY_FLAG_CACHE	    0x00000010 //»º´æ»áÒéµÄÏà¹Ø×ÊÁÏ Ö»ÓĞÓëCOMPLEXQUERY_FLAG_MEETINGID²ÅÓĞĞ§
+#define COMPLEXQUERY_FLAG_PHONE		0x00000020 //³£ÓÃÈËÔ±µç»° 
 
-//complex query cache flag æŒ‰å¦‚ä¸‹çš„é¡ºåºè¿”å›
-#define COMPLEXCACHE_FLAG_MEETFUNCTION			0x0000000000000001 //å‘é€ä¼šè®®åŠŸèƒ½
-#define COMPLEXCACHE_FLAG_MEETAGENDA			0x0000000000000002 //å‘é€ä¼šè®®è®®ç¨‹
-#define COMPLEXCACHE_FLAG_MEETBULLET			0x0000000000000004 //å‘é€ä¼šè®®å…¬å‘Š
-#define COMPLEXCACHE_FLAG_MEMBER				0x0000000000000008 //å‘é€å‚ä¼šäººå‘˜
-#define COMPLEXCACHE_FLAG_MEMBERPERMISSION		0x0000000000000010 //å‘é€å‚ä¼šäººå‘˜æƒé™
-#define COMPLEXCACHE_FLAG_MEMBERSEAT			0x0000000000000020 //å‘é€ä¼šè®®æ’ä½
-#define COMPLEXCACHE_FLAG_MEETVIDEO				0x0000000000000040 //å‘é€ä¼šè®®è§†é¢‘ç›´æ’­
-#define COMPLEXCACHE_FLAG_MEETVOTE				0x0000000000000080 //å‘é€ä¼šè®®æŠ•ç¥¨
-#define COMPLEXCACHE_FLAG_DIRFILE				0x0000000000000100 //å‘é€ä¼šè®®ç›®å½•å’Œç›®å½•æ–‡ä»¶
-#define COMPLEXCACHE_FLAG_ROOMDEVICE			0x0000000000000200 //å‘é€ä¼šåœºä¸ä¼šåœºè®¾å¤‡
-#define COMPLEXCACHE_FLAG_MEETSIGN				0x0000000000000400 //å‘é€ä¼šè®®ç­¾åˆ°
-#define COMPLEXCACHE_FLAG_TABLECARD				0x0000000000000800 //å‘é€ä¼šè®®æ¡Œç‰Œ
+//complex query cache flag °´ÈçÏÂµÄË³Ğò·µ»Ø
+#define COMPLEXCACHE_FLAG_MEETFUNCTION			0x0000000000000001 //·¢ËÍ»áÒé¹¦ÄÜ
+#define COMPLEXCACHE_FLAG_MEETAGENDA			0x0000000000000002 //·¢ËÍ»áÒéÒé³Ì
+#define COMPLEXCACHE_FLAG_MEETBULLET			0x0000000000000004 //·¢ËÍ»áÒé¹«¸æ
+#define COMPLEXCACHE_FLAG_MEMBER				0x0000000000000008 //·¢ËÍ²Î»áÈËÔ±
+#define COMPLEXCACHE_FLAG_MEMBERPERMISSION		0x0000000000000010 //·¢ËÍ²Î»áÈËÔ±È¨ÏŞ
+#define COMPLEXCACHE_FLAG_MEMBERSEAT			0x0000000000000020 //·¢ËÍ»áÒéÅÅÎ»
+#define COMPLEXCACHE_FLAG_MEETVIDEO				0x0000000000000040 //·¢ËÍ»áÒéÊÓÆµÖ±²¥
+#define COMPLEXCACHE_FLAG_MEETVOTE				0x0000000000000080 //·¢ËÍ»áÒéÍ¶Æ±
+#define COMPLEXCACHE_FLAG_DIRFILE				0x0000000000000100 //·¢ËÍ»áÒéÄ¿Â¼ºÍÄ¿Â¼ÎÄ¼ş
+#define COMPLEXCACHE_FLAG_ROOMDEVICE			0x0000000000000200 //·¢ËÍ»á³¡Óë»á³¡Éè±¸
+#define COMPLEXCACHE_FLAG_MEETSIGN				0x0000000000000400 //·¢ËÍ»áÒéÇ©µ½
+#define COMPLEXCACHE_FLAG_TABLECARD				0x0000000000000800 //·¢ËÍ»áÒé×ÀÅÆ
 
-//ä¼šè®®ç®¡ç†éƒ¨åˆ†  å¤åˆæŸ¥è¯¢ä¼šè®®
-//stagesï¼šSTAGE_StartUpMeeting
-//fun: FUN_One å•ä¸ªä¼šè®®ä¿¡æ¯
-//method:æŸ¥è¯¢
+//»áÒé¹ÜÀí²¿·Ö  ¸´ºÏ²éÑ¯»áÒé
+//stages£ºSTAGE_StartUpMeeting
+//fun: FUN_One µ¥¸ö»áÒéĞÅÏ¢
+//method:²éÑ¯
 typedef struct
 {
-	int32u		 queryflag;	//æŸ¥è¯¢æ ‡å¿—ä½ COMPLEXQUERY_FLAG_MEETINGID
-	int32u		 meetingid;//ä¼šè®®ID
-	int64u		 cacheflag;//ç¼“å­˜æ ‡å¿— COMPLEXCACHE_FLAG_DIRFILE
-	int32u		 roomid;//ä¼šåœºID
-	int32u	     status;	//ä¼šè®®çŠ¶æ€ MEETING_STATUS
-	PD_Time		 starttime;//å¼€å§‹æ—¶é—´ å•ä½ï¼šUTCç§’
-	PD_Time		 endtime;//ç»“æŸæ—¶é—´ å•ä½ï¼šUTCç§’
-	char		 phone[SHORT_DESCRIBE_LENG];  //å¸¸ç”¨äººå‘˜ç”µè¯
+	int32u		 queryflag;	//²éÑ¯±êÖ¾Î» COMPLEXQUERY_FLAG_MEETINGID
+	int32u		 meetingid;//»áÒéID
+	int64u		 cacheflag;//»º´æ±êÖ¾ COMPLEXCACHE_FLAG_DIRFILE
+	int32u		 roomid;//»á³¡ID
+	int32u	     status;	//»áÒé×´Ì¬ MEETING_STATUS
+	PD_Time		 starttime;//¿ªÊ¼Ê±¼ä µ¥Î»£ºUTCÃë
+	PD_Time		 endtime;//½áÊøÊ±¼ä µ¥Î»£ºUTCÃë
+	char		 phone[SHORT_DESCRIBE_LENG];  //³£ÓÃÈËÔ±µç»°
 }PD_ComplexQueryMeetingManage;
 
 //agendatype
-#define MEET_AGENDA_TYPE_TEXT  0 //æ–‡æœ¬
-#define MEET_AGENDA_TYPE_FILE  1 //æ–‡ä»¶
-#define MEET_AGENDA_TYPE_TIME  2 //æ—¶é—´è½´å¼
-#define MEET_AGENDA_TYPE_NOSET 0xff000000 //æŸ¥è¯¢è®®ç¨‹æ—¶å¯æŒ‡å®šè¯¥æ ‡å¿—è¡¨ç¤ºæŸ¥è¯¢å½“å‰ä¼šè®®ä½¿ç”¨çš„è®®ç¨‹
+#define MEET_AGENDA_TYPE_TEXT  0 //ÎÄ±¾
+#define MEET_AGENDA_TYPE_FILE  1 //ÎÄ¼ş
+#define MEET_AGENDA_TYPE_TIME  2 //Ê±¼äÖáÊ½
+#define MEET_AGENDA_TYPE_NOSET 0xff000000 //²éÑ¯Òé³ÌÊ±¿ÉÖ¸¶¨¸Ã±êÖ¾±íÊ¾²éÑ¯µ±Ç°»áÒéÊ¹ÓÃµÄÒé³Ì
 
-//ä¼šè®®è®®ç¨‹ 
-//stagesï¼šSTAGE_MeetingAgenda
-//fun: FUN_Agenda ä¼šè®®è®®ç¨‹
-//method:æŸ¥è¯¢ï¼Œä¿®æ”¹
-//MEET_AGENDA_TYPE_TEXT ã€MEET_AGENDA_TYPE_FILE
+//»áÒéÒé³Ì 
+//stages£ºSTAGE_MeetingAgenda
+//fun: FUN_Agenda »áÒéÒé³Ì
+//method:²éÑ¯£¬ĞŞ¸Ä
+//MEET_AGENDA_TYPE_TEXT ¡¢MEET_AGENDA_TYPE_FILE
 typedef struct
 {
-	unsigned int MeetingId;  //ä¼šè®®ID
-	unsigned int type;//ç±»å‹ MEET_AGENDATYPE_NOSET
-	unsigned int meetagendatype;//ä¼šè®®ä½¿ç”¨çš„è®®ç¨‹ç±»å‹
+	unsigned int MeetingId;  //»áÒéID
+	unsigned int type;//ÀàĞÍ MEET_AGENDATYPE_NOSET
+	unsigned int meetagendatype;//»áÒéÊ¹ÓÃµÄÒé³ÌÀàĞÍ
 
-	//å¦‚æœæ˜¯æ–‡æœ¬,åˆšè¡¨ç¤ºæ–‡æœ¬é•¿åº¦
-	//å¦‚æœæ˜¯æ–‡ä»¶åˆ™è¡¨ç¤ºåª’ä½“ID
+	//Èç¹ûÊÇÎÄ±¾,¸Õ±íÊ¾ÎÄ±¾³¤¶È
+	//Èç¹ûÊÇÎÄ¼şÔò±íÊ¾Ã½ÌåID
 	unsigned int val;
-	//char text[]; //å†…å®¹æ ¹æ®å‰é¢é•¿åº¦ä¸å®šé•¿
+	//char text[]; //ÄÚÈİ¸ù¾İÇ°Ãæ³¤¶È²»¶¨³¤
 }PD_MeetingAgenda;
 
-//æ—¶é—´è½´å¼ä¼šè®®è®®ç¨‹
-#define MEETAGENDA_STATUS_IDLE		0 //æœªå‘èµ·
-#define MEETAGENDA_STATUS_RUNNING   1 //è¿›è¡Œä¸­
-#define MEETAGENDA_STATUS_END		2 //å·²ç»“æŸ
+//Ê±¼äÖáÊ½»áÒéÒé³Ì
+#define MEETAGENDA_STATUS_IDLE		0 //Î´·¢Æğ
+#define MEETAGENDA_STATUS_RUNNING   1 //½øĞĞÖĞ
+#define MEETAGENDA_STATUS_END		2 //ÒÑ½áÊø
 
 #define MEETAGENDA_DESCTEXT_LENG    320
 
-//æ—¶é—´è½´è®®ç¨‹çš„äº¤æ¢
-//stagesï¼šSTAGE_MeetingAgenda
-//fun: FUN_Agenda ä¼šè®®è®®ç¨‹
+//Ê±¼äÖáÒé³ÌµÄ½»»»
+//stages£ºSTAGE_MeetingAgenda
+//fun: FUN_Agenda »áÒéÒé³Ì
 //method:METHOD_Report
 typedef struct
 {
-	int32u MeetingId;  //ä¼šè®®ID
-	int32u agendaid1;  //è®®ç¨‹ID
-	int32u agendaid2;  //è®®ç¨‹ID
+	int32u MeetingId;  //»áÒéID
+	int32u agendaid1;  //Òé³ÌID
+	int32u agendaid2;  //Òé³ÌID
 }PD_MeetingAgendaTimePos;
 
-//æ—¶é—´è½´è®®ç¨‹çš„
-//stagesï¼šSTAGE_MeetingAgenda
-//fun: FUN_Agenda ä¼šè®®è®®ç¨‹
+//Ê±¼äÖáÒé³ÌµÄ
+//stages£ºSTAGE_MeetingAgenda
+//fun: FUN_Agenda »áÒéÒé³Ì
 //method:METHOD_Control
 typedef struct
 {
-	int32u MeetingId;  //ä¼šè®®ID
+	int32u MeetingId;  //»áÒéID
 	int    num;
-	//int32u agendaid[num];  //è®®ç¨‹ID
+	//int32u agendaid[num];  //Òé³ÌID
 }PD_MeetingAgendaTimeSavePos;
 
-#define AGENDA_AUTOADDBINDDIR 0xff000000 //è‡ªåŠ¨æ·»åŠ ç›®å½•
+#define AGENDA_AUTOADDBINDDIR 0xff000000 //×Ô¶¯Ìí¼ÓÄ¿Â¼
 typedef struct
 {
-	unsigned int  agendaid;  //è®®ç¨‹ID
-	unsigned int  status;  //è®®ç¨‹çŠ¶æ€
-	unsigned int  dirid;  //ç»‘å®šç›®å½•ID AGENDA_AUTOADDBINDDIR
-	int64u		  startutctime;//å•ä½ç§’
-	int64u	      endutctime;  //å•ä½ç§’
-	char desctext[MEETAGENDA_DESCTEXT_LENG]; //æè¿°å†…å®¹
+	unsigned int  agendaid;  //Òé³ÌID
+	unsigned int  status;  //Òé³Ì×´Ì¬
+	unsigned int  dirid;  //°ó¶¨Ä¿Â¼ID AGENDA_AUTOADDBINDDIR
+	int64u		  startutctime;//µ¥Î»Ãë
+	int64u	      endutctime;  //µ¥Î»Ãë
+	char desctext[MEETAGENDA_DESCTEXT_LENG]; //ÃèÊöÄÚÈİ
 }PD_AgendaTimeInfo;
 
-#define AGENDA_FLAG_SHOWSTATUS   0x0001 //è¯¥æ ‡å¿—ä½è¡¨ç¤ºéšè—å±æ€§ 0=æ˜¾ç¤º 1=è¡¨ç¤ºéšè—
-#define AGENDA_FLAG_VOTE		 0x0002 //è¯¥æ ‡å¿—ä½è¡¨ç¤ºè®¾ç½®æŠ•ç¥¨å±æ€§ 0=ä¸ç»‘å®š 1=è¡¨ç¤ºç»‘å®š
-#define AGENDA_FLAG_PASSWD		 0x0004 //è¯¥æ ‡å¿—ä½è¡¨ç¤ºè®¾ç½®å¯†ç å±æ€§ 0=ä¸ç»‘å®š 1=è¡¨ç¤ºç»‘å®š
+#define AGENDA_FLAG_SHOWSTATUS   0x0001 //¸Ã±êÖ¾Î»±íÊ¾Òş²ØÊôĞÔ 0=ÏÔÊ¾ 1=±íÊ¾Òş²Ø
+#define AGENDA_FLAG_VOTE		 0x0002 //¸Ã±êÖ¾Î»±íÊ¾ÉèÖÃÍ¶Æ±ÊôĞÔ 0=²»°ó¶¨ 1=±íÊ¾°ó¶¨
+#define AGENDA_FLAG_PASSWD		 0x0004 //¸Ã±êÖ¾Î»±íÊ¾ÉèÖÃÃÜÂëÊôĞÔ 0=²»°ó¶¨ 1=±íÊ¾°ó¶¨
 typedef struct
 {
-	int32u  agendaid;  //è®®ç¨‹ID
-	int32u  status;  //è®®ç¨‹çŠ¶æ€
-	int32u  dirid;  //ç»‘å®šç›®å½•ID AGENDA_AUTOADDBINDDIR
-	int64u	startutctime;//å•ä½ç§’
-	int64u	endutctime;  //å•ä½ç§’
-	char    desctext[MEETAGENDA_DESCTEXT_LENG]; //æè¿°å†…å®¹
-	int32u  voteid;  //ç»‘å®šé—®å·ID
-	int16u  flag;  //å…³è”çš„æ ‡å¿—
+	int32u  agendaid;  //Òé³ÌID
+	int32u  status;  //Òé³Ì×´Ì¬
+	int32u  dirid;  //°ó¶¨Ä¿Â¼ID AGENDA_AUTOADDBINDDIR
+	int64u	startutctime;//µ¥Î»Ãë
+	int64u	endutctime;  //µ¥Î»Ãë
+	char    desctext[MEETAGENDA_DESCTEXT_LENG]; //ÃèÊöÄÚÈİ
+	int32u  voteid;  //°ó¶¨ÎÊ¾íID
+	int16u  flag;  //¹ØÁªµÄ±êÖ¾
 	int8u   fill[2];
-	char    passwd[PD_SHORT_PASSWORD_LENG];//å¯†ç 
+	char    passwd[PD_SHORT_PASSWORD_LENG];//ÃÜÂë
 }PD_AgendaTimeInfo_V2;
 
 typedef struct
 {
-	int32u  agendaid;  //è®®ç¨‹ID
-	int32u  status;  //è®®ç¨‹çŠ¶æ€
-	int32u  dirid;  //ç»‘å®šç›®å½•ID AGENDA_AUTOADDBINDDIR
-	int64u	startutctime;//å•ä½ç§’
-	int64u	endutctime;  //å•ä½ç§’
-	int32u  pos;//æš‚ä¸ä½¿ç”¨
-	int32u  voteid;  //ç»‘å®šé—®å·ID
-	int16u  flag;  //å…³è”çš„æ ‡å¿—
+	int32u  agendaid;  //Òé³ÌID
+	int32u  status;  //Òé³Ì×´Ì¬
+	int32u  dirid;  //°ó¶¨Ä¿Â¼ID AGENDA_AUTOADDBINDDIR
+	int64u	startutctime;//µ¥Î»Ãë
+	int64u	endutctime;  //µ¥Î»Ãë
+	int32u  pos;//Ôİ²»Ê¹ÓÃ
+	int32u  voteid;  //°ó¶¨ÎÊ¾íID
+	int16u  flag;  //¹ØÁªµÄ±êÖ¾
 	int8u   fill[2];
-	char    passwd[PD_SHORT_PASSWORD_LENG];//å¯†ç 
+	char    passwd[PD_SHORT_PASSWORD_LENG];//ÃÜÂë
 	int32u  jsonlen;//
 	//char   json[jsonlen + 1];//{"name":""}
 }PD_AgendaTimeInfo_V3;
 
-//stagesï¼šSTAGE_MeetingAgenda
-//fun: FUN_Agenda ä¼šè®®è®®ç¨‹
-//method:æŸ¥è¯¢
+//stages£ºSTAGE_MeetingAgenda
+//fun: FUN_Agenda »áÒéÒé³Ì
+//method:²éÑ¯
 //MEET_AGENDA_TYPE_TIME
 typedef struct
 {
-	unsigned int MeetingId;  //ä¼šè®®ID
-	unsigned int type;//ç±»å‹ MEET_AGENDATYPE_NOSET
-	unsigned int meetagendatype;//ä¼šè®®ä½¿ç”¨çš„è®®ç¨‹ç±»å‹
-	unsigned int TotalNum;//æ€»å…±æœ‰å¤šå°‘ä¸ªè®®ç¨‹
-	unsigned int StartId; //å½“å‰å¸§å¼€å§‹è®®ç¨‹åºå·
-	unsigned int CurrNum;//å½“å‰å¸§åŒ…æ‹¬å¤šå°‘ä¸ªè®®ç¨‹ä¿¡æ¯
-	//PD_AgendaTimeInfo; //æ ¹æ®å‰é¢æ€»æ•°åˆ—å†™PD_AgendaTimeInfo
+	unsigned int MeetingId;  //»áÒéID
+	unsigned int type;//ÀàĞÍ MEET_AGENDATYPE_NOSET
+	unsigned int meetagendatype;//»áÒéÊ¹ÓÃµÄÒé³ÌÀàĞÍ
+	unsigned int TotalNum;//×Ü¹²ÓĞ¶àÉÙ¸öÒé³Ì
+	unsigned int StartId; //µ±Ç°Ö¡¿ªÊ¼Òé³ÌĞòºÅ
+	unsigned int CurrNum;//µ±Ç°Ö¡°üÀ¨¶àÉÙ¸öÒé³ÌĞÅÏ¢
+	//PD_AgendaTimeInfo; //¸ù¾İÇ°Ãæ×ÜÊıÁĞĞ´PD_AgendaTimeInfo
 
 }PD_MeetingAgendaTimeEx;
 
-//æ—¶é—´è½´å¼ä¼šè®®è®®ç¨‹
-//stagesï¼šSTAGE_MeetingAgenda
-//fun: FUN_Agenda ä¼šè®®è®®ç¨‹
-//method:æ·»åŠ ï¼Œä¿®æ”¹ï¼Œåˆ é™¤
+//Ê±¼äÖáÊ½»áÒéÒé³Ì
+//stages£ºSTAGE_MeetingAgenda
+//fun: FUN_Agenda »áÒéÒé³Ì
+//method:Ìí¼Ó£¬ĞŞ¸Ä£¬É¾³ı
 typedef struct
 {
-	unsigned int  MeetingId;  //ä¼šè®®ID
-	unsigned int  type;//ç±»å‹
+	unsigned int  MeetingId;  //»áÒéID
+	unsigned int  type;//ÀàĞÍ
 	PD_AgendaTimeInfo item;
-	unsigned int meetagendatype;//ä¼šè®®ä½¿ç”¨çš„è®®ç¨‹ç±»å‹
+	unsigned int meetagendatype;//»áÒéÊ¹ÓÃµÄÒé³ÌÀàĞÍ
 }PD_MeetingAgendaTime;
 
-//æ—¶é—´è½´å¼ä¼šè®®è®®ç¨‹
-//stagesï¼šSTAGE_MeetingAgenda
-//fun: FUN_Agenda ä¼šè®®è®®ç¨‹
-//method:æ·»åŠ ï¼Œä¿®æ”¹ï¼Œåˆ é™¤
+//Ê±¼äÖáÊ½»áÒéÒé³Ì
+//stages£ºSTAGE_MeetingAgenda
+//fun: FUN_Agenda »áÒéÒé³Ì
+//method:Ìí¼Ó£¬ĞŞ¸Ä£¬É¾³ı
 typedef struct
 {
-	unsigned int  MeetingId;  //ä¼šè®®ID
-	unsigned int  type;//ç±»å‹
-	unsigned int  meetagendatype;//ä¼šè®®ä½¿ç”¨çš„è®®ç¨‹ç±»å‹
+	unsigned int  MeetingId;  //»áÒéID
+	unsigned int  type;//ÀàĞÍ
+	unsigned int  meetagendatype;//»áÒéÊ¹ÓÃµÄÒé³ÌÀàĞÍ
 	PD_AgendaTimeInfo_V2 item;
 }PD_MeetingAgendaTime_V2;
 
 typedef struct
 {
-	unsigned int  MeetingId;  //ä¼šè®®ID
-	unsigned int  type;//ç±»å‹
-	unsigned int  meetagendatype;//ä¼šè®®ä½¿ç”¨çš„è®®ç¨‹ç±»å‹
+	unsigned int  MeetingId;  //»áÒéID
+	unsigned int  type;//ÀàĞÍ
+	unsigned int  meetagendatype;//»áÒéÊ¹ÓÃµÄÒé³ÌÀàĞÍ
 	PD_AgendaTimeInfo_V3 item;
 }PD_MeetingAgendaTime_V3;
 
 
-//ä¼šè®®å¤§ç™½æ¿å…¬å‘Š 
-//stagesï¼šSTAGE_MeetingAgenda
-//fun: FUN_One //ä¼šè®®å…¬å‘Š
-//method:æŸ¥è¯¢ï¼Œä¿®æ”¹
+//»áÒé´ó°×°å¹«¸æ 
+//stages£ºSTAGE_MeetingAgenda
+//fun: FUN_One //»áÒé¹«¸æ
+//method:²éÑ¯£¬ĞŞ¸Ä
 typedef struct
 {
-	unsigned int MeetingId;  //ä¼šè®®ID
+	unsigned int MeetingId;  //»áÒéID
 	unsigned int textlen;
-	//char text[]; //å†…å®¹æ ¹æ®å‰é¢é•¿åº¦ä¸å®šé•¿
+	//char text[]; //ÄÚÈİ¸ù¾İÇ°Ãæ³¤¶È²»¶¨³¤
 }PD_MeetingBigBulletText;
 
-//ä¼šè®®å…¬å‘Š
+//»áÒé¹«¸æ
 #define MEETBULLET_TEXT_LENG 320
 #define PD_BULLET_DIRECTSTART 0xff000000
 typedef struct
 {
-	unsigned int bulletid;  //å…¬å‘ŠID å‘èµ·å…¬å‘Šæ˜¯å¯ä»¥æŒ‡å®šPD_BULLET_DIRECTSTARTè¡¨ç¤ºæ·»åŠ å®Œæˆç«‹å³å‘èµ·
-	unsigned int type;//å…¬å‘Šç±»å‹
-	unsigned int starttime;//å…¬å‘Šè‡ªåŠ¨å‘èµ·çš„æ—¶é—´,æŒ‰ä¼šè®®å¼€å§‹æ—¶é—´å¼€å§‹ å•ä½ç§’
-	unsigned int timeouts;//å…¬å‘Šè¶…æ—¶å…³é—­çš„æ—¶é—´ æŒ‰å…¬å‘Šå‘èµ·æ—¶é—´å¼€å§‹ å•ä½ç§’
-	char title[DESCRIBE_LENG];//æ ‡é¢˜
-	char content[MEETBULLET_TEXT_LENG]; //å†…å®¹
+	unsigned int bulletid;  //¹«¸æID ·¢Æğ¹«¸æÊÇ¿ÉÒÔÖ¸¶¨PD_BULLET_DIRECTSTART±íÊ¾Ìí¼ÓÍê³ÉÁ¢¼´·¢Æğ
+	unsigned int type;//¹«¸æÀàĞÍ
+	unsigned int starttime;//¹«¸æ×Ô¶¯·¢ÆğµÄÊ±¼ä,°´»áÒé¿ªÊ¼Ê±¼ä¿ªÊ¼ µ¥Î»Ãë
+	unsigned int timeouts;//¹«¸æ³¬Ê±¹Ø±ÕµÄÊ±¼ä °´¹«¸æ·¢ÆğÊ±¼ä¿ªÊ¼ µ¥Î»Ãë
+	char title[DESCRIBE_LENG];//±êÌâ
+	char content[MEETBULLET_TEXT_LENG]; //ÄÚÈİ
 }PD_BulletInfo;
 
-//stagesï¼šSTAGE_MeetingAgenda
-//fun: FUN_Bulletin, //ä¼šè®®å…¬å‘Š
-//method:æŸ¥è¯¢
+//stages£ºSTAGE_MeetingAgenda
+//fun: FUN_Bulletin, //»áÒé¹«¸æ
+//method:²éÑ¯
 typedef struct
 {
-	unsigned int MeetingId;  //ä¼šè®®ID
-	unsigned int TotalNum;//æ€»å…±æœ‰å¤šå°‘ä¸ªå…¬å‘Š
-	unsigned int StartId; //å½“å‰å¸§å¼€å§‹å…¬å‘Šåºå·
-	unsigned int CurrNum;//å½“å‰å¸§åŒ…æ‹¬å¤šå°‘ä¸ªå…¬å‘Šä¿¡æ¯
-	//PD_BulletInfo; //æ ¹æ®å‰é¢æ€»æ•°åˆ—å†™PD_BulletInfo
+	unsigned int MeetingId;  //»áÒéID
+	unsigned int TotalNum;//×Ü¹²ÓĞ¶àÉÙ¸ö¹«¸æ
+	unsigned int StartId; //µ±Ç°Ö¡¿ªÊ¼¹«¸æĞòºÅ
+	unsigned int CurrNum;//µ±Ç°Ö¡°üÀ¨¶àÉÙ¸ö¹«¸æĞÅÏ¢
+	//PD_BulletInfo; //¸ù¾İÇ°Ãæ×ÜÊıÁĞĞ´PD_BulletInfo
 
 }PD_MeetingBulletinEx;
 
-//ä¼šè®®å…¬å‘Š
-//stagesï¼šSTAGE_MeetingAgenda
-//fun: FUN_Bulletin, //ä¼šè®®å…¬å‘Š
-//method:æ·»åŠ ï¼Œä¿®æ”¹ï¼Œåˆ é™¤
+//»áÒé¹«¸æ
+//stages£ºSTAGE_MeetingAgenda
+//fun: FUN_Bulletin, //»áÒé¹«¸æ
+//method:Ìí¼Ó£¬ĞŞ¸Ä£¬É¾³ı
 typedef struct 
 {  
-	unsigned int  MeetingId;  //ä¼šè®®ID
+	unsigned int  MeetingId;  //»áÒéID
 	PD_BulletInfo item;
 }PD_MeetingBulletin;
 
-//å‘å¸ƒä¼šè®®å…¬å‘Š
-//stagesï¼šSTAGE_MeetingAgenda
-//fun: FUN_Bulletin, //ä¼šè®®å…¬å‘Š
-//method:é€šçŸ¥
+//·¢²¼»áÒé¹«¸æ
+//stages£ºSTAGE_MeetingAgenda
+//fun: FUN_Bulletin, //»áÒé¹«¸æ
+//method:Í¨Öª
 typedef struct
 {
-	unsigned int  MeetingId;  //ä¼šè®®ID
+	unsigned int  MeetingId;  //»áÒéID
 	PD_BulletInfo item;
-	int32u operdeviceid;//å‘èµ·è®¾å¤‡
-	int32u opermember;//å‘èµ·äººå‘˜ID
+	int32u operdeviceid;//·¢ÆğÉè±¸
+	int32u opermember;//·¢ÆğÈËÔ±ID
 	int devnum;
 }PD_PublishMeetingBulletin;
 
 #ifndef MEET_FACEID_MAINBG
-//ä¼šè®®ç•Œé¢è®¾ç½®
+//»áÒé½çÃæÉèÖÃ
 //faceid
-#define MEET_FACEID_MAINBG			1  //ä¸»ç•Œé¢ png
-#define MEET_FACEID_SUBBG			2  //å­ç•Œé¢ png
+#define MEET_FACEID_MAINBG			1  //Ö÷½çÃæ png
+#define MEET_FACEID_SUBBG			2  //×Ó½çÃæ png
 #define MEET_FACEID_LOGO			3  //logo png
-#define MEET_FACEID_MEETNAME		4  //ä¼šè®®åç§° text
-#define MEET_FACEID_MEMBERNAME		5  //å‚ä¼šäººåç§° text
-#define MEET_FACEID_MEMBERCOMPANY	6  //å‚ä¼šäººå•ä½ text
-#define MEET_FACEID_MEMBERJOB		7  //å‚ä¼šäººèŒä¸š text
-#define MEET_FACEID_SEATNAME		8  //åº§å¸­åç§° text
-#define MEET_FACEID_TIMER			9  //æ—¥æœŸæ—¶é—´ text
-#define MEET_FACEID_COMPANY			10 //å•ä½åç§° text
-#define MEET_FACEID_SHOWFILE		11 //å¼€ä¼šé¢„è¯»æ–‡ä»¶ã€è§†é¢‘ç­‰
-#define MEET_FACEID_COLTDTEXT		12 //å…¬å¸åç§° onytext
+#define MEET_FACEID_MEETNAME		4  //»áÒéÃû³Æ text
+#define MEET_FACEID_MEMBERNAME		5  //²Î»áÈËÃû³Æ text
+#define MEET_FACEID_MEMBERCOMPANY	6  //²Î»áÈËµ¥Î» text
+#define MEET_FACEID_MEMBERJOB		7  //²Î»áÈËÖ°Òµ text
+#define MEET_FACEID_SEATNAME		8  //×ùÏ¯Ãû³Æ text
+#define MEET_FACEID_TIMER			9  //ÈÕÆÚÊ±¼ä text
+#define MEET_FACEID_COMPANY			10 //µ¥Î»Ãû³Æ text
+#define MEET_FACEID_SHOWFILE		11 //¿ª»áÔ¤¶ÁÎÄ¼ş¡¢ÊÓÆµµÈ
+#define MEET_FACEID_COLTDTEXT		12 //¹«Ë¾Ãû³Æ onytext
 #define MEET_FACE_LOGO_GEO		13 //text
-#define MEET_FACE_topstatus_GEO		14 //ä¼šè®®çŠ¶æ€ text 
-#define MEET_FACE_checkin_GEO		15 //è¿›å…¥ä¼šè®®æŒ‰é’® text
-#define MEET_FACE_manage_GEO		16 //è¿›å…¥åå° text
-#define MEET_FACE_remark_GEO		17 //å¤‡æ³¨ text
-#define MEET_FACE_role_GEO		18 //è§’è‰² text
-#define MEET_FACE_ver_GEO		19 //ç‰ˆæœ¬ text
+#define MEET_FACE_topstatus_GEO		14 //»áÒé×´Ì¬ text 
+#define MEET_FACE_checkin_GEO		15 //½øÈë»áÒé°´Å¥ text
+#define MEET_FACE_manage_GEO		16 //½øÈëºóÌ¨ text
+#define MEET_FACE_remark_GEO		17 //±¸×¢ text
+#define MEET_FACE_role_GEO		18 //½ÇÉ« text
+#define MEET_FACE_ver_GEO		19 //°æ±¾ text
 
-#define MEET_FACE_SeatIcoShow_GEO		20 //æ’ä½å›¾æ ‡æ˜¯å¦æ˜¾ç¤º text
+#define MEET_FACE_SeatIcoShow_GEO		20 //ÅÅÎ»Í¼±êÊÇ·ñÏÔÊ¾ text
 
-#define MEET_FACE_SeatLayoutShow_top		21 //æ¡Œç‰Œæ˜¾ç¤ºä¸Š  text
-#define MEET_FACE_SeatLayoutShow_main		22 //æ¡Œç‰Œæ˜¾ç¤ºä¸­  text
-#define MEET_FACE_SeatLayoutShow_bottom		23 //æ¡Œç‰Œæ˜¾ç¤ºä¸‹  text
+#define MEET_FACE_SeatLayoutShow_top		21 //×ÀÅÆÏÔÊ¾ÉÏ  text
+#define MEET_FACE_SeatLayoutShow_main		22 //×ÀÅÆÏÔÊ¾ÖĞ  text
+#define MEET_FACE_SeatLayoutShow_bottom		23 //×ÀÅÆÏÔÊ¾ÏÂ  text
 
 #define  MEET_FACE_MEETAGENDAFont         24
 
-#define MEET_FACE_BulletinBK        25  // ä¼šè®®å…¬å‘ŠèƒŒæ™¯  png ï¼ˆä»…IDï¼‰
-#define MEET_FACE_BulletinLogo      26  // ä¼šè®®å…¬å‘ŠLOGO  png ï¼ˆä»…IDï¼‰
-#define MEET_FACE_BulletinTitle     27  // ä¼šè®®å…¬å‘Šæ ‡é¢˜  text
-#define MEET_FACE_BulletinContent   28  // ä¼šè®®å…¬å‘Šå†…å®¹  text
-#define MEET_FACE_BulletinBtn       29  // å…¬å‘Šå…³é—­æŒ‰é’®  text
+#define MEET_FACE_BulletinBK        25  // »áÒé¹«¸æ±³¾°  png £¨½öID£©
+#define MEET_FACE_BulletinLogo      26  // »áÒé¹«¸æLOGO  png £¨½öID£©
+#define MEET_FACE_BulletinTitle     27  // »áÒé¹«¸æ±êÌâ  text
+#define MEET_FACE_BulletinContent   28  // »áÒé¹«¸æÄÚÈİ  text
+#define MEET_FACE_BulletinBtn       29  // ¹«¸æ¹Ø±Õ°´Å¥  text
 
-#define MEET_FACEID_PROJECTIVE_MIANBG		101  //æŠ•å½±ç•Œé¢ png
+#define MEET_FACEID_PROJECTIVE_MIANBG		101  //Í¶Ó°½çÃæ png
 #define MEET_FACEID_PROJECTIVE_LOGO			102  //logo png
-#define MEET_FACEID_PROJECTIVE_MEETNAME		103  //ä¼šè®®åç§° text
-#define MEET_FACEID_PROJECTIVE_SEATNAME		104  //åº§å¸­åç§° text
-#define MEET_FACEID_PROJECTIVE_TIMER		105  //æ—¥æœŸæ—¶é—´ text
-#define MEET_FACEID_PROJECTIVE_COMPANY		106  //å•ä½åç§° text
-#define MEET_FACEID_PROJECTIVE_SIGNINFO		107  //ç­¾åˆ°æƒ…å†µ text
-#define MEET_FACEID_PROJECTIVE_MEETTIME		108  //ä¼šè®®æ—¶é—´ text
-#define MEET_FACEID_PROJECTIVE_COMPANYNAME	109  //å…¬å¸åç§°ä½ç½® text
-#define MEET_FACEID_PROJECTIVE_STATUS		110  //ä¼šè®®çŠ¶æ€ text
-#define MEET_FACEID_PROJECTIVE_SHOWFILE		111  //å¼€ä¼šé¢„è¯»æ–‡ä»¶ã€è§†é¢‘ç­‰  //ä»…ID
-#define MEET_FACEID_PROJECTIVE_COLTDTEXT	112  //å…¬å¸åç§° onytext
+#define MEET_FACEID_PROJECTIVE_MEETNAME		103  //»áÒéÃû³Æ text
+#define MEET_FACEID_PROJECTIVE_SEATNAME		104  //×ùÏ¯Ãû³Æ text
+#define MEET_FACEID_PROJECTIVE_TIMER		105  //ÈÕÆÚÊ±¼ä text
+#define MEET_FACEID_PROJECTIVE_COMPANY		106  //µ¥Î»Ãû³Æ text
+#define MEET_FACEID_PROJECTIVE_SIGNINFO		107  //Ç©µ½Çé¿ö text
+#define MEET_FACEID_PROJECTIVE_MEETTIME		108  //»áÒéÊ±¼ä text
+#define MEET_FACEID_PROJECTIVE_COMPANYNAME	109  //¹«Ë¾Ãû³ÆÎ»ÖÃ text
+#define MEET_FACEID_PROJECTIVE_STATUS		110  //»áÒé×´Ì¬ text
+#define MEET_FACEID_PROJECTIVE_SHOWFILE		111  //¿ª»áÔ¤¶ÁÎÄ¼ş¡¢ÊÓÆµµÈ  //½öID
+#define MEET_FACEID_PROJECTIVE_COLTDTEXT	112  //¹«Ë¾Ãû³Æ onytext
 
-#define MEET_FACEID_PROJECTIVE_SIGN_ALL     113  // ç­¾åˆ°ï¼šåº”åˆ°
-#define MEET_FACEID_PROJECTIVE_SIGN_IN      114  // ç­¾åˆ°ï¼šå·²åˆ°
-#define MEET_FACEID_PROJECTIVE_SIGN_OUT     115  // ç­¾åˆ°ï¼šæœªåˆ°
-#define MEET_FACEID_PROJECTIVE_DATE         116  // æŠ•å½±æ˜¾ç¤ºå¼€ä¼š(å½“å¤©)æ—¥æœŸ,æ ¼å¼ï¼š2022å¹´1æœˆ2æ—¥
+#define MEET_FACEID_PROJECTIVE_SIGN_ALL     113  // Ç©µ½£ºÓ¦µ½
+#define MEET_FACEID_PROJECTIVE_SIGN_IN      114  // Ç©µ½£ºÒÑµ½
+#define MEET_FACEID_PROJECTIVE_SIGN_OUT     115  // Ç©µ½£ºÎ´µ½
+#define MEET_FACEID_PROJECTIVE_DATE         116  // Í¶Ó°ÏÔÊ¾¿ª»á(µ±Ìì)ÈÕÆÚ,¸ñÊ½£º2022Äê1ÔÂ2ÈÕ
 
-#define MEET_FACEID_PROJECTIVE_CUSTOMTITLE1 117  //æŠ•å½±è‡ªå®šä¹‰æ ‡é¢˜
-#define MEET_FACEID_PROJECTIVE_AgendaInfo   118  //è®®é¢˜
+#define MEET_FACEID_PROJECTIVE_CUSTOMTITLE1 117  //Í¶Ó°×Ô¶¨Òå±êÌâ
+#define MEET_FACEID_PROJECTIVE_AgendaInfo   118  //ÒéÌâ
 //fontflag
-#define MEET_FONTFLAG_BOLD		0x00000001 //åŠ ç²—
-#define MEET_FONTFLAG_LEAN		0x00000002 //å€¾æ–œ
-#define MEET_FONTFLAG_UNDERLINE 0x00000004 //ä¸‹åˆ’çº¿
+#define MEET_FONTFLAG_BOLD		0x00000001 //¼Ó´Ö
+#define MEET_FONTFLAG_LEAN		0x00000002 //ÇãĞ±
+#define MEET_FONTFLAG_UNDERLINE 0x00000004 //ÏÂ»®Ïß
 
 //flag
-#define MEET_FACEFLAG_SHOW			0x00000001 //è¯¥ä½ç”¨äºè¡¨ç¤ºè¯¥é¡¹æ˜¯å¦å¯è§
-#define MEET_FACEFLAG_TEXT			0x00000002 //è¯¥ä½ç”¨äºè¡¨ç¤ºæ•°æ®æ˜¯æ–‡æœ¬ç±»å‹,å¦åˆ™ä¸ºæ–‡ä»¶ID
-#define MEET_FACEFLAG_ONLYTEXT		0x00000004 //è¯¥ä½ç”¨äºè¡¨ç¤ºæ•°æ®æ˜¯çº¯æ–‡æœ¬ç±»å‹
+#define MEET_FACEFLAG_SHOW			0x00000001 //¸ÃÎ»ÓÃÓÚ±íÊ¾¸ÃÏîÊÇ·ñ¿É¼û
+#define MEET_FACEFLAG_TEXT			0x00000002 //¸ÃÎ»ÓÃÓÚ±íÊ¾Êı¾İÊÇÎÄ±¾ÀàĞÍ,·ñÔòÎªÎÄ¼şID
+#define MEET_FACEFLAG_ONLYTEXT		0x00000004 //¸ÃÎ»ÓÃÓÚ±íÊ¾Êı¾İÊÇ´¿ÎÄ±¾ÀàĞÍ
 #endif
 
-//æ–‡æœ¬é¡¹
+//ÎÄ±¾Ïî
 typedef struct
 {
-	unsigned int faceid;  //ç•Œé¢é¡¹ID
-	unsigned int flag;	  //å±æ€§å€¼
+	unsigned int faceid;  //½çÃæÏîID
+	unsigned int flag;	  //ÊôĞÔÖµ
 
-	unsigned short  fontsize;	//å­—ä½“å¤§å°
-	unsigned int    color;		//å­—ä½“rgbaé¢œè‰²
-	unsigned short  align;		//å¯¹é½
-	unsigned short  fontflag;	//å­—ä½“å±æ€§
-	char			fontname[NAME_LENG];//å­—ä½“åç§°
+	unsigned short  fontsize;	//×ÖÌå´óĞ¡
+	unsigned int    color;		//×ÖÌårgbaÑÕÉ«
+	unsigned short  align;		//¶ÔÆë
+	unsigned short  fontflag;	//×ÖÌåÊôĞÔ
+	char			fontname[NAME_LENG];//×ÖÌåÃû³Æ
 	
-	float lx;//åæ ‡ å·¦ä¸Šè§’x  (x * 100 / width)
-	float ly;//åæ ‡ å·¦ä¸Šè§’y  (y * 100 / height)
-	float bx;//åæ ‡ å³ä¸‹è§’x
-	float by;//åæ ‡ å³ä¸‹è§’y
+	float lx;//×ø±ê ×óÉÏ½Çx  (x * 100 / width)
+	float ly;//×ø±ê ×óÉÏ½Çy  (y * 100 / height)
+	float bx;//×ø±ê ÓÒÏÂ½Çx
+	float by;//×ø±ê ÓÒÏÂ½Çy
 	
 }PD_FaceTextItemInfo;
 
-//å›¾ç‰‡é¡¹
+//Í¼Æ¬Ïî
 typedef struct
 {
-	unsigned int faceid;  //ç•Œé¢é¡¹ID
-	unsigned int flag;    //å±æ€§å€¼
-	unsigned int mediaid; //é¡¹å€¼
+	unsigned int faceid;  //½çÃæÏîID
+	unsigned int flag;    //ÊôĞÔÖµ
+	unsigned int mediaid; //ÏîÖµ
 }PD_FacePictureItemInfo;
 
-//çº¯æ–‡æœ¬é¡¹
+//´¿ÎÄ±¾Ïî
 typedef struct
 {
-	unsigned int faceid;  //ç•Œé¢é¡¹ID
-	unsigned int flag;    //å±æ€§å€¼
-	char		 text[DESCRIBE_LENG];//æ–‡æœ¬
+	unsigned int faceid;  //½çÃæÏîID
+	unsigned int flag;    //ÊôĞÔÖµ
+	char		 text[DESCRIBE_LENG];//ÎÄ±¾
 }PD_FaceOnlyTextItemInfo;
 
-//stagesï¼šSTAGE_MeetingFace
+//stages£ºSTAGE_MeetingFace
 //fun: FUN_One
-//method:æŸ¥è¯¢ï¼Œä¿®æ”¹
+//method:²éÑ¯£¬ĞŞ¸Ä
 typedef struct
 {
-	unsigned int getall;  //ä¸ºçœŸè¡¨ç¤ºè·å–å…¨éƒ¨,å¦åˆ™è·å–è®¾å¤‡æ‰€å±ç±»å‹çš„é¡¹
-	unsigned int TotalNum;//æ€»å…±æœ‰å¤šå°‘ä¸ªå…¬å‘Š
-	unsigned int StartId; //å½“å‰å¸§å¼€å§‹å…¬å‘Šåºå·
-	unsigned int CurrNum; //å½“å‰å¸§åŒ…æ‹¬å¤šå°‘ä¸ªå…¬å‘Šä¿¡æ¯
-	//PD_FaceTextItemInfo PD_FacePictureItemInfo; //æ ¹æ®å‰é¢æ€»æ•°åˆ—å†™PD_FaceTextItemInfo PD_FacePictureItemInfoäº¤é”™
+	unsigned int getall;  //ÎªÕæ±íÊ¾»ñÈ¡È«²¿,·ñÔò»ñÈ¡Éè±¸ËùÊôÀàĞÍµÄÏî
+	unsigned int TotalNum;//×Ü¹²ÓĞ¶àÉÙ¸ö¹«¸æ
+	unsigned int StartId; //µ±Ç°Ö¡¿ªÊ¼¹«¸æĞòºÅ
+	unsigned int CurrNum; //µ±Ç°Ö¡°üÀ¨¶àÉÙ¸ö¹«¸æĞÅÏ¢
+	//PD_FaceTextItemInfo PD_FacePictureItemInfo; //¸ù¾İÇ°Ãæ×ÜÊıÁĞĞ´PD_FaceTextItemInfo PD_FacePictureItemInfo½»´í
 }PD_MeetingFaceEx;
 
 #define MEETDIR_NEEDFILE 0xff000000
 
-//ä¼šè®®èµ„æ–™ ç›®å½•æŸ¥è¯¢
-//stagesï¼šSTAGE_MeetingDatum
-//fun: FUN_Dir_All, å…¨éƒ¨ç›®å½•
-//method:æŸ¥è¯¢
-//ä¸€ä¸ªä¼šè®®çš„èµ„æ–™ç›®å½•åç§°å”¯ä¸€ï¼Œä¸èƒ½æœ‰é‡å¤
+//»áÒé×ÊÁÏ Ä¿Â¼²éÑ¯
+//stages£ºSTAGE_MeetingDatum
+//fun: FUN_Dir_All, È«²¿Ä¿Â¼
+//method:²éÑ¯
+//Ò»¸ö»áÒéµÄ×ÊÁÏÄ¿Â¼Ãû³ÆÎ¨Ò»£¬²»ÄÜÓĞÖØ¸´
 typedef struct 
 {  
-	unsigned int MeetingId;  //ä¼šè®®ID
-	unsigned int TotalNum ;//æ€»å…±æœ‰å¤šå°‘ä¸ªç›®å½•
-	unsigned int StartId; //å½“å‰å¸§å¼€å§‹ç›®å½•åºå·
-	unsigned int  CurrNum ;//å½“å‰å¸§åŒ…æ‹¬å¤šå°‘ä¸ªç›®å½•ä¿¡æ¯
-	//PD_DirInfo; //æ ¹æ®å‰é¢æ€»æ•°åˆ—å†™PD_DirInfo
+	unsigned int MeetingId;  //»áÒéID
+	unsigned int TotalNum ;//×Ü¹²ÓĞ¶àÉÙ¸öÄ¿Â¼
+	unsigned int StartId; //µ±Ç°Ö¡¿ªÊ¼Ä¿Â¼ĞòºÅ
+	unsigned int  CurrNum ;//µ±Ç°Ö¡°üÀ¨¶àÉÙ¸öÄ¿Â¼ĞÅÏ¢
+	//PD_DirInfo; //¸ù¾İÇ°Ãæ×ÜÊıÁĞĞ´PD_DirInfo
 }PD_MeetingDirAll;
 typedef struct
 {
-	unsigned int MeetingId;  //ä¼šè®®ID
-	unsigned int TotalNum;//æ€»å…±æœ‰å¤šå°‘ä¸ªç›®å½•
-	unsigned int StartId; //å½“å‰å¸§å¼€å§‹ç›®å½•åºå·
-	unsigned int  CurrNum;//å½“å‰å¸§åŒ…æ‹¬å¤šå°‘ä¸ªç›®å½•ä¿¡æ¯
-	//PD_DirInfo_V2; //æ ¹æ®å‰é¢æ€»æ•°åˆ—å†™PD_DirInfo_V2
+	unsigned int MeetingId;  //»áÒéID
+	unsigned int TotalNum;//×Ü¹²ÓĞ¶àÉÙ¸öÄ¿Â¼
+	unsigned int StartId; //µ±Ç°Ö¡¿ªÊ¼Ä¿Â¼ĞòºÅ
+	unsigned int  CurrNum;//µ±Ç°Ö¡°üÀ¨¶àÉÙ¸öÄ¿Â¼ĞÅÏ¢
+	//PD_DirInfo_V2; //¸ù¾İÇ°Ãæ×ÜÊıÁĞĞ´PD_DirInfo_V2
 }PD_MeetingDirAll_V2;
 
-//ä¼šè®®èµ„æ–™  ç›®å½•å¢åŠ ï¼Œä¿®æ”¹ï¼Œåˆ é™¤
-//stagesï¼šSTAGE_MeetingDatum
-//fun: FUN_Dir_One, å•ä¸ªç›®å½•
-//method:å¢åŠ ï¼Œåˆ é™¤
+//»áÒé×ÊÁÏ  Ä¿Â¼Ôö¼Ó£¬ĞŞ¸Ä£¬É¾³ı
+//stages£ºSTAGE_MeetingDatum
+//fun: FUN_Dir_One, µ¥¸öÄ¿Â¼
+//method:Ôö¼Ó£¬É¾³ı
 typedef struct 
 {  
-	unsigned int MeetingId;  //ä¼šè®®ID
+	unsigned int MeetingId;  //»áÒéID
 	PD_DirInfo Dir; 
 }PD_MeetingDirOne;
 typedef struct
 {
-	unsigned int MeetingId;  //ä¼šè®®ID
+	unsigned int MeetingId;  //»áÒéID
 	PD_DirInfo_V2 Dir;
 }PD_MeetingDirOne_V2;
 
-//ä¼šè®®èµ„æ–™  ç›®å½•é‡å‘½å
-//stagesï¼šSTAGE_MeetingDatum
-//fun: FUN_Dir_One, å•ä¸ªç›®å½•
-//method:ä¿®æ”¹
+//»áÒé×ÊÁÏ  Ä¿Â¼ÖØÃüÃû
+//stages£ºSTAGE_MeetingDatum
+//fun: FUN_Dir_One, µ¥¸öÄ¿Â¼
+//method:ĞŞ¸Ä
 typedef struct
 {
-	unsigned int MeetingId;  //ä¼šè®®ID
-	PD_DirInfo oldDir; //ç›®å½•åŸæ¥çš„åç§°
-	PD_DirInfo newDir; //ç›®å½•ç°æœ‰åç§°
+	unsigned int MeetingId;  //»áÒéID
+	PD_DirInfo oldDir; //Ä¿Â¼Ô­À´µÄÃû³Æ
+	PD_DirInfo newDir; //Ä¿Â¼ÏÖÓĞÃû³Æ
 }PD_MeetingDirChange;
 
-//ä¼šè®®æ–‡ä»¶ 
-//stagesï¼šSTAGE_MeetingDatum
-//fun: FUN_File_All, å…¨éƒ¨æ–‡ä»¶
-//method:æŸ¥è¯¢
+//»áÒéÎÄ¼ş 
+//stages£ºSTAGE_MeetingDatum
+//fun: FUN_File_All, È«²¿ÎÄ¼ş
+//method:²éÑ¯
 
-//åŒä¸€ä¸ªç›®å½•ä¸‹é¢çš„æ–‡ä»¶åç§°å”¯ä¸€ï¼Œä¸èƒ½é‡å¤
+//Í¬Ò»¸öÄ¿Â¼ÏÂÃæµÄÎÄ¼şÃû³ÆÎ¨Ò»£¬²»ÄÜÖØ¸´
 typedef struct 
 {  
-	unsigned int MeetingId;  //ä¼šè®®ID
-	PD_DirInfo dir;	//ç›®å½•
-	unsigned int TotalNum ;//æ€»å…±æœ‰å¤šå°‘ä¸ªæ–‡ä»¶
-	unsigned int StartId; //å½“å‰å¸§å¼€å§‹æ–‡ä»¶åºå·
-	unsigned int  CurrNum ;//å½“å‰å¸§åŒ…æ‹¬å¤šå°‘ä¸ªæ–‡ä»¶ä¿¡æ¯
-	//PD_FileInfo; //æ ¹æ®å‰é¢æ€»æ•°åˆ—å†™PD_FileInfo
+	unsigned int MeetingId;  //»áÒéID
+	PD_DirInfo dir;	//Ä¿Â¼
+	unsigned int TotalNum ;//×Ü¹²ÓĞ¶àÉÙ¸öÎÄ¼ş
+	unsigned int StartId; //µ±Ç°Ö¡¿ªÊ¼ÎÄ¼şĞòºÅ
+	unsigned int  CurrNum ;//µ±Ç°Ö¡°üÀ¨¶àÉÙ¸öÎÄ¼şĞÅÏ¢
+	//PD_FileInfo; //¸ù¾İÇ°Ãæ×ÜÊıÁĞĞ´PD_FileInfo
 }PD_MeetingFileAll;
 
 typedef struct
 {
-	int32u MeetingId;  //ä¼šè®®ID
-	int32u dirid; //ç›®å½•ID
-	int32u TotalNum;//æ€»å…±æœ‰å¤šå°‘ä¸ªæ–‡ä»¶
-	int32u StartId; //å½“å‰å¸§å¼€å§‹æ–‡ä»¶åºå·
-	int32u CurrNum;//å½“å‰å¸§åŒ…æ‹¬å¤šå°‘ä¸ªæ–‡ä»¶ä¿¡æ¯
-	//PD_FileInfo_V2; //æ ¹æ®å‰é¢æ€»æ•°åˆ—å†™PD_FileInfo_V2
+	int32u MeetingId;  //»áÒéID
+	int32u dirid; //Ä¿Â¼ID
+	int32u TotalNum;//×Ü¹²ÓĞ¶àÉÙ¸öÎÄ¼ş
+	int32u StartId; //µ±Ç°Ö¡¿ªÊ¼ÎÄ¼şĞòºÅ
+	int32u CurrNum;//µ±Ç°Ö¡°üÀ¨¶àÉÙ¸öÎÄ¼şĞÅÏ¢
+	//PD_FileInfo_V2; //¸ù¾İÇ°Ãæ×ÜÊıÁĞĞ´PD_FileInfo_V2
 }PD_MeetingFileAll_V2;
 
-//ä¼šè®®æ–‡ä»¶  å¢åŠ ï¼Œåˆ é™¤
-//stagesï¼šSTAGE_MeetingDatum
-//fun: FUN_File_One, å•ä¸ªæ–‡ä»¶
-//method:å¢åŠ ï¼Œåˆ é™¤
+//»áÒéÎÄ¼ş  Ôö¼Ó£¬É¾³ı
+//stages£ºSTAGE_MeetingDatum
+//fun: FUN_File_One, µ¥¸öÎÄ¼ş
+//method:Ôö¼Ó£¬É¾³ı
 typedef struct 
 {  
-	unsigned int MeetingId;  //ä¼šè®®ID
-	PD_DirInfo dir;	//ç›®å½•
+	unsigned int MeetingId;  //»áÒéID
+	PD_DirInfo dir;	//Ä¿Â¼
 	PD_FileInfo file;
 }PD_MeetingFileOne;
 
 typedef struct
 {
-	int32u MeetingId;  //ä¼šè®®ID
-	int32u dirid;	//ç›®å½•id
+	int32u MeetingId;  //»áÒéID
+	int32u dirid;	//Ä¿Â¼id
 	PD_FileInfo_V2 file;
 }PD_MeetingFileOne_V2;
 
-//ä¼šè®®æ–‡ä»¶  ä¿®æ”¹
-//stagesï¼šSTAGE_MeetingDatum
-//fun: FUN_File_One, å•ä¸ªæ–‡ä»¶
-//method:ä¿®æ”¹
+//»áÒéÎÄ¼ş  ĞŞ¸Ä
+//stages£ºSTAGE_MeetingDatum
+//fun: FUN_File_One, µ¥¸öÎÄ¼ş
+//method:ĞŞ¸Ä
 typedef struct 
 {  
-	unsigned int MeetingId;  //ä¼šè®®ID
-	PD_DirInfo dir;	//ç›®å½•
+	unsigned int MeetingId;  //»áÒéID
+	PD_DirInfo dir;	//Ä¿Â¼
 	PD_FileInfo oldFile; //
 	PD_FileInfo newFile; 
 }PD_MeetingFileChange;
@@ -1675,100 +1702,100 @@ typedef struct
 ///start FileScore
 typedef struct
 {
-	int32u fileid;  //æ–‡ä»¶ID
-	int32u memberid;//å‚ä¼šäººå‘˜ID
-	int32u score;//è¯„åˆ†
-	int64u scoretime;//è¯„åˆ†utcæ—¶é—´ å¾®ç§’
+	int32u fileid;  //ÎÄ¼şID
+	int32u memberid;//²Î»áÈËÔ±ID
+	int32u score;//ÆÀ·Ö
+	int64u scoretime;//ÆÀ·ÖutcÊ±¼ä Î¢Ãë
 }PD_Item_FileScore;
 
-//ä¼šè®®æ–‡ä»¶è¯„åˆ†  ä¿®æ”¹
-//stagesï¼šSTAGE_FileScore
-//fun: FUN_One, å•ä¸ª
-//method:æ·»åŠ ã€ä¿®æ”¹ã€åˆ é™¤ã€æŸ¥è¯¢(æ•°æ®åº“è¿”å›)
+//»áÒéÎÄ¼şÆÀ·Ö  ĞŞ¸Ä
+//stages£ºSTAGE_FileScore
+//fun: FUN_One, µ¥¸ö
+//method:Ìí¼Ó¡¢ĞŞ¸Ä¡¢É¾³ı¡¢²éÑ¯(Êı¾İ¿â·µ»Ø)
 typedef struct
 {
-	int32u meetingid;  //ä¼šè®®ID
-	int32u TotalNum;//æ€»å…±æœ‰å¤šå°‘ä¸ªæ–‡ä»¶
-	int32u StartId; //å½“å‰å¸§å¼€å§‹æ–‡ä»¶åºå·
-	int32u CurrNum;//å½“å‰å¸§åŒ…æ‹¬å¤šå°‘ä¸ªæ–‡ä»¶ä¿¡æ¯
-	//PD_Item_FileScore; //æ ¹æ®å‰é¢æ€»æ•°åˆ—å†™PD_Item_FileScore
+	int32u meetingid;  //»áÒéID
+	int32u TotalNum;//×Ü¹²ÓĞ¶àÉÙ¸öÎÄ¼ş
+	int32u StartId; //µ±Ç°Ö¡¿ªÊ¼ÎÄ¼şĞòºÅ
+	int32u CurrNum;//µ±Ç°Ö¡°üÀ¨¶àÉÙ¸öÎÄ¼şĞÅÏ¢
+	//PD_Item_FileScore; //¸ù¾İÇ°Ãæ×ÜÊıÁĞĞ´PD_Item_FileScore
 }PD_MeetingFileScore;
 
-//ä¼šè®®æ–‡ä»¶è¯„åˆ†  æŸ¥è¯¢
-//stagesï¼šSTAGE_FileScore
-//fun: FUN_One, å•ä¸ª
-//method:æŸ¥è¯¢ã€æŸ¥è¯¢ç»“æœ
+//»áÒéÎÄ¼şÆÀ·Ö  ²éÑ¯
+//stages£ºSTAGE_FileScore
+//fun: FUN_One, µ¥¸ö
+//method:²éÑ¯¡¢²éÑ¯½á¹û
 typedef struct
 {
-	int32u meetingid;//ä¼šè®®ID
-	int32u fileid;   //æ–‡ä»¶ID
+	int32u meetingid;//»áÒéID
+	int32u fileid;   //ÎÄ¼şID
 }PD_QueryFileScore;
 
-//ä¼šè®®æ–‡ä»¶è¯„åˆ†  è¿”å›æŸ¥è¯¢ç»“æœ
-//stagesï¼šSTAGE_FileScore
-//fun: FUN_One, å•ä¸ª
-//method:æŸ¥è¯¢ç»“æœ
+//»áÒéÎÄ¼şÆÀ·Ö  ·µ»Ø²éÑ¯½á¹û
+//stages£ºSTAGE_FileScore
+//fun: FUN_One, µ¥¸ö
+//method:²éÑ¯½á¹û
 typedef struct
 {
-	int32u meetingid;//ä¼šè®®ID
-	int32u fileid;   //æ–‡ä»¶ID
-	int32u score;	 //å¹³å‡è¯„åˆ†
+	int32u meetingid;//»áÒéID
+	int32u fileid;   //ÎÄ¼şID
+	int32u score;	 //Æ½¾ùÆÀ·Ö
 }PD_QueryAverageFileScore;
 ///end FileScore
 
-#define MAX_EVALUATETEXTLEN 260 //è¯„ä»·çš„æ–‡æœ¬æœ€å¤§é•¿åº¦
+#define MAX_EVALUATETEXTLEN 260 //ÆÀ¼ÛµÄÎÄ±¾×î´ó³¤¶È
 //evaluate flag
-#define FILEEVALUATE_FLAG_SECRETARY 0x00000001 //è¯¥æ ‡å¿—ä¸º1è¡¨ç¤ºè¯„ä»·å¯¹å¤–ä¸å¯è§
+#define FILEEVALUATE_FLAG_SECRETARY 0x00000001 //¸Ã±êÖ¾Îª1±íÊ¾ÆÀ¼Û¶ÔÍâ²»¿É¼û
 
 ///start Fileevaluate
 typedef struct
 {
-	int32u fileid;  //æ–‡ä»¶ID
-	int32u memberid;//å‚ä¼šäººå‘˜ID
-	int32u flag;//æ ‡å¿— å‚è§evaluate flag å®å®šä¹‰
-	int64u evaluatetime;//è¯„åˆ†utcæ—¶é—´ å¾®ç§’
-	char   evaluate[MAX_EVALUATETEXTLEN];//è¯„åˆ†çš„æ–‡æœ¬
+	int32u fileid;  //ÎÄ¼şID
+	int32u memberid;//²Î»áÈËÔ±ID
+	int32u flag;//±êÖ¾ ²Î¼ûevaluate flag ºê¶¨Òå
+	int64u evaluatetime;//ÆÀ·ÖutcÊ±¼ä Î¢Ãë
+	char   evaluate[MAX_EVALUATETEXTLEN];//ÆÀ·ÖµÄÎÄ±¾
 }PD_Item_FileEvaluate;
 
-//ä¼šè®®æ–‡ä»¶è¯„ä»· 
-//stagesï¼šSTAGE_FileEvaluate
-//fun: FUN_One, å•ä¸ª
-//method:æ·»åŠ ã€æŸ¥è¯¢(æ•°æ®åº“è¿”å›)
+//»áÒéÎÄ¼şÆÀ¼Û 
+//stages£ºSTAGE_FileEvaluate
+//fun: FUN_One, µ¥¸ö
+//method:Ìí¼Ó¡¢²éÑ¯(Êı¾İ¿â·µ»Ø)
 typedef struct
 {
-	int32u meetingid;  //ä¼šè®®ID
-	int32u totalrecord;//ç¬¦åˆæ¡ä»¶çš„æ€»è®°å½•æ¡æ•°
-	int32u startrow;//æŸ¥è¯¢è¿”å›ç”¨æˆ·ä¼ è¿‡æ¥çš„å¼€å§‹è¡Œ
-	int32u TotalNum;//æ€»å…±æœ‰å¤šå°‘ä¸ªæ–‡ä»¶
-	int32u StartId; //å½“å‰å¸§å¼€å§‹æ–‡ä»¶åºå·
-	int32u CurrNum;//å½“å‰å¸§åŒ…æ‹¬å¤šå°‘ä¸ªæ–‡ä»¶ä¿¡æ¯
-	//PD_Item_FileEvaluate; //æ ¹æ®å‰é¢æ€»æ•°åˆ—å†™PD_Item_FileScore
+	int32u meetingid;  //»áÒéID
+	int32u totalrecord;//·ûºÏÌõ¼şµÄ×Ü¼ÇÂ¼ÌõÊı
+	int32u startrow;//²éÑ¯·µ»ØÓÃ»§´«¹ıÀ´µÄ¿ªÊ¼ĞĞ
+	int32u TotalNum;//×Ü¹²ÓĞ¶àÉÙ¸öÎÄ¼ş
+	int32u StartId; //µ±Ç°Ö¡¿ªÊ¼ÎÄ¼şĞòºÅ
+	int32u CurrNum;//µ±Ç°Ö¡°üÀ¨¶àÉÙ¸öÎÄ¼şĞÅÏ¢
+	//PD_Item_FileEvaluate; //¸ù¾İÇ°Ãæ×ÜÊıÁĞĞ´PD_Item_FileScore
 }PD_MeetingFileEvaluate;
 
-//ä¼šè®®æ–‡ä»¶è¯„ä»·  æŸ¥è¯¢
-//stagesï¼šSTAGE_FileEvaluate
-//fun: FUN_One, å•ä¸ª
-//method:æŸ¥è¯¢
+//»áÒéÎÄ¼şÆÀ¼Û  ²éÑ¯
+//stages£ºSTAGE_FileEvaluate
+//fun: FUN_One, µ¥¸ö
+//method:²éÑ¯
 typedef struct
 {
-	int32u meetingid;//ä¼šè®®ID å¿…é¡»æœ‰æ•ˆ
-	int32u fileid;   //æ–‡ä»¶ID å¯ä»¥ä¸º0è¡¨ç¤ºæ‰€æœ‰æ–‡ä»¶
-	int32u memberid;//å‚ä¼šäººå‘˜ID å¯ä»¥ä¸º0è¡¨ç¤ºæ‰€æœ‰å‚ä¼šäºº
-	int64u startevaluatetime;//æŸ¥è¯¢çš„èµ·å§‹è¯„åˆ†utcæ—¶é—´ å¾®ç§’ å¿…é¡»æœ‰æ•ˆ
-	int64u endevaluatetime;//æŸ¥è¯¢çš„ç»“æŸè¯„åˆ†utcæ—¶é—´ å¾®ç§’ å¿…é¡»æœ‰æ•ˆ
-	int32u startrow;//æŸ¥è¯¢å¼€å§‹è¡Œ å®ç°åˆ†é¡µæŸ¥è¯¢ å¿…é¡»æœ‰æ•ˆ
+	int32u meetingid;//»áÒéID ±ØĞëÓĞĞ§
+	int32u fileid;   //ÎÄ¼şID ¿ÉÒÔÎª0±íÊ¾ËùÓĞÎÄ¼ş
+	int32u memberid;//²Î»áÈËÔ±ID ¿ÉÒÔÎª0±íÊ¾ËùÓĞ²Î»áÈË
+	int64u startevaluatetime;//²éÑ¯µÄÆğÊ¼ÆÀ·ÖutcÊ±¼ä Î¢Ãë ±ØĞëÓĞĞ§
+	int64u endevaluatetime;//²éÑ¯µÄ½áÊøÆÀ·ÖutcÊ±¼ä Î¢Ãë ±ØĞëÓĞĞ§
+	int32u startrow;//²éÑ¯¿ªÊ¼ĞĞ ÊµÏÖ·ÖÒ³²éÑ¯ ±ØĞëÓĞĞ§
 }PD_QueryFileEvaluate;
 
-//ä¼šè®®æ–‡ä»¶è¯„ä»·  åˆ é™¤
-//stagesï¼šSTAGE_FileEvaluate
-//fun: FUN_One, å•ä¸ª
-//method:åˆ é™¤
+//»áÒéÎÄ¼şÆÀ¼Û  É¾³ı
+//stages£ºSTAGE_FileEvaluate
+//fun: FUN_One, µ¥¸ö
+//method:É¾³ı
 typedef struct
 {
-	int32u meetingid;//ä¼šè®®ID å¿…é¡»æœ‰æ•ˆ
-	int32u fileid;   //æ–‡ä»¶ID å¯ä»¥ä¸º0è¡¨ç¤ºæ‰€æœ‰æ–‡ä»¶
-	int32u memberid;//å‚ä¼šäººå‘˜ID å¯ä»¥ä¸º0è¡¨ç¤ºæ‰€æœ‰å‚ä¼šäºº
-	int64u evaluatetime;//è¯„åˆ†utcæ—¶é—´ å¾®ç§’ å½“fileidã€memberidæœ‰æ•ˆæ—¶ å¯ä»¥æœ‰æ•ˆè¡¨ç¤ºåˆ é™¤æŒ‡å®šçš„è¯„è®º
+	int32u meetingid;//»áÒéID ±ØĞëÓĞĞ§
+	int32u fileid;   //ÎÄ¼şID ¿ÉÒÔÎª0±íÊ¾ËùÓĞÎÄ¼ş
+	int32u memberid;//²Î»áÈËÔ±ID ¿ÉÒÔÎª0±íÊ¾ËùÓĞ²Î»áÈË
+	int64u evaluatetime;//ÆÀ·ÖutcÊ±¼ä Î¢Ãë µ±fileid¡¢memberidÓĞĞ§Ê± ¿ÉÒÔÓĞĞ§±íÊ¾É¾³ıÖ¸¶¨µÄÆÀÂÛ
 }PD_DelFileEvaluate;
 ///end Fileevaluate
 
@@ -1776,49 +1803,49 @@ typedef struct
 ///start Meetevaluate
 typedef struct
 {
-	int32u memberid;//å‚ä¼šäººå‘˜ID
-	int32u flag;//æ ‡å¿— å‚è§file evaluate flag å®å®šä¹‰
-	int64u evaluatetime;//è¯„åˆ†utcæ—¶é—´ å¾®ç§’
-	char   evaluate[MAX_EVALUATETEXTLEN];//è¯„åˆ†çš„æ–‡æœ¬
+	int32u memberid;//²Î»áÈËÔ±ID
+	int32u flag;//±êÖ¾ ²Î¼ûfile evaluate flag ºê¶¨Òå
+	int64u evaluatetime;//ÆÀ·ÖutcÊ±¼ä Î¢Ãë
+	char   evaluate[MAX_EVALUATETEXTLEN];//ÆÀ·ÖµÄÎÄ±¾
 }PD_Item_MeetEvaluate;
 
-//ä¼šè®®æ–‡ä»¶è¯„ä»· 
-//stagesï¼šSTAGE_MeetEvaluate
-//fun: FUN_One, å•ä¸ª
-//method:æ·»åŠ ã€æŸ¥è¯¢(æ•°æ®åº“è¿”å›)
+//»áÒéÎÄ¼şÆÀ¼Û 
+//stages£ºSTAGE_MeetEvaluate
+//fun: FUN_One, µ¥¸ö
+//method:Ìí¼Ó¡¢²éÑ¯(Êı¾İ¿â·µ»Ø)
 typedef struct
 {
-	int32u meetingid;  //ä¼šè®®ID
-	int32u totalrecord;//ç¬¦åˆæ¡ä»¶çš„æ€»è®°å½•æ¡æ•°
-	int32u startrow;//æŸ¥è¯¢è¿”å›ç”¨æˆ·ä¼ è¿‡æ¥çš„å¼€å§‹è¡Œ
-	int32u TotalNum;//æ€»å…±æœ‰å¤šå°‘ä¸ªæ–‡ä»¶
-	int32u StartId; //å½“å‰å¸§å¼€å§‹æ–‡ä»¶åºå·
-	int32u CurrNum;//å½“å‰å¸§åŒ…æ‹¬å¤šå°‘ä¸ªæ–‡ä»¶ä¿¡æ¯
-	//PD_Item_MeetEvaluate; //æ ¹æ®å‰é¢æ€»æ•°åˆ—å†™PD_Item_FileScore
+	int32u meetingid;  //»áÒéID
+	int32u totalrecord;//·ûºÏÌõ¼şµÄ×Ü¼ÇÂ¼ÌõÊı
+	int32u startrow;//²éÑ¯·µ»ØÓÃ»§´«¹ıÀ´µÄ¿ªÊ¼ĞĞ
+	int32u TotalNum;//×Ü¹²ÓĞ¶àÉÙ¸öÎÄ¼ş
+	int32u StartId; //µ±Ç°Ö¡¿ªÊ¼ÎÄ¼şĞòºÅ
+	int32u CurrNum;//µ±Ç°Ö¡°üÀ¨¶àÉÙ¸öÎÄ¼şĞÅÏ¢
+	//PD_Item_MeetEvaluate; //¸ù¾İÇ°Ãæ×ÜÊıÁĞĞ´PD_Item_FileScore
 }PD_MeetingMeetEvaluate;
 
-//ä¼šè®®æ–‡ä»¶è¯„ä»·  æŸ¥è¯¢
-//stagesï¼šSTAGE_MeetEvaluate
-//fun: FUN_One, å•ä¸ª
-//method:æŸ¥è¯¢
+//»áÒéÎÄ¼şÆÀ¼Û  ²éÑ¯
+//stages£ºSTAGE_MeetEvaluate
+//fun: FUN_One, µ¥¸ö
+//method:²éÑ¯
 typedef struct
 {
-	int32u meetingid;//ä¼šè®®ID å¿…é¡»æœ‰æ•ˆ
-	int32u memberid;//å‚ä¼šäººå‘˜ID å¯ä»¥ä¸º0è¡¨ç¤ºæ‰€æœ‰å‚ä¼šäºº
-	int64u startevaluatetime;//æŸ¥è¯¢çš„èµ·å§‹è¯„åˆ†utcæ—¶é—´ å¾®ç§’ å¿…é¡»æœ‰æ•ˆ
-	int64u endevaluatetime;//æŸ¥è¯¢çš„ç»“æŸè¯„åˆ†utcæ—¶é—´ å¾®ç§’ å¿…é¡»æœ‰æ•ˆ
-	int32u startrow;//æŸ¥è¯¢å¼€å§‹è¡Œ å®ç°åˆ†é¡µæŸ¥è¯¢ å¿…é¡»æœ‰æ•ˆ
+	int32u meetingid;//»áÒéID ±ØĞëÓĞĞ§
+	int32u memberid;//²Î»áÈËÔ±ID ¿ÉÒÔÎª0±íÊ¾ËùÓĞ²Î»áÈË
+	int64u startevaluatetime;//²éÑ¯µÄÆğÊ¼ÆÀ·ÖutcÊ±¼ä Î¢Ãë ±ØĞëÓĞĞ§
+	int64u endevaluatetime;//²éÑ¯µÄ½áÊøÆÀ·ÖutcÊ±¼ä Î¢Ãë ±ØĞëÓĞĞ§
+	int32u startrow;//²éÑ¯¿ªÊ¼ĞĞ ÊµÏÖ·ÖÒ³²éÑ¯ ±ØĞëÓĞĞ§
 }PD_QueryMeetEvaluate;
 
-//ä¼šè®®æ–‡ä»¶è¯„ä»·  åˆ é™¤
-//stagesï¼šSTAGE_FileEvaluate
-//fun: FUN_One, å•ä¸ª
-//method:åˆ é™¤
+//»áÒéÎÄ¼şÆÀ¼Û  É¾³ı
+//stages£ºSTAGE_FileEvaluate
+//fun: FUN_One, µ¥¸ö
+//method:É¾³ı
 typedef struct
 {
-	int32u meetingid;//ä¼šè®®ID å¿…é¡»æœ‰æ•ˆ
-	int32u memberid;//å‚ä¼šäººå‘˜ID å¯ä»¥ä¸º0è¡¨ç¤ºæ‰€æœ‰å‚ä¼šäºº
-	int64u evaluatetime;//è¯„åˆ†utcæ—¶é—´ å¾®ç§’ å½“memberidæœ‰æ•ˆæ—¶ å¯ä»¥æœ‰æ•ˆè¡¨ç¤ºåˆ é™¤æŒ‡å®šçš„è¯„è®º
+	int32u meetingid;//»áÒéID ±ØĞëÓĞĞ§
+	int32u memberid;//²Î»áÈËÔ±ID ¿ÉÒÔÎª0±íÊ¾ËùÓĞ²Î»áÈË
+	int64u evaluatetime;//ÆÀ·ÖutcÊ±¼ä Î¢Ãë µ±memberidÓĞĞ§Ê± ¿ÉÒÔÓĞĞ§±íÊ¾É¾³ıÖ¸¶¨µÄÆÀÂÛ
 }PD_DelMeetEvaluate;
 ///end Meetevaluate
 
@@ -1827,148 +1854,148 @@ typedef struct
 #define MAX_LOGPARAMETER_NUM 4
 typedef struct
 {
-	int32u pageid;//ç•Œé¢id  å‚è§systemlogoperid.h SYSTEMLOG_PAGEID
-	int32u operid;//æ“ä½œç±»åˆ«  å‚è§systemlogoperid.h  SYSTEMLOG_OPERID
-	int32u meetid;//æ“ä½œçš„ä¼šè®®ID
-	int32u roomid;//æ“ä½œçš„ä¼šåœºID
-	int32u deviceid;//æ“ä½œçš„è®¾å¤‡ID
-	int32u urole;//å‚è§role_admin
-	int32u uid;//äººå‘˜ID
+	int32u pageid;//½çÃæid  ²Î¼ûsystemlogoperid.h SYSTEMLOG_PAGEID
+	int32u operid;//²Ù×÷Àà±ğ  ²Î¼ûsystemlogoperid.h  SYSTEMLOG_OPERID
+	int32u meetid;//²Ù×÷µÄ»áÒéID
+	int32u roomid;//²Ù×÷µÄ»á³¡ID
+	int32u deviceid;//²Ù×÷µÄÉè±¸ID
+	int32u urole;//²Î¼ûrole_admin
+	int32u uid;//ÈËÔ±ID
 
-	int64u opertime;//æ“ä½œutcæ—¶é—´ å¾®ç§’
+	int64u opertime;//²Ù×÷utcÊ±¼ä Î¢Ãë
 
-	int32u param[MAX_LOGPARAMETER_NUM];//æ ¹æ®æ“ä½œå¯¹åº”çš„æ“ä½œå‚æ•°ï¼Œç”¨äºå¿«é€Ÿç»Ÿè®¡ï¼Œeg:æ’­æ”¾çš„æ–‡ä»¶IDï¼Œæ’­æ”¾çš„æµè®¾å¤‡ID,
+	int32u param[MAX_LOGPARAMETER_NUM];//¸ù¾İ²Ù×÷¶ÔÓ¦µÄ²Ù×÷²ÎÊı£¬ÓÃÓÚ¿ìËÙÍ³¼Æ£¬eg:²¥·ÅµÄÎÄ¼şID£¬²¥·ÅµÄÁ÷Éè±¸ID,
 }PD_Item_MeetSystemLog;
 
 
-//ä¼šè®®æ–‡ä»¶è¯„ä»· 
-//stagesï¼šSTAGE_SystemLog
-//fun: FUN_One, å•ä¸ª
-//method:æ·»åŠ ã€æŸ¥è¯¢(æ•°æ®åº“è¿”å›)
+//»áÒéÎÄ¼şÆÀ¼Û 
+//stages£ºSTAGE_SystemLog
+//fun: FUN_One, µ¥¸ö
+//method:Ìí¼Ó¡¢²éÑ¯(Êı¾İ¿â·µ»Ø)
 typedef struct
 {
-	int32u totalrecord;//æœ¬æ¬¡æŸ¥è¯¢æ€»è®°å½•æ•°
-	int32u startrow;//æŸ¥è¯¢è¿”å›ç”¨æˆ·ä¼ è¿‡æ¥çš„å¼€å§‹è¡Œ
-	int32u TotalNum;//æ€»å…±æœ‰å¤šå°‘ä¸ªæ–‡ä»¶
-	int32u StartId; //å½“å‰å¸§å¼€å§‹æ–‡ä»¶åºå·
-	int32u CurrNum;//å½“å‰å¸§åŒ…æ‹¬å¤šå°‘ä¸ªæ–‡ä»¶ä¿¡æ¯
-	//PD_Item_MeetSystemLog; //æ ¹æ®å‰é¢æ€»æ•°åˆ—å†™PD_Item_MeetSystemLog
+	int32u totalrecord;//±¾´Î²éÑ¯×Ü¼ÇÂ¼Êı
+	int32u startrow;//²éÑ¯·µ»ØÓÃ»§´«¹ıÀ´µÄ¿ªÊ¼ĞĞ
+	int32u TotalNum;//×Ü¹²ÓĞ¶àÉÙ¸öÎÄ¼ş
+	int32u StartId; //µ±Ç°Ö¡¿ªÊ¼ÎÄ¼şĞòºÅ
+	int32u CurrNum;//µ±Ç°Ö¡°üÀ¨¶àÉÙ¸öÎÄ¼şĞÅÏ¢
+	//PD_Item_MeetSystemLog; //¸ù¾İÇ°Ãæ×ÜÊıÁĞĞ´PD_Item_MeetSystemLog
 }PD_MeetingMeetSystemLog;
 
-//ä¼šè®®æ–‡ä»¶è¯„ä»·  æŸ¥è¯¢
-//stagesï¼šSTAGE_SystemLog
-//fun: FUN_One, å•ä¸ª
-//method:æŸ¥è¯¢
+//»áÒéÎÄ¼şÆÀ¼Û  ²éÑ¯
+//stages£ºSTAGE_SystemLog
+//fun: FUN_One, µ¥¸ö
+//method:²éÑ¯
 typedef struct
 {
-	int32u pageid;//ç•Œé¢id  å‚è§systemlogoperid.h SYSTEMLOG_PAGEID
-	int32u operid;//æ“ä½œæ–¹æ³• å‚è§systemlogoperid.h  SYSTEMLOG_OPERID ä¸º0è¡¨ç¤ºä¸ä½œä¸ºæŸ¥è¯¢æ¡ä»¶
-	int32u meetid;//æ“ä½œçš„ä¼šè®®ID ä¸º0è¡¨ç¤ºä¸ä½œä¸ºæŸ¥è¯¢æ¡ä»¶
-	int32u roomid;//æ“ä½œçš„ä¼šåœºID ä¸º0è¡¨ç¤ºä¸ä½œä¸ºæŸ¥è¯¢æ¡ä»¶
-	int32u deviceid;//æ“ä½œçš„è®¾å¤‡ID ä¸º0è¡¨ç¤ºä¸ä½œä¸ºæŸ¥è¯¢æ¡ä»¶
-	int32u urole;//å‚è§role_admin ä¸º0è¡¨ç¤ºä¸ä½œä¸ºæŸ¥è¯¢æ¡ä»¶
-	int32u uid;//äººå‘˜ID ä¸º0è¡¨ç¤ºä¸ä½œä¸ºæŸ¥è¯¢æ¡ä»¶
+	int32u pageid;//½çÃæid  ²Î¼ûsystemlogoperid.h SYSTEMLOG_PAGEID
+	int32u operid;//²Ù×÷·½·¨ ²Î¼ûsystemlogoperid.h  SYSTEMLOG_OPERID Îª0±íÊ¾²»×÷Îª²éÑ¯Ìõ¼ş
+	int32u meetid;//²Ù×÷µÄ»áÒéID Îª0±íÊ¾²»×÷Îª²éÑ¯Ìõ¼ş
+	int32u roomid;//²Ù×÷µÄ»á³¡ID Îª0±íÊ¾²»×÷Îª²éÑ¯Ìõ¼ş
+	int32u deviceid;//²Ù×÷µÄÉè±¸ID Îª0±íÊ¾²»×÷Îª²éÑ¯Ìõ¼ş
+	int32u urole;//²Î¼ûrole_admin Îª0±íÊ¾²»×÷Îª²éÑ¯Ìõ¼ş
+	int32u uid;//ÈËÔ±ID Îª0±íÊ¾²»×÷Îª²éÑ¯Ìõ¼ş
 
-	int32u param[MAX_LOGPARAMETER_NUM];//æ ¹æ®æ“ä½œå¯¹åº”çš„æ“ä½œå‚æ•°  ä¸º0è¡¨ç¤ºä¸ä½œä¸ºæŸ¥è¯¢æ¡ä»¶
+	int32u param[MAX_LOGPARAMETER_NUM];//¸ù¾İ²Ù×÷¶ÔÓ¦µÄ²Ù×÷²ÎÊı  Îª0±íÊ¾²»×÷Îª²éÑ¯Ìõ¼ş
 
-	int64u startopertime;//æŸ¥è¯¢çš„èµ·å§‹è®°å½•utcæ—¶é—´ å¾®ç§’ å¿…é¡»æœ‰æ•ˆ
-	int64u endopertime;//æŸ¥è¯¢çš„ç»“æŸè®°å½•utcæ—¶é—´ å¾®ç§’ å¿…é¡»æœ‰æ•ˆ
-	int32u startrow;//æŸ¥è¯¢å¼€å§‹è¡Œ å®ç°åˆ†é¡µæŸ¥è¯¢ å¿…é¡»æœ‰æ•ˆ
+	int64u startopertime;//²éÑ¯µÄÆğÊ¼¼ÇÂ¼utcÊ±¼ä Î¢Ãë ±ØĞëÓĞĞ§
+	int64u endopertime;//²éÑ¯µÄ½áÊø¼ÇÂ¼utcÊ±¼ä Î¢Ãë ±ØĞëÓĞĞ§
+	int32u startrow;//²éÑ¯¿ªÊ¼ĞĞ ÊµÏÖ·ÖÒ³²éÑ¯ ±ØĞëÓĞĞ§
 }PD_QueryMeetSystemLog;
 ///end systemlog
 
 //////////////////////////////////////////////////////////////////////////
-//ä¼šè®®æ–‡ä»¶  ä¿®æ”¹æ–‡ä»¶åºå·æ’åº
-//stagesï¼šSTAGE_MeetingDatum
-//fun: FUN_File_All, æ‰€æœ‰æ–‡ä»¶
-//method:è®¾ç½®
+//»áÒéÎÄ¼ş  ĞŞ¸ÄÎÄ¼şĞòºÅÅÅĞò
+//stages£ºSTAGE_MeetingDatum
+//fun: FUN_File_All, ËùÓĞÎÄ¼ş
+//method:ÉèÖÃ
 typedef struct
 {
-	unsigned int MeetingId;  //ä¼šè®®ID
-	unsigned int dirid;//ç›®å½•ID
-	unsigned int filenum;//æ–‡ä»¶æ•°
-	//unsigned int fileid[];//æŒ‰IDçš„æ’åº
+	unsigned int MeetingId;  //»áÒéID
+	unsigned int dirid;//Ä¿Â¼ID
+	unsigned int filenum;//ÎÄ¼şÊı
+	//unsigned int fileid[];//°´IDµÄÅÅĞò
 }PD_MeetingFilePosSet;
 
 typedef struct
 {
-	unsigned int dirid;  //ä¼šè®®ç›®å½•
-	unsigned int pos;    //åºå·
+	unsigned int dirid;  //»áÒéÄ¿Â¼
+	unsigned int pos;    //ĞòºÅ
 }PD_MeetingDirPosItem;
 
-//ä¼šè®®ç›®å½•  ä¿®æ”¹ç›®å½•å·æ’åº
-//stagesï¼šSTAGE_MeetingDatum
-//fun: FUN_Dir_All, æ‰€æœ‰ç›®å½•
-//method:è®¾ç½®
+//»áÒéÄ¿Â¼  ĞŞ¸ÄÄ¿Â¼ºÅÅÅĞò
+//stages£ºSTAGE_MeetingDatum
+//fun: FUN_Dir_All, ËùÓĞÄ¿Â¼
+//method:ÉèÖÃ
 typedef struct
 {
-	unsigned int MeetingId;  //ä¼šè®®ID
-	unsigned int num;    //ç›®å½•æ•°
+	unsigned int MeetingId;  //»áÒéID
+	unsigned int num;    //Ä¿Â¼Êı
 	//PD_MeetingDirPosItem item[];//
 }PD_MeetingDirPosSet;
 
-//è§†é¢‘ä¼šè®®
-//stagesï¼šSTAGE_MeetingVideo
-//fun: ProtocalData::FUN_All, å…¨éƒ¨è§†é¢‘æ–‡ä»¶
-//method:æŸ¥è¯¢
-//ä¸€ä¸ªä¼šè®®çš„è§†é¢‘æ–‡ä»¶åç§°å”¯ä¸€ï¼Œä¸èƒ½é‡å¤
+//ÊÓÆµ»áÒé
+//stages£ºSTAGE_MeetingVideo
+//fun: ProtocalData::FUN_All, È«²¿ÊÓÆµÎÄ¼ş
+//method:²éÑ¯
+//Ò»¸ö»áÒéµÄÊÓÆµÎÄ¼şÃû³ÆÎ¨Ò»£¬²»ÄÜÖØ¸´
 typedef struct 
 {  
-	unsigned int MeetingId;  //ä¼šè®®ID
-	unsigned int TotalNum ;//æ€»å…±æœ‰å¤šå°‘ä¸ªæ–‡ä»¶
-	unsigned int StartId;  //å½“å‰å¼€å§‹åºå·
-	unsigned int CurrNum;  //å½“å‰å¸§åŒ…æ‹¬å¤šå°‘ä¸ªä¼šè®®ä¿¡æ¯
-	//PD_VideoStruct; //æ ¹æ®å‰é¢æ€»æ•°åˆ—å†™PD_FileInfont 
+	unsigned int MeetingId;  //»áÒéID
+	unsigned int TotalNum ;//×Ü¹²ÓĞ¶àÉÙ¸öÎÄ¼ş
+	unsigned int StartId;  //µ±Ç°¿ªÊ¼ĞòºÅ
+	unsigned int CurrNum;  //µ±Ç°Ö¡°üÀ¨¶àÉÙ¸ö»áÒéĞÅÏ¢
+	//PD_VideoStruct; //¸ù¾İÇ°Ãæ×ÜÊıÁĞĞ´PD_FileInfont 
 }PD_MeetingVideoAll;
 
-//è§†é¢‘ä¼šè®®
-//stagesï¼šSTAGE_MeetingVideo
-//fun: FUN_One, å•ä¸ªè§†é¢‘æ–‡ä»¶
-//method:å¢åŠ ï¼Œåˆ é™¤
+//ÊÓÆµ»áÒé
+//stages£ºSTAGE_MeetingVideo
+//fun: FUN_One, µ¥¸öÊÓÆµÎÄ¼ş
+//method:Ôö¼Ó£¬É¾³ı
 typedef struct 
 {  
-	unsigned int MeetingId;  //ä¼šè®®ID
-	PD_VideoStruct video; //æ ¹æ®å‰é¢æ€»æ•°åˆ—å†™PD_FileInfont 
+	unsigned int MeetingId;  //»áÒéID
+	PD_VideoStruct video; //¸ù¾İÇ°Ãæ×ÜÊıÁĞĞ´PD_FileInfont 
 }PD_MeetingVideoOne;
 
 
-//ä¼šè®®æ’ä½
-//stagesï¼šSTAGE_MeetingSeat
-//fun: ProtocalData::FUN_All, å…¨éƒ¨æ’ä½æƒ…å†µ
-//method:æŸ¥è¯¢,æ‰¹é‡ä¿®æ”¹
+//»áÒéÅÅÎ»
+//stages£ºSTAGE_MeetingSeat
+//fun: ProtocalData::FUN_All, È«²¿ÅÅÎ»Çé¿ö
+//method:²éÑ¯,ÅúÁ¿ĞŞ¸Ä
 //
 typedef struct 
 {  
-	unsigned int MeetingId;  //ä¼šè®®ID
-	unsigned int TotalNum ;//æ€»å…±æœ‰å¤šå°‘ä¸ªåº§ä½ç¼–å·
-	unsigned int StartId;  //å½“å‰å¼€å§‹åºå·
-	unsigned int CurrNum;  //å½“å‰å¸§åŒ…æ‹¬å¤šå°‘ä¸ªåº§ä½ç¼–å·ä¿¡æ¯
-	//PD_Seat; //æ ¹æ®å‰é¢æ€»æ•°åˆ—å†™PD_Seat 
+	unsigned int MeetingId;  //»áÒéID
+	unsigned int TotalNum ;//×Ü¹²ÓĞ¶àÉÙ¸ö×ùÎ»±àºÅ
+	unsigned int StartId;  //µ±Ç°¿ªÊ¼ĞòºÅ
+	unsigned int CurrNum;  //µ±Ç°Ö¡°üÀ¨¶àÉÙ¸ö×ùÎ»±àºÅĞÅÏ¢
+	//PD_Seat; //¸ù¾İÇ°Ãæ×ÜÊıÁĞĞ´PD_Seat 
 }PD_MeetingSeatAll;
 
 
-//ä¼šè®®æ’ä½
-//stagesï¼šSTAGE_MeetingSeat
+//»áÒéÅÅÎ»
+//stages£ºSTAGE_MeetingSeat
 //fun: FUN_One, 
-//method:å¢åŠ ï¼Œåˆ é™¤,ä¿®æ”¹
+//method:Ôö¼Ó£¬É¾³ı,ĞŞ¸Ä
 //
 typedef struct 
 {  
-	unsigned int MeetingId;  //ä¼šè®®ID
-	unsigned int roomid;//ä¼šåœºID
+	unsigned int MeetingId;  //»áÒéID
+	unsigned int roomid;//»á³¡ID
 	PD_Seat seat; //PD_Seat 
 }PD_MeetingSeatOne;
 
-//è¿”å›ä¼šè®®ä¸»æŒäººæŸ¥è¯¢
+//·µ»Ø»áÒéÖ÷³ÖÈË²éÑ¯
 typedef struct
 {
-	int32u meetingid;//ä¼šè®®ID
-	int32u membernameid;//ä¸»æŒäººID
-	char   membername[NAME_LENG];//ç®¡ç†å‘˜ç™»å½•å
+	int32u meetingid;//»áÒéID
+	int32u membernameid;//Ö÷³ÖÈËID
+	char   membername[NAME_LENG];//¹ÜÀíÔ±µÇÂ¼Ãû
 }PD_Item_MeetCompee;
 
 //stages:STAGE_MeetingSeat
-//funï¼šFUN_All
+//fun£ºFUN_All
 //method: METHOD_Query
 typedef struct
 {
@@ -1977,233 +2004,233 @@ typedef struct
 	//PD_Item_MeetCompee item[num];
 }PD_QueryMeetCompee;
 
-//ä¼šè®®èŠå¤©
-//stagesï¼šSTAGE_MeetingChat
+//»áÒéÁÄÌì
+//stages£ºSTAGE_MeetingChat
 //fun: FUN_One, 
 //method:METHOD_Add  , 
 typedef struct
 {
-	unsigned int MeetingId;     //ä¼šè®®ID
-	unsigned int sendmemId;		//å‘é€äººäººå‘˜ID
-	unsigned int membernum;		//æ¥æ”¶çš„å‚ä¼šäººå‘˜idæ•°,å…¶ä¸­0ä¸ºæ‰€æœ‰äººå‘˜
+	unsigned int MeetingId;     //»áÒéID
+	unsigned int sendmemId;		//·¢ËÍÈËÈËÔ±ID
+	unsigned int membernum;		//½ÓÊÕµÄ²Î»áÈËÔ±idÊı,ÆäÖĞ0ÎªËùÓĞÈËÔ±
 	ROLE_MEMBER  role;
-	ProtocalData::CHAT_TYPE_ENUM type;//èŠå¤©ç±»å‹ï¼ŒåŒ…æ‹¬
+	ProtocalData::CHAT_TYPE_ENUM type;//ÁÄÌìÀàĞÍ£¬°üÀ¨
 
-	char meetname[DESCRIBE_LENG];//ä¼šè®®åç§°
-	char roomname[DESCRIBE_LENG];//ä¼šè®®å®¤å
-	char membername[DESCRIBE_LENG];//äººå‘˜åç§°
-	char seatename[DESCRIBE_LENG];//å¸­ä½å
+	char meetname[DESCRIBE_LENG];//»áÒéÃû³Æ
+	char roomname[DESCRIBE_LENG];//»áÒéÊÒÃû
+	char membername[DESCRIBE_LENG];//ÈËÔ±Ãû³Æ
+	char seatename[DESCRIBE_LENG];//Ï¯Î»Ãû
 
 	PD_Time startTime;
-	char text[CHATTEXT_LENG];//å¿…é¡»åŠ ä¸Šç©ºå­—ç¬¦ç»“å°¾
-	//int32u []; //å‚ä¼šäººå‘˜id
+	char text[CHATTEXT_LENG];//±ØĞë¼ÓÉÏ¿Õ×Ö·û½áÎ²
+	//int32u []; //²Î»áÈËÔ±id
 }PD_MeetingChat;
 
-//æ”¶åˆ°æ¶ˆæ¯ç¡®è®¤çš„å›å¤
-//stagesï¼šSTAGE_MeetingChat
+//ÊÕµ½ÏûÏ¢È·ÈÏµÄ»Ø¸´
+//stages£ºSTAGE_MeetingChat
 //fun: FUN_One, 
 //method:METHOD_Report 
 typedef struct
 {
-	//åŸæ¶ˆæ¯çš„æ•°æ®
-	int32u		meetid;//ä¼šè®®ID
-	ProtocalData::CHAT_TYPE_ENUM	    msgtype;//æ¶ˆæ¯ç±»å‹
-	PD_Time	    utcsecond;//UTCæ—¶é—´ å•ä½ï¼šUTC ç§’
-	ROLE_MEMBER		role;//åŸå‘é€è€…è§’è‰²
-	int32u	    memberid;//åŸå‘é€è€…ID
-	int32u		senddevid;//åŸå‘é€çš„è®¾å¤‡ID
+	//Ô­ÏûÏ¢µÄÊı¾İ
+	int32u		meetid;//»áÒéID
+	ProtocalData::CHAT_TYPE_ENUM	    msgtype;//ÏûÏ¢ÀàĞÍ
+	PD_Time	    utcsecond;//UTCÊ±¼ä µ¥Î»£ºUTC Ãë
+	ROLE_MEMBER		role;//Ô­·¢ËÍÕß½ÇÉ«
+	int32u	    memberid;//Ô­·¢ËÍÕßID
+	int32u		senddevid;//Ô­·¢ËÍµÄÉè±¸ID
 
-	char		confirmmsg[CHATTEXT_LENG];//ç¡®è®¤çš„æ¶ˆæ¯æ–‡æœ¬
-	PD_Time	    confirmutcsecond;//ç¡®è®¤çš„UTCæ—¶é—´ å•ä½ï¼šUTC ç§’
-	int32u		confirmdevid;//ç¡®è®¤çš„è®¾å¤‡ID
-	char		confirmseatename[DESCRIBE_LENG];//ç¡®è®¤å¸­ä½å
+	char		confirmmsg[CHATTEXT_LENG];//È·ÈÏµÄÏûÏ¢ÎÄ±¾
+	PD_Time	    confirmutcsecond;//È·ÈÏµÄUTCÊ±¼ä µ¥Î»£ºUTC Ãë
+	int32u		confirmdevid;//È·ÈÏµÄÉè±¸ID
+	char		confirmseatename[DESCRIBE_LENG];//È·ÈÏÏ¯Î»Ãû
 }PD_ChatConfirm, *pPD_ChatConfirm;
-/*******************************æŠ•ç¥¨***********************************/
-//å‘èµ·æŠ•ç¥¨
-//stagesï¼šSTAGE_MeetingVote
-//fun: FUN_StartVote, å‘èµ·æŠ•ç¥¨
-//method:METHOD_Control,æ§åˆ¶
+/*******************************Í¶Æ±***********************************/
+//·¢ÆğÍ¶Æ±
+//stages£ºSTAGE_MeetingVote
+//fun: FUN_StartVote, ·¢ÆğÍ¶Æ±
+//method:METHOD_Control,¿ØÖÆ
 typedef struct 
 {  
-	unsigned int MeetingId;  //ä¼šè®®ID
-	unsigned int voteNum;  //æœ‰å¤šå°‘é¡¹æŠ•ç¥¨å†…å®¹
-	//PD_VoteStart	vote; å¡«å……VoteNumé¡¹æŠ•ç¥¨ä¿¡æ¯
+	unsigned int MeetingId;  //»áÒéID
+	unsigned int voteNum;  //ÓĞ¶àÉÙÏîÍ¶Æ±ÄÚÈİ
+	//PD_VoteStart	vote; Ìî³äVoteNumÏîÍ¶Æ±ĞÅÏ¢
 }PD_MeetingVoteStart;
 
-//è®¾ç½®æŠ•ç¥¨çš„è¶…æ—¶å€¼
-//stagesï¼šSTAGE_MeetingVote
-//fun: FUN_StartVote, å‘èµ·æŠ•ç¥¨
-//method:METHOD_Set,è®¾ç½®
+//ÉèÖÃÍ¶Æ±µÄ³¬Ê±Öµ
+//stages£ºSTAGE_MeetingVote
+//fun: FUN_StartVote, ·¢ÆğÍ¶Æ±
+//method:METHOD_Set,ÉèÖÃ
 typedef struct
 {
-	unsigned int MeetingId;  //ä¼šè®®ID
-	unsigned int voiteid;  //æŠ•ç¥¨ID
-	unsigned int timeouts;  //è¶…æ—¶å€¼
+	unsigned int MeetingId;  //»áÒéID
+	unsigned int voiteid;  //Í¶Æ±ID
+	unsigned int timeouts;  //³¬Ê±Öµ
 
 }PD_MeetingVoteTimeouts;
 
-//æŠ•ç¥¨
-//stagesï¼šSTAGE_MeetingVote
-//fun: FUN_Vote, æŠ•ç¥¨
-//method:	METHOD_Controlæ§åˆ¶ï¼ŒMETHOD_Stopç»“æŸæŠ•ç¥¨ï¼ˆå‘èµ·æŠ•ç¥¨åéœ€è¦å‘é€METHOD_Stopç»“æŸæŠ•ç¥¨ï¼‰
+//Í¶Æ±
+//stages£ºSTAGE_MeetingVote
+//fun: FUN_Vote, Í¶Æ±
+//method:	METHOD_Control¿ØÖÆ£¬METHOD_Stop½áÊøÍ¶Æ±£¨·¢ÆğÍ¶Æ±ºóĞèÒª·¢ËÍMETHOD_Stop½áÊøÍ¶Æ±£©
 typedef struct 
 {  
-	unsigned int MeetingId;  //ä¼šè®®ID
-	unsigned int voteNum;  //æœ‰å¤šå°‘é¡¹æŠ•ç¥¨å†…å®¹
-	//PD_VoteState state; å¡«å……VoteNumé¡¹æŠ•ç¥¨ä¿¡æ¯
+	unsigned int MeetingId;  //»áÒéID
+	unsigned int voteNum;  //ÓĞ¶àÉÙÏîÍ¶Æ±ÄÚÈİ
+	//PD_VoteState state; Ìî³äVoteNumÏîÍ¶Æ±ĞÅÏ¢
 }PD_MeetingVoteState;
  
 #define MEETVOTE_NEEDRECORD 0xff000000
 
-//æŸ¥è¯¢ä¼šè®®æ‰€æœ‰æŠ•ç¥¨ä¿¡æ¯
-//stagesï¼šSTAGE_MeetingVote
-//funï¼šFUN_VoteInfo
-//method:  METHOD_Query  æŸ¥è¯¢
+//²éÑ¯»áÒéËùÓĞÍ¶Æ±ĞÅÏ¢
+//stages£ºSTAGE_MeetingVote
+//fun£ºFUN_VoteInfo
+//method:  METHOD_Query  ²éÑ¯
 typedef struct
 {
 	unsigned int MeetingId;
-	unsigned int TotalNum; //æ€»å…±æœ‰å¤šå°‘ä¸ª -- MEETVOTE_NEEDRECORD
-	unsigned int StartId;  //å½“å‰å¼€å§‹åºå·
-	unsigned int CurrNum;  //å½“å‰å¸§åŒ…æ‹¬å¤šå°‘ä¸ªä¿¡æ¯
+	unsigned int TotalNum; //×Ü¹²ÓĞ¶àÉÙ¸ö -- MEETVOTE_NEEDRECORD
+	unsigned int StartId;  //µ±Ç°¿ªÊ¼ĞòºÅ
+	unsigned int CurrNum;  //µ±Ç°Ö¡°üÀ¨¶àÉÙ¸öĞÅÏ¢
 
-	//PD_VoteStart  //å¡«å……VoteNumé¡¹æŠ•ç¥¨ä¿¡æ¯
+	//PD_VoteStart  //Ìî³äVoteNumÏîÍ¶Æ±ĞÅÏ¢
 }PD_MeetingVote_All;
 
 
-//æŠ•ç¥¨è®¡æ•°
+//Í¶Æ±¼ÆÊı
 typedef struct 
 {  
-	unsigned int voteid;  //æŠ•ç¥¨ID
-	unsigned int selectcount; //æœ‰æ•ˆæŠ•ç¥¨é¡¹
-	unsigned int select[MAX_VOTEITEM_COUNT]; //é€‰æ‹©1æŠ•ç¥¨æ•°
+	unsigned int voteid;  //Í¶Æ±ID
+	unsigned int selectcount; //ÓĞĞ§Í¶Æ±Ïî
+	unsigned int select[MAX_VOTEITEM_COUNT]; //Ñ¡Ôñ1Í¶Æ±Êı
 }PD_VoteCount;
 
-//æŸ¥è¯¢ä¼šè®®æ‰€æœ‰æŠ•ç¥¨è®¡æ•°
-//stagesï¼š			STAGE_MeetingVote
-//funï¼š				FUN_VoteCount
-//method:			METHOD_Query æŸ¥è¯¢
+//²éÑ¯»áÒéËùÓĞÍ¶Æ±¼ÆÊı
+//stages£º			STAGE_MeetingVote
+//fun£º				FUN_VoteCount
+//method:			METHOD_Query ²éÑ¯
 typedef struct
 {
 	unsigned int MeetingId;
 	unsigned int VoteNum;
-	//PD_VoteCount vc;  å¡«å……VoteNumé¡¹æŠ•ç¥¨è®¡æ•°
+	//PD_VoteCount vc;  Ìî³äVoteNumÏîÍ¶Æ±¼ÆÊı
 }PD_MeetingVote_Count;
 
 
-typedef unsigned int VOTE_SELECT;	//æŠ•ç¥¨è®°å½•
-//0x00000001é€‰æ‹©äº†é€‰é¡¹ä¸€,0x00000002é€‰æ‹©äº†é€‰é¡¹äºŒ
-//æŠ•ç¥¨äººè®°å½•
+typedef unsigned int VOTE_SELECT;	//Í¶Æ±¼ÇÂ¼
+//0x00000001Ñ¡ÔñÁËÑ¡ÏîÒ»,0x00000002Ñ¡ÔñÁËÑ¡Ïî¶ş
+//Í¶Æ±ÈË¼ÇÂ¼
 typedef struct
 {
 	unsigned int memberid;
-	VOTE_SELECT selects;	//æŠ•ç¥¨é€‰é¡¹è®°å½•
+	VOTE_SELECT selects;	//Í¶Æ±Ñ¡Ïî¼ÇÂ¼
 }PD_VoteStatic_Signed_One;
 typedef struct
 {
 	unsigned int memberid;
-	VOTE_SELECT selects;	//æŠ•ç¥¨é€‰é¡¹è®°å½•
-	int16u namelen;			        //åç§°é•¿åº¦=å­—ç¬¦ä¸²é•¿åº¦+ç»“å°¾å­—èŠ‚
-	//char meetingname[namelen];    //åç§°éœ€è¦å¢åŠ ä¸€ä¸ªå­—èŠ‚0ä½œå­—ç¬¦ä¸²ç»“å°¾
+	VOTE_SELECT selects;	//Í¶Æ±Ñ¡Ïî¼ÇÂ¼
+	int16u namelen;			        //Ãû³Æ³¤¶È=×Ö·û´®³¤¶È+½áÎ²×Ö½Ú
+	//char meetingname[namelen];    //Ãû³ÆĞèÒªÔö¼ÓÒ»¸ö×Ö½Ú0×÷×Ö·û´®½áÎ²
 }PD_VoteStatic_Signed_One_V2;
-//æŸ¥è¯¢è®°åæŠ•ç¥¨æŠ•ç¥¨äºº
+//²éÑ¯¼ÇÃûÍ¶Æ±Í¶Æ±ÈË
 //stage:		STAGE_MeetingVote
 //fun:			FUN_VoteRecord
-//method:		METHOD_Query æŸ¥è¯¢
+//method:		METHOD_Query ²éÑ¯
 typedef struct
 {
 	unsigned int meetingid;
 	unsigned int voteid;
 	unsigned int Num;
-	//å¡«å……Numä¸ªPD_VoteStatic_Signed_One
+	//Ìî³äNum¸öPD_VoteStatic_Signed_One
 }PD_VoteStatic_Signed;
 
 
-//åˆ é™¤æŠ•ç¥¨
+//É¾³ıÍ¶Æ±
 //stages:STAGE_MeetingVote
-//funï¼šFUN_VoteInfo
-//method:  METHOD_Delete	åˆ é™¤
+//fun£ºFUN_VoteInfo
+//method:  METHOD_Delete	É¾³ı
 typedef struct
 {
 	unsigned int meetingid;
-	unsigned int delcount;	//è¦åˆ é™¤çš„æŠ•ç¥¨æ•°é‡
-	//unsigned int voteid;	//å¡«å……éœ€è¦åˆ é™¤çš„æŠ•ç¥¨id
+	unsigned int delcount;	//ÒªÉ¾³ıµÄÍ¶Æ±ÊıÁ¿
+	//unsigned int voteid;	//Ìî³äĞèÒªÉ¾³ıµÄÍ¶Æ±id
 	//...
 	//unsigned int voteid;
 }PD_MeetingVote_Mul;
-/***************************æŠ•ç¥¨***********************************/
+/***************************Í¶Æ±***********************************/
 
 
-//ç­¾åˆ°ä¿¡æ¯
-//stagesï¼šSTAGE_SignIn
-//fun: ProtocalData::FUN_All, è·å–æ‰€æœ‰çš„ç­¾åˆ°ä¿¡æ¯
-//method:	æŸ¥è¯¢
+//Ç©µ½ĞÅÏ¢
+//stages£ºSTAGE_SignIn
+//fun: ProtocalData::FUN_All, »ñÈ¡ËùÓĞµÄÇ©µ½ĞÅÏ¢
+//method:	²éÑ¯
 typedef struct 
 {  
-	unsigned int MeetingId;  //ä¼šè®®ID
-	TYPE_SIGNIN  signin_type;//ç­¾åˆ°ç±»å‹
-	unsigned int TotalNum ;//æ€»å…±æœ‰å¤šå°‘ä¸ª
-	unsigned int StartId;  //å½“å‰å¼€å§‹åºå·
-	unsigned int CurrNum;  //å½“å‰å¸§åŒ…æ‹¬å¤šå°‘ä¸ªä¿¡æ¯
-	//PD_SignInInfo //ä¸å®šé•¿ï¼Œæ ¹æ®å‰é¢å‚æ•°å¡«å†™
+	unsigned int MeetingId;  //»áÒéID
+	TYPE_SIGNIN  signin_type;//Ç©µ½ÀàĞÍ
+	unsigned int TotalNum ;//×Ü¹²ÓĞ¶àÉÙ¸ö
+	unsigned int StartId;  //µ±Ç°¿ªÊ¼ĞòºÅ
+	unsigned int CurrNum;  //µ±Ç°Ö¡°üÀ¨¶àÉÙ¸öĞÅÏ¢
+	//PD_SignInInfo //²»¶¨³¤£¬¸ù¾İÇ°Ãæ²ÎÊıÌîĞ´
 }PD_MeetingSignInAll;
  
-//ç»ˆç«¯ç­¾åˆ°
-//stagesï¼šSTAGE_SignIn
+//ÖÕ¶ËÇ©µ½
+//stages£ºSTAGE_SignIn
 //fun: FUN_One, 
-//method:	METHOD_Add æ·»åŠ 
+//method:	METHOD_Add Ìí¼Ó
 typedef struct 
 {  
-	unsigned int MeetingId;  //ä¼šè®®ID
+	unsigned int MeetingId;  //»áÒéID
 	PD_AddSignInInfo signIn; //
 }PD_MeetingSignInOne;
  
 
-//åˆ é™¤ç­¾åˆ°
-//stagesï¼šSTAGE_SignIn
+//É¾³ıÇ©µ½
+//stages£ºSTAGE_SignIn
 //fun: FUN_One, 
-//method:	METHOD_Delete åˆ é™¤
+//method:	METHOD_Delete É¾³ı
 typedef struct
 {
-	unsigned int MeetingId;  //ä¼šè®®ID
+	unsigned int MeetingId;  //»áÒéID
 	int membernum; //
 	//int32u memberid[];
 }PD_MeetingDeleteSignIn; 
 
-//æ‰¹æ³¨ä¿¡æ¯
-//stagesï¼šSTAGE_Postil
-//fun: ProtocalData::FUN_All, è·å–æ‰€æœ‰
-//method:	æŸ¥è¯¢
+//Åú×¢ĞÅÏ¢
+//stages£ºSTAGE_Postil
+//fun: ProtocalData::FUN_All, »ñÈ¡ËùÓĞ
+//method:	²éÑ¯
 typedef struct 
 {  
-	unsigned int MeetingId;  //ä¼šè®®ID
-	unsigned int TotalNum ;//æ€»å…±æœ‰å¤šå°‘ä¸ª
-	unsigned int StartId;  //å½“å‰å¼€å§‹åºå·
-	unsigned int CurrNum;  //å½“å‰å¸§åŒ…æ‹¬å¤šå°‘ä¸ªä¿¡æ¯
-	//PD_Postil //ä¸å®šé•¿ï¼Œæ ¹æ®å‰é¢å‚æ•°å¡«å†™
+	unsigned int MeetingId;  //»áÒéID
+	unsigned int TotalNum ;//×Ü¹²ÓĞ¶àÉÙ¸ö
+	unsigned int StartId;  //µ±Ç°¿ªÊ¼ĞòºÅ
+	unsigned int CurrNum;  //µ±Ç°Ö¡°üÀ¨¶àÉÙ¸öĞÅÏ¢
+	//PD_Postil //²»¶¨³¤£¬¸ù¾İÇ°Ãæ²ÎÊıÌîĞ´
 }PD_MeetingPostilAll; 
 
-//æ‰¹æ³¨ä¿¡æ¯
-//stagesï¼šSTAGE_Postil
+//Åú×¢ĞÅÏ¢
+//stages£ºSTAGE_Postil
 //fun: FUN_One, 
-//method: æ·»åŠ  åˆ é™¤
+//method: Ìí¼Ó É¾³ı
 typedef struct 
 {  
-	unsigned int MeetingId;  //ä¼šè®®ID
+	unsigned int MeetingId;  //»áÒéID
 	PD_Postil pstl;
 }PD_MeetingPostilOne; 
 
 
-//ç™½æ¿-è®¾ç½®å‚ä¼šäººå‘˜é¢œè‰²
+//°×°å-ÉèÖÃ²Î»áÈËÔ±ÑÕÉ«
 typedef struct
 {
 	unsigned int memberid;
 	unsigned int ARGB;
 }PD_WhiteBoard_MemberColor_Common;
 
-//ç™½æ¿-è®¾ç½®å‚ä¼šäººå‘˜é¢œè‰²
+//°×°å-ÉèÖÃ²Î»áÈËÔ±ÑÕÉ«
 //stages:STAGE_BaiBan
 //fun:	FUN_ColorConfig
-//method: ä¿®æ”¹
+//method: ĞŞ¸Ä
 typedef struct
 {
 	unsigned int meetingid;
@@ -2211,44 +2238,44 @@ typedef struct
 	unsigned int ARGB;
 }PD_WhiteBoard_MemberColor_Modify_Client;
 
-//ç™½æ¿-è®¾ç½®å‚ä¼šäººå‘˜é¢œè‰²
+//°×°å-ÉèÖÃ²Î»áÈËÔ±ÑÕÉ«
 //stages:STAGE_BaiBan
 //fun:	FUN_ColorConfig
-//method: æŸ¥è¯¢
+//method: ²éÑ¯
 typedef struct
 {
 	unsigned int meetingid;
 }PD_WhiteBoard_MemberColor_Query_Client;
 
-//ç™½æ¿-è®¾ç½®å‚ä¼šäººå‘˜é¢œè‰²
+//°×°å-ÉèÖÃ²Î»áÈËÔ±ÑÕÉ«
 //stages:STAGE_BaiBan
 //fun:	FUN_ColorConfig
-//method: æŸ¥è¯¢
+//method: ²éÑ¯
 typedef struct
 {
 	unsigned int meetingid;
 	unsigned int Num;
-	//Numä¸ªPD_WhiteBoard_MemberColor_Common
+	//Num¸öPD_WhiteBoard_MemberColor_Common
 }PD_WhiteBoard_MemberColor_Query_Sever;
 
-//ç™½æ¿é¡¹
-//stagesï¼šSTAGE_BaiBan
-//fun: FUN_One,ProtocalData::FUN_All  è¯´æ˜ï¼šæ’¤é”€æ‰€æœ‰çš„æ—¶å€™ä½¿ç”¨ProtocalData::FUN_All ï¼Œæ–¹æ³•ä¸ºåˆ é™¤
-//method:	å¢åŠ ï¼Œåˆ é™¤ï¼Œä¿®æ”¹
+//°×°åÏî
+//stages£ºSTAGE_BaiBan
+//fun: FUN_One,ProtocalData::FUN_All  ËµÃ÷£º³·ÏúËùÓĞµÄÊ±ºòÊ¹ÓÃProtocalData::FUN_All £¬·½·¨ÎªÉ¾³ı
+//method:	Ôö¼Ó£¬É¾³ı£¬ĞŞ¸Ä
 typedef struct 
 {  
-	int32u MeetingId;   //ä¼šè®®ID
-	int32u srcmemid; //ç™½æ¿å‘èµ·äººå‘˜ID
-	int64u srcwbid;		//ç™½æ¿id
+	int32u MeetingId;   //»áÒéID
+	int32u srcmemid; //°×°å·¢ÆğÈËÔ±ID
+	int64u srcwbid;		//°×°åid
 
 	int32u  fileid;
 	int32u  pageindex;
 
-	//æ­¤ä¸¤é¡¹ç”¨äºæ ‡è¯†è¿™ä¸ªæ“ä½œ
-	int32u memberid;    //äººå‘˜ID
-	int32u operid;	    //æ“ä½œID ç»ˆç«¯è®¡ç®—äº§ç”Ÿ
-	int64u utcstamp;	//æ—¶é—´æˆ³
-	WHITEBOAD_FIGURETYPE figuretype;	//å›¾å½¢ç±»å‹
+	//´ËÁ½ÏîÓÃÓÚ±êÊ¶Õâ¸ö²Ù×÷
+	int32u memberid;    //ÈËÔ±ID
+	int32u operid;	    //²Ù×÷ID ÖÕ¶Ë¼ÆËã²úÉú
+	int64u utcstamp;	//Ê±¼ä´Á
+	WHITEBOAD_FIGURETYPE figuretype;	//Í¼ĞÎÀàĞÍ
 }PD_WhiteBoardHeader, *pPD_WhiteBoardHeader;
 
 //PDF del clear
@@ -2256,7 +2283,7 @@ typedef struct
 {
 	PD_WhiteBoardHeader header;
 
-	float  pos[2];		    //(lx,lyåæ ‡)
+	float  pos[2];		    //(lx,ly×ø±ê)
 }PD_WhiteBoard_pdfDel, *pPD_WhiteBoard_pdfDel;
 
 //line elapse rect
@@ -2264,127 +2291,127 @@ typedef struct
 {  
 	PD_WhiteBoardHeader header;
 
-	int8u  linesize;		//çº¿æ¡å®½åº¦
-	int32u Argb;			//çº¿æ¡é¢œè‰²
-	float  pt[4];		    //(lx,ly,rx,ry å·¦ä¸Šè§’,å³ä¸‹è§’åæ ‡)
+	int8u  linesize;		//ÏßÌõ¿í¶È
+	int32u Argb;			//ÏßÌõÑÕÉ«
+	float  pt[4];		    //(lx,ly,rx,ry ×óÉÏ½Ç,ÓÒÏÂ½Ç×ø±ê)
 }PD_WhiteBoard_rect, *pPD_WhiteBoard_rect;
 
 typedef struct 
 {  
 	PD_WhiteBoardHeader header;
 
-	int8u  linesize;			//çº¿æ¡å®½åº¦
-	int32u Argb;			//çº¿æ¡é¢œè‰²
+	int8u  linesize;			//ÏßÌõ¿í¶È
+	int32u Argb;			//ÏßÌõÑÕÉ«
 	int32u ptnum;//ink point Num
-	//ink  --- float[2 * optionlen](x,yä¾æ¬¡æ’åˆ—)
+	//ink  --- float[2 * optionlen](x,yÒÀ´ÎÅÅÁĞ)
 }PD_WhiteBoard_ink, *pPD_WhiteBoard_ink;
 
 typedef struct 
 {  
 	PD_WhiteBoardHeader header;
 
-	float  pos[2];		    //(lx,ly,å·¦ä¸Šè§’åæ ‡)
+	float  pos[2];		    //(lx,ly,×óÉÏ½Ç×ø±ê)
 	int32u picsize;			//data size png format
 }PD_WhiteBoard_picture, *pPD_WhiteBoard_picture;
 
 //font flag
-#define WHITEBOARD_FONT_STRIKEOUT 0x01 //åˆ é™¤çº¿
-#define WHITEBOARD_FONT_BOLD	  0x02 //åŠ ç²—
-#define WHITEBOARD_FONT_ITALIC	  0x04 //å€¾æ–œ
-#define WHITEBOARD_FONT_UNDERLINE 0x08 //ä¸‹åˆ’çº¿
+#define WHITEBOARD_FONT_STRIKEOUT 0x01 //É¾³ıÏß
+#define WHITEBOARD_FONT_BOLD	  0x02 //¼Ó´Ö
+#define WHITEBOARD_FONT_ITALIC	  0x04 //ÇãĞ±
+#define WHITEBOARD_FONT_UNDERLINE 0x08 //ÏÂ»®Ïß
 
 typedef struct 
 {  
 	PD_WhiteBoardHeader header;
 
-	int8u  fontsize;			//å­—ä½“å¤§å°
-	int8u  fontflag;			//å­—ä½“å…¶å®ƒå±æ€§
-	int32u Argb;				//å­—ä½“é¢œè‰²
-	char   fontname[NAME_LENG]; //å­—ä½“åç§°
-	float  pos[2];				//(lx,ly,å·¦ä¸Šè§’åæ ‡)
+	int8u  fontsize;			//×ÖÌå´óĞ¡
+	int8u  fontflag;			//×ÖÌåÆäËüÊôĞÔ
+	int32u Argb;				//×ÖÌåÑÕÉ«
+	char   fontname[NAME_LENG]; //×ÖÌåÃû³Æ
+	float  pos[2];				//(lx,ly,×óÉÏ½Ç×ø±ê)
 
-	int32u textlen;			    //char[](é•¿åº¦ä¸º textlen)
+	int32u textlen;			    //char[](³¤¶ÈÎª textlen)
 }PD_WhiteBoard_text, *pPD_WhiteBoard_text;
 
 //////////////////////////////////////////////////////////////////////////
-//----------äººå‘˜ç®¡ç†----------
-//äººå‘˜ç®¡ç†éƒ¨åˆ†
-//äººå‘˜ç®¡ç†
-//stagesï¼šSTAGE_PeopleManage
-//fun: ProtocalData::FUN_All å¯¹æ‰€æœ‰äººå‘˜æ“ä½œ
-//method:æŸ¥è¯¢
-//äººå‘˜ç®¡ç†ä¸­ï¼Œäººå‘˜åç§°æ˜¯å”¯ä¸€çš„ä¿¡æ¯ï¼Œä¸èƒ½é‡å¤
+//----------ÈËÔ±¹ÜÀí----------
+//ÈËÔ±¹ÜÀí²¿·Ö
+//ÈËÔ±¹ÜÀí
+//stages£ºSTAGE_PeopleManage
+//fun: ProtocalData::FUN_All ¶ÔËùÓĞÈËÔ±²Ù×÷
+//method:²éÑ¯
+//ÈËÔ±¹ÜÀíÖĞ£¬ÈËÔ±Ãû³ÆÊÇÎ¨Ò»µÄĞÅÏ¢£¬²»ÄÜÖØ¸´
 typedef struct 
 {  
-	unsigned int TotalNum;	//æ€»å…±æœ‰å¤šå°‘è®¾å¤‡
-	unsigned int StartId;	//å½“å‰å¸§å¼€å§‹åºå·  
-	unsigned int  CurrNum;	//å½“å‰å¸§åŒ…æ‹¬å¤šå°‘ä¸ªè®¾å¤‡åºå·
-	//PD_PersonnelInfo ; //æ ¹æ®å®é™…äººå‘˜å¡«å†™PD_PersonnelInfoç»“æ„ä¿¡æ¯
+	unsigned int TotalNum;	//×Ü¹²ÓĞ¶àÉÙÉè±¸
+	unsigned int StartId;	//µ±Ç°Ö¡¿ªÊ¼ĞòºÅ  
+	unsigned int  CurrNum;	//µ±Ç°Ö¡°üÀ¨¶àÉÙ¸öÉè±¸ĞòºÅ
+	//PD_PersonnelInfo ; //¸ù¾İÊµ¼ÊÈËÔ±ÌîĞ´PD_PersonnelInfo½á¹¹ĞÅÏ¢
 	
 }PD_AllPeopleManage;
 
-//äººå‘˜ç®¡ç†
+//ÈËÔ±¹ÜÀí
 //stages: STAGE_PeopleManage
 //fun: FUN All
-//method: æœç´¢
-//å®¢æˆ·ç«¯å‘é€è¯¥ç»“æ„ä½“
+//method: ËÑË÷
+//¿Í»§¶Ë·¢ËÍ¸Ã½á¹¹Ìå
 typedef struct
 {
 	PD_PersonnelInfo people;
 }PD_PeopleSearch;
 
-//äººå‘˜ç®¡ç†
+//ÈËÔ±¹ÜÀí
 //stages: STAGE_PeopleManage
 //fun: FUN All
-//method: æœç´¢
-//æœåŠ¡ç«¯å‘é€è¯¥ç»“æ„ä½“
+//method: ËÑË÷
+//·şÎñ¶Ë·¢ËÍ¸Ã½á¹¹Ìå
 typedef struct
 {
 	unsigned int num;
-	//PD_PersonnelInfo ; //å¡«å†™numä¸ªPD_PersonnelInfoç»“æ„ä¿¡æ¯
+	//PD_PersonnelInfo ; //ÌîĞ´num¸öPD_PersonnelInfo½á¹¹ĞÅÏ¢
 }PD_PeopleSearchResult;
 
-//äººå‘˜ç®¡ç†
-//stagesï¼šSTAGE_PeopleManage
-//fun: FUN_One å¯¹å•ä¸ªäººå‘˜æ“ä½œ
-//method:æ·»åŠ ï¼Œåˆ é™¤
-//å®¢æˆ·ç«¯å‘é€æ•°æ®ï¼ŒæœåŠ¡ç«¯åªè¿”å›PD_Responseheaderåº”ç­”éƒ¨åˆ†
+//ÈËÔ±¹ÜÀí
+//stages£ºSTAGE_PeopleManage
+//fun: FUN_One ¶Ôµ¥¸öÈËÔ±²Ù×÷
+//method:Ìí¼Ó£¬É¾³ı
+//¿Í»§¶Ë·¢ËÍÊı¾İ£¬·şÎñ¶ËÖ»·µ»ØPD_ResponseheaderÓ¦´ğ²¿·Ö
 typedef struct 
 {  
 	PD_PersonnelInfo per;
 	
 }PD_OnePeopleManage;
 
-//æ‰¹é‡åˆ é™¤äººå‘˜ç®¡ç†
+//ÅúÁ¿É¾³ıÈËÔ±¹ÜÀí
 //stages: STAGE_PeopleManage
 //fun: FUN All
 //method: del
-//å®¢æˆ·ç«¯å‘é€æ•°æ®ï¼ŒæœåŠ¡ç«¯åªè¿”å›PD_Responseheaderåº”ç­”éƒ¨åˆ†
+//¿Í»§¶Ë·¢ËÍÊı¾İ£¬·şÎñ¶ËÖ»·µ»ØPD_ResponseheaderÓ¦´ğ²¿·Ö
 typedef struct
 {
 	unsigned int num;
-	//int32u ; //å¡«å†™numä¸ªpeopleid
+	//int32u ; //ÌîĞ´num¸öpeopleid
 }PD_MutilOperPeople;
 
-//æ§åˆ¶ä¼šè®®çš„çŠ¶æ€
-//stagesï¼šSTAGE_MeetingStatus
-//fun: STAGE_MeetingStatus, æ§åˆ¶ä¼šè®®çš„çŠ¶æ€
-//method:	æŸ¥è¯¢ã€æ§åˆ¶
+//¿ØÖÆ»áÒéµÄ×´Ì¬
+//stages£ºSTAGE_MeetingStatus
+//fun: STAGE_MeetingStatus, ¿ØÖÆ»áÒéµÄ×´Ì¬
+//method:	²éÑ¯¡¢¿ØÖÆ
 typedef struct{
-	unsigned int meetingid;//ä¼šè®®id
-	ProtocalData::MEETING_STATUS status;//ä¼šè®®çŠ¶æ€
+	unsigned int meetingid;//»áÒéid
+	ProtocalData::MEETING_STATUS status;//»áÒé×´Ì¬
 }PD_MeetingStatusControl;
 
-#define MODIFY_FILEACCESS_FLAG_CLEAR 0x00000001 //ä¿å­˜å‰å…ˆæ¸…ç©º
+#define MODIFY_FILEACCESS_FLAG_CLEAR 0x00000001 //±£´æÇ°ÏÈÇå¿Õ
 
-//ä¼šè®®æ–‡ä»¶æƒé™
-//stagesï¼šSTAGE_MeetingDatum
-//fun: FUN_File_Access, å•ä¸ªæ–‡ä»¶çš„æƒé™
-//method:æŸ¥è¯¢,ä¿®æ”¹
+//»áÒéÎÄ¼şÈ¨ÏŞ
+//stages£ºSTAGE_MeetingDatum
+//fun: FUN_File_Access, µ¥¸öÎÄ¼şµÄÈ¨ÏŞ
+//method:²éÑ¯,ĞŞ¸Ä¡¢É¾³ı
 typedef struct
 {
-	int32u  MeedingId;  //ä¼šè®®ID
-	int32u  flag;//1=è¡¨ç¤ºæ¸…ç©ºå†ä¿å­˜,0è¡¨ç¤ºç›´æ¥æ·»åŠ 
+	int32u  MeedingId;  //»áÒéID
+	int32u  flag;//1=±íÊ¾Çå¿ÕÔÙ±£´æ,0±íÊ¾Ö±½ÓÌí¼Ó
 	int32u  jsonlen;
 	//char    json[];
 	/*
@@ -2398,25 +2425,25 @@ typedef struct
 }PD_MeetingFileAccess;
 
 
-//ç›®å½•äººå‘˜æƒé™
+//Ä¿Â¼ÈËÔ±È¨ÏŞ
 /*
-é€‚ç”¨äºSTAGE_MeetingDatum + FUN_DirPermission + METHOD_Query/METHOD_Modify
-ä¿®æ”¹è¯·æ±‚PD_MeetingId + PD_SingleId(ç›®å½•id) + PD_BlockCount(å‚ä¼šäººæ•°é‡) + PD_SingleId(å‚ä¼šäººid) + ...
-æŸ¥è¯¢è¯·æ±‚PD_MeetingId + PD_SingleId(ç›®å½•id)
-æŸ¥è¯¢å›å¤PD_MeetingId + PD_SingleId(ç›®å½•id) + PD_BlockCount(å‚ä¼šäººæ•°é‡) + PD_SingleId(å‚ä¼šäººid) + ...
+ÊÊÓÃÓÚSTAGE_MeetingDatum + FUN_DirPermission + METHOD_Query/METHOD_Modify
+ĞŞ¸ÄÇëÇóPD_MeetingId + PD_SingleId(Ä¿Â¼id) + PD_BlockCount(²Î»áÈËÊıÁ¿) + PD_SingleId(²Î»áÈËid) + ...
+²éÑ¯ÇëÇóPD_MeetingId + PD_SingleId(Ä¿Â¼id)
+²éÑ¯»Ø¸´PD_MeetingId + PD_SingleId(Ä¿Â¼id) + PD_BlockCount(²Î»áÈËÊıÁ¿) + PD_SingleId(²Î»áÈËid) + ...
 */
 
 typedef struct
 {
 	int32u devid;
 	int32u ptsize;
-	//char  pt[ptsize]; //å¡«å……ptsize / (size(float) * 2) ä¸ªfloatç”¨æ¥è®°å½•æŒ‡æ—¨è½¨è¿¹
+	//char  pt[ptsize]; //Ìî³äptsize / (size(float) * 2) ¸öfloatÓÃÀ´¼ÇÂ¼Ö¸Ö¼¹ì¼£
 }PD_DevPointItem;
 
-//ä¼šåœºè®¾å¤‡æŸ¥è¯¢
-//stagesï¼šSTAGE_DeviceASGN
+//»á³¡Éè±¸²éÑ¯
+//stages£ºSTAGE_DeviceASGN
 //fun: FUN_Device_Asgn,
-//method:æŸ¥è¯¢
+//method:²éÑ¯
 typedef struct
 {
 	int32u roomid;
@@ -2433,179 +2460,179 @@ typedef struct PD_DEVPOS
 	ProtocalData::SEAT_DIRECTION direction;
 }PD_DEVPOS;
 
-//ä¼šåœºè®¾å¤‡
-//stagesï¼šSTAGE_DeviceASGN
-//fun: FUN_One å•ä¸ªä¼šåœºè®¾å¤‡
-//method:æ·»åŠ  åˆ é™¤
+//»á³¡Éè±¸
+//stages£ºSTAGE_DeviceASGN
+//fun: FUN_One µ¥¸ö»á³¡Éè±¸
+//method:Ìí¼Ó É¾³ı
 typedef struct
 {
-	unsigned int MeetingroomId;		//ä¼šåœºID
+	unsigned int MeetingroomId;		//»á³¡ID
 	unsigned int DeviceNum;
-	//unsigned int deviceid;  å¡«å……DeviceNumä¸ªè®¾å¤‡ID
+	//unsigned int deviceid;  Ìî³äDeviceNum¸öÉè±¸ID
 }PD_FieldDevice;
 
-//ä¼šåœºè®¾å¤‡æŸ¥è¯¢
-//stagesï¼šSTAGE_DeviceASGN
+//»á³¡Éè±¸²éÑ¯
+//stages£ºSTAGE_DeviceASGN
 //fun: FUN_Device_Asgn,
-//method:æŸ¥è¯¢
+//method:²éÑ¯
 typedef struct
 {
-	unsigned int MeetingroomId;		//ä¼šåœºID
+	unsigned int MeetingroomId;		//»á³¡ID
 	unsigned int DeviceNum;
-	//PD_DEVPOS deviceid[DeviceNum];  å¡«å……DeviceNumä¸ªè®¾å¤‡ID//PD_DEVPOS
+	//PD_DEVPOS deviceid[DeviceNum];  Ìî³äDeviceNum¸öÉè±¸ID//PD_DEVPOS
 }PD_DeviceAssign; 
 
 
-//ç»ˆç«¯å‘é€æ•°æ®å¤´---ç­‰å¾…ç”¨æˆ·
+//ÖÕ¶Ë·¢ËÍÊı¾İÍ·---µÈ´ıÓÃ»§
 //stages: STAGE_Wait4User
 //fun: FUN_Wait4User
-//method: æŸ¥è¯¢
+//method: ²éÑ¯
 typedef struct 
 {
-	unsigned int deviceid; //è®¾å¤‡ID
+	unsigned int deviceid; //Éè±¸ID
 }PD_Wait4User_TERMINAL;
 
 
-//æœåŠ¡ç«¯è¿”å›æ•°æ®å¤´---ç­‰å¾…ç”¨æˆ·
+//·şÎñ¶Ë·µ»ØÊı¾İÍ·---µÈ´ıÓÃ»§
 //stages: STAGE_Wait4User
 //fun: FUN_Wait4User
-//method: æŸ¥è¯¢
+//method: ²éÑ¯
 typedef struct 
 {
-	unsigned int deviceid;				//è®¾å¤‡ID
-	unsigned int meetingid;				//ä¼šè®®ID
-	unsigned int memberid;				//äººå‘˜ID
-	unsigned int roomid;				//ä¼šåœºID
-	char meetingname [DESCRIBE_LENG];	//ä¼šè®®åç§°
-	char membername [NAME_LENG];		//äººå‘˜åç§°
-	char company [DESCRIBE_LENG];		//å…¬å¸åç§°
-	char job [DESCRIBE_LENG];			//èŒä½åç§°
-	TYPE_SIGNIN signin_type;			//ç­¾åˆ°ç±»å‹
+	unsigned int deviceid;				//Éè±¸ID
+	unsigned int meetingid;				//»áÒéID
+	unsigned int memberid;				//ÈËÔ±ID
+	unsigned int roomid;				//»á³¡ID
+	char meetingname [DESCRIBE_LENG];	//»áÒéÃû³Æ
+	char membername [NAME_LENG];		//ÈËÔ±Ãû³Æ
+	char company [DESCRIBE_LENG];		//¹«Ë¾Ãû³Æ
+	char job [DESCRIBE_LENG];			//Ö°Î»Ãû³Æ
+	TYPE_SIGNIN signin_type;			//Ç©µ½ÀàĞÍ
 }PD_Wait4User_SERVER;
 typedef struct
 {
-	unsigned int deviceid;				//è®¾å¤‡ID
-	unsigned int meetingid;				//ä¼šè®®ID
-	unsigned int memberid;				//äººå‘˜ID
-	unsigned int roomid;				//ä¼šåœºID
-	char membername[NAME_LENG];		//äººå‘˜åç§°
-	char company[DESCRIBE_LENG];		//å…¬å¸åç§°
-	char job[DESCRIBE_LENG];			//èŒä½åç§°
-	char signin_type;					//ç­¾åˆ°ç±»å‹ TYPE_SIGNIN
+	unsigned int deviceid;				//Éè±¸ID
+	unsigned int meetingid;				//»áÒéID
+	unsigned int memberid;				//ÈËÔ±ID
+	unsigned int roomid;				//»á³¡ID
+	char membername[NAME_LENG];		//ÈËÔ±Ãû³Æ
+	char company[DESCRIBE_LENG];		//¹«Ë¾Ãû³Æ
+	char job[DESCRIBE_LENG];			//Ö°Î»Ãû³Æ
+	char signin_type;					//Ç©µ½ÀàĞÍ TYPE_SIGNIN
 	char file;
-	int16u namelen;			        //åç§°é•¿åº¦=å­—ç¬¦ä¸²é•¿åº¦+ç»“å°¾å­—èŠ‚
-	//char meetingname[namelen];    //åç§°éœ€è¦å¢åŠ ä¸€ä¸ªå­—èŠ‚0ä½œå­—ç¬¦ä¸²ç»“å°¾
+	int16u namelen;			        //Ãû³Æ³¤¶È=×Ö·û´®³¤¶È+½áÎ²×Ö½Ú
+	//char meetingname[namelen];    //Ãû³ÆĞèÒªÔö¼ÓÒ»¸ö×Ö½Ú0×÷×Ö·û´®½áÎ²
 }PD_Wait4User_SERVER_V2;
 
-#define MEETPOTIL_FLAG_FORCEOPEN	   1 //è¯¥æ ‡å¿—è¡¨ç¤ºéœ€è¦å¼ºåˆ¶æ‰§è¡Œæ‰¹æ³¨ç™½æ¿å¼ºè¡Œæ‰“å¼€
-#define MEETPOTIL_FLAG_FORCECLOSE	   2 //è¯¥æ ‡å¿—è¡¨ç¤ºéœ€è¦å¼ºåˆ¶æ‰§è¡Œæ‰¹æ³¨ç™½æ¿å¼ºè¡Œå…³é—­
-#define MEETPOTIL_FLAG_REQUESTOPEN	   3 //è¯¥æ ‡å¿—è¡¨ç¤ºæœ‰äººå‘èµ·ç™½æ¿
-#define MEETPOTIL_FLAG_REJECTOPEN	   4 //è¯¥æ ‡å¿—è¡¨ç¤ºå¯¹æ–¹æ‹’ç»æ‰“å¼€ç™½æ¿
-#define MEETPOTIL_FLAG_EXIT			   5 //è¯¥æ ‡å¿—è¡¨ç¤ºæœ‰äººç¦»å¼€ç™½æ¿
-#define MEETPOTIL_FLAG_ENTER		   6 //è¯¥æ ‡å¿—è¡¨ç¤ºæœ‰äººè¿›å…¥ç™½æ¿
+#define MEETPOTIL_FLAG_FORCEOPEN	   1 //¸Ã±êÖ¾±íÊ¾ĞèÒªÇ¿ÖÆÖ´ĞĞÅú×¢°×°åÇ¿ĞĞ´ò¿ª
+#define MEETPOTIL_FLAG_FORCECLOSE	   2 //¸Ã±êÖ¾±íÊ¾ĞèÒªÇ¿ÖÆÖ´ĞĞÅú×¢°×°åÇ¿ĞĞ¹Ø±Õ
+#define MEETPOTIL_FLAG_REQUESTOPEN	   3 //¸Ã±êÖ¾±íÊ¾ÓĞÈË·¢Æğ°×°å
+#define MEETPOTIL_FLAG_REJECTOPEN	   4 //¸Ã±êÖ¾±íÊ¾¶Ô·½¾Ü¾ø´ò¿ª°×°å
+#define MEETPOTIL_FLAG_EXIT			   5 //¸Ã±êÖ¾±íÊ¾ÓĞÈËÀë¿ª°×°å
+#define MEETPOTIL_FLAG_ENTER		   6 //¸Ã±êÖ¾±íÊ¾ÓĞÈË½øÈë°×°å
 
-#define MEETPOTIL_FLAG_MAXHUBREQUESTOPEN	   101 //è¯¥æ ‡å¿—è¡¨ç¤ºæœ‰äººå‘èµ·maxhubç™½æ¿
-#define MEETPOTIL_FLAG_MAXHUBREJECTOPEN		   102 //è¯¥æ ‡å¿—è¡¨ç¤ºå¯¹æ–¹æ‹’ç»æ‰“å¼€maxhubç™½æ¿
-#define MEETPOTIL_FLAG_MAXHUBEXIT			   103 //è¯¥æ ‡å¿—è¡¨ç¤ºæœ‰äººç¦»å¼€maxhubç™½æ¿
-#define MEETPOTIL_FLAG_MAXHUBENTER			   104 //è¯¥æ ‡å¿—è¡¨ç¤ºæœ‰äººè¿›å…¥maxhubç™½æ¿
-#define MEETPOTIL_FLAG_MAXHUBENTERSYNER		   105 //è¯¥æ ‡å¿—è¿›å…¥maxhubç™½æ¿ååŒçŠ¶æ€
-#define MEETPOTIL_FLAG_MAXHUBCLOSESYNER		   106 //è¯¥æ ‡å¿—é€€å‡ºmaxhubç™½æ¿ååŒçŠ¶æ€
+#define MEETPOTIL_FLAG_MAXHUBREQUESTOPEN	   101 //¸Ã±êÖ¾±íÊ¾ÓĞÈË·¢Æğmaxhub°×°å
+#define MEETPOTIL_FLAG_MAXHUBREJECTOPEN		   102 //¸Ã±êÖ¾±íÊ¾¶Ô·½¾Ü¾ø´ò¿ªmaxhub°×°å
+#define MEETPOTIL_FLAG_MAXHUBEXIT			   103 //¸Ã±êÖ¾±íÊ¾ÓĞÈËÀë¿ªmaxhub°×°å
+#define MEETPOTIL_FLAG_MAXHUBENTER			   104 //¸Ã±êÖ¾±íÊ¾ÓĞÈË½øÈëmaxhub°×°å
+#define MEETPOTIL_FLAG_MAXHUBENTERSYNER		   105 //¸Ã±êÖ¾½øÈëmaxhub°×°åĞ­Í¬×´Ì¬
+#define MEETPOTIL_FLAG_MAXHUBCLOSESYNER		   106 //¸Ã±êÖ¾ÍË³ömaxhub°×°åĞ­Í¬×´Ì¬
 
-//æ‰¹æ³¨ç™½æ¿æ“ä½œ -- add by ct 20160822
+//Åú×¢°×°å²Ù×÷ -- add by ct 20160822
 //stages: STAGE_BaiBan
 //fun:    ProtocalData::FUN_All
-//method: é€šçŸ¥
+//method: Í¨Öª
 typedef struct 
 {
 	int32u  meetingid;
-	char    medianame [DESCRIBE_LENG];	//åç§°
-	int32u  opermemberid;//å½“å‰è¯¥å‘½ä»¤çš„äººå‘˜ID
-	int32u  srcmemid;//å‘èµ·äººçš„äººå‘˜ID ç™½æ¿æ ‡è¯†ä½¿ç”¨
-	int64u  srcwbid;//å‘èµ·äººçš„ç™½æ¿æ ‡è¯† å–å¾®ç§’çº§çš„æ—¶é—´ä½œæ ‡è¯† ç™½æ¿æ ‡è¯†ä½¿ç”¨
-	int32u  operflag;//æ“ä½œæ ‡å¿—
+	char    medianame [DESCRIBE_LENG];	//Ãû³Æ
+	int32u  opermemberid;//µ±Ç°¸ÃÃüÁîµÄÈËÔ±ID
+	int32u  srcmemid;//·¢ÆğÈËµÄÈËÔ±ID °×°å±êÊ¶Ê¹ÓÃ
+	int64u  srcwbid;//·¢ÆğÈËµÄ°×°å±êÊ¶ È¡Î¢Ãë¼¶µÄÊ±¼ä×÷±êÊ¶ °×°å±êÊ¶Ê¹ÓÃ
+	int32u  operflag;//²Ù×÷±êÖ¾
 	int32u  fileid;
 	int32u  pageindex;
-	int32u  userdevnum; //æ¨é€çš„ç”¨æˆ·è®¾å¤‡IDæ•°é‡ ä¸º0è¡¨ç¤ºæ¨é€åˆ°å½“å‰ä¼šè®®çš„æ‰€æœ‰ç”¨æˆ·
+	int32u  userdevnum; //ÍÆËÍµÄÓÃ»§Éè±¸IDÊıÁ¿ Îª0±íÊ¾ÍÆËÍµ½µ±Ç°»áÒéµÄËùÓĞÓÃ»§
 	//int32u userdevid[];
 }PD_PushPotil, *pPD_PushPotil;
 
-//æ–‡ä»¶æ¨é€ -- add by ct 20160716
+//ÎÄ¼şÍÆËÍ -- add by ct 20160716
 //stages: STAGE_PushFile
 //fun:    FUN_PushFile
-//method: é€šçŸ¥
+//method: Í¨Öª
 typedef struct 
 {
 	int32u  meetingid;
-	int32u  fileid;  //æ¨é€çš„æ–‡ä»¶ID
-	int32u  triggeruserval;//æ–‡ä»¶æ ‡å¿—
-	int32u  devnum;   //æ¨é€çš„è®¾å¤‡æ•°é‡ ä¸º0è¡¨ç¤ºæ¨é€åˆ°å½“å‰ä¼šè®®çš„æ‰€æœ‰è®¾å¤‡
+	int32u  fileid;  //ÍÆËÍµÄÎÄ¼şID
+	int32u  triggeruserval;//ÎÄ¼ş±êÖ¾
+	int32u  devnum;   //ÍÆËÍµÄÉè±¸ÊıÁ¿ Îª0±íÊ¾ÍÆËÍµ½µ±Ç°»áÒéµÄËùÓĞÉè±¸
 	//int32u devid[];
 }PD_PushFile, *pPD_PushFile;
 
-//æ–‡ä»¶æ¨é€ -- add by ct 20220205
+//ÎÄ¼şÍÆËÍ -- add by ct 20220205
 //stages: STAGE_PushFile
 //fun:    FUN_PushFile
-//method: é€šçŸ¥
+//method: Í¨Öª
 typedef struct
 {
 	int32u  meetingid;
-	int32u  fileid;  //æ¨é€çš„æ–‡ä»¶ID
+	int32u  fileid;  //ÍÆËÍµÄÎÄ¼şID
 	int32u  flag;//
-	int32u  dirid; //ç›®å½•id
-	char    passwd[PD_SHORT_PASSWORD_LENG];//æ–‡æ¡£åŠ å¯†å¯†ç , ä¸ºç©ºè¡¨ç¤ºæ— å¯†ç 
-	int32u  triggeruserval;//æ–‡ä»¶æ ‡å¿—
-	int32u  devnum;   //æ¨é€çš„è®¾å¤‡æ•°é‡ ä¸º0è¡¨ç¤ºæ¨é€åˆ°å½“å‰ä¼šè®®çš„æ‰€æœ‰è®¾å¤‡
+	int32u  dirid; //Ä¿Â¼id
+	char    passwd[PD_SHORT_PASSWORD_LENG];//ÎÄµµ¼ÓÃÜÃÜÂë, Îª¿Õ±íÊ¾ÎŞÃÜÂë
+	int32u  triggeruserval;//ÎÄ¼ş±êÖ¾
+	int32u  devnum;   //ÍÆËÍµÄÉè±¸ÊıÁ¿ Îª0±íÊ¾ÍÆËÍµ½µ±Ç°»áÒéµÄËùÓĞÉè±¸
 	//int32u devid[];
 }PD_PushFile_V2, *pPD_PushFile_V2;
 
-//æµæ¨é€ -- add by ct 20160718
+//Á÷ÍÆËÍ -- add by ct 20160718
 //stages: STAGE_PushStream
 //fun:    FUN_PushStream
-//method: é€šçŸ¥
+//method: Í¨Öª
 typedef struct 
 {
 	int32u  meetingid;
-	int32u  triggeruserval;//æµæ ‡å¿—
-	int32u  id;		   //æŒ‡å®šçš„æµIDæˆ–è®¾å¤‡ID
-	int8u   subid;	   //è®¾å¤‡IDçš„å­—é€šé“å·
-	int8u   encodemode;   //å‚è§ DEVICE_INVITECHAT_ENCODEMODE_HIGH
-	int8u   fill[2];   //å¡«å……å­—èŠ‚
-	int32u  devnum;   //æ¨é€çš„è®¾å¤‡æ•°é‡ ä¸º0è¡¨ç¤ºæ¨é€åˆ°å½“å‰ä¼šè®®çš„æ‰€æœ‰è®¾å¤‡
+	int32u  triggeruserval;//Á÷±êÖ¾
+	int32u  id;		   //Ö¸¶¨µÄÁ÷ID»òÉè±¸ID
+	int8u   subid;	   //Éè±¸IDµÄ×ÖÍ¨µÀºÅ
+	int8u   encodemode;   //²Î¼û DEVICE_INVITECHAT_ENCODEMODE_HIGH
+	int8u   fill[2];   //Ìî³ä×Ö½Ú
+	int32u  devnum;   //ÍÆËÍµÄÉè±¸ÊıÁ¿ Îª0±íÊ¾ÍÆËÍµ½µ±Ç°»áÒéµÄËùÓĞÉè±¸
 	//int32u devid[];
 }PD_PushStream, *pPD_PushStream;
 
-//å‘ä¸»æŒäººè¯·æ±‚æµæ¨é€åˆ°ä¼šè®®ç»ˆç«¯ -- add by ct 20160718
+//ÏòÖ÷³ÖÈËÇëÇóÁ÷ÍÆËÍµ½»áÒéÖÕ¶Ë -- add by ct 20160718
 //stages: STAGE_RePushStream
 //fun:    FUN_RePushStream
-//method: å‘ŠçŸ¥
+//method: ¸æÖª
 typedef struct 
 {
 	int32u  meetingid;
-	int32u  handledeviceid; //å¤„ç†è¯¥è¯·æ±‚çš„è®¾å¤‡
-	int8u   subid;	   //è®¾å¤‡IDçš„å­—é€šé“å·
-	int8u   encodemode;   //å‚è§ DEVICE_INVITECHAT_ENCODEMODE_HIGH
-	int8u   fill[2];   //å¡«å……å­—èŠ‚
-	int32u  triggeruserval;//æµæ ‡å¿—
-	int32u  deviceid; //å‘èµ·è¯·æ±‚çš„è®¾å¤‡ID
-	int32u  memberid; //å‘èµ·è¯·æ±‚çš„äººå‘˜ID
+	int32u  handledeviceid; //´¦Àí¸ÃÇëÇóµÄÉè±¸
+	int8u   subid;	   //Éè±¸IDµÄ×ÖÍ¨µÀºÅ
+	int8u   encodemode;   //²Î¼û DEVICE_INVITECHAT_ENCODEMODE_HIGH
+	int8u   fill[2];   //Ìî³ä×Ö½Ú
+	int32u  triggeruserval;//Á÷±êÖ¾
+	int32u  deviceid; //·¢ÆğÇëÇóµÄÉè±¸ID
+	int32u  memberid; //·¢ÆğÇëÇóµÄÈËÔ±ID
 
-	int32u  devnum;   //æ¨é€çš„è®¾å¤‡æ•°é‡ ä¸º0è¡¨ç¤ºæ¨é€åˆ°å½“å‰ä¼šè®®çš„æ‰€æœ‰è®¾å¤‡
+	int32u  devnum;   //ÍÆËÍµÄÉè±¸ÊıÁ¿ Îª0±íÊ¾ÍÆËÍµ½µ±Ç°»áÒéµÄËùÓĞÉè±¸
 	//int32u devid[];
 
 }PD_RePushStream, *pPD_RePushStream;
 
 //see screencontrol.h define
-//å‘æ¡Œé¢æºå‘é€æ§åˆ¶æŒ‡ä»¤ -- add by ct 20161101
+//Ïò×ÀÃæÔ´·¢ËÍ¿ØÖÆÖ¸Áî -- add by ct 20161101
 //stages: STAGE_StreamControl
 //fun:    FUN_STREAMCONTROL
 //method: METHOD_Control
 typedef struct 
 {
-	int32u  flag;			//æ§åˆ¶çš„æ ‡å¿—
-	int32u  deviceid;       //å‘èµ·è¯·æ±‚çš„è®¾å¤‡ID
-	int32u  memberid;       //å‘èµ·è¯·æ±‚çš„äººå‘˜ID
-	int32u  handledeviceid; //å¤„ç†è¯¥è¯·æ±‚çš„è®¾å¤‡
-	int8u   streammode;		//æ¨¡å¼
+	int32u  flag;			//¿ØÖÆµÄ±êÖ¾
+	int32u  deviceid;       //·¢ÆğÇëÇóµÄÉè±¸ID
+	int32u  memberid;       //·¢ÆğÇëÇóµÄÈËÔ±ID
+	int32u  handledeviceid; //´¦Àí¸ÃÇëÇóµÄÉè±¸
+	int8u   streammode;		//Ä£Ê½
 	int8u	fill[3];
 	int32u  val1;
 	int32u  val2;
@@ -2614,47 +2641,47 @@ typedef struct
 typedef struct 
 {
 	int32u  otherflag; //other flag
-	float   x; //x% widthçš„ç™¾åˆ†
-	float   y; //y% heightçš„ç™¾åˆ†
+	float   x; //x% widthµÄ°Ù·Ö
+	float   y; //y% heightµÄ°Ù·Ö
 }PD_MouseStreamControl, *pPD_MouseStreamControl;
 
 typedef struct 
 {
 	int32u  otherflag;
-	int32u  key; //å¯¹åº”çš„keyå€¼,å‚è€ƒqt enum Keyçš„å€¼
+	int32u  key; //¶ÔÓ¦µÄkeyÖµ,²Î¿¼qt enum KeyµÄÖµ
 }PD_KeyBoardStreamControl, *pPD_KeyBoardStreamControl;
 
 #define MemState_MainFace  0
 #define MemState_MemFace   1
 #define MemState_AdminFace 2
 #define optionid_SIGNINNUM 0
-//é€šçŸ¥ç»ˆç«¯åœæ­¢å½“å‰çš„è§¦å‘å™¨ -- add by ct 20170216
+//Í¨ÖªÖÕ¶ËÍ£Ö¹µ±Ç°µÄ´¥·¢Æ÷ -- add by ct 20170216
 //stages: STAGE_DeviceOper
 //fun:    ProtocalData::FUN_All
 //method: METHOD_Control
 typedef struct
 {
 	int32u  meetingid;
-	int32u  oper;			//æ§åˆ¶ç  enum MEETING_DEVICEOPER
-	int32u  deviceid;       //å‘èµ·è¯·æ±‚çš„è®¾å¤‡ID
-	int32u  memberid;       //å‘èµ·è¯·æ±‚çš„äººå‘˜ID
+	int32u  oper;			//¿ØÖÆÂë enum MEETING_DEVICEOPER
+	int32u  deviceid;       //·¢ÆğÇëÇóµÄÉè±¸ID
+	int32u  memberid;       //·¢ÆğÇëÇóµÄÈËÔ±ID
 	int32u  val;
 	//MEETING_ZOOMPER		  zoompercent (0 ~ 100)
 	//MEETING_NOTIFYMEMBERNUM membernum 
-	//MEETING_NOTIFYMEMBERSTATE MemState_MainFace 0åœç•™åœ¨ä¸»ç•Œé¢ï¼Œ1åœç•™åœ¨å‚ä¼šäººç•Œé¢,2åœç•™åœ¨ç§˜ä¹¦ç•Œé¢
+	//MEETING_NOTIFYMEMBERSTATE MemState_MainFace 0Í£ÁôÔÚÖ÷½çÃæ£¬1Í£ÁôÔÚ²Î»áÈË½çÃæ,2Í£ÁôÔÚÃØÊé½çÃæ
 	//MEETING_TEXTBRODCAST texttype;
 
-	int32u  devnum;			//å¤„ç†è¯¥è¯·æ±‚çš„è®¾å¤‡æ•°é‡ ä¸º0è¡¨ç¤ºå…¨éƒ¨
+	int32u  devnum;			//´¦Àí¸ÃÇëÇóµÄÉè±¸ÊıÁ¿ Îª0±íÊ¾È«²¿
 	int32u  optiondatalen;
 	//int32u []  //devid
 	//char[] //optiondata
 
 	//MEETING_STOPRESWORK		int8u  resid[];
-	//MEETING_NOTIFYMEMBERNUM   int32u data[], data[0]=å·²ç»ç­¾åˆ°çš„å‚ä¼šäººå‘˜æ•°;
+	//MEETING_NOTIFYMEMBERNUM   int32u data[], data[0]=ÒÑ¾­Ç©µ½µÄ²Î»áÈËÔ±Êı;
 	//MEETING_TEXTBRODCAST char  *text; optiondatalen=strlen(text) + 1;
 }PD_DeviceOper, *pPD_DeviceOper;
 
-//è®¾å¤‡ç•Œé¢çŠ¶æ€äº¤äº’ -- add by ct 20240729
+//Éè±¸½çÃæ×´Ì¬½»»¥ -- add by ct 20240729
 //stages: STAGE_DeviceFaceState
 //fun:    ProtocalData::FUN_One
 //method: METHOD_Query/METHOD_Set
@@ -2674,7 +2701,7 @@ typedef struct
 	int32u  facestate;
 }PD_DevFaceState_Item, *pPD_DevFaceState_Item;
 
-//è®¾å¤‡å®æ—¶ä¿¡æ¯ -- add by ct 20250523
+//Éè±¸ÊµÊ±ĞÅÏ¢ -- add by ct 20250523
 //stages: STAGE_DeviceFaceState
 //fun:    ProtocalData::FUN_All
 //method: METHOD_Query/METHOD_Set
@@ -2686,376 +2713,376 @@ typedef struct
 	//PD_DevFaceState_Item []
 }PD_DevsInfo, *pPD_DevsInfo;
 
-/********************************å˜æ›´æ¨é€START************************************/
-//----------part_change----------	//å˜æ›´å†…å®¹
-#define seat_change 			0x01	//æ’ä½å˜æ›´
-#define agenda_change 			0x02	//è®®ç¨‹å˜æ›´
-#define bulletin_change			0x03	//å…¬å‘Šå˜æ›´
-#define dir_change 				0x04	//ç›®å½•å˜æ›´
-#define file_change 			0x05	//æ–‡ä»¶å˜æ›´
-#define people_change			0x06	//äººå‘˜å˜æ›´
-#define stream_change			0x07	//æµå˜æ›´
-#define field_change			0x08	//ä¼šåœºå˜æ›´
-#define url_change				0x09	//é»˜è®¤ç½‘å€å˜æ›´ data=PD_URL_item* id_change=num  
-#define	desk_change				0x0a	//æ¡Œç‰Œé…ç½®å˜æ›´
-#define flddevice_change		0x0b	//ä¼šåœºè®¾å¤‡å˜æ›´
-#define meeting_change			0x0c	//ä¼šè®®å˜æ›´
-#define member_change			0x0d	//å‚ä¼šäººå‘˜å˜æ›´
-#define admin_change			0x0e	//ç®¡ç†å‘˜å˜æ›´
-#define batch_member_change		0x0f	//æ‰¹é‡å‚ä¼šäººå‘˜å˜æ›´
-#define signin_change			0x10	//ç­¾åˆ°å˜æ›´
-#define groupofpeople_change	0x11	//äººå‘˜åˆ†ç»„å˜æ›´
-#define groupofmember_change	0x12	//å‚ä¼šäººå‘˜åˆ†ç»„å˜æ›´
-#define peopleingroup_change	0x13	//äººå‘˜åˆ†ç»„æˆå‘˜å˜æ›´
-#define memberingroup_change	0x14	//å‚ä¼šäººå‘˜åˆ†ç»„æˆå‘˜å˜æ›´
-#define membercolor_change		0x15	//ç™½æ¿é¢œè‰²é…ç½®å˜æ›´
-#define votecount_change		0x16	//æŠ•ç¥¨è®¡æ•°å˜æ›´
-#define votestat_change			0x17	//æŠ•ç¥¨çŠ¶æ€å˜æ›´ fid_change=voteid id_change=votestate
-#define voteinfo_change			0x18	//æŠ•ç¥¨ä¿¡æ¯å˜æ›´
-#define memperm_change			0x19	//å‚ä¼šäººå‘˜æƒé™å˜æ›´
-#define dirperm_change			0x1a	//ç›®å½•å‚ä¼šäººæƒé™å˜æ›´
-#define meetingstatus_change    0x1b	//ä¼šè®®çŠ¶æ€å˜æ›´
-#define votetimeouts_change		0x1c	//æŠ•ç¥¨è¶…æ—¶å€¼å˜æ›´ fid_change=voteid id_change=timeouts
-#define meetfuncfg_change		0x1d	//ä¼šè®®åŠŸèƒ½é…ç½®å˜æ›´
-#define fieldmanager_change		0x1e	//ç®¡ç†å‘˜å¯æ§ä¼šåœºå˜æ›´ fid_change=adminid, id_change=num 
-#define facecfg_change			0x1f	//ç•Œé¢è®¾ç½®å˜æ›´ id_change=faceid  PD_FaceTextItemInfo PD_FacePictureItemInfo
-#define fieldbg_change			0x20	//ä¼šåœºèƒŒæ™¯å›¾å˜æ›´ fid_change=roomid, id_change=mediaid 
-#define filepos_change			0x21	//ä¼šè®®ç›®å½•æ–‡ä»¶æ’åºå˜æ›´  data=PD_MeetingFilePosSet*
-#define filescore_change		0x22	//æ–‡ä»¶è¯„åˆ†å˜æ›´ data=PD_Item_FileScore* id_change=num  
-#define fileevaluate_change		0x23	//æ–‡ä»¶è¯„ä»·å˜æ›´ data=PD_Item_FileEvaluate* id_change=num| data=PD_DelFileEvaluate*
-#define meetevaluate_change		0x24	//ä¼šè®®è¯„ä»·å˜æ›´ data=PD_Item_MeetEvaluate* id_change=num| data=PD_DelMeetEvaluate*
-#define systemlog_change		0x25	//ç³»ç»Ÿæ—¥å¿—å˜æ›´ data=PD_Item_MeetSystemLog* id_change=num
-#define bigbulletin_change		0x26	//ä¼šè®®å¤§ç™½æ¿å…¬å‘Šå˜æ›´
-#define dirpos_change			0x27	//ä¼šè®®ç›®å½•æ’åºå˜æ›´  data=PD_MeetingDirPosSet*
-#define publicinfo_change		0x28	//å…¨å±€å­—ä¸²å˜æ›´  data=PD_PublicInfo*
-#define userdeffilescore_baseinfo_change 0x29	//ä¼šè®®è‡ªå®šä¹‰è¯„åˆ†åŸºç¡€æ•°æ®å˜æ›´  data=PD_UserDefineFileScore* | drop fid_change=voteid
-#define userdeffilescore_timeout_change 0x2a	//ä¼šè®®è‡ªå®šä¹‰è¯„åˆ†è¶…æ—¶å€¼å˜æ›´  fid_change=voteid id_change=timeouts
-#define userdeffilescore_votestate_change 0x2b	//ä¼šè®®è‡ªå®šä¹‰è¯„åˆ†çŠ¶æ€å˜æ›´  data=PD_change_UserDefineFileScore fid_change=voteid id_change=votestate
-#define userdeffilescore_recordcount_change 0x2c	//ä¼šè®®è‡ªå®šä¹‰è¯„åˆ†çŠ¶æ€å˜æ›´  data=PD_Item_FileScoreMemberStatistic* fid_change=voteid
-#define memberpos_change			0x2d	//ä¼šè®®å‚ä¼šäººå‘˜æ’åºå˜æ›´  data=PD_MeetingMemberPosSet*
-#define meettopic_change			0x2e	//ä¼šè®®è®®é¢˜å˜æ›´  data=PD_TopicItemInfo* id_change=num 
-#define meettopicgroup_change		0x2f	//ä¼šè®®è®®é¢˜å•ä½å˜æ›´  data=PD_TopicGroupItemInfo* id_change=num 
-#define meettopicperm_change		0x30	//ä¼šè®®è®®é¢˜æƒé™å˜æ›´  data=PD_MeetTopics* id_change=num 
-#define meetlecture_change		    0x31	//ä¼šè®®æ¼”è®²ç¨¿å˜æ›´  data=PD_LectureItemInfo* id_change=num 
-#define meethomepage_change		    0x32	//ä¼šè®®æ¬¢è¿ç•Œé¢å˜æ›´  data=PD_HomePageItemInfo* id_change=num 
-#define fileaccess_change 			0x33	//æ–‡ä»¶æƒé™å˜æ›´ data=(userid)int32u*  | id_change=num | fid_change=fileid
-#define meetuserdef_change		    0x34	//ä¼šè®®è‡ªå®šä¹‰æ•°æ®å˜æ›´  data=PD_MeetUserdefItemInfo* id_change=num 
-#define roomuserdef_change		    0x35	//ä¼šåœºè‡ªå®šä¹‰æ•°æ®å˜æ›´  data=PD_RoomUserdefItemInfo* id_change=num 
-#define avote_change		        0x36	//æ–°æŠ•ç¥¨æ•°æ®å˜æ›´  data=PD_AVote* id_change=num 
-#define avotestat_change			0x37	//æ–°æŠ•ç¥¨çŠ¶æ€å˜æ›´ fid_change=voteid id_change=votestate
-#define avotecount_change			0x38	//æ–°æŠ•ç¥¨è®¡æ•°å˜æ›´
-#define seatplan_change		        0x39	//å¸­ä½æ–¹æ¡ˆå˜æ›´  data=PD_AddSeatPlan* id_change=num 
-#define seatplanbind_change		    0x3a	//å¸­ä½æ–¹æ¡ˆIDç»‘å®šå˜æ›´  data=PD_SeatPlanBindItem* id_change=num 
-#define seatplanmem_change		    0x3b	//å¸­ä½æ–¹æ¡ˆäººå‘˜ç»‘å®šå˜æ›´  data=PD_SeatPlanMemItem* id_change=num 
-#define devfacestate_change		    0x3c	//è®¾å¤‡ç•Œé¢çŠ¶æ€å˜æ›´  data=PD_DeviceFaceState* id_change=num 
-#define devinfo_change		        0x3d	//è®¾å¤‡ä¿¡æ¯å˜æ›´  data=PD_DevsInfo* 
-#define complexpublicuserdef_change		        0x3e	//å…¨å±€å¤åˆè‡ªå®šä¹‰æ•°æ®å˜æ›´  data=PD_ComplexPublicUserInfo* 
-#define complexmeetuserdef_change		        0x3f	//ä¼šè®®å¤åˆè‡ªå®šä¹‰æ•°æ®å˜æ›´  data=PD_ComplexMeetcUserInfo* 
+/********************************±ä¸üÍÆËÍSTART************************************/
+//----------part_change----------	//±ä¸üÄÚÈİ
+#define seat_change 			0x01	//ÅÅÎ»±ä¸ü
+#define agenda_change 			0x02	//Òé³Ì±ä¸ü
+#define bulletin_change			0x03	//¹«¸æ±ä¸ü
+#define dir_change 				0x04	//Ä¿Â¼±ä¸ü
+#define file_change 			0x05	//ÎÄ¼ş±ä¸ü
+#define people_change			0x06	//ÈËÔ±±ä¸ü
+#define stream_change			0x07	//Á÷±ä¸ü
+#define field_change			0x08	//»á³¡±ä¸ü
+#define url_change				0x09	//Ä¬ÈÏÍøÖ·±ä¸ü data=PD_URL_item* id_change=num  
+#define	desk_change				0x0a	//×ÀÅÆÅäÖÃ±ä¸ü
+#define flddevice_change		0x0b	//»á³¡Éè±¸±ä¸ü
+#define meeting_change			0x0c	//»áÒé±ä¸ü
+#define member_change			0x0d	//²Î»áÈËÔ±±ä¸ü
+#define admin_change			0x0e	//¹ÜÀíÔ±±ä¸ü
+#define batch_member_change		0x0f	//ÅúÁ¿²Î»áÈËÔ±±ä¸ü
+#define signin_change			0x10	//Ç©µ½±ä¸ü
+#define groupofpeople_change	0x11	//ÈËÔ±·Ö×é±ä¸ü
+#define groupofmember_change	0x12	//²Î»áÈËÔ±·Ö×é±ä¸ü
+#define peopleingroup_change	0x13	//ÈËÔ±·Ö×é³ÉÔ±±ä¸ü
+#define memberingroup_change	0x14	//²Î»áÈËÔ±·Ö×é³ÉÔ±±ä¸ü
+#define membercolor_change		0x15	//°×°åÑÕÉ«ÅäÖÃ±ä¸ü
+#define votecount_change		0x16	//Í¶Æ±¼ÆÊı±ä¸ü
+#define votestat_change			0x17	//Í¶Æ±×´Ì¬±ä¸ü fid_change=voteid id_change=votestate
+#define voteinfo_change			0x18	//Í¶Æ±ĞÅÏ¢±ä¸ü
+#define memperm_change			0x19	//²Î»áÈËÔ±È¨ÏŞ±ä¸ü
+#define dirperm_change			0x1a	//Ä¿Â¼²Î»áÈËÈ¨ÏŞ±ä¸ü
+#define meetingstatus_change    0x1b	//»áÒé×´Ì¬±ä¸ü
+#define votetimeouts_change		0x1c	//Í¶Æ±³¬Ê±Öµ±ä¸ü fid_change=voteid id_change=timeouts
+#define meetfuncfg_change		0x1d	//»áÒé¹¦ÄÜÅäÖÃ±ä¸ü
+#define fieldmanager_change		0x1e	//¹ÜÀíÔ±¿É¿Ø»á³¡±ä¸ü fid_change=adminid, id_change=num 
+#define facecfg_change			0x1f	//½çÃæÉèÖÃ±ä¸ü id_change=faceid  PD_FaceTextItemInfo PD_FacePictureItemInfo
+#define fieldbg_change			0x20	//»á³¡±³¾°Í¼±ä¸ü fid_change=roomid, id_change=mediaid 
+#define filepos_change			0x21	//»áÒéÄ¿Â¼ÎÄ¼şÅÅĞò±ä¸ü  data=PD_MeetingFilePosSet*
+#define filescore_change		0x22	//ÎÄ¼şÆÀ·Ö±ä¸ü data=PD_Item_FileScore* id_change=num  
+#define fileevaluate_change		0x23	//ÎÄ¼şÆÀ¼Û±ä¸ü data=PD_Item_FileEvaluate* id_change=num| data=PD_DelFileEvaluate*
+#define meetevaluate_change		0x24	//»áÒéÆÀ¼Û±ä¸ü data=PD_Item_MeetEvaluate* id_change=num| data=PD_DelMeetEvaluate*
+#define systemlog_change		0x25	//ÏµÍ³ÈÕÖ¾±ä¸ü data=PD_Item_MeetSystemLog* id_change=num
+#define bigbulletin_change		0x26	//»áÒé´ó°×°å¹«¸æ±ä¸ü
+#define dirpos_change			0x27	//»áÒéÄ¿Â¼ÅÅĞò±ä¸ü  data=PD_MeetingDirPosSet*
+#define publicinfo_change		0x28	//È«¾Ö×Ö´®±ä¸ü  data=PD_PublicInfo*
+#define userdeffilescore_baseinfo_change 0x29	//»áÒé×Ô¶¨ÒåÆÀ·Ö»ù´¡Êı¾İ±ä¸ü  data=PD_UserDefineFileScore* | drop fid_change=voteid
+#define userdeffilescore_timeout_change 0x2a	//»áÒé×Ô¶¨ÒåÆÀ·Ö³¬Ê±Öµ±ä¸ü  fid_change=voteid id_change=timeouts
+#define userdeffilescore_votestate_change 0x2b	//»áÒé×Ô¶¨ÒåÆÀ·Ö×´Ì¬±ä¸ü  data=PD_change_UserDefineFileScore fid_change=voteid id_change=votestate
+#define userdeffilescore_recordcount_change 0x2c	//»áÒé×Ô¶¨ÒåÆÀ·Ö×´Ì¬±ä¸ü  data=PD_Item_FileScoreMemberStatistic* fid_change=voteid
+#define memberpos_change			0x2d	//»áÒé²Î»áÈËÔ±ÅÅĞò±ä¸ü  data=PD_MeetingMemberPosSet*
+#define meettopic_change			0x2e	//»áÒéÒéÌâ±ä¸ü  data=PD_TopicItemInfo* id_change=num 
+#define meettopicgroup_change		0x2f	//»áÒéÒéÌâµ¥Î»±ä¸ü  data=PD_TopicGroupItemInfo* id_change=num 
+#define meettopicperm_change		0x30	//»áÒéÒéÌâÈ¨ÏŞ±ä¸ü  data=PD_MeetTopics* id_change=num 
+#define meetlecture_change		    0x31	//»áÒéÑİ½²¸å±ä¸ü  data=PD_LectureItemInfo* id_change=num 
+#define meethomepage_change		    0x32	//»áÒé»¶Ó­½çÃæ±ä¸ü  data=PD_HomePageItemInfo* id_change=num 
+#define fileaccess_change 			0x33	//ÎÄ¼şÈ¨ÏŞ±ä¸ü data=(userid)int32u*  | id_change=num | fid_change=fileid
+#define meetuserdef_change		    0x34	//»áÒé×Ô¶¨ÒåÊı¾İ±ä¸ü  data=PD_MeetUserdefItemInfo* id_change=num 
+#define roomuserdef_change		    0x35	//»á³¡×Ô¶¨ÒåÊı¾İ±ä¸ü  data=PD_RoomUserdefItemInfo* id_change=num 
+#define avote_change		        0x36	//ĞÂÍ¶Æ±Êı¾İ±ä¸ü  data=PD_AVote* id_change=num 
+#define avotestat_change			0x37	//ĞÂÍ¶Æ±×´Ì¬±ä¸ü fid_change=voteid id_change=votestate
+#define avotecount_change			0x38	//ĞÂÍ¶Æ±¼ÆÊı±ä¸ü
+#define seatplan_change		        0x39	//Ï¯Î»·½°¸±ä¸ü  data=PD_AddSeatPlan* id_change=num 
+#define seatplanbind_change		    0x3a	//Ï¯Î»·½°¸ID°ó¶¨±ä¸ü  data=PD_SeatPlanBindItem* id_change=num 
+#define seatplanmem_change		    0x3b	//Ï¯Î»·½°¸ÈËÔ±°ó¶¨±ä¸ü  data=PD_SeatPlanMemItem* id_change=num 
+#define devfacestate_change		    0x3c	//Éè±¸½çÃæ×´Ì¬±ä¸ü  data=PD_DeviceFaceState* id_change=num 
+#define devinfo_change		        0x3d	//Éè±¸ĞÅÏ¢±ä¸ü  data=PD_DevsInfo* 
+#define complexpublicuserdef_change		        0x3e	//È«¾Ö¸´ºÏ×Ô¶¨ÒåÊı¾İ±ä¸ü  data=PD_ComplexPublicUserInfo* 
+#define complexmeetuserdef_change		        0x3f	//»áÒé¸´ºÏ×Ô¶¨ÒåÊı¾İ±ä¸ü  data=PD_ComplexMeetcUserInfo* 
 
 
-/*äººå‘˜åˆ†ç»„æˆå‘˜å˜æ›´ / å‚ä¼šäººå‘˜åˆ†ç»„æˆå‘˜å˜æ›´ å‘ç”Ÿæ—¶,åªå‘é€å˜æ›´çš„å¤´éƒ¨æ•°æ®,å®¢æˆ·ç«¯ä¸‹æ‹‰æ¡†åˆ·æ–°è·å–*/
+/*ÈËÔ±·Ö×é³ÉÔ±±ä¸ü / ²Î»áÈËÔ±·Ö×é³ÉÔ±±ä¸ü ·¢ÉúÊ±,Ö»·¢ËÍ±ä¸üµÄÍ·²¿Êı¾İ,¿Í»§¶ËÏÂÀ­¿òË¢ĞÂ»ñÈ¡*/
 
-//----------type_change----------	//å˜æ›´ç±»å‹
-#define drop_change 	0x01	//å·²åˆ é™¤(åˆ é™¤çš„å†…å®¹åŒ…å«å…¶ä»–å†…å®¹æ—¶,å¦‚ä¼šåœºåŒ…å«ä¼šåœºè®¾å¤‡,è¿™äº›å†…å®¹ä¹Ÿè¢«åˆ é™¤,è€Œä¸”ä¸ä¼šæ¨é€è¿™äº›å˜æ›´)
-#define new_change 		0x02	//æ–°å¢
-#define mod_change		0x03	//å·²ä¿®æ”¹(idä¸å˜)
-#define clr_change		0x04	//æ¸…ç©º(ç”¨äºæ¸…ç©ºä¸€ä¸ªidå¯¹åº”å¤šæ¡æ•°æ®çš„å†…å®¹ï¼Œå¦‚æ¸…ç©ºæŸä¸ªç›®å½•çš„è®¿é—®é»‘åå•ï¼Œä»¥ä¾¿äºæ‰¹é‡æ”¹å˜å†…å®¹)
-#define status_change 	0x05	//çŠ¶æ€
-#define pos_change 	    0x06	//ä½ç½®
-#define fastadd_change 	0x07	//å¿«é€Ÿæ–°å¢
-#define filevote_change 0x08	//æ–‡ä»¶æŠ•ç¥¨é‡ç½®
-#define agendadir_change 0x09	//è®®ç¨‹å…³è”ç›®å½•é‡ç½®
-#define memrole_change   0x0a	//å‚ä¼šäººè§’è‰²é‡ç½®
-#define device_change    0x0b	//è®¾å¤‡
-#define import_change    0x0c	//å¯¼å…¥
+//----------type_change----------	//±ä¸üÀàĞÍ
+#define drop_change 	0x01	//ÒÑÉ¾³ı(É¾³ıµÄÄÚÈİ°üº¬ÆäËûÄÚÈİÊ±,Èç»á³¡°üº¬»á³¡Éè±¸,ÕâĞ©ÄÚÈİÒ²±»É¾³ı,¶øÇÒ²»»áÍÆËÍÕâĞ©±ä¸ü)
+#define new_change 		0x02	//ĞÂÔö
+#define mod_change		0x03	//ÒÑĞŞ¸Ä(id²»±ä)
+#define clr_change		0x04	//Çå¿Õ(ÓÃÓÚÇå¿ÕÒ»¸öid¶ÔÓ¦¶àÌõÊı¾İµÄÄÚÈİ£¬ÈçÇå¿ÕÄ³¸öÄ¿Â¼µÄ·ÃÎÊºÚÃûµ¥£¬ÒÔ±ãÓÚÅúÁ¿¸Ä±äÄÚÈİ)
+#define status_change 	0x05	//×´Ì¬
+#define pos_change 	    0x06	//Î»ÖÃ
+#define fastadd_change 	0x07	//¿ìËÙĞÂÔö
+#define filevote_change 0x08	//ÎÄ¼şÍ¶Æ±ÖØÖÃ
+#define agendadir_change 0x09	//Òé³Ì¹ØÁªÄ¿Â¼ÖØÖÃ
+#define memrole_change   0x0a	//²Î»áÈË½ÇÉ«ÖØÖÃ
+#define device_change    0x0b	//Éè±¸
+#define import_change    0x0c	//µ¼Èë
 
 //stages:STAGE_PushUpdate
 //fun:FUN_PushUpdate
-//method:é€šçŸ¥
+//method:Í¨Öª
 
-/* å˜æ›´é¡¹çˆ¶id ç”¨äºæ ‡è¯† å˜æ›´é¡¹id çš„æ›´å¤šä¿¡æ¯,
-   1.ç”¨äºæ ‡è¯† æ–‡ä»¶idæ‰€åœ¨çš„ç›®å½•id: 
+/* ±ä¸üÏî¸¸id ÓÃÓÚ±êÊ¶ ±ä¸üÏîid µÄ¸ü¶àĞÅÏ¢,
+   1.ÓÃÓÚ±êÊ¶ ÎÄ¼şidËùÔÚµÄÄ¿Â¼id: 
 	fid_change=dirid
 	id_change=fileid
-   2.ç”¨äºæ ‡è¯† è®¾å¤‡idæ‰€åœ¨çš„ä¼šåœºidï¼š
+   2.ÓÃÓÚ±êÊ¶ Éè±¸idËùÔÚµÄ»á³¡id£º
     fid_change=fieldid;
 	id_change=deviceid;
 	*/
 typedef struct
 {
-	unsigned char part_change;	//å˜æ›´å†…å®¹
-	unsigned char type_change;	//å˜æ›´ç±»å‹
-	unsigned int meetingid;		//ä¼šè®®id(å˜æ›´å†…å®¹,å¦‚ä¼šåœºã€ä¼šåœºè®¾å¤‡ã€äººå‘˜ç­‰,ç‹¬ç«‹äºä¼šè®®çš„,å¡«0)			
-	unsigned int fid_change;	//å˜æ›´é¡¹çˆ¶id
-	unsigned int id_change;		//å˜æ›´é¡¹id(å˜æ›´å†…å®¹ä¸ºä¼šè®®æ—¶,ä¼šè®®idåªåœ¨meetingidå¡«å†™)
-	unsigned int length_change;	//åæ¥å†…å®¹é•¿åº¦(å­—èŠ‚)
-	//å˜æ›´åå†…å®¹(æ–°å¢ã€å·²ä¿®æ”¹çš„å†…å®¹)
+	unsigned char part_change;	//±ä¸üÄÚÈİ
+	unsigned char type_change;	//±ä¸üÀàĞÍ
+	unsigned int meetingid;		//»áÒéid(±ä¸üÄÚÈİ,Èç»á³¡¡¢»á³¡Éè±¸¡¢ÈËÔ±µÈ,¶ÀÁ¢ÓÚ»áÒéµÄ,Ìî0)			
+	unsigned int fid_change;	//±ä¸üÏî¸¸id
+	unsigned int id_change;		//±ä¸üÏîid(±ä¸üÄÚÈİÎª»áÒéÊ±,»áÒéidÖ»ÔÚmeetingidÌîĞ´)
+	unsigned int length_change;	//ºó½ÓÄÚÈİ³¤¶È(×Ö½Ú)
+	//±ä¸üºóÄÚÈİ(ĞÂÔö¡¢ÒÑĞŞ¸ÄµÄÄÚÈİ)
 }PD_ContntChng;
 
 
-//æ’ä½å˜æ›´å†…å®¹
-//è®¾å¤‡idèµ‹å€¼ç»™PD_ContntChngçš„id_change
+//ÅÅÎ»±ä¸üÄÚÈİ
+//Éè±¸id¸³Öµ¸øPD_ContntChngµÄid_change
 typedef struct
 {
-	unsigned int 	memberid;				//åº§ä½åˆ†é…çš„äººå‘˜id,è‹¥åº§ä½æœªåˆ†é…ç»™äººå‘˜memberidä¸º0;
-	ROLE_MEMBER 	role;					//è§’è‰²
+	unsigned int 	memberid;				//×ùÎ»·ÖÅäµÄÈËÔ±id,Èô×ùÎ»Î´·ÖÅä¸øÈËÔ±memberidÎª0;
+	ROLE_MEMBER 	role;					//½ÇÉ«
 }PD_chng_seat;
 
-//äººå‘˜å˜æ›´å†…å®¹
+//ÈËÔ±±ä¸üÄÚÈİ
 typedef struct
 {
-	char name[NAME_LENG];		//åå­—
-	char company[DESCRIBE_LENG]; //å•ä½
-	char job[DESCRIBE_LENG];		//èŒä½
-	char comment[DESCRIBE_LENG];	//å¤‡æ³¨
-	char phone[SHORT_DESCRIBE_LENG];  //ç”µè¯
-	char email[SHORT_DESCRIBE_LENG];  //é‚®ç®±
-	char password[PASSWORD_LENG];  //å¯†ç 
+	char name[NAME_LENG];		//Ãû×Ö
+	char company[DESCRIBE_LENG]; //µ¥Î»
+	char job[DESCRIBE_LENG];		//Ö°Î»
+	char comment[DESCRIBE_LENG];	//±¸×¢
+	char phone[SHORT_DESCRIBE_LENG];  //µç»°
+	char email[SHORT_DESCRIBE_LENG];  //ÓÊÏä
+	char password[PASSWORD_LENG];  //ÃÜÂë
 }PD_chng_peopl;
 
-//ç›®å½•å˜æ›´å†…å®¹
+//Ä¿Â¼±ä¸üÄÚÈİ
 typedef struct
 {
-	char name[FILENAME_LENG];		//æ–‡ä»¶å
-	unsigned int parentdirid;	    //çˆ¶ç›®å½•ID
-	unsigned int dirpos;		    //åºå·
+	char name[FILENAME_LENG];		//ÎÄ¼şÃû
+	unsigned int parentdirid;	    //¸¸Ä¿Â¼ID
+	unsigned int dirpos;		    //ĞòºÅ
 }PD_chng_dir;
 
-//æ–‡ä»¶å˜æ›´å†…å®¹--æ–°å¢
+//ÎÄ¼ş±ä¸üÄÚÈİ--ĞÂÔö
 typedef struct
 {
-	char name[FILENAME_LENG];					//æ–‡ä»¶å
-	unsigned int uploaderid;					//ä¸Šä¼ è€…id,ä¸Šä¼ è§’è‰²ä¸ºç®¡ç†å‘˜æ—¶,uploaderid=0
-	ROLE_MEMBER  uploader_role;					//ä¸Šä¼ è€…è§’è‰²
-	char		 uploader_name[NAME_LENG];		//ä¸Šä¼ è€…åå­—
-	unsigned int filepos;	//æ–‡ä»¶åºå·
+	char name[FILENAME_LENG];					//ÎÄ¼şÃû
+	unsigned int uploaderid;					//ÉÏ´«Õßid,ÉÏ´«½ÇÉ«Îª¹ÜÀíÔ±Ê±,uploaderid=0
+	ROLE_MEMBER  uploader_role;					//ÉÏ´«Õß½ÇÉ«
+	char		 uploader_name[NAME_LENG];		//ÉÏ´«ÕßÃû×Ö
+	unsigned int filepos;	//ÎÄ¼şĞòºÅ
 }PD_chng_file_new;
 
-//æ–‡ä»¶å˜æ›´å†…å®¹--ä¿®æ”¹
+//ÎÄ¼ş±ä¸üÄÚÈİ--ĞŞ¸Ä
 typedef struct
 {
-	char name[FILENAME_LENG];		//æ–‡ä»¶å
+	char name[FILENAME_LENG];		//ÎÄ¼şÃû
 }PD_chng_file_mod;
 
-//æµå˜æ›´å†…å®¹
+//Á÷±ä¸üÄÚÈİ
 typedef struct
 {
-	char name[DESCRIBE_LENG]; //è§†é¢‘åç§°
-	char addr[DESCRIBE_LENG]; //è§†é¢‘åœ°å€
+	char name[DESCRIBE_LENG]; //ÊÓÆµÃû³Æ
+	char addr[DESCRIBE_LENG]; //ÊÓÆµµØÖ·
 }PD_chng_stream;
 
-//ä¼šåœºå˜æ›´å†…å®¹
+//»á³¡±ä¸üÄÚÈİ
 typedef struct
 {
-	char name[DESCRIBE_LENG];  //å­—ç¬¦ä¸²ä¿¡æ¯
-	char addr[DESCRIBE_LENG];  //ä¼šåœºåœ°ç‚¹
-	char comment[DESCRIBE_LENG];  //å¤‡æ³¨
-	unsigned int picid;		   //èƒŒæ™¯å›¾id
+	char name[DESCRIBE_LENG];  //×Ö·û´®ĞÅÏ¢
+	char addr[DESCRIBE_LENG];  //»á³¡µØµã
+	char comment[DESCRIBE_LENG];  //±¸×¢
+	unsigned int picid;		   //±³¾°Í¼id
 }PD_chng_field;
 
-//ä¼šè®®å˜æ›´å†…å®¹
+//»áÒé±ä¸üÄÚÈİ
 typedef struct
 {
-	char name[DESCRIBE_LENG];		//ä¼šè®®åç§°
-	unsigned int roomId;			//ä¼šè®®å®¤ID
-	TYPE_MEETING type;				//ä¼šè®®ç±»å‹
-	PD_Time startTime;				//å¼€å§‹æ—¶é—´
-	PD_Time endTime;				//ç»“æŸæ—¶é—´
-	unsigned int managerid;			//ç®¡ç†å‘˜ID
-	TYPE_SIGNIN signin_type;		//ä¼šè®®ç­¾åˆ°ç±»å‹
-	char meeting_psw[ONESIGNPASSWORD_LENG];			//ä¼šè®®ç­¾åˆ°å¯†ç 
-	char ordername[NAME_LENG];      //ä¼šè®®é¢„çº¦äººå‘˜åç§°
+	char name[DESCRIBE_LENG];		//»áÒéÃû³Æ
+	unsigned int roomId;			//»áÒéÊÒID
+	TYPE_MEETING type;				//»áÒéÀàĞÍ
+	PD_Time startTime;				//¿ªÊ¼Ê±¼ä
+	PD_Time endTime;				//½áÊøÊ±¼ä
+	unsigned int managerid;			//¹ÜÀíÔ±ID
+	TYPE_SIGNIN signin_type;		//»áÒéÇ©µ½ÀàĞÍ
+	char meeting_psw[ONESIGNPASSWORD_LENG];			//»áÒéÇ©µ½ÃÜÂë
+	char ordername[NAME_LENG];      //»áÒéÔ¤Ô¼ÈËÔ±Ãû³Æ
 }PD_chng_meeting;
 
-//æ¡Œç‰Œå˜æ›´å†…å®¹
+//×ÀÅÆ±ä¸üÄÚÈİ
 typedef struct
 {
-	PD_Color conf1[Count_FontConf];	//æ¡Œç‰Œé…ç½®
-	unsigned int bg_photoid;		//æ¡Œç‰ŒèƒŒæ™¯å›¾id
+	PD_Color conf1[Count_FontConf];	//×ÀÅÆÅäÖÃ
+	unsigned int bg_photoid;		//×ÀÅÆ±³¾°Í¼id
 }PD_chng_desk;
 
-//å‚ä¼šäººå‘˜å˜æ›´
+//²Î»áÈËÔ±±ä¸ü
 typedef struct
 {
-	char psw[ONESIGNPASSWORD_LENG];					//ä¸ªäººç­¾åˆ°å¯†ç 
+	char psw[ONESIGNPASSWORD_LENG];					//¸öÈËÇ©µ½ÃÜÂë
 }PD_chng_member;
 
-//ç®¡ç†å‘˜å˜æ›´å†…å®¹
+//¹ÜÀíÔ±±ä¸üÄÚÈİ
 typedef struct
 {
-	char admin_user[NAME_LENG];		//ç®¡ç†å‘˜ç™»å½•å
-	char desc[DESCRIBE_LENG];		//ç®¡ç†å‘˜æè¿°
-	char phone[SHORT_DESCRIBE_LENG];  //ç”µè¯
-	char email[SHORT_DESCRIBE_LENG];  //é‚®ç®±
+	char admin_user[NAME_LENG];		//¹ÜÀíÔ±µÇÂ¼Ãû
+	char desc[DESCRIBE_LENG];		//¹ÜÀíÔ±ÃèÊö
+	char phone[SHORT_DESCRIBE_LENG];  //µç»°
+	char email[SHORT_DESCRIBE_LENG];  //ÓÊÏä
 
 }PD_chng_admin;
 
-//æ‰¹é‡å‚ä¼šäººå‘˜å˜æ›´--æ·»åŠ 
+//ÅúÁ¿²Î»áÈËÔ±±ä¸ü--Ìí¼Ó
 typedef struct
 {
-	unsigned int MemNum;			//æ·»åŠ å‚ä¼šäººå‘˜çš„æ•°é‡
-	//PD_Member_Edit[MemNum];		//å¡«å……MemNumä¸ªå‚ä¼šäººå‘˜ä¿¡æ¯
+	unsigned int MemNum;			//Ìí¼Ó²Î»áÈËÔ±µÄÊıÁ¿
+	//PD_Member_Edit[MemNum];		//Ìî³äMemNum¸ö²Î»áÈËÔ±ĞÅÏ¢
 }PD_chng_member_batch;
 
-//æ‰¹é‡å‚ä¼šäººå‘˜å˜æ›´--åˆ é™¤
+//ÅúÁ¿²Î»áÈËÔ±±ä¸ü--É¾³ı
 typedef struct
 {
-	unsigned int MemNum;			//åˆ é™¤å‚ä¼šäººå‘˜çš„æ•°é‡
-	//unsigned int memberid;		//å¡«å……MemNumä¸ªå‚ä¼šäººå‘˜Id
+	unsigned int MemNum;			//É¾³ı²Î»áÈËÔ±µÄÊıÁ¿
+	//unsigned int memberid;		//Ìî³äMemNum¸ö²Î»áÈËÔ±Id
 }PD_chng_member_del_batch;
 
-//ç­¾åˆ°å˜æ›´--æ–°å¢
-//å‚ä¼šäººå‘˜çš„idå¡«åœ¨id_change
+//Ç©µ½±ä¸ü--ĞÂÔö
+//²Î»áÈËÔ±µÄidÌîÔÚid_change
 typedef struct
 {
-	PD_Time time;					//æ—¶é—´
-	TYPE_SIGNIN signin_type;		//ç­¾åˆ°ç±»å‹
-	unsigned int length;			//åæ¥æ•°æ®é•¿åº¦
-	//char signin_photo[length];	//è§†é¢‘ç­¾åˆ°å›¾ç‰‡
+	PD_Time time;					//Ê±¼ä
+	TYPE_SIGNIN signin_type;		//Ç©µ½ÀàĞÍ
+	unsigned int length;			//ºó½ÓÊı¾İ³¤¶È
+	//char signin_photo[length];	//ÊÓÆµÇ©µ½Í¼Æ¬
 }PD_chng_signin;
 
-//äººå‘˜åˆ†ç»„å˜æ›´å†…å®¹
+//ÈËÔ±·Ö×é±ä¸üÄÚÈİ
 typedef struct
 {
 	char		groupname[NAME_LENG];
 }PD_chng_groupofpeople;
 
-//å‚ä¼šäººå‘˜åˆ†ç»„å˜æ›´èƒ½å®¹
+//²Î»áÈËÔ±·Ö×é±ä¸üÄÜÈİ
 typedef struct
 {
 	char		groupname[NAME_LENG];
 }PD_chng_groupofmember;
 
-//ç™½æ¿é¢œè‰²é…ç½®å˜æ›´
+//°×°åÑÕÉ«ÅäÖÃ±ä¸ü
 typedef struct
 {
 	unsigned int rgb;
 }PD_chng_membercolor;
 
-//æŠ•ç¥¨ä¿¡æ¯å˜æ›´
+//Í¶Æ±ĞÅÏ¢±ä¸ü
 typedef struct{
-	char content[VOTE_CONTENTLENG]; //æŠ•ç¥¨å†…å®¹ 
-	ProtocalData::VOTEMAIN_TYPE  maintype; //ç±»åˆ« æŠ•ç¥¨ é€‰ä¸¾ é—®å·è°ƒæŸ¥
-	ProtocalData::VOTE_MODE mode; //åŒ¿åæŠ•ç¥¨ è®°åæŠ•ç¥¨
-	ProtocalData::VOTE_TYPE type; //å¤šé€‰ å•é€‰
-	unsigned int timeouts;     //è®¡æ—¶æŠ•ç¥¨ ç§’æ•°
-	unsigned int selectcount;     //æœ‰æ•ˆé€‰é¡¹æ•°é‡
-	char voteText[MAX_VOTEITEM_COUNT][VOTE_LENG];  //é€‰æ‹©1æè¿°æ–‡å­—		
+	char content[VOTE_CONTENTLENG]; //Í¶Æ±ÄÚÈİ 
+	ProtocalData::VOTEMAIN_TYPE  maintype; //Àà±ğ Í¶Æ± Ñ¡¾Ù ÎÊ¾íµ÷²é
+	ProtocalData::VOTE_MODE mode; //ÄäÃûÍ¶Æ± ¼ÇÃûÍ¶Æ±
+	ProtocalData::VOTE_TYPE type; //¶àÑ¡ µ¥Ñ¡
+	unsigned int timeouts;     //¼ÆÊ±Í¶Æ± ÃëÊı
+	unsigned int selectcount;     //ÓĞĞ§Ñ¡ÏîÊıÁ¿
+	char voteText[MAX_VOTEITEM_COUNT][VOTE_LENG];  //Ñ¡Ôñ1ÃèÊöÎÄ×Ö		
 }PD_chng_voteinfo;
 
 
-//å‚ä¼šäººå‘˜æƒé™å˜æ›´
+//²Î»áÈËÔ±È¨ÏŞ±ä¸ü
 /*
-fid:memberid		//å‚ä¼šäººå‘˜id
-id:permission		//å‚ä¼šäººæƒé™
+fid:memberid		//²Î»áÈËÔ±id
+id:permission		//²Î»áÈËÈ¨ÏŞ
 */
 
 
-//ä¼šè®®çŠ¶æ€å˜æ›´
+//»áÒé×´Ì¬±ä¸ü
 /*
-id:status			//ä¼šè®®çŠ¶æ€
+id:status			//»áÒé×´Ì¬
 */
 
-/********************************å˜æ›´æ¨é€END************************************/
+/********************************±ä¸üÍÆËÍEND************************************/
 
 
-/*--------------------ç®¡ç†å‘˜--------------------*/
-//ç®¡ç†å‘˜
+/*--------------------¹ÜÀíÔ±--------------------*/
+//¹ÜÀíÔ±
 typedef struct
 {
-	unsigned int adminid;			//ç®¡ç†å‘˜id
-	char admin_user[NAME_LENG];		//ç®¡ç†å‘˜ç™»å½•å
-	char desc[DESCRIBE_LENG];		//ç®¡ç†å‘˜æè¿°
-	char phone[SHORT_DESCRIBE_LENG];  //ç”µè¯
-	char email[SHORT_DESCRIBE_LENG];  //é‚®ç®±
+	unsigned int adminid;			//¹ÜÀíÔ±id
+	char admin_user[NAME_LENG];		//¹ÜÀíÔ±µÇÂ¼Ãû
+	char desc[DESCRIBE_LENG];		//¹ÜÀíÔ±ÃèÊö
+	char phone[SHORT_DESCRIBE_LENG];  //µç»°
+	char email[SHORT_DESCRIBE_LENG];  //ÓÊÏä
 
 }PD_AdminInfo;
 
 //stages:STAGE_Admin
 //fun:FUN_One
-//method:æ·»åŠ ,ä¿®æ”¹
+//method:Ìí¼Ó,ĞŞ¸Ä
 typedef struct
 {
 	PD_AdminInfo	admininfo;
-	char psw[DESCRIBE_LENG];		//ç®¡ç†å‘˜å¯†ç 
+	char psw[DESCRIBE_LENG];		//¹ÜÀíÔ±ÃÜÂë
 }PD_Amdin_One;
 
 //stages:STAGE_Admin
 //fun:FUN_One
-//method:åˆ é™¤(åªæœ‰è¶…çº§ç®¡ç†å‘˜rootæ‰èƒ½åˆ é™¤)
+//method:É¾³ı(Ö»ÓĞ³¬¼¶¹ÜÀíÔ±root²ÅÄÜÉ¾³ı)
 typedef struct
 {
-	unsigned int adminid2del;				//è¢«åˆ é™¤çš„ç®¡ç†å‘˜id
+	unsigned int adminid2del;				//±»É¾³ıµÄ¹ÜÀíÔ±id
 }PD_Admin_One_Del;
 
 //stages:STAGE_Admin
 //fun:ProtocalData::FUN_All
-//method:æŸ¥è¯¢
+//method:²éÑ¯
 typedef struct
 {
 	unsigned int Num;
-	//PD_AmdinInfo admininfo;	//å¡«å……Numä¸ªç®¡ç†å‘˜ä¿¡æ¯
+	//PD_AmdinInfo admininfo;	//Ìî³äNum¸ö¹ÜÀíÔ±ĞÅÏ¢
 }PD_Admin_All;
 
-#define ADMINPOWER_DEVICEVIEW    0x00000001 //è®¾å¤‡æµè§ˆ
-#define ADMINPOWER_DEVICECONTROL 0x00000002 //è®¾å¤‡ç®¡ç† åˆ é™¤ä¿®æ”¹å‚æ•°é…ç½®
-#define ADMINPOWER_ROOMQUERY	 0x00000020 //ä¼šåœºæµè§ˆ
-#define ADMINPOWER_ROOMCONTROL   0x00000040 //ä¼šåœºå¢åˆ æ”¹
-#define ADMINPOWER_ROOMOPER	     0x00000080 //ä¼šåœºç®¡ç†è®¾å¤‡çš„å¢åˆ 
-#define ADMINPOWER_ROOMSET	     0x00000100 //ä¼šåœºå¸ƒå±€ä¿®æ”¹
-#define ADMINPOWER_ADMINVIEW     0x00000200 //ç®¡ç†å‘˜æµè§ˆ
-#define ADMINPOWER_ADMINCONTROL  0x00000400 //ç®¡ç†å‘˜å¢åˆ æ”¹ åªèƒ½å¯¹å­çº§åŠä»¥ä¸‹ä¿®æ”¹
-#define ADMINPOWER_PEOPLEQUERY   0x00000800 //å¸¸ç”¨äººå‘˜å’Œéƒ¨é—¨æµè§ˆ
-#define ADMINPOWER_PEOPLECONTROL 0x00001000 //å¸¸ç”¨äººå‘˜å’Œéƒ¨é—¨å¢åˆ æ”¹
-#define ADMINPOWER_DEVICEUPDATE  0x00002000 //è®¾å¤‡å‡çº§
-#define ADMINPOWER_OTHERSET      0x00004000 //å…¶å®ƒè®¾ç½® ï¼ˆå…¨å±€çš„ç•Œé¢é…ç½®ç­‰ï¼‰
-#define ADMINPOWER_MEETVIEW 	 0x00008000 //ä¼šè®®æµè§ˆ
-#define ADMINPOWER_MEETCONTROL   0x00010000 //ä¼šè®®ç®¡ç† å¢åˆ æ”¹å¤åˆ¶
-#define ADMINPOWER_MEETOPER	     0x00020000 //ä¼šè®®çŠ¶æ€æ§åˆ¶
-#define ADMINPOWER_MEMBERQUERY   0x00040000 //ä¼šå‰ã€ä¸­ã€åçš„æ•°æ®æµè§ˆæƒé™
-#define ADMINPOWER_MEMBERCONTROL 0x00080000 //ä¼šå‰ã€ä¸­ã€åæ•°æ®ç¼–è¾‘ä¿®æ”¹åˆ é™¤çš„æƒé™
-#define ADMINPOWER_FILEOPEN      0x00100000 //ä¼šè®®èµ„æ–™ä¸‹è½½æ‰“å¼€çš„æƒé™
-#define ADMINPOWER_DEVICEOPER    0x00200000 //è®¾å¤‡æ“ä½œ å‡é™å¼€å…³æœºç­¾åˆ°è¾…åŠ©ç­‰
-#define ADMINPOWER_RECORDOPEN	 0x00400000 //å½•åƒæŸ¥çœ‹
-#define ADMINPOWER_LOGVIEW       0x00800000 //æ—¥å¿—æŸ¥çœ‹
-#define ADMINPOWER_RECORDDOWN    0x01000000 //å½•åƒä¸‹è½½
-#define ADMINPOWER_ARCHIVE       0x02000000 //ä¼šè®®å½’æ¡£
-#define ADMINPOWER_DATAEXPORT    0x04000000 //æ•°æ®ï¼ˆä¼šè®®ã€äººå‘˜ã€æŠ•ç¥¨ã€ç­¾åˆ°ã€æ’ä½ã€æ—¥å¿—ç­‰ï¼‰å¯¼å‡º
+#define ADMINPOWER_DEVICEVIEW    0x00000001 //Éè±¸ä¯ÀÀ
+#define ADMINPOWER_DEVICECONTROL 0x00000002 //Éè±¸¹ÜÀí É¾³ıĞŞ¸Ä²ÎÊıÅäÖÃ
+#define ADMINPOWER_ROOMQUERY	 0x00000020 //»á³¡ä¯ÀÀ
+#define ADMINPOWER_ROOMCONTROL   0x00000040 //»á³¡ÔöÉ¾¸Ä
+#define ADMINPOWER_ROOMOPER	     0x00000080 //»á³¡¹ÜÀíÉè±¸µÄÔöÉ¾
+#define ADMINPOWER_ROOMSET	     0x00000100 //»á³¡²¼¾ÖĞŞ¸Ä
+#define ADMINPOWER_ADMINVIEW     0x00000200 //¹ÜÀíÔ±ä¯ÀÀ
+#define ADMINPOWER_ADMINCONTROL  0x00000400 //¹ÜÀíÔ±ÔöÉ¾¸Ä Ö»ÄÜ¶Ô×Ó¼¶¼°ÒÔÏÂĞŞ¸Ä
+#define ADMINPOWER_PEOPLEQUERY   0x00000800 //³£ÓÃÈËÔ±ºÍ²¿ÃÅä¯ÀÀ
+#define ADMINPOWER_PEOPLECONTROL 0x00001000 //³£ÓÃÈËÔ±ºÍ²¿ÃÅÔöÉ¾¸Ä
+#define ADMINPOWER_DEVICEUPDATE  0x00002000 //Éè±¸Éı¼¶
+#define ADMINPOWER_OTHERSET      0x00004000 //ÆäËüÉèÖÃ £¨È«¾ÖµÄ½çÃæÅäÖÃµÈ£©
+#define ADMINPOWER_MEETVIEW 	 0x00008000 //»áÒéä¯ÀÀ
+#define ADMINPOWER_MEETCONTROL   0x00010000 //»áÒé¹ÜÀí ÔöÉ¾¸Ä¸´ÖÆ
+#define ADMINPOWER_MEETOPER	     0x00020000 //»áÒé×´Ì¬¿ØÖÆ
+#define ADMINPOWER_MEMBERQUERY   0x00040000 //»áÇ°¡¢ÖĞ¡¢ºóµÄÊı¾İä¯ÀÀÈ¨ÏŞ
+#define ADMINPOWER_MEMBERCONTROL 0x00080000 //»áÇ°¡¢ÖĞ¡¢ºóÊı¾İ±à¼­ĞŞ¸ÄÉ¾³ıµÄÈ¨ÏŞ
+#define ADMINPOWER_FILEOPEN      0x00100000 //»áÒé×ÊÁÏÏÂÔØ´ò¿ªµÄÈ¨ÏŞ
+#define ADMINPOWER_DEVICEOPER    0x00200000 //Éè±¸²Ù×÷ Éı½µ¿ª¹Ø»úÇ©µ½¸¨ÖúµÈ
+#define ADMINPOWER_RECORDOPEN	 0x00400000 //Â¼Ïñ²é¿´
+#define ADMINPOWER_LOGVIEW       0x00800000 //ÈÕÖ¾²é¿´
+#define ADMINPOWER_RECORDDOWN    0x01000000 //Â¼ÏñÏÂÔØ
+#define ADMINPOWER_ARCHIVE       0x02000000 //»áÒé¹éµµ
+#define ADMINPOWER_DATAEXPORT    0x04000000 //Êı¾İ£¨»áÒé¡¢ÈËÔ±¡¢Í¶Æ±¡¢Ç©µ½¡¢ÅÅÎ»¡¢ÈÕÖ¾µÈ£©µ¼³ö
 
 typedef struct
 {
-	int32u adminid;			//ç®¡ç†å‘˜id
-	int32u parentid;//ç®¡ç†å‘˜çš„çˆ¶ID
-	int32u power;//æƒé™
-	char admin_user[NAME_LENG];		//ç®¡ç†å‘˜ç™»å½•å
-	char desc[DESCRIBE_LENG];		//ç®¡ç†å‘˜æè¿°
-	char phone[SHORT_DESCRIBE_LENG];  //ç”µè¯
-	char email[SHORT_DESCRIBE_LENG];  //é‚®ç®±
+	int32u adminid;			//¹ÜÀíÔ±id
+	int32u parentid;//¹ÜÀíÔ±µÄ¸¸ID
+	int32u power;//È¨ÏŞ
+	char admin_user[NAME_LENG];		//¹ÜÀíÔ±µÇÂ¼Ãû
+	char desc[DESCRIBE_LENG];		//¹ÜÀíÔ±ÃèÊö
+	char phone[SHORT_DESCRIBE_LENG];  //µç»°
+	char email[SHORT_DESCRIBE_LENG];  //ÓÊÏä
 
 }PD_AdminInfo_V2;
 
 //stages:STAGE_Admin
 //fun:FUN_One
-//method:æ·»åŠ ,ä¿®æ”¹
+//method:Ìí¼Ó,ĞŞ¸Ä
 typedef struct
 {
 	PD_AdminInfo	admininfo;
-	char psw[PASSWORD_LENG];		//ç®¡ç†å‘˜å¯†ç 
+	char psw[PASSWORD_LENG];		//¹ÜÀíÔ±ÃÜÂë
 }PD_Amdin_One_V2;
 
 //stages:STAGE_Admin
 //fun:ProtocalData::FUN_All
-//method:æŸ¥è¯¢
+//method:²éÑ¯
 typedef struct
 {
 	unsigned int Num;
-	//PD_AdminInfo_V2 admininfo;	//å¡«å……Numä¸ªç®¡ç†å‘˜ä¿¡æ¯
+	//PD_AdminInfo_V2 admininfo;	//Ìî³äNum¸ö¹ÜÀíÔ±ĞÅÏ¢
 }PD_Admin_All_V2;
 
-#define IMPORT_ADMIN_FLAG_DELALL 0x00000001 //å¯¼å…¥å‰åˆ é™¤äººå‘˜
+#define IMPORT_ADMIN_FLAG_DELALL 0x00000001 //µ¼ÈëÇ°É¾³ıÈËÔ±
 
-//æ‰¹é‡æ“ä½œç®¡ç†äººå‘˜
-//stagesï¼šSTAGE_Admin
+//ÅúÁ¿²Ù×÷¹ÜÀíÈËÔ±
+//stages£ºSTAGE_Admin
 //fun: ProtocalData::FUN_All
 //method:IMPORT|Delete
 typedef struct
@@ -3080,45 +3107,45 @@ typedef struct
 	*/
 
 }PD_MutilOperAdmin, *pPD_MutilOperAdmin;
-/*--------------------ç®¡ç†å‘˜--------------------*/
+/*--------------------¹ÜÀíÔ±--------------------*/
 
-/*--------------------ä¼šè®®åŠŸèƒ½é…ç½®--------------------*/
-//åŠŸèƒ½é…ç½®
+/*--------------------»áÒé¹¦ÄÜÅäÖÃ--------------------*/
+//¹¦ÄÜÅäÖÃ
 typedef struct
 {
-	unsigned int funcode;	//åŠŸèƒ½æ ‡è¯†
-	unsigned int position;	//ä½ç½®
+	unsigned int funcode;	//¹¦ÄÜ±êÊ¶
+	unsigned int position;	//Î»ÖÃ
 }PD_MeetingFunc_conf;
 
 //stages:STAGE_FunConf
 //fun:ProtocalData::FUN_All
-//method:ä¿®æ”¹ã€æŸ¥è¯¢
+//method:ĞŞ¸Ä¡¢²éÑ¯
 typedef struct
 {
 	unsigned int meetingid;
 	unsigned int fun_num;
-	//å¡«å……fun_numä¸ªPD_MeetingFunc_conf
+	//Ìî³äfun_num¸öPD_MeetingFunc_conf
 }PD_MeetingFuncs;
-/*--------------------ä¼šè®®åŠŸèƒ½é…ç½®--------------------*/
-/*-------------------äººå‘˜åˆ†ç»„start---------------------*/
+/*--------------------»áÒé¹¦ÄÜÅäÖÃ--------------------*/
+/*-------------------ÈËÔ±·Ö×éstart---------------------*/
 typedef struct
 { 
 	unsigned int groupid;
-	char groupname[NAME_LENG];//åˆ†ç»„å
+	char groupname[NAME_LENG];//·Ö×éÃû
 }PD_GroupOfPeople;
 
 //stages:ProtocalData::STAGE_PeopleGroup
 //fun:ProtocalData::FUN_All
-//method:æŸ¥è¯¢
+//method:²éÑ¯
 typedef struct
 {
 	unsigned int totalnum;
-	//PD_GroupOfPeople;  å¡«å……totalnumä¸ªPD_GroupOfPeople
+	//PD_GroupOfPeople;  Ìî³ätotalnum¸öPD_GroupOfPeople
 }PD_AllGroupOfPeople;
 
 //stages:ProtocalData::STAGE_PeopleGroup
 //fun:FUN_One
-//method:æ·»åŠ ã€ä¿®æ”¹ã€åˆ é™¤
+//method:Ìí¼Ó¡¢ĞŞ¸Ä¡¢É¾³ı
 typedef struct
 {
 	PD_GroupOfPeople group;
@@ -3126,44 +3153,44 @@ typedef struct
 
 //stages:ProtocalData::STAGE_PeopleGroup
 //fun:ProtocalData::FUN_All
-//method:ä¿®æ”¹ã€åˆ é™¤ã€è®¾ç½®(å°†æŒ‡å®šäººå‘˜å¤åˆ¶åˆ°æŸåˆ†ç»„)
+//method:ĞŞ¸Ä¡¢É¾³ı¡¢ÉèÖÃ(½«Ö¸¶¨ÈËÔ±¸´ÖÆµ½Ä³·Ö×é)
 typedef struct
 {
 	unsigned int groupid;
-	unsigned int pepnum; //åˆ†ç»„äººå‘˜æ•°é‡
-	//unsigned int peopleid;  å¡«å……pepnumä¸ªpeopleid
+	unsigned int pepnum; //·Ö×éÈËÔ±ÊıÁ¿
+	//unsigned int peopleid;  Ìî³äpepnum¸öpeopleid
 }PD_SaveGroupOfPeople;
 
-//ç”¨äºæ·»åŠ åˆ†ç»„äººå‘˜
+//ÓÃÓÚÌí¼Ó·Ö×éÈËÔ±
 //stages:ProtocalData::STAGE_PeopleGroup
 //fun:ProtocalData::FUN_All
-//method:æ·»åŠ 
+//method:Ìí¼Ó
 typedef struct
 {
-	unsigned int groupid;//åŒæ—¶å°†è¯¥æ·»åŠ çš„äººå‘˜åŠ å…¥åˆ°æŒ‡å®šåˆ†ç»„
+	unsigned int groupid;//Í¬Ê±½«¸ÃÌí¼ÓµÄÈËÔ±¼ÓÈëµ½Ö¸¶¨·Ö×é
 	PD_PersonnelInfo per;
 
 }PD_AddPeopleGroupManage;
 
 //stages:ProtocalData::STAGE_PeopleGroup
 //fun:FUN_One
-//method:æŸ¥è¯¢
+//method:²éÑ¯
 typedef struct
 {
 	unsigned int groupid;
-	unsigned int pepnum; //åˆ†ç»„äººå‘˜æ•°é‡
-	//PD_PersonnelInfo people;  å¡«å……pepnumä¸ªPD_PersonnelInfo
+	unsigned int pepnum; //·Ö×éÈËÔ±ÊıÁ¿
+	//PD_PersonnelInfo people;  Ìî³äpepnum¸öPD_PersonnelInfo
 }PD_PeopleInGroup;
 
-#define IMPORT_PEOPLE_FLAG_DELALL 0x00000001 //å¯¼å…¥å‰åˆ é™¤äººå‘˜
+#define IMPORT_PEOPLE_FLAG_DELALL 0x00000001 //µ¼ÈëÇ°É¾³ıÈËÔ±
 
-//å¯¼å…¥å¸¸ç”¨äººå‘˜
-//stagesï¼šSTAGE_PeopleGroup
+//µ¼Èë³£ÓÃÈËÔ±
+//stages£ºSTAGE_PeopleGroup
 //fun: ProtocalData::FUN_All
 //method:IMPORT
 typedef struct
 {
-	int32u groupid;//å¦‚æœå¯¼å…¥å…¨éƒ¨=0ï¼ŒæŒ‡å®šç»„å†™å…¥å³å¯
+	int32u groupid;//Èç¹ûµ¼ÈëÈ«²¿=0£¬Ö¸¶¨×éĞ´Èë¼´¿É
 	int32u flag;//IMPORT_PEOPLE_FLAG_DELALL
 
 	int32u jsonlen;
@@ -3172,7 +3199,7 @@ typedef struct
 	"data":  //
 	[
 	{
-	"name::"é™ˆå·¥",
+	"name::"³Â¹¤",
 	"company":"xx",
 	"job":"xx",
 	"phone":"123456",
@@ -3186,15 +3213,15 @@ typedef struct
 	*/
 
 }PD_ImportPeople;
-/*-------------------äººå‘˜åˆ†ç»„end---------------------*/
+/*-------------------ÈËÔ±·Ö×éend---------------------*/
 
-/*-------------------å‚ä¼šäººå‘˜åˆ†ç»„end---------------------*/
-/*----é˜¶æ®µ:STAGE_MemberGroup----*/
+/*-------------------²Î»áÈËÔ±·Ö×éend---------------------*/
+/*----½×¶Î:STAGE_MemberGroup----*/
 typedef struct
 {
 	unsigned int	meetingid;
 	unsigned int	groupid;
-	char groupname[NAME_LENG];//åˆ†ç»„å
+	char groupname[NAME_LENG];//·Ö×éÃû
 }PD_GroupOfMember_common;
 
 typedef struct
@@ -3212,7 +3239,7 @@ typedef struct
 {
 	unsigned int	meetingid;
 	unsigned int	groupid;
-	char groupname[NAME_LENG];//åˆ†ç»„å
+	char groupname[NAME_LENG];//·Ö×éÃû
 }PD_GroupOfMember_Modify_client;//FUN:FUN_One METHOD:METHOD_Modify
 
 typedef struct
@@ -3226,7 +3253,7 @@ typedef struct
 	unsigned int	meetingid;
 	unsigned int	groupid;
 	unsigned int	num;
-	//unsigned int  memberid;//å¡«å……numä¸ªmemberid
+	//unsigned int  memberid;//Ìî³änum¸ömemberid
 }PD_MemberInGroup_Modify_client;//FUN:ProtocalData::FUN_All METHOD:METHOD_Modify
 
 typedef struct
@@ -3241,7 +3268,7 @@ typedef struct
 {
 	unsigned int	meetingid;
 	unsigned int	totalnum;
-	//PD_GroupOfMember_common;  å¡«å……totalnumä¸ªPD_GroupOfMember_common
+	//PD_GroupOfMember_common;  Ìî³ätotalnum¸öPD_GroupOfMember_common
 }PD_AllGroupOfMember_Query_server;//FUN:ProtocalData::FUN_All METHOD:METHOD_Query
 
 typedef struct
@@ -3249,9 +3276,9 @@ typedef struct
 	unsigned int	meetingid;
 	unsigned int	groupid;
 	unsigned int	num;
-	//PD_PersonnelInfo  member;//å¡«å……numä¸ªmember
+	//PD_PersonnelInfo  member;//Ìî³änum¸ömember
 }PD_MemberInGroup_Query_server;//FUN:FUN_One METHOD:METHOD_Query
-/*-------------------å‚ä¼šäººå‘˜åˆ†ç»„end---------------------*/
+/*-------------------²Î»áÈËÔ±·Ö×éend---------------------*/
 
 
 //struct for deleting db records 
@@ -3319,7 +3346,7 @@ typedef struct
 	unsigned int roomnum;
 }PD_MGRROOM;
 
-//ä¼šè®®ç»Ÿè®¡
+//»áÒéÍ³¼Æ
 enum MEET_STATISTIC_TYPE {
 	MEET_STATISTIC_FILEGET = 1,
 	MEET_STATISTIC_SCREENGET,
@@ -3334,24 +3361,24 @@ enum MEET_STATISTIC_TYPE {
 	MEET_STATISTIC_BULLETCOUNT,
 };
 
-//æ›´æ–°ä¼šè®®ç»Ÿè®¡
+//¸üĞÂ»áÒéÍ³¼Æ
 //stages:STAGE_MeetStatistic
-//funï¼šFUN_One
+//fun£ºFUN_One
 //method:  METHOD_Add METHOD_Query
 typedef struct
 {
 	unsigned int meetingid;//
-	MEET_STATISTIC_TYPE type;//ç»Ÿè®¡ç±»å‹
+	MEET_STATISTIC_TYPE type;//Í³¼ÆÀàĞÍ
 }PD_MeetStatistic;
 
-//è¿”å›æŸ¥è¯¢ä¼šè®®ç»Ÿè®¡
+//·µ»Ø²éÑ¯»áÒéÍ³¼Æ
 //stages:STAGE_MeetStatistic
-//funï¼šFUN_One
+//fun£ºFUN_One
 //method:   METHOD_Query
 typedef struct
 {
-	unsigned int meetingid;//ä¼šè®®ID
-	char		 meetname[DESCRIBE_LENG];//ä¼šè®®ID
+	unsigned int meetingid;//»áÒéID
+	char		 meetname[DESCRIBE_LENG];//»áÒéID
 	unsigned int streamgetcount;
 	unsigned int screengetcount;
 	unsigned int filegetcount;
@@ -3364,12 +3391,12 @@ typedef struct
 	unsigned int electioncount;
 	unsigned int questioncount;
 	unsigned int bulletcount;
-	unsigned long long addtime; //utc ç§’
+	unsigned long long addtime; //utc Ãë
 }PD_MeetOneStatistic;
 typedef struct
 {
-	unsigned int meetingid;//ä¼šè®®ID
-	char		 meetname[DESCRIBE_LENG];//ä¼šè®®ID
+	unsigned int meetingid;//»áÒéID
+	char		 meetname[DESCRIBE_LENG];//»áÒéID
 	unsigned int streamgetcount;
 	unsigned int screengetcount;
 	unsigned int filegetcount;
@@ -3382,47 +3409,47 @@ typedef struct
 	unsigned int electioncount;
 	unsigned int questioncount;
 	unsigned int bulletcount;
-	unsigned long long addtime; //utc ç§’
-	int16u namelen;			 //åç§°é•¿åº¦=å­—ç¬¦ä¸²é•¿åº¦+ç»“å°¾å­—èŠ‚
+	unsigned long long addtime; //utc Ãë
+	int16u namelen;			 //Ãû³Æ³¤¶È=×Ö·û´®³¤¶È+½áÎ²×Ö½Ú
 	int8u  fill[2];
-	//char name[namelen];    //åç§°éœ€è¦å¢åŠ ä¸€ä¸ªå­—èŠ‚0ä½œå­—ç¬¦ä¸²ç»“å°¾
+	//char name[namelen];    //Ãû³ÆĞèÒªÔö¼ÓÒ»¸ö×Ö½Ú0×÷×Ö·û´®½áÎ²
 }PD_MeetOneStatistic_V2;
 
-//æ—¶é—´æ®µä¼šè®®ç»Ÿè®¡
+//Ê±¼ä¶Î»áÒéÍ³¼Æ
 enum MEET_STATISTIC_TIMEQUARTER {
-	MEET_STATISTIC_BYMONTH = 1,//æŒ‰æœˆä»½æŸ¥è¯¢,æœ€å¤šä¸€æ¬¡å¯æŸ¥12ä¸ªæœˆ
-	MEET_STATISTIC_BYQUARTER,//æŒ‰å­£åº¦æŸ¥è¯¢,æœ€å¤šä¸€æ¬¡å¯æŸ¥12ä¸ªå­£åº¦
-	MEET_STATISTIC_BYYEAR,//æŒ‰å¹´æŸ¥è¯¢,æœ€å¤šä¸€æ¬¡å¯æŸ¥12ä¸ªå¹´
+	MEET_STATISTIC_BYMONTH = 1,//°´ÔÂ·İ²éÑ¯,×î¶àÒ»´Î¿É²é12¸öÔÂ
+	MEET_STATISTIC_BYQUARTER,//°´¼¾¶È²éÑ¯,×î¶àÒ»´Î¿É²é12¸ö¼¾¶È
+	MEET_STATISTIC_BYYEAR,//°´Äê²éÑ¯,×î¶àÒ»´Î¿É²é12¸öÄê
 };
 
 
-//æŸ¥è¯¢æ—¶é—´æ®µä¼šè®®ç»Ÿè®¡
+//²éÑ¯Ê±¼ä¶Î»áÒéÍ³¼Æ
 //stages:STAGE_MeetStatistic
-//funï¼šFUN_All
+//fun£ºFUN_All
 //method:METHOD_QueryResult
 typedef struct
 {
-	MEET_STATISTIC_TIMEQUARTER type;//ç»Ÿè®¡æ—¶é—´æ®µ
+	MEET_STATISTIC_TIMEQUARTER type;//Í³¼ÆÊ±¼ä¶Î
 
-	//ç»Ÿè®¡æ—¶é—´æ®µ
+	//Í³¼ÆÊ±¼ä¶Î
 	unsigned short startyear; //
-	unsigned short startmonth; //æŒ‰æœˆæŸ¥è¯¢æ‰æœ‰æ•ˆ
+	unsigned short startmonth; //°´ÔÂ²éÑ¯²ÅÓĞĞ§
 	unsigned short endyear; //
-	unsigned short endmonth; ////æŒ‰æœˆæŸ¥è¯¢æ‰æœ‰æ•ˆ
+	unsigned short endmonth; ////°´ÔÂ²éÑ¯²ÅÓĞĞ§
 
 }PD_QueryStatistic_Quarter;
 
 typedef struct
 {
-	//ç»Ÿè®¡æ—¶é—´æ®µ
+	//Í³¼ÆÊ±¼ä¶Î
 	unsigned short startyear; //
 	unsigned short startmonth; //
 	unsigned short endyear; //
 	unsigned short endmonth; //
 
-	unsigned int meetingcount;//æ€»ä¼šè®®æ•°
+	unsigned int meetingcount;//×Ü»áÒéÊı
 
-	//æ€»è®¡æ•°
+	//×Ü¼ÆÊı
 	unsigned int streamgetcount;
 	unsigned int screengetcount;
 	unsigned int filegetcount;
@@ -3437,32 +3464,32 @@ typedef struct
 	
 }PD_MeetOneStatisticItem;
 
-//è¿”å›æŸ¥è¯¢æ—¶é—´æ®µä¼šè®®ç»Ÿè®¡
+//·µ»Ø²éÑ¯Ê±¼ä¶Î»áÒéÍ³¼Æ
 //stages:STAGE_MeetStatistic
-//funï¼šFUN_One
+//fun£ºFUN_One
 //method:   METHOD_QueryResult
 typedef struct
 {
-	MEET_STATISTIC_TIMEQUARTER type;//ç»Ÿè®¡æ—¶é—´æ®µ
-	unsigned int num;  //å½“å‰å¸§åŒ…æ‹¬å¤šå°‘ä¸ªä¿¡æ¯
+	MEET_STATISTIC_TIMEQUARTER type;//Í³¼ÆÊ±¼ä¶Î
+	unsigned int num;  //µ±Ç°Ö¡°üÀ¨¶àÉÙ¸öĞÅÏ¢
 
-	//PD_MeetOneStatisticItem  //å¡«å……PD_MeetOneStatisticItemé¡¹æŠ•ç¥¨ä¿¡æ¯
+	//PD_MeetOneStatisticItem  //Ìî³äPD_MeetOneStatisticItemÏîÍ¶Æ±ĞÅÏ¢
 }PD_MeetStatistic_Quarter;
 
 #define PUBLICINFO_DATALEN 260
 
 //dataid
-#define MAXHUB_SERVERURL      2 //MAXHUBç™½æ¿ç³»ç»Ÿçš„æœåŠ¡å™¨åœ°å€ {"scanServerIp":"10.248.6.208","scanServerPort":"8889","serverIp":"10.248.6.11","serverPort":"61000"}
-#define PUBLIINFO_DATACACHE   3 //ä¼šè®®èµ„æ–™ç¼“å­˜ {"enable":"1","size":"150"} enable:æ˜¯å¦å¯ç”¨ size:è¶…è¿‡æŒ‡å®šå¤§å°çš„ å•ä½:M
-#define PUBLIINFO_MEETRECYCLE 4 //ä¼šè®®å®šæœŸæ¸…ç† {"enable":"1","day":"7"} enable:æ˜¯å¦å¯ç”¨ day:æ¸…ç†æŒ‡å®šå¤©æ•°å‰çš„ å•ä½:å¤©
-#define PUBLIINFO_OFFICEBINDPDF 5 //officeç»‘å®šçš„pdfæ–‡ä»¶ {"arr":[{"a":"0xb0000001","b":"0xb0000002"}]} a=officeæ–‡ä»¶id,b=pdfæ–‡ä»¶Id V2åè®®æ‰æ”¯æŒ
-#define MEET_PUBLIINFO_AGENDA_QUICKUSER 6   //  æ–¹å›¾å¿«æ·æ·»åŠ æ±‡æŠ¥äººorä¼ è¾¾äºº{"contents"["1","2"]}
-#define MEET_PUBLIINFO_AGENDA_QUICKMEMBER 7   // æ–¹å›¾å¿«æ·æ·»åŠ åˆ—å¸­äººå‘˜{"members"["1","2"]}
-#define MEET_PUBLIINFO_MEETDBINI 8 //ä¼šè®®æ•°æ®åº“åå°client.iniæ–‡ä»¶ 
+#define MAXHUB_SERVERURL      2 //MAXHUB°×°åÏµÍ³µÄ·şÎñÆ÷µØÖ· {"scanServerIp":"10.248.6.208","scanServerPort":"8889","serverIp":"10.248.6.11","serverPort":"61000"}
+#define PUBLIINFO_DATACACHE   3 //»áÒé×ÊÁÏ»º´æ {"enable":"1","size":"150"} enable:ÊÇ·ñÆôÓÃ size:³¬¹ıÖ¸¶¨´óĞ¡µÄ µ¥Î»:M
+#define PUBLIINFO_MEETRECYCLE 4 //»áÒé¶¨ÆÚÇåÀí {"enable":"1","day":"7"} enable:ÊÇ·ñÆôÓÃ day:ÇåÀíÖ¸¶¨ÌìÊıÇ°µÄ µ¥Î»:Ìì
+#define PUBLIINFO_OFFICEBINDPDF 5 //office°ó¶¨µÄpdfÎÄ¼ş {"arr":[{"a":"0xb0000001","b":"0xb0000002"}]} a=officeÎÄ¼şid,b=pdfÎÄ¼şId V2Ğ­Òé²ÅÖ§³Ö
+#define MEET_PUBLIINFO_AGENDA_QUICKUSER 6   //  ·½Í¼¿ì½İÌí¼Ó»ã±¨ÈËor´«´ïÈË{"contents"["1","2"]}
+#define MEET_PUBLIINFO_AGENDA_QUICKMEMBER 7   // ·½Í¼¿ì½İÌí¼ÓÁĞÏ¯ÈËÔ±{"members"["1","2"]}
+#define MEET_PUBLIINFO_MEETDBINI 8 //»áÒéÊı¾İ¿âºóÌ¨client.iniÎÄ¼ş 
 
-//æŸ¥è¯¢ç³»ç»Ÿå…¨å±€å­—ä¸²
+//²éÑ¯ÏµÍ³È«¾Ö×Ö´®
 //stages:STAGE_PublicInfo
-//funï¼šFUN_All
+//fun£ºFUN_All
 //method: METHOD_Query
 typedef struct
 {
@@ -3471,26 +3498,26 @@ typedef struct
 	//int32u dataid[num];
 }PD_QueryPublicInfo;
 
-//è¿”å›æŸ¥è¯¢ç³»ç»Ÿå…¨å±€å­—ä¸²
-//å•ä¸ªå…¨å±€å­—ä¸²
+//·µ»Ø²éÑ¯ÏµÍ³È«¾Ö×Ö´®
+//µ¥¸öÈ«¾Ö×Ö´®
 typedef struct
 {
-	int32u dataid;//å­—ä¸²ID
+	int32u dataid;//×Ö´®ID
 	char   dataval[PUBLICINFO_DATALEN];
 }PD_Item_PublicInfo;
 
-//è¿”å›æŸ¥è¯¢ç³»ç»Ÿå…¨å±€å­—ä¸²
-//å•ä¸ªå…¨å±€å­—ä¸²
+//·µ»Ø²éÑ¯ÏµÍ³È«¾Ö×Ö´®
+//µ¥¸öÈ«¾Ö×Ö´®
 typedef struct
 {
-	int32u dataid;//å­—ä¸²ID
+	int32u dataid;//×Ö´®ID
 
-	int16u namelen;			 //åç§°é•¿åº¦=å­—ç¬¦ä¸²é•¿åº¦+ç»“å°¾å­—èŠ‚
-	//char name[namelen];    //åç§°éœ€è¦å¢åŠ ä¸€ä¸ªå­—èŠ‚0ä½œå­—ç¬¦ä¸²ç»“å°¾
+	int16u namelen;			 //Ãû³Æ³¤¶È=×Ö·û´®³¤¶È+½áÎ²×Ö½Ú
+	//char name[namelen];    //Ãû³ÆĞèÒªÔö¼ÓÒ»¸ö×Ö½Ú0×÷×Ö·û´®½áÎ²
 }PD_Item_PublicInfo_V2;
 
 //stages:STAGE_PublicInfo
-//funï¼šFUN_All
+//fun£ºFUN_All
 //method: METHOD_Query METHOD_Set
 typedef struct
 {
@@ -3499,21 +3526,21 @@ typedef struct
 	//PD_Item_PublicInfo item[num];
 }PD_PublicInfo;
 
-//æ‰«ç åŠ å…¥ä¼šè®®
+//É¨Âë¼ÓÈë»áÒé
 //stages:STAGE_MeetingSeat
-//funï¼šFUN_One
+//fun£ºFUN_One
 //method: METHOD_Notify
 typedef struct
 {
-	int32u meetingid;//æ‰«ç åŠ å…¥çš„ä¼šè®®ID
-	int32u memberrole;//å‚ä¼šäººè§’è‰²
-	PD_Member_Edit memberinfo;//å‚ä¼šäººå‘˜çš„ä¿¡æ¯,å¦‚æœå‚ä¼šäººIDä¸º0ï¼Œè¡¨ç¤ºæ–°å»ºä¸€ä¸ªå‚ä¼šäººå‘˜
+	int32u meetingid;//É¨Âë¼ÓÈëµÄ»áÒéID
+	int32u memberrole;//²Î»áÈË½ÇÉ«
+	PD_Member_Edit memberinfo;//²Î»áÈËÔ±µÄĞÅÏ¢,Èç¹û²Î»áÈËIDÎª0£¬±íÊ¾ĞÂ½¨Ò»¸ö²Î»áÈËÔ±
 
 }PD_ScanEnterMeet;
 
-//å¿«é€Ÿå…¥ä¼š
+//¿ìËÙÈë»á
 //stages:STAGE_MeetingSeat
-//funï¼šFUN_One
+//fun£ºFUN_One
 //method: METHOD_Start
 typedef struct
 {
@@ -3524,41 +3551,41 @@ typedef struct
 	*/
 	int32u meetid;
 	int32u deviceid;
-	char   phone[SHORT_DESCRIBE_LENG];  //ç”µè¯
+	char   phone[SHORT_DESCRIBE_LENG];  //µç»°
 
-	//é¢„ç•™æ•°æ®åé¢å¯èƒ½ä¼šè¿›è¡Œä½¿ç”¨
-	int32u jsonlen;//é•¿åº¦=å­—ç¬¦ä¸²é•¿åº¦+ç»“å°¾å­—èŠ‚
-	//char   jsontext[jsonlen]; //éœ€è¦å¢åŠ ä¸€ä¸ªå­—èŠ‚0ä½œå­—ç¬¦ä¸²ç»“å°¾
+	//Ô¤ÁôÊı¾İºóÃæ¿ÉÄÜ»á½øĞĞÊ¹ÓÃ
+	int32u jsonlen;//³¤¶È=×Ö·û´®³¤¶È+½áÎ²×Ö½Ú
+	//char   jsontext[jsonlen]; //ĞèÒªÔö¼ÓÒ»¸ö×Ö½Ú0×÷×Ö·û´®½áÎ²
 }PD_FastEnterMeet;
 
-/*--------------------------------æ–‡ä»¶è‡ªå®šä¹‰é€‰é¡¹è¯„åˆ† 20180723-----------------------------------------*/
-#define FILESCORE_VOTECONTENT_MAXLEN 200 //æ–‡ä»¶è¯„åˆ†æ ‡é¢˜æœ€å¤§é•¿åº¦
-#define FILESCORE_MAXITEM 4				 //æ–‡ä»¶è¯„åˆ†é€‰é¡¹æœ€å¤§ä¸ªæ•°
-#define FILESCORE_MAXITEM_LEN 60				 //æ–‡ä»¶è¯„åˆ†é€‰é¡¹æœ€å¤§é•¿åº¦
+/*--------------------------------ÎÄ¼ş×Ô¶¨ÒåÑ¡ÏîÆÀ·Ö 20180723-----------------------------------------*/
+#define FILESCORE_VOTECONTENT_MAXLEN 200 //ÎÄ¼şÆÀ·Ö±êÌâ×î´ó³¤¶È
+#define FILESCORE_MAXITEM 4				 //ÎÄ¼şÆÀ·ÖÑ¡Ïî×î´ó¸öÊı
+#define FILESCORE_MAXITEM_LEN 60				 //ÎÄ¼şÆÀ·ÖÑ¡Ïî×î´ó³¤¶È
 typedef struct
 {
-	int32u voteid;//è¯„åˆ†é¡¹IDï¼Œä¼šè®®ä¸­å”¯ä¸€ï¼Œç”¨æ¥æ ‡è¯†åˆ é™¤å’Œä¿®æ”¹ã€å‘èµ·ã€åœæ­¢ç­‰æ“ä½œ
-	int32u fileid;//æ–‡ä»¶ID
-	char content[FILESCORE_VOTECONTENT_MAXLEN]; //æŠ•ç¥¨å†…å®¹ 
+	int32u voteid;//ÆÀ·ÖÏîID£¬»áÒéÖĞÎ¨Ò»£¬ÓÃÀ´±êÊ¶É¾³ıºÍĞŞ¸Ä¡¢·¢Æğ¡¢Í£Ö¹µÈ²Ù×÷
+	int32u fileid;//ÎÄ¼şID
+	char content[FILESCORE_VOTECONTENT_MAXLEN]; //Í¶Æ±ÄÚÈİ 
 
-	ProtocalData::VOTE_MODE mode; //åŒ¿åæŠ•ç¥¨ è®°åæŠ•ç¥¨
+	ProtocalData::VOTE_MODE mode; //ÄäÃûÍ¶Æ± ¼ÇÃûÍ¶Æ±
 
-	unsigned int votestate;     //æŠ•ç¥¨çŠ¶æ€  å‚è§ vote_notvote
-	unsigned int timeouts;     //è®¡æ—¶ç»“æŸ å•ä½ï¼šç§’
-	int64u starttime;//å¼€æ—¶æŠ•ç¥¨çš„æ—¶é—´ UTCç§’
-	int64u endtime;//ç»“æŸæŠ•ç¥¨çš„æ—¶é—´ UTCç§’
+	unsigned int votestate;     //Í¶Æ±×´Ì¬  ²Î¼û vote_notvote
+	unsigned int timeouts;     //¼ÆÊ±½áÊø µ¥Î»£ºÃë
+	int64u starttime;//¿ªÊ±Í¶Æ±µÄÊ±¼ä UTCÃë
+	int64u endtime;//½áÊøÍ¶Æ±µÄÊ±¼ä UTCÃë
 
-	int32u shouldmembernum;  //åº”åˆ°äººæ•°
-	int32u realmembernum;    //å·²æŠ•äººæ•°
+	int32u shouldmembernum;  //Ó¦µ½ÈËÊı
+	int32u realmembernum;    //ÒÑÍ¶ÈËÊı
 
-	unsigned int selectcount;     //æœ‰æ•ˆé€‰é¡¹æ•°é‡
-	int32u itemsumscore[FILESCORE_MAXITEM];  //æ¯ä¸ªé€‰é¡¹çš„ç›®å‰æ€»åˆ†--æ ¹æ®å·²æŠ•äººæ•°è®¡ç®—
-	char voteText[FILESCORE_MAXITEM][FILESCORE_MAXITEM_LEN];  //æè¿°æ–‡å­—
+	unsigned int selectcount;     //ÓĞĞ§Ñ¡ÏîÊıÁ¿
+	int32u itemsumscore[FILESCORE_MAXITEM];  //Ã¿¸öÑ¡ÏîµÄÄ¿Ç°×Ü·Ö--¸ù¾İÒÑÍ¶ÈËÊı¼ÆËã
+	char voteText[FILESCORE_MAXITEM][FILESCORE_MAXITEM_LEN];  //ÃèÊöÎÄ×Ö
 }PD_Item_UserDefineFileScore;
 
-//æ–‡ä»¶è‡ªå®šä¹‰é€‰é¡¹è¯„åˆ†
+//ÎÄ¼ş×Ô¶¨ÒåÑ¡ÏîÆÀ·Ö
 //stages:STAGE_FileScoreVote
-//funï¼šFUN_All
+//fun£ºFUN_All
 //method: METHOD_Add\METHOD_Modify\METHOD_Query
 typedef struct
 {
@@ -3566,52 +3593,52 @@ typedef struct
 	unsigned int	TotalNum;
 	unsigned int	StartId;
 	unsigned int	CurrNum;
-	//PD_Item_UserDefineFileScore;  å¡«å……curnumä¸ªPD_Item_UserDefineFileScore
+	//PD_Item_UserDefineFileScore;  Ìî³äcurnum¸öPD_Item_UserDefineFileScore
 }PD_UserDefineFileScore;
 
-//åˆ é™¤æ–‡ä»¶è‡ªå®šä¹‰é€‰é¡¹è¯„åˆ†
+//É¾³ıÎÄ¼ş×Ô¶¨ÒåÑ¡ÏîÆÀ·Ö
 //stages:STAGE_FileScoreVote
-//funï¼šFUN_All
-//method: METHOD_Deleteã€METHOD_Stop
+//fun£ºFUN_All
+//method: METHOD_Delete¡¢METHOD_Stop
 typedef struct
 {
 	unsigned int	MeetingId;
 	unsigned int	TotalNum;
-	//int32u voteid[totalnum];//æŠ•ç¥¨ID
+	//int32u voteid[totalnum];//Í¶Æ±ID
 }PD_DeleteUserDefineFileScore;
 
-//æ–‡ä»¶è‡ªå®šä¹‰é€‰é¡¹è¯„åˆ†çŠ¶æ€å˜æ›´
+//ÎÄ¼ş×Ô¶¨ÒåÑ¡ÏîÆÀ·Ö×´Ì¬±ä¸ü
 typedef struct
 {
-	int32u	votestate;//å‚è§ VOTING_FLAG_REVOTE
-	int64u  starttime;//å‘èµ·æŠ•ç¥¨æ—¶é—´ UTCç§’
-	int64u  endtime;//ç»“æŸæŠ•ç¥¨æ—¶é—´ UTCç§’
+	int32u	votestate;//²Î¼û VOTING_FLAG_REVOTE
+	int64u  starttime;//·¢ÆğÍ¶Æ±Ê±¼ä UTCÃë
+	int64u  endtime;//½áÊøÍ¶Æ±Ê±¼ä UTCÃë
 }PD_change_UserDefineFileScore;
 
-//è®¾ç½®æ–‡ä»¶è‡ªå®šä¹‰é€‰é¡¹è¯„åˆ†æŠ•ç¥¨çš„è¶…æ—¶å€¼
-//stagesï¼šSTAGE_FileScoreVote
+//ÉèÖÃÎÄ¼ş×Ô¶¨ÒåÑ¡ÏîÆÀ·ÖÍ¶Æ±µÄ³¬Ê±Öµ
+//stages£ºSTAGE_FileScoreVote
 //fun: FUN_All
-//method:METHOD_Set,è®¾ç½®
+//method:METHOD_Set,ÉèÖÃ
 typedef struct
 {
-	unsigned int MeetingId;  //ä¼šè®®ID
-	unsigned int voiteid;  //æŠ•ç¥¨ID
-	unsigned int timeouts;  //è¶…æ—¶å€¼
+	unsigned int MeetingId;  //»áÒéID
+	unsigned int voiteid;  //Í¶Æ±ID
+	unsigned int timeouts;  //³¬Ê±Öµ
 
 }PD_MeetingUserDefineFileScoreTimeouts;
 
 typedef struct
 {
 	unsigned int	voteid;
-	unsigned int	voteflag;//å‚è§ VOTING_FLAG_REVOTE
+	unsigned int	voteflag;//²Î¼û VOTING_FLAG_REVOTE
 	unsigned int	timeouts;
 	unsigned int	membernum;
-	//int32u memberid[membernum];//äººå‘˜ID
+	//int32u memberid[membernum];//ÈËÔ±ID
 }PD_Item_StartUserDefineFileScore;
 
-//å‘èµ·æ–‡ä»¶è‡ªå®šä¹‰é€‰é¡¹è¯„åˆ†
+//·¢ÆğÎÄ¼ş×Ô¶¨ÒåÑ¡ÏîÆÀ·Ö
 //stages:STAGE_FileScoreVote
-//funï¼šFUN_All
+//fun£ºFUN_All
 //method: METHOD_Start
 typedef struct
 {
@@ -3619,458 +3646,458 @@ typedef struct
 	PD_Item_StartUserDefineFileScore item;
 }PD_StartUserDefineFileScore;
 
-//æ”¶åˆ°å‘èµ·æ–‡ä»¶è‡ªå®šä¹‰é€‰é¡¹è¯„åˆ†
+//ÊÕµ½·¢ÆğÎÄ¼ş×Ô¶¨ÒåÑ¡ÏîÆÀ·Ö
 //stages:STAGE_FileScoreVote
-//funï¼šFUN_All
+//fun£ºFUN_All
 //method: METHOD_Start
 typedef struct
 {
 	int32u meetingid;
-	int32u voteid;//è¯„åˆ†é¡¹IDï¼Œä¼šè®®ä¸­å”¯ä¸€ï¼Œç”¨æ¥æ ‡è¯†åˆ é™¤å’Œä¿®æ”¹ã€å‘èµ·ã€åœæ­¢ç­‰æ“ä½œ
-	int32u fileid;//æ–‡ä»¶ID
-	char   content[FILESCORE_VOTECONTENT_MAXLEN]; //æŠ•ç¥¨å†…å®¹ 
+	int32u voteid;//ÆÀ·ÖÏîID£¬»áÒéÖĞÎ¨Ò»£¬ÓÃÀ´±êÊ¶É¾³ıºÍĞŞ¸Ä¡¢·¢Æğ¡¢Í£Ö¹µÈ²Ù×÷
+	int32u fileid;//ÎÄ¼şID
+	char   content[FILESCORE_VOTECONTENT_MAXLEN]; //Í¶Æ±ÄÚÈİ 
 
-	ProtocalData::VOTE_MODE mode; //åŒ¿åæŠ•ç¥¨ è®°åæŠ•ç¥¨
-	int32u timeouts; //è®¡æ—¶ç»“æŸ å•ä½ï¼šç§’
-	int64u starttime;//å¼€æ—¶æŠ•ç¥¨çš„æ—¶é—´ UTCç§’
-	int32u voteflag;//å‚è§ VOTING_FLAG_REVOTE
+	ProtocalData::VOTE_MODE mode; //ÄäÃûÍ¶Æ± ¼ÇÃûÍ¶Æ±
+	int32u timeouts; //¼ÆÊ±½áÊø µ¥Î»£ºÃë
+	int64u starttime;//¿ªÊ±Í¶Æ±µÄÊ±¼ä UTCÃë
+	int32u voteflag;//²Î¼û VOTING_FLAG_REVOTE
 	
-	int32u selectcount;     //æœ‰æ•ˆé€‰é¡¹æ•°é‡
-	char   voteText[FILESCORE_MAXITEM][FILESCORE_MAXITEM_LEN];  //æè¿°æ–‡å­—
+	int32u selectcount;     //ÓĞĞ§Ñ¡ÏîÊıÁ¿
+	char   voteText[FILESCORE_MAXITEM][FILESCORE_MAXITEM_LEN];  //ÃèÊöÎÄ×Ö
 
 	int32u membernum;
-	//int32u memberid[membernum];//äººå‘˜ID
+	//int32u memberid[membernum];//ÈËÔ±ID
 }PD_StartUserDefineFileScoreNotify;
 
 typedef struct
 {
-	int32u voteid;//è¯„åˆ†é¡¹IDï¼Œä¼šè®®ä¸­å”¯ä¸€ï¼Œç”¨æ¥æ ‡è¯†åˆ é™¤å’Œä¿®æ”¹ã€å‘èµ·ã€åœæ­¢ç­‰æ“ä½œ
-	int32u shouldmembernum;  //åº”åˆ°äººæ•°
-	int32u realmembernum;    //å·²æŠ•äººæ•°
-	int32u itemsumscore[FILESCORE_MAXITEM];  //æ¯ä¸ªé€‰é¡¹çš„ç›®å‰æ€»åˆ†--æ ¹æ®å·²æŠ•äººæ•°è®¡ç®—
+	int32u voteid;//ÆÀ·ÖÏîID£¬»áÒéÖĞÎ¨Ò»£¬ÓÃÀ´±êÊ¶É¾³ıºÍĞŞ¸Ä¡¢·¢Æğ¡¢Í£Ö¹µÈ²Ù×÷
+	int32u shouldmembernum;  //Ó¦µ½ÈËÊı
+	int32u realmembernum;    //ÒÑÍ¶ÈËÊı
+	int32u itemsumscore[FILESCORE_MAXITEM];  //Ã¿¸öÑ¡ÏîµÄÄ¿Ç°×Ü·Ö--¸ù¾İÒÑÍ¶ÈËÊı¼ÆËã
 }PD_Item_FileScoreStatistic;
 
-//æ–‡ä»¶è‡ªå®šä¹‰é€‰é¡¹è¯„åˆ†ç»Ÿè®¡
+//ÎÄ¼ş×Ô¶¨ÒåÑ¡ÏîÆÀ·ÖÍ³¼Æ
 //stages:STAGE_FileScoreVote
-//funï¼šFUN_VoteCount
+//fun£ºFUN_VoteCount
 //method: METHOD_Query
 typedef struct
 {
 	unsigned int	MeetingId;
 	unsigned int	VoteNum;
-	//PD_Item_FileScoreStatistic;  å¡«å……curnumä¸ªPD_Item_FileScoreStatistic
+	//PD_Item_FileScoreStatistic;  Ìî³äcurnum¸öPD_Item_FileScoreStatistic
 }PD_UserDefineFileScoreStatistic;
 
 typedef struct
 {
-	int32u memberid;  //äººå‘˜ID
-	int32u state;  //æ˜¯å¦å·²ç»æäº¤ 1è¡¨ç¤ºå·²ç»æäº¤ 0æœªæäº¤
-	int32u score[FILESCORE_MAXITEM];  //æ¯ä¸ªé€‰é¡¹çš„åˆ†--æ ¹æ®å·²æŠ•äººæ•°è®¡ç®—
-	int64u votetime;//æäº¤æ—¶é—´ UTC ç§’
-	char   content[FILESCORE_VOTECONTENT_MAXLEN]; //æ„è§ 
+	int32u memberid;  //ÈËÔ±ID
+	int32u state;  //ÊÇ·ñÒÑ¾­Ìá½» 1±íÊ¾ÒÑ¾­Ìá½» 0Î´Ìá½»
+	int32u score[FILESCORE_MAXITEM];  //Ã¿¸öÑ¡ÏîµÄ·Ö--¸ù¾İÒÑÍ¶ÈËÊı¼ÆËã
+	int64u votetime;//Ìá½»Ê±¼ä UTC Ãë
+	char   content[FILESCORE_VOTECONTENT_MAXLEN]; //Òâ¼û 
 
 }PD_Item_FileScoreMemberStatistic;
 
-//æ–‡ä»¶è‡ªå®šä¹‰é€‰é¡¹è¯„åˆ†äººå‘˜ç»Ÿè®¡
+//ÎÄ¼ş×Ô¶¨ÒåÑ¡ÏîÆÀ·ÖÈËÔ±Í³¼Æ
 //stages:STAGE_FileScoreVote
-//funï¼šFUN_VoteInfo
-//method: METHOD_Queryã€METHOD_Addï¼ˆæäº¤æŠ•ç¥¨ï¼‰
+//fun£ºFUN_VoteInfo
+//method: METHOD_Query¡¢METHOD_Add£¨Ìá½»Í¶Æ±£©
 typedef struct
 {
 	unsigned int	MeetingId;
-	unsigned int    voteid;//è¯„åˆ†é¡¹IDï¼Œä¼šè®®ä¸­å”¯ä¸€ï¼Œç”¨æ¥æ ‡è¯†åˆ é™¤å’Œä¿®æ”¹ã€å‘èµ·ã€åœæ­¢ç­‰æ“ä½œ
+	unsigned int    voteid;//ÆÀ·ÖÏîID£¬»áÒéÖĞÎ¨Ò»£¬ÓÃÀ´±êÊ¶É¾³ıºÍĞŞ¸Ä¡¢·¢Æğ¡¢Í£Ö¹µÈ²Ù×÷
 	unsigned int	TotalNum;
 	unsigned int	StartId;
 	unsigned int	CurrNum;
-	//PD_Item_FileScoreMemberStatistic;  å¡«å……curnumä¸ªPD_Item_FileScoreMemberStatistic
+	//PD_Item_FileScoreMemberStatistic;  Ìî³äcurnum¸öPD_Item_FileScoreMemberStatistic
 }PD_UserDefineFileScoreMemberStatistic;
 
-//ç”Ÿç‰©è®¤è¯åˆ é™¤
+//ÉúÎïÈÏÖ¤É¾³ı
 typedef struct
 {
-	int32u memberid;//æ ‡è¯†ç”¨-æŸ¥è¯¢ç»“æœä¼šè¿”å›è¯¥å€¼
-	char   phone[SHORT_DESCRIBE_LENG];  //ç”µè¯-æŸ¥è¯¢ç»“æœä¼šè¿”å›è¯¥å€¼
-	char   idcard[SHORT_DESCRIBE_LENG];  //èº«ä»½è¯å·ç -æŸ¥è¯¢ç»“æœä¼šè¿”å›è¯¥å€¼
+	int32u memberid;//±êÊ¶ÓÃ-²éÑ¯½á¹û»á·µ»Ø¸ÃÖµ
+	char   phone[SHORT_DESCRIBE_LENG];  //µç»°-²éÑ¯½á¹û»á·µ»Ø¸ÃÖµ
+	char   idcard[SHORT_DESCRIBE_LENG];  //Éí·İÖ¤ºÅÂë-²éÑ¯½á¹û»á·µ»Ø¸ÃÖµ
 }PD_ZKIdentify_SingleItem;
 
-#define IDENTIFY_FLAG_ISLASTFRAME 0x00000001 //æ ‡è®°ä¸ºæœ€åä¸€å¸§
-#define IDENTIFY_FLAG_NEEDDATA    0x00000002 //æ ‡è®°åªè¿”å›æ•°æ®çš„é•¿åº¦
+#define IDENTIFY_FLAG_ISLASTFRAME 0x00000001 //±ê¼ÇÎª×îºóÒ»Ö¡
+#define IDENTIFY_FLAG_NEEDDATA    0x00000002 //±ê¼ÇÖ»·µ»ØÊı¾İµÄ³¤¶È
 
 //stages:STAGE_ZKIDENTIFY
-//funï¼šFUN_One
+//fun£ºFUN_One
 //method:METHOD_Delete\METHOD_Query
 typedef struct
 {
-	int    queryflag;//æŸ¥è¯¢æ ‡å¿— 
-	int	   num; //å½“æ–¹æ³•ä¸ºåˆ é™¤æ—¶,ä¸º0è¡¨ç¤ºåˆ é™¤å…¨éƒ¨
+	int    queryflag;//²éÑ¯±êÖ¾ 
+	int	   num; //µ±·½·¨ÎªÉ¾³ıÊ±,Îª0±íÊ¾É¾³ıÈ«²¿
 
 	//PD_ZKIdentify_SingleItem item[];
 }PD_ZKIdentify_Simple;
 
-//ç”Ÿç‰©è®¤è¯
+//ÉúÎïÈÏÖ¤
 //stages:STAGE_ZKIDENTIFY
-//funï¼šFUN_One
-//method: METHOD_Queryï¼ˆè¿”å›æŸ¥è¯¢ç»“æœï¼‰ã€METHOD_Modify
+//fun£ºFUN_One
+//method: METHOD_Query£¨·µ»Ø²éÑ¯½á¹û£©¡¢METHOD_Modify
 typedef struct
 {
 	int    flag;//IDENTIFY_FLAG_ISLASTFRAME
-	int    fingerimg1len;//1æ‰‹æŒ‡æŒ‡çº¹æ¨¡æ¿ ä¸º0è¡¨ç¤ºæ²¡æœ‰æ¨¡æ¿æ•°æ®
-	int    fingerimg2len;//2æ‰‹æŒ‡æŒ‡çº¹æ¨¡æ¿ ä¸º0è¡¨ç¤ºæ²¡æœ‰æ¨¡æ¿æ•°æ®
-	int    faceimglen;//äººè„¸æ¨¡æ¿ ä¸º0è¡¨ç¤ºæ²¡æœ‰æ¨¡æ¿æ•°æ®
+	int    fingerimg1len;//1ÊÖÖ¸Ö¸ÎÆÄ£°å Îª0±íÊ¾Ã»ÓĞÄ£°åÊı¾İ
+	int    fingerimg2len;//2ÊÖÖ¸Ö¸ÎÆÄ£°å Îª0±íÊ¾Ã»ÓĞÄ£°åÊı¾İ
+	int    faceimglen;//ÈËÁ³Ä£°å Îª0±íÊ¾Ã»ÓĞÄ£°åÊı¾İ
 
-	int64u addtime;//å½•å…¥çš„æ—¶é—´-æŸ¥è¯¢è¿”å›æ—¶æœ‰æ•ˆ
+	int64u addtime;//Â¼ÈëµÄÊ±¼ä-²éÑ¯·µ»ØÊ±ÓĞĞ§
 	PD_ZKIdentify_SingleItem base;
 	
 }PD_ZKIdentify_Oper;
 
 
-// çŸ­ä¿¡æœåŠ¡
-#define  MAX_PHONE_NUMBER    100  // ä¸€æ¬¡å¯å‘é€çš„æœ€å¤§æ•°é‡
-#define  PHONE_NUMBER_LEN    12   // æ‰‹æœºå·ç é•¿åº¦
-#define  MAX_MSG_LEN         300  // çŸ­ä¿¡æœ€å¤§å­—ç¬¦æ•°
-#define  DEFAULT_MSG_LEN     40   // é»˜è®¤å­—ç¬¦ä¸²é•¿åº¦
+// ¶ÌĞÅ·şÎñ
+#define  MAX_PHONE_NUMBER    100  // Ò»´Î¿É·¢ËÍµÄ×î´óÊıÁ¿
+#define  PHONE_NUMBER_LEN    12   // ÊÖ»úºÅÂë³¤¶È
+#define  MAX_MSG_LEN         300  // ¶ÌĞÅ×î´ó×Ö·ûÊı
+#define  DEFAULT_MSG_LEN     40   // Ä¬ÈÏ×Ö·û´®³¤¶È
 
-// è¯·æ±‚ç”¨
+// ÇëÇóÓÃ
 typedef struct  
 {
-	char  serverIP[DEFAULT_MSG_LEN];                    // æœåŠ¡å™¨IP
-	char  serverPort[DEFAULT_MSG_LEN];                  // æœåŠ¡å™¨ç«¯å£å·
-	char  ctrlType[DEFAULT_MSG_LEN];                    // çŸ­ä¿¡æœåŠ¡ç±»å‹ï¼ˆå‘é€ï¼ŒæŸ¥è¯¢ç­‰ï¼‰
+	char  serverIP[DEFAULT_MSG_LEN];                    // ·şÎñÆ÷IP
+	char  serverPort[DEFAULT_MSG_LEN];                  // ·şÎñÆ÷¶Ë¿ÚºÅ
+	char  ctrlType[DEFAULT_MSG_LEN];                    // ¶ÌĞÅ·şÎñÀàĞÍ£¨·¢ËÍ£¬²éÑ¯µÈ£©
 
-	char  uname[DEFAULT_MSG_LEN];                       // çŸ­ä¿¡æœåŠ¡è´¦æˆ· åç§°
-	char  upwd[DEFAULT_MSG_LEN];                        // çŸ­ä¿¡æœåŠ¡è´¦æˆ· å¯†ç 
-	char  numbers[MAX_PHONE_NUMBER][PHONE_NUMBER_LEN];  // ç”µè¯å·ç 
-	char  messageInfo[MAX_MSG_LEN];                     // çŸ­ä¿¡å†…å®¹
+	char  uname[DEFAULT_MSG_LEN];                       // ¶ÌĞÅ·şÎñÕË»§ Ãû³Æ
+	char  upwd[DEFAULT_MSG_LEN];                        // ¶ÌĞÅ·şÎñÕË»§ ÃÜÂë
+	char  numbers[MAX_PHONE_NUMBER][PHONE_NUMBER_LEN];  // µç»°ºÅÂë
+	char  messageInfo[MAX_MSG_LEN];                     // ¶ÌĞÅÄÚÈİ
 }PD_MSNInfo, *pPD_MSNInfo;
 
-// æ¥æ”¶å“åº” ç”¨
+// ½ÓÊÕÏìÓ¦ ÓÃ
 typedef struct 
 {
-	int  statuscode;  // çŠ¶æ€ç ï¼ˆè¡¨ç¤ºè¯·æ±‚ç»“æœï¼‰
+	int  statuscode;  // ×´Ì¬Âë£¨±íÊ¾ÇëÇó½á¹û£©
 }PD_ItemMsnCode, *pPD_ItemMsnCode;
 
-// æŸ¥è¯¢ä½™é‡ï¼ˆå‰©ä½™å¯å‘é€æ¡æ•°ï¼‰
+// ²éÑ¯ÓàÁ¿£¨Ê£Óà¿É·¢ËÍÌõÊı£©
 typedef struct 
 {
 	PD_ItemMsnCode  recvCode;
 
-	int  account;  // å‰©ä½™çŸ­ä¿¡æ¡æ•°
+	int  account;  // Ê£Óà¶ÌĞÅÌõÊı
 }PD_MsnLastCnt, *pPD_MsnLastCnt;
 
-//////////////////////////// topic è®®é¢˜ //////////////////////////////////////////////
-//æ—¶é—´è½´å¼ä¼šè®®è®®ç¨‹
+//////////////////////////// topic ÒéÌâ //////////////////////////////////////////////
+//Ê±¼äÖáÊ½»áÒéÒé³Ì
 //status
-#define MEETTOPIC_STATUS_OFF		0 //æœªå¼€å§‹
-#define MEETTOPIC_STATUS_ON         1 //å¼€å§‹
+#define MEETTOPIC_STATUS_OFF		0 //Î´¿ªÊ¼
+#define MEETTOPIC_STATUS_ON         1 //¿ªÊ¼
 typedef struct
 {
-	int32u  topiciid;  //è®®é¢˜ID
-	int32u  status;  //è®®é¢˜çŠ¶æ€ å‚è§ MEETTOPIC_STATUS_OFF
-	int32u  fileid;  //ç»‘å®šæ–‡ä»¶ID
-	int64u	startutctime;//å•ä½ç§’
-	int64u	endutctime;  //å•ä½ç§’
-	char	topicname[DESCRIBE_LENG]; //è®®é¢˜åç§°
-	char	reporter[NAME_LENG];//æ±‡æŠ¥å•ä½
+	int32u  topiciid;  //ÒéÌâID
+	int32u  status;  //ÒéÌâ×´Ì¬ ²Î¼û MEETTOPIC_STATUS_OFF
+	int32u  fileid;  //°ó¶¨ÎÄ¼şID
+	int64u	startutctime;//µ¥Î»Ãë
+	int64u	endutctime;  //µ¥Î»Ãë
+	char	topicname[DESCRIBE_LENG]; //ÒéÌâÃû³Æ
+	char	reporter[NAME_LENG];//»ã±¨µ¥Î»
 }PD_TopicItemInfo;
 
-//stagesï¼šSTAGE_MeetTopic
-//fun: FUN_All ä¼šè®®è®®é¢˜
-//method:æŸ¥è¯¢ã€å¢åŠ ã€ä¿®æ”¹ã€åˆ é™¤ã€è®¾ç½®
+//stages£ºSTAGE_MeetTopic
+//fun: FUN_All »áÒéÒéÌâ
+//method:²éÑ¯¡¢Ôö¼Ó¡¢ĞŞ¸Ä¡¢É¾³ı¡¢ÉèÖÃ
 typedef struct
 {
-	int32u MeetingId;  //ä¼šè®®ID
-	int32u TotalNum;//æ€»å…±æœ‰å¤šå°‘ä¸ªè®®é¢˜
-	int32u StartId; //å½“å‰å¸§å¼€å§‹è®®é¢˜åºå·
-	int32u CurrNum;//å½“å‰å¸§åŒ…æ‹¬å¤šå°‘ä¸ªè®®é¢˜ä¿¡æ¯
-	//PD_TopicItemInfo; //æ ¹æ®å‰é¢æ€»æ•°åˆ—å†™PD_TopicItemInfo
+	int32u MeetingId;  //»áÒéID
+	int32u TotalNum;//×Ü¹²ÓĞ¶àÉÙ¸öÒéÌâ
+	int32u StartId; //µ±Ç°Ö¡¿ªÊ¼ÒéÌâĞòºÅ
+	int32u CurrNum;//µ±Ç°Ö¡°üÀ¨¶àÉÙ¸öÒéÌâĞÅÏ¢
+	//PD_TopicItemInfo; //¸ù¾İÇ°Ãæ×ÜÊıÁĞĞ´PD_TopicItemInfo
 
 }PD_MeetTopics;
 
-//stagesï¼šSTAGE_MeetTopic
-//fun: FUN_All ä¼šè®®è®®é¢˜
+//stages£ºSTAGE_MeetTopic
+//fun: FUN_All »áÒéÒéÌâ
 //method:METHOD_Control
 typedef struct
 {
-	int32u MeetingId;  //ä¼šè®®ID
+	int32u MeetingId;  //»áÒéID
 	int32u num;//
 
-	//int32u topicids[num];//è®®é¢˜IDçš„é¡ºåº
+	//int32u topicids[num];//ÒéÌâIDµÄË³Ğò
 }PD_SetMeetTopicsPos;
 
 //////////////////////////// topic group //////////////////////////////////////////////
 typedef struct
 {
-	int32u  topiciid;  //è®®é¢˜ID
-	int32u  groupid;  //åˆ†ç»„ID
-	char	groupname[NAME_LENG];//åˆ†ç»„åç§°
+	int32u  topiciid;  //ÒéÌâID
+	int32u  groupid;  //·Ö×éID
+	char	groupname[NAME_LENG];//·Ö×éÃû³Æ
 }PD_TopicGroupItemInfo;
 
-//stagesï¼šSTAGE_MeetTopic
-//fun: FUN_One ä¼šè®®è®®é¢˜
-//method:æŸ¥è¯¢ã€å¢åŠ ã€ä¿®æ”¹ã€åˆ é™¤
+//stages£ºSTAGE_MeetTopic
+//fun: FUN_One »áÒéÒéÌâ
+//method:²éÑ¯¡¢Ôö¼Ó¡¢ĞŞ¸Ä¡¢É¾³ı
 typedef struct
 {
-	int32u MeetingId;  //ä¼šè®®ID
-	int32u TotalNum;//æ€»å…±æœ‰å¤šå°‘ä¸ªè®®é¢˜
-	int32u StartId; //å½“å‰å¸§å¼€å§‹è®®é¢˜åºå·
-	int32u CurrNum;//å½“å‰å¸§åŒ…æ‹¬å¤šå°‘ä¸ªè®®é¢˜ä¿¡æ¯
-	//PD_TopicGroupItemInfo; //æ ¹æ®å‰é¢æ€»æ•°åˆ—å†™PD_TopicGroupItemInfo
+	int32u MeetingId;  //»áÒéID
+	int32u TotalNum;//×Ü¹²ÓĞ¶àÉÙ¸öÒéÌâ
+	int32u StartId; //µ±Ç°Ö¡¿ªÊ¼ÒéÌâĞòºÅ
+	int32u CurrNum;//µ±Ç°Ö¡°üÀ¨¶àÉÙ¸öÒéÌâĞÅÏ¢
+	//PD_TopicGroupItemInfo; //¸ù¾İÇ°Ãæ×ÜÊıÁĞĞ´PD_TopicGroupItemInfo
 
 }PD_MeetTopicGroups;
 
 //////////////////////////// topic nopermission //////////////////////////////////////////////
 typedef struct
 {
-	int32u  topiciid;  //è®®é¢˜ID
-	int32u  memberid;  //å‚ä¼šäººå‘˜ID
+	int32u  topiciid;  //ÒéÌâID
+	int32u  memberid;  //²Î»áÈËÔ±ID
 }PD_TopicPermItemInfo;
 
-//stagesï¼šSTAGE_MeetTopic
-//fun: FUN_MemberPermission ä¼šè®®è®®é¢˜
-//method:æŸ¥è¯¢ã€å¢åŠ ã€ä¿®æ”¹ã€åˆ é™¤
+//stages£ºSTAGE_MeetTopic
+//fun: FUN_MemberPermission »áÒéÒéÌâ
+//method:²éÑ¯¡¢Ôö¼Ó¡¢ĞŞ¸Ä¡¢É¾³ı
 typedef struct
 {
-	int32u MeetingId;  //ä¼šè®®ID
+	int32u MeetingId;  //»áÒéID
 	int32u topicid;
-	int32u TotalNum;//æ€»å…±æœ‰å¤šå°‘ä¸ªè®®é¢˜
-	int32u StartId; //å½“å‰å¸§å¼€å§‹è®®é¢˜åºå·
-	int32u CurrNum;//å½“å‰å¸§åŒ…æ‹¬å¤šå°‘ä¸ªè®®é¢˜ä¿¡æ¯
-	//PD_TopicPermItemInfo; //æ ¹æ®å‰é¢æ€»æ•°åˆ—å†™PD_TopicPermItemInfo
+	int32u TotalNum;//×Ü¹²ÓĞ¶àÉÙ¸öÒéÌâ
+	int32u StartId; //µ±Ç°Ö¡¿ªÊ¼ÒéÌâĞòºÅ
+	int32u CurrNum;//µ±Ç°Ö¡°üÀ¨¶àÉÙ¸öÒéÌâĞÅÏ¢
+	//PD_TopicPermItemInfo; //¸ù¾İÇ°Ãæ×ÜÊıÁĞĞ´PD_TopicPermItemInfo
 
 }PD_MeetTopicPerms;
 
 //////////////////////////// lecture //////////////////////////////////////////////
 typedef struct
 {
-	int32u  fileid;  //è®®é¢˜ID
-	int32u  memberid;  //å‚ä¼šäººå‘˜ID
+	int32u  fileid;  //ÒéÌâID
+	int32u  memberid;  //²Î»áÈËÔ±ID
 }PD_LectureItemInfo;
 
-//stagesï¼šSTAGE_Lecture
-//fun: FUN_All ä¼šè®®è®²ç¨¿
-//method:æŸ¥è¯¢ã€å¢åŠ ã€ä¿®æ”¹ã€åˆ é™¤
+//stages£ºSTAGE_Lecture
+//fun: FUN_All »áÒé½²¸å
+//method:²éÑ¯¡¢Ôö¼Ó¡¢ĞŞ¸Ä¡¢É¾³ı
 typedef struct
 {
-	int32u MeetingId;  //ä¼šè®®ID
-	int32u TotalNum;//æ€»å…±æœ‰å¤šå°‘ä¸ªè®®é¢˜
-	int32u StartId; //å½“å‰å¸§å¼€å§‹è®®é¢˜åºå·
-	int32u CurrNum;//å½“å‰å¸§åŒ…æ‹¬å¤šå°‘ä¸ªè®®é¢˜ä¿¡æ¯
-	//PD_LectureItemInfo; //æ ¹æ®å‰é¢æ€»æ•°åˆ—å†™PD_LectureItemInfo
+	int32u MeetingId;  //»áÒéID
+	int32u TotalNum;//×Ü¹²ÓĞ¶àÉÙ¸öÒéÌâ
+	int32u StartId; //µ±Ç°Ö¡¿ªÊ¼ÒéÌâĞòºÅ
+	int32u CurrNum;//µ±Ç°Ö¡°üÀ¨¶àÉÙ¸öÒéÌâĞÅÏ¢
+	//PD_LectureItemInfo; //¸ù¾İÇ°Ãæ×ÜÊıÁĞĞ´PD_LectureItemInfo
 
 }PD_MeetLecture;
 
 //////////////////////////// home page //////////////////////////////////////////////
 typedef struct
 {
-	int32u  MeetingId;  //ä¼šè®®ID
-	int32u  fileid;  //å›¾ç‰‡ID
-	int32u  fontsize;  //å­—ä½“å¤§å°
-	int32u  fontcolor;//å­—ä½“é¢œè‰²
-	char    fontname[NAME_LENG];//å­—ä½“åç§°
-	int32u  deviceflag;//è®¾å¤‡çš„å…¨å±€æ ‡å¿—å‚è§ owbase.h å®å®šä¹‰ MEETDEVICE_FLAG
+	int32u  MeetingId;  //»áÒéID
+	int32u  fileid;  //Í¼Æ¬ID
+	int32u  fontsize;  //×ÖÌå´óĞ¡
+	int32u  fontcolor;//×ÖÌåÑÕÉ«
+	char    fontname[NAME_LENG];//×ÖÌåÃû³Æ
+	int32u  deviceflag;//Éè±¸µÄÈ«¾Ö±êÖ¾²Î¼û owbase.h ºê¶¨Òå MEETDEVICE_FLAG
 }PD_HomePageItemInfo;
 
-//stagesï¼šSTAGE_HomePage
-//fun: FUN_One ä¼šè®®æ¬¢è¿ç•Œé¢
-//method:æŸ¥è¯¢ã€ä¿®æ”¹
+//stages£ºSTAGE_HomePage
+//fun: FUN_One »áÒé»¶Ó­½çÃæ
+//method:²éÑ¯¡¢ĞŞ¸Ä
 typedef struct
 {
-	int32u MeetingId;  //ä¼šè®®ID
-	int32u TotalNum;//æ€»å…±æœ‰å¤šå°‘ä¸ª
-	int32u StartId; //å½“å‰å¸§å¼€å§‹åºå·
-	int32u CurrNum;//å½“å‰å¸§åŒ…æ‹¬å¤šå°‘ä¸ªä¿¡æ¯
-	//PD_HomePageItemInfo; //æ ¹æ®å‰é¢æ€»æ•°åˆ—å†™PD_HomePageItemInfo
+	int32u MeetingId;  //»áÒéID
+	int32u TotalNum;//×Ü¹²ÓĞ¶àÉÙ¸ö
+	int32u StartId; //µ±Ç°Ö¡¿ªÊ¼ĞòºÅ
+	int32u CurrNum;//µ±Ç°Ö¡°üÀ¨¶àÉÙ¸öĞÅÏ¢
+	//PD_HomePageItemInfo; //¸ù¾İÇ°Ãæ×ÜÊıÁĞĞ´PD_HomePageItemInfo
 
 }PD_HomePage;
 
-//////////////////////////// ä¼šè®®ç”¨æˆ·è‡ªå®šæ•°æ® //////////////////////////////////////////////
-#define MeetUserDef_SLOGAN		 1 //ä¼šè®®æ ‡è¯­
+//////////////////////////// »áÒéÓÃ»§×Ô¶¨Êı¾İ //////////////////////////////////////////////
+#define MeetUserDef_SLOGAN		 1 //»áÒé±êÓï
 
-#define MeetUserDef_APPROVALLOG  2 //ä¼šè®®å®¡æ‰¹æ—¥å¿—
+#define MeetUserDef_APPROVALLOG  2 //»áÒéÉóÅúÈÕÖ¾
 
-//dataæ•°ç»„ç±»å‹ asktmç”³è¯·å®¡æ‰¹çš„æ—¶é—´ utcç§’ï¼Œ askidç”³è¯·çš„adminidï¼Œaskmsgç”³è¯·åŸå› ï¼Œapptmå®¡æ‰¹çš„æ—¶é—´ utcç§’ï¼Œappidå®¡æ‰¹ç®¡ç†å‘˜id,statusæœ¬æ¬¡å®¡æ‰¹çš„çŠ¶æ€å‚è§MEET_APPROVAL_IDLEå®šä¹‰ï¼Œappmsgæœ¬æ¬¡å®¡æ‰¹çš„å¤‡æ³¨
-//{"data":[{"asktm":"178959632","askid":5,"askmsg":"ç”¨äºéƒ¨é—¨è®¨è®º","apptm":"17892213","appid":1,"status":1,"appmsg":"å®¡æ‰¹é€šè¿‡"}]}
+//dataÊı×éÀàĞÍ asktmÉêÇëÉóÅúµÄÊ±¼ä utcÃë£¬ askidÉêÇëµÄadminid£¬askmsgÉêÇëÔ­Òò£¬apptmÉóÅúµÄÊ±¼ä utcÃë£¬appidÉóÅú¹ÜÀíÔ±id,status±¾´ÎÉóÅúµÄ×´Ì¬²Î¼ûMEET_APPROVAL_IDLE¶¨Òå£¬appmsg±¾´ÎÉóÅúµÄ±¸×¢
+//{"data":[{"asktm":"178959632","askid":5,"askmsg":"ÓÃÓÚ²¿ÃÅÌÖÂÛ","apptm":"17892213","appid":1,"status":1,"appmsg":"ÉóÅúÍ¨¹ı"}]}
 
 
 typedef struct
 {
-	int32u id;//æ•°æ®id
+	int32u id;//Êı¾İid
 	int8u fill[2];
-	int16u namelen;			 //åç§°é•¿åº¦=å­—ç¬¦ä¸²é•¿åº¦+ç»“å°¾å­—èŠ‚
-	//char name[namelen];    //åç§°éœ€è¦å¢åŠ ä¸€ä¸ªå­—èŠ‚0ä½œå­—ç¬¦ä¸²ç»“å°¾
+	int16u namelen;			 //Ãû³Æ³¤¶È=×Ö·û´®³¤¶È+½áÎ²×Ö½Ú
+	//char name[namelen];    //Ãû³ÆĞèÒªÔö¼ÓÒ»¸ö×Ö½Ú0×÷×Ö·û´®½áÎ²
 }PD_MeetUserdefItemInfo;
 
-//stagesï¼šSTAGE_MeetUserdef
-//fun: FUN_One ä¼šè®®æ¬¢è¿ç•Œé¢
-//method:åˆ é™¤ã€æŸ¥è¯¢ã€ä¿®æ”¹
+//stages£ºSTAGE_MeetUserdef
+//fun: FUN_One »áÒé»¶Ó­½çÃæ
+//method:É¾³ı¡¢²éÑ¯¡¢ĞŞ¸Ä
 typedef struct
 {
-	int32u MeetingId;  //ä¼šè®®ID
-	int32u TotalNum;//æ€»å…±æœ‰å¤šå°‘ä¸ª
-	int32u StartId; //å½“å‰å¸§å¼€å§‹åºå·
-	int32u CurrNum;//å½“å‰å¸§åŒ…æ‹¬å¤šå°‘ä¸ªä¿¡æ¯
-	//PD_MeetUserdefItemInfo; //æ ¹æ®å‰é¢æ€»æ•°åˆ—å†™PD_MeetUserdefItemInfo
+	int32u MeetingId;  //»áÒéID
+	int32u TotalNum;//×Ü¹²ÓĞ¶àÉÙ¸ö
+	int32u StartId; //µ±Ç°Ö¡¿ªÊ¼ĞòºÅ
+	int32u CurrNum;//µ±Ç°Ö¡°üÀ¨¶àÉÙ¸öĞÅÏ¢
+	//PD_MeetUserdefItemInfo; //¸ù¾İÇ°Ãæ×ÜÊıÁĞĞ´PD_MeetUserdefItemInfo
 
 }PD_MeetUserdefInfo;
 
-//////////////////////////// ä¼šåœºç”¨æˆ·è‡ªå®šæ•°æ® //////////////////////////////////////////////
+//////////////////////////// »á³¡ÓÃ»§×Ô¶¨Êı¾İ //////////////////////////////////////////////
 typedef struct
 {
-	int32u id;//æ•°æ®id
+	int32u id;//Êı¾İid
 	int8u fill[2];
-	int16u namelen;			 //åç§°é•¿åº¦=å­—ç¬¦ä¸²é•¿åº¦+ç»“å°¾å­—èŠ‚
-	//char name[namelen];    //åç§°éœ€è¦å¢åŠ ä¸€ä¸ªå­—èŠ‚0ä½œå­—ç¬¦ä¸²ç»“å°¾
+	int16u namelen;			 //Ãû³Æ³¤¶È=×Ö·û´®³¤¶È+½áÎ²×Ö½Ú
+	//char name[namelen];    //Ãû³ÆĞèÒªÔö¼ÓÒ»¸ö×Ö½Ú0×÷×Ö·û´®½áÎ²
 }PD_RoomUserdefItemInfo;
 
-//stagesï¼šSTAGE_RoomUserdef
-//fun: FUN_One ä¼šè®®æ¬¢è¿ç•Œé¢
-//method:åˆ é™¤ã€æŸ¥è¯¢ã€ä¿®æ”¹
+//stages£ºSTAGE_RoomUserdef
+//fun: FUN_One »áÒé»¶Ó­½çÃæ
+//method:É¾³ı¡¢²éÑ¯¡¢ĞŞ¸Ä
 typedef struct
 {
-	int32u roomid;  //ä¼šåœºID
-	int32u TotalNum;//æ€»å…±æœ‰å¤šå°‘ä¸ª
-	int32u StartId; //å½“å‰å¸§å¼€å§‹åºå·
-	int32u CurrNum;//å½“å‰å¸§åŒ…æ‹¬å¤šå°‘ä¸ªä¿¡æ¯
-	//PD_RoomUserdefItemInfo; //æ ¹æ®å‰é¢æ€»æ•°åˆ—å†™PD_RoomUserdefItemInfo
+	int32u roomid;  //»á³¡ID
+	int32u TotalNum;//×Ü¹²ÓĞ¶àÉÙ¸ö
+	int32u StartId; //µ±Ç°Ö¡¿ªÊ¼ĞòºÅ
+	int32u CurrNum;//µ±Ç°Ö¡°üÀ¨¶àÉÙ¸öĞÅÏ¢
+	//PD_RoomUserdefItemInfo; //¸ù¾İÇ°Ãæ×ÜÊıÁĞĞ´PD_RoomUserdefItemInfo
 
 }PD_RoomUserdefInfo;
 
-#define FASTMEET_AGENDAFLAG_DIR  0x00000001 //è®®ç¨‹è‡ªåŠ¨å…³è”ç›®å½•
-#define FASTMEET_AGENDAFLAG_VOTE 0x00000002 //è®®ç¨‹è‡ªåŠ¨å…³è”æŠ•ç¥¨
-#define FASTMEET_AGENDAFLAG_SHOW 0x00000004 //è®®ç¨‹æ·»åŠ æ—¶è®¾ä¸ºéšè—
-#define FASTMEET_AGENDAFLAG_PSW  0x00000008 //è®®ç¨‹æ·»åŠ æ—¶è®¾ä¸ºéšè—
+#define FASTMEET_AGENDAFLAG_DIR  0x00000001 //Òé³Ì×Ô¶¯¹ØÁªÄ¿Â¼
+#define FASTMEET_AGENDAFLAG_VOTE 0x00000002 //Òé³Ì×Ô¶¯¹ØÁªÍ¶Æ±
+#define FASTMEET_AGENDAFLAG_SHOW 0x00000004 //Òé³ÌÌí¼ÓÊ±ÉèÎªÒş²Ø
+#define FASTMEET_AGENDAFLAG_PSW  0x00000008 //Òé³ÌÌí¼ÓÊ±ÉèÎªÒş²Ø
 
-//stagesï¼šSTAGE_StartUpMeeting
-//fun: FUN_One ä¼šè®®æ¬¢è¿ç•Œé¢
-//method:METHOD_Report å¿«é€Ÿåˆ›å»ºä¼šè®®
+//stages£ºSTAGE_StartUpMeeting
+//fun: FUN_One »áÒé»¶Ó­½çÃæ
+//method:METHOD_Report ¿ìËÙ´´½¨»áÒé
 typedef struct
 {
 	/*
 	{
-	"name":"ä¼šè®®åç§°",
-	"type":"0",//ä¼šè®®ç±»å‹
-	"status":"0",//ä¼šè®®çŠ¶æ€ å¯é€‰ å‚è§MEETING_STATUS ä»…æ–°å¢æ‰æœ‰æ•ˆ
-	"starttime":"",//UTC ç§’æ•°
-	"endtime":"",//UTC ç§’æ•°
-	"signin_type":"0",//ç­¾åˆ°ç±»å‹
-	"managerid":"0",//ç®¡ç†ID
-	"passwd":"",//ç­¾åˆ°å¯†ç   å¯é€‰
-	"ordername":"",//é¢„çº¦è€… å¯é€‰
-	"agendatype":"",//è®®é¢˜ç±»å‹ å¯é€‰
-	"agendadesc":"",//æ–‡æœ¬è®®é¢˜ å¯é€‰
-	"agendafile":"",//æ–‡ä»¶è®®é¢˜ å¯é€‰
-	"nomember":1,//ä¸æ·»åŠ å‚ä¼šäºº
-	"member":  //å¯é€‰
+	"name":"»áÒéÃû³Æ",
+	"type":"0",//»áÒéÀàĞÍ
+	"status":"0",//»áÒé×´Ì¬ ¿ÉÑ¡ ²Î¼ûMEETING_STATUS ½öĞÂÔö²ÅÓĞĞ§
+	"starttime":"",//UTC ÃëÊı
+	"endtime":"",//UTC ÃëÊı
+	"signin_type":"0",//Ç©µ½ÀàĞÍ
+	"managerid":"0",//¹ÜÀíID
+	"passwd":"",//Ç©µ½ÃÜÂë  ¿ÉÑ¡
+	"ordername":"",//Ô¤Ô¼Õß ¿ÉÑ¡
+	"agendatype":"",//ÒéÌâÀàĞÍ ¿ÉÑ¡
+	"agendadesc":"",//ÎÄ±¾ÒéÌâ ¿ÉÑ¡
+	"agendafile":"",//ÎÄ¼şÒéÌâ ¿ÉÑ¡
+	"nomember":1,//²»Ìí¼Ó²Î»áÈË
+	"member":  //¿ÉÑ¡
 	[
-	{"name::"é™ˆå·¥","company":"xx","job":"xx","phone","123456","password":"123456","perm":"0xff","role":3,"devid":"0x1100000"}
-	{"name::"é™ˆå·¥","company":"xx","job":"xx","phone","123456","password":"123456","perm":"0xff","role":4,"devid":"0x1100001"},
-	{"name::"é™ˆå·¥","company":"xx","job":"xx","phone","123456","password":"123456","perm":"0xff","role":1,"devid":"0x1100002"}
+	{"name::"³Â¹¤","company":"xx","job":"xx","comment":"xx","phone","123456","email":"xx","password":"123456","perm":"0xff","role":3,"devid":"0x1100000"}
+	{"name::"³Â¹¤","company":"xx","job":"xx","comment":"xx","phone","123456","email":"xx","password":"123456","perm":"0xff","role":4,"devid":"0x1100001"},
+	{"name::"³Â¹¤","company":"xx","job":"xx","comment":"xx","phone","123456","email":"xx","password":"123456","perm":"0xff","role":1,"devid":"0x1100002"}
 	],
-	"agenda":  //è®®é¢˜ å¯é€‰
+	"agenda":  //ÒéÌâ ¿ÉÑ¡
 	[
 	{
-	"flag":"",//å‚è§ FASTMEET_AGENDAFLAG_DIR
-	"desc:"",//è®®é¢˜å†…å®¹ ä¸é™é•¿ï¼Œå¯ä»¥ä½¿ç”¨jsonæ ¼å¼ï¼Œä¸ºjsonæ—¶a æ˜¯è®®é¢˜æ ‡é¢˜
-	"starttime":"",//è®®é¢˜è®¾ç½®çš„å¼€å§‹æ—¶é—´ UTC ç§’æ•° eg:1683854858 å¯é€‰
-	"endtime":"",//è®®é¢˜è®¾ç½®çš„ç»“æŸæ—¶é—´  UTC ç§’æ•° eg:1683891858 å¯é€‰
-	"passwd":"",//è®®é¢˜è®¾ç½®è®¿é—®å¯†ç  é™é•¿8å­—èŠ‚ å¯é€‰
-	"perm":[0,2]//è®®é¢˜é»‘åå•ï¼Œæ•°å€¼å¯¹åº”äº†Memberä¸­çš„å‚ä¼šäººç´¢å¼•ä»0å¼€å§‹ï¼ŒæŒ‡å®šmemberæ—¶æ‰æœ‰æ•ˆï¼Œä¼šè®¾ç½®åˆ°ç›®å½•æƒé™ä¸­
+	"flag":"",//²Î¼û FASTMEET_AGENDAFLAG_DIR
+	"desc:"",//ÒéÌâÄÚÈİ ²»ÏŞ³¤£¬¿ÉÒÔÊ¹ÓÃjson¸ñÊ½£¬ÎªjsonÊ±a ÊÇÒéÌâ±êÌâ
+	"starttime":"",//ÒéÌâÉèÖÃµÄ¿ªÊ¼Ê±¼ä UTC ÃëÊı eg:1683854858 ¿ÉÑ¡
+	"endtime":"",//ÒéÌâÉèÖÃµÄ½áÊøÊ±¼ä  UTC ÃëÊı eg:1683891858 ¿ÉÑ¡
+	"passwd":"",//ÒéÌâÉèÖÃ·ÃÎÊÃÜÂë ÏŞ³¤8×Ö½Ú ¿ÉÑ¡
+	"perm":[0,2]//ÒéÌâºÚÃûµ¥£¬ÊıÖµ¶ÔÓ¦ÁËMemberÖĞµÄ²Î»áÈËË÷Òı´Ó0¿ªÊ¼£¬Ö¸¶¨memberÊ±²ÅÓĞĞ§£¬»áÉèÖÃµ½Ä¿Â¼È¨ÏŞÖĞ
 	}
 	],
-	"userdef":  //ä¼šè®®è‡ªå®šä¹‰æ•°æ® å¯é€‰
+	"userdef":  //»áÒé×Ô¶¨ÒåÊı¾İ ¿ÉÑ¡
 	[
 	{
-	"id":"1",//æ•°æ®id
-	"text:"",//æ•°æ® ä¸é™é•¿ï¼Œå¯ä»¥ä½¿ç”¨jsonæ ¼å¼
+	"id":"1",//Êı¾İid
+	"text:"",//Êı¾İ ²»ÏŞ³¤£¬¿ÉÒÔÊ¹ÓÃjson¸ñÊ½
 	}
 	],
 	}
 	*/
-	int64u buildtime;//å¾®ç§’çº§UTCæ—¶é—´ï¼Œåˆ›å»ºå®Œæ¯•åä¼šå°†è¯¥å€¼è¿”å›
-	int32u roomid;//ä¼šåœºID
-	int32u jsonlen;//é•¿åº¦=å­—ç¬¦ä¸²é•¿åº¦+ç»“å°¾å­—èŠ‚
-	//char   jsontext[jsonlen]; //éœ€è¦å¢åŠ ä¸€ä¸ªå­—èŠ‚0ä½œå­—ç¬¦ä¸²ç»“å°¾
+	int64u buildtime;//Î¢Ãë¼¶UTCÊ±¼ä£¬´´½¨Íê±Ïºó»á½«¸ÃÖµ·µ»Ø
+	int32u roomid;//»á³¡ID
+	int32u jsonlen;//³¤¶È=×Ö·û´®³¤¶È+½áÎ²×Ö½Ú
+	//char   jsontext[jsonlen]; //ĞèÒªÔö¼ÓÒ»¸ö×Ö½Ú0×÷×Ö·û´®½áÎ²
 
 }PD_FastCreateMeetInfo;
 
-//ä¼šè®®åä¿¡æ¯ç»„æˆ
+//»áÒéÃûĞÅÏ¢×é³É
 typedef struct
 {
-	int64u buildtime;       //å¾®ç§’çº§UTCæ—¶é—´ï¼Œåˆ›å»ºå®Œæ¯•åä¼šå°†è¯¥å€¼è¿”å›
-	int32u senddeviceid;    //åˆ›å»ºè€…çš„è®¾å¤‡ID
-	int32u id;				//ä¼šè®®ç¼–å·
-	int32u roomId;			//ä¼šè®®å®¤ID
-	int32u status;			//ä¼šè®®çŠ¶æ€ MEETING_STATUS
-	int32u managerid;		//ç®¡ç†å‘˜id
+	int64u buildtime;       //Î¢Ãë¼¶UTCÊ±¼ä£¬´´½¨Íê±Ïºó»á½«¸ÃÖµ·µ»Ø
+	int32u senddeviceid;    //´´½¨ÕßµÄÉè±¸ID
+	int32u id;				//»áÒé±àºÅ
+	int32u roomId;			//»áÒéÊÒID
+	int32u status;			//»áÒé×´Ì¬ MEETING_STATUS
+	int32u managerid;		//¹ÜÀíÔ±id
 	PD_Time startTime;
 	PD_Time endTime;
-	char   meeting_psw[ONESIGNPASSWORD_LENG];				//ä¼šè®®ç­¾åˆ°å¯†ç  æ˜æ–‡utf8
-	char   ordername[NAME_LENG];							//ä¼šè®®é¢„çº¦äººå‘˜åç§°
-	int8u  type;			 //ä¼šè®®ç±»å‹ TYPE_MEETING
-	int8u  signin_type;		 //ç­¾åˆ°ç±»å‹ TYPE_SIGNIN
-	int16u namelen;			 //åç§°é•¿åº¦=å­—ç¬¦ä¸²é•¿åº¦+ç»“å°¾å­—èŠ‚
-	//char name[namelen];    //åç§°éœ€è¦å¢åŠ ä¸€ä¸ªå­—èŠ‚0ä½œå­—ç¬¦ä¸²ç»“å°¾
+	char   meeting_psw[ONESIGNPASSWORD_LENG];				//»áÒéÇ©µ½ÃÜÂë Ã÷ÎÄutf8
+	char   ordername[NAME_LENG];							//»áÒéÔ¤Ô¼ÈËÔ±Ãû³Æ
+	int8u  type;			 //»áÒéÀàĞÍ TYPE_MEETING
+	int8u  signin_type;		 //Ç©µ½ÀàĞÍ TYPE_SIGNIN
+	int16u namelen;			 //Ãû³Æ³¤¶È=×Ö·û´®³¤¶È+½áÎ²×Ö½Ú
+	//char name[namelen];    //Ãû³ÆĞèÒªÔö¼ÓÒ»¸ö×Ö½Ú0×÷×Ö·û´®½áÎ²
 }PD_FastCreateMeetInfo_OK;
 
 
-//////////////////////////ä¼šè®®é¢„çº¦////////////////////////////////////////////////
-//stagesï¼šSTAGE_MeetOrder
-//fun: FUN_One ä¼šè®®é¢„çº¦
-//method:METHOD_Add æ·»åŠ |ä¿®æ”¹
+//////////////////////////»áÒéÔ¤Ô¼////////////////////////////////////////////////
+//stages£ºSTAGE_MeetOrder
+//fun: FUN_One »áÒéÔ¤Ô¼
+//method:METHOD_Add Ìí¼Ó|ĞŞ¸Ä
 typedef struct
 {
 	/*
 	{
 	"roomid":"1",
-	"name":"ä¼šè®®åç§°",
-	"mode":"",//é¢„çº¦æ¨¡å¼ å¯é€‰
-	"type":"0",//ä¼šè®®ç±»å‹ å¯é€‰
-	"starttime":"",//UTC ç§’æ•°
-	"endtime":"",//UTC ç§’æ•°
-	"signin_type":"0",//ç­¾åˆ°ç±»å‹
-	"passwd":"",//ç­¾åˆ°å¯†ç   å¯é€‰
-	"ordername":"",//é¢„çº¦è€… å¯é€‰
-	"desc":"",//è¯·æ±‚çš„ç†ç”±  å¯é€‰
-	"member":  //å¯é€‰
+	"name":"»áÒéÃû³Æ",
+	"mode":"",//Ô¤Ô¼Ä£Ê½ ¿ÉÑ¡
+	"type":"0",//»áÒéÀàĞÍ ¿ÉÑ¡
+	"starttime":"",//UTC ÃëÊı
+	"endtime":"",//UTC ÃëÊı
+	"signin_type":"0",//Ç©µ½ÀàĞÍ
+	"passwd":"",//Ç©µ½ÃÜÂë  ¿ÉÑ¡
+	"ordername":"",//Ô¤Ô¼Õß ¿ÉÑ¡
+	"desc":"",//ÇëÇóµÄÀíÓÉ  ¿ÉÑ¡
+	"member":  //¿ÉÑ¡
 	[
-	{"name::"é™ˆå·¥","company":"xx","job":"xx","phone":"123456","password":"123456"}
-	{"name::"é™ˆå·¥","company":"xx","job":"xx","phone":"123456","password":"123456"},
-	{"name::"é™ˆå·¥","company":"xx","job":"xx","phone":"123456","password":"123456"}
+	{"name::"³Â¹¤","company":"xx","job":"xx","phone":"123456","password":"123456"}
+	{"name::"³Â¹¤","company":"xx","job":"xx","phone":"123456","password":"123456"},
+	{"name::"³Â¹¤","company":"xx","job":"xx","phone":"123456","password":"123456"}
 	],
 	}
 	*/
 	int32u markid;
-	int64u buildtime;//UTC å¾®ç§’
-	char   phone[SHORT_DESCRIBE_LENG];  //ç”µè¯
-	int32u jsonlen;//é•¿åº¦=å­—ç¬¦ä¸²é•¿åº¦+ç»“å°¾å­—èŠ‚
-	//char   jsontext[jsonlen]; //éœ€è¦å¢åŠ ä¸€ä¸ªå­—èŠ‚0ä½œå­—ç¬¦ä¸²ç»“å°¾
+	int64u buildtime;//UTC Î¢Ãë
+	char   phone[SHORT_DESCRIBE_LENG];  //µç»°
+	int32u jsonlen;//³¤¶È=×Ö·û´®³¤¶È+½áÎ²×Ö½Ú
+	//char   jsontext[jsonlen]; //ĞèÒªÔö¼ÓÒ»¸ö×Ö½Ú0×÷×Ö·û´®½áÎ²
 
 }PD_MeetOrderInfo;
 
-//ä¼šè®®é¢„çº¦å½•å…¥æˆåŠŸ
+//»áÒéÔ¤Ô¼Â¼Èë³É¹¦
 typedef struct
 {
 	int32u markid;
-	int64u buildtime;//UTC å¾®ç§’
-	int32u senddeviceid;    //åˆ›å»ºè€…çš„è®¾å¤‡ID
-	int32u id;				//ä¼šè®®ç¼–å·
-	char   phone[SHORT_DESCRIBE_LENG];  //ç”µè¯
-	int32u jsonlen;//é•¿åº¦=å­—ç¬¦ä¸²é•¿åº¦+ç»“å°¾å­—èŠ‚
-	//char   jsontext[jsonlen]; //éœ€è¦å¢åŠ ä¸€ä¸ªå­—èŠ‚0ä½œå­—ç¬¦ä¸²ç»“å°¾
+	int64u buildtime;//UTC Î¢Ãë
+	int32u senddeviceid;    //´´½¨ÕßµÄÉè±¸ID
+	int32u id;				//»áÒé±àºÅ
+	char   phone[SHORT_DESCRIBE_LENG];  //µç»°
+	int32u jsonlen;//³¤¶È=×Ö·û´®³¤¶È+½áÎ²×Ö½Ú
+	//char   jsontext[jsonlen]; //ĞèÒªÔö¼ÓÒ»¸ö×Ö½Ú0×÷×Ö·û´®½áÎ²
 
 }PD_MeetOrderInfo_Reture;
 
 typedef struct
 {
-	int32u id;				//ä¼šè®®ç¼–å·
-	int64u buildtime;//UTC å¾®ç§’
-	char   phone[SHORT_DESCRIBE_LENG];  //ç”µè¯
-	int8u  status;//å®¡æ‰¹çŠ¶æ€
+	int32u id;				//»áÒé±àºÅ
+	int64u buildtime;//UTC Î¢Ãë
+	char   phone[SHORT_DESCRIBE_LENG];  //µç»°
+	int8u  status;//ÉóÅú×´Ì¬
 	int8u  fill;//
-	int16u reasonlen;//å®¡æ‰¹å›æ‰§ é•¿åº¦=å­—ç¬¦ä¸²é•¿åº¦+ç»“å°¾å­—èŠ‚
-	int32u jsonlen;//é•¿åº¦=å­—ç¬¦ä¸²é•¿åº¦+ç»“å°¾å­—èŠ‚
-	//char   reason[reasonlen]; //éœ€è¦å¢åŠ ä¸€ä¸ªå­—èŠ‚0ä½œå­—ç¬¦ä¸²ç»“å°¾
-	//char   jsontext[jsonlen]; //éœ€è¦å¢åŠ ä¸€ä¸ªå­—èŠ‚0ä½œå­—ç¬¦ä¸²ç»“å°¾
+	int16u reasonlen;//ÉóÅú»ØÖ´ ³¤¶È=×Ö·û´®³¤¶È+½áÎ²×Ö½Ú
+	int32u jsonlen;//³¤¶È=×Ö·û´®³¤¶È+½áÎ²×Ö½Ú
+	//char   reason[reasonlen]; //ĞèÒªÔö¼ÓÒ»¸ö×Ö½Ú0×÷×Ö·û´®½áÎ²
+	//char   jsontext[jsonlen]; //ĞèÒªÔö¼ÓÒ»¸ö×Ö½Ú0×÷×Ö·û´®½áÎ²
 
 }PD_MeetOrderItemInfo;
 
@@ -4083,89 +4110,90 @@ typedef struct
 
 typedef struct
 {
-	int64u starttime;//UTC å¾®ç§’
-	int64u endtime;//UTC å¾®ç§’
-	char   phone[SHORT_DESCRIBE_LENG];  //ç”µè¯
-	int8u  status;//å®¡æ‰¹çŠ¶æ€
+	int64u starttime;//UTC Î¢Ãë
+	int64u endtime;//UTC Î¢Ãë
+	char   phone[SHORT_DESCRIBE_LENG];  //µç»°
+	int8u  status;//ÉóÅú×´Ì¬
 	int8u  fill[3];//
-	char   faststr[DESCRIBE_LENG];  //å¯¹é¢„çº¦å†…å®¹è¿›è¡Œæ¨¡ç³Šæœç´¢
+	char   faststr[DESCRIBE_LENG];  //¶ÔÔ¤Ô¼ÄÚÈİ½øĞĞÄ£ºıËÑË÷
 }PD_MeetOrder_ComplexQuery;
 
 //////////////////////////20230313 add ////////////////////////////////////////////////
-#define SWITCH_NEWVOTE 0 //ä½¿ç”¨æ–°æŠ•ç¥¨ä»£æ›¿æ—§æŠ•ç¥¨ è¿™ä¸ªæ˜¯é’ˆå¯¹è®®ç¨‹ç›®å½•æ–‡ä»¶ç»‘å®šçš„æŠ•ç¥¨å…³è”ä»¥åŠè§£é™¤
+#define SWITCH_NEWVOTE 0 //Ê¹ÓÃĞÂÍ¶Æ±´úÌæ¾ÉÍ¶Æ± Õâ¸öÊÇÕë¶ÔÒé³ÌÄ¿Â¼ÎÄ¼ş°ó¶¨µÄÍ¶Æ±¹ØÁªÒÔ¼°½â³ı
 
-#define AVOTEBASE_TYPE_VOTE  0x00 //æŠ•ç¥¨
-#define AVOTEBASE_TYPE_ELE   0x01 //é€‰ä¸¾
-#define AVOTEBASE_TYPE_QUE   0x02 //é—®å·è°ƒæŸ¥
+#define AVOTEBASE_TYPE_VOTE  0x00 //Í¶Æ±
+#define AVOTEBASE_TYPE_ELE   0x01 //Ñ¡¾Ù
+#define AVOTEBASE_TYPE_QUE   0x02 //ÎÊ¾íµ÷²é
  
-#define AVOTEBASE_MODE_AGONYMOUS   0x00 //åŒ¿å
-#define AVOTEBASE_MODE_SIGNED      0x01 //è®°å
+#define AVOTEBASE_MODE_AGONYMOUS   0x00 //ÄäÃû
+#define AVOTEBASE_MODE_SIGNED      0x01 //¼ÇÃû
 
-#define AVOTEBASE_SELTYPE_SINGLE   0x00 //å•é€‰
-#define AVOTEBASE_SELTYPE_MANY     0x01 //å¤šé€‰
+#define AVOTEBASE_SELTYPE_SINGLE   0x00 //µ¥Ñ¡
+#define AVOTEBASE_SELTYPE_MANY     0x01 //¶àÑ¡
 
-#define AVOTEBASE_STATUS_IDLE     0x00 //æœªå‘èµ·çš„æŠ•ç¥¨
-#define AVOTEBASE_STATUS_ING      0x01 //æ­£åœ¨è¿›è¡Œçš„æŠ•ç¥¨
-#define AVOTEBASE_STATUS_END      0x02 //å·²ç»ç»“æŸçš„æŠ•ç¥¨
+#define AVOTEBASE_STATUS_IDLE     0x00 //Î´·¢ÆğµÄÍ¶Æ±
+#define AVOTEBASE_STATUS_ING      0x01 //ÕıÔÚ½øĞĞµÄÍ¶Æ±
+#define AVOTEBASE_STATUS_END      0x02 //ÒÑ¾­½áÊøµÄÍ¶Æ±
 
-//æŠ•ç¥¨æ·»åŠ ï¼Œä¿®æ”¹æŒ‡å®šçš„æ ‡å¿—
-#define AVOTEBASE_FLAG_MARK		0x0000001 //è¡¨ç¤ºæŠ•ç¥¨è¦æäº¤å¤‡æ³¨
-#define AVOTEBASE_FLAG_SCORE	0x0000002 //è¡¨ç¤ºæŠ•ç¥¨è¦æäº¤é€‰é¡¹åˆ†æ•°
-#define AVOTEBASE_FLAG_START	0x0000004 //è¡¨ç¤ºæ·»åŠ æˆåŠŸåç«‹å³å‘èµ·
-#define AVOTEBASE_FLAG_DIRID	0x0000008 //è¡¨ç¤ºæ·»åŠ æ—¶ä»ç›®å½•IDè·å–æŠ•ç¥¨å‘èµ·çš„å‚ä¼šäºº
-#define AVOTEBASE_FLAG_SIGNPNG  0x0000010 //è¡¨ç¤ºæäº¤æ—¶éœ€è¦ç­¾å
-#define AVOTEBASE_FLAG_PSW		0x0000020 //è¡¨ç¤ºæäº¤æ—¶éœ€è¦å‚ä¼šäººå¯†ç è®¤è¯
-#define AVOTEBASE_FLAG_RAND		0x0000040 //è¡¨ç¤ºæŠ•ç¥¨å‘èµ·é€‰é¡¹éšæœºæ˜¾ç¤º
+//Í¶Æ±Ìí¼Ó£¬ĞŞ¸ÄÖ¸¶¨µÄ±êÖ¾
+#define AVOTEBASE_FLAG_MARK		0x0000001 //±íÊ¾Í¶Æ±ÒªÌá½»±¸×¢
+#define AVOTEBASE_FLAG_SCORE	0x0000002 //±íÊ¾Í¶Æ±ÒªÌá½»Ñ¡Ïî·ÖÊı
+#define AVOTEBASE_FLAG_START	0x0000004 //±íÊ¾Ìí¼Ó³É¹¦ºóÁ¢¼´·¢Æğ
+#define AVOTEBASE_FLAG_DIRID	0x0000008 //±íÊ¾Ìí¼ÓÊ±´ÓÄ¿Â¼ID»ñÈ¡Í¶Æ±·¢ÆğµÄ²Î»áÈË
+#define AVOTEBASE_FLAG_SIGNPNG  0x0000010 //±íÊ¾Ìá½»Ê±ĞèÒªÇ©Ãû
+#define AVOTEBASE_FLAG_PSW		0x0000020 //±íÊ¾Ìá½»Ê±ĞèÒª²Î»áÈËÃÜÂëÈÏÖ¤
+#define AVOTEBASE_FLAG_RAND		0x0000040 //±íÊ¾Í¶Æ±·¢ÆğÑ¡ÏîËæ»úÏÔÊ¾
+#define AVOTEBASE_FLAG_LAST		0x0000080 //±íÊ¾Í¶Æ±Ä©Î»±í¾ö
 
-//å‘èµ·æŠ•ç¥¨æ ‡å¿—
-#define AVOTING_FLAG_NOPOST		0x00000001 //ä¸åœ¨æŠ•å½±æœºä¸Šæ˜¾ç¤ºæŠ•ç¥¨ç»“æœ
-#define AVOTING_FLAG_SECRETARY	0x00000002 //æŠ•ç¥¨é€‰é¡¹ä¿å¯†æŠ•ç¥¨æ¨¡å¼
-#define AVOTING_FLAG_FINISHEXIT	0x00000004 //å…¨éƒ¨æäº¤å®Œæˆåç«‹å³ç»“æŸ
-#define AVOTING_FLAG_REVOTE		0x00000008 //é‡æŠ• æ¸…ç©ºä¹‹å‰çš„è®°å½•
+//·¢ÆğÍ¶Æ±±êÖ¾
+#define AVOTING_FLAG_NOPOST		0x00000001 //²»ÔÚÍ¶Ó°»úÉÏÏÔÊ¾Í¶Æ±½á¹û
+#define AVOTING_FLAG_SECRETARY	0x00000002 //Í¶Æ±Ñ¡Ïî±£ÃÜÍ¶Æ±Ä£Ê½
+#define AVOTING_FLAG_FINISHEXIT	0x00000004 //È«²¿Ìá½»Íê³ÉºóÁ¢¼´½áÊø
+#define AVOTING_FLAG_REVOTE		0x00000008 //ÖØÍ¶ Çå¿ÕÖ®Ç°µÄ¼ÇÂ¼
 
 
 typedef struct
 {
-	int32u voteflag; //å‘èµ·æŠ•ç¥¨æ ‡å¿— AVOTING_FLAG_NOPOST
-	int32u timeouts; //è®¡æ—¶ç»“æŸ å•ä½ï¼šç§’
-	int32u membernum;//å‚ä¸æŠ•ç¥¨çš„å‚ä¼šäººå‘˜æ•°
+	int32u voteflag; //·¢ÆğÍ¶Æ±±êÖ¾ AVOTING_FLAG_NOPOST
+	int32u timeouts; //¼ÆÊ±½áÊø µ¥Î»£ºÃë
+	int32u membernum;//²ÎÓëÍ¶Æ±µÄ²Î»áÈËÔ±Êı
 	//int32u members[];
 }PD_AVoteStartFlag;
 
 typedef struct
 {
-	int32u voteid; //æŠ•ç¥¨ID
+	int32u voteid; //Í¶Æ±ID
 	int32u fileid;//
 	int8u  type;//AVOTEBASE_TYPE_VOTE
 	int8u  mode;//AVOTEBASE_MODE_AGONYMOUS
 	int8u  seltype;// AVOTEBASE_SELTYPE_SINGLE
-	int8u  state;  //æŠ•ç¥¨çŠ¶æ€ æœªå‘èµ·=0 è¿›è¡Œä¸­=1 ç»“æŸ=2
-	int32u timeouts;     //è®¡æ—¶ç»“æŸ å•ä½ï¼šUTCç§’
-	int8u  per;//æŠ•ç¥¨é€šè¿‡ç‡ é€‰é¡¹1å·²æŠ•äººæ•°å åº”åˆ°äººæ•°çš„æ¯”ä¾‹
+	int8u  state;  //Í¶Æ±×´Ì¬ Î´·¢Æğ=0 ½øĞĞÖĞ=1 ½áÊø=2
+	int32u timeouts;     //¼ÆÊ±½áÊø µ¥Î»£ºUTCÃë
+	int8u  per;//Í¶Æ±Í¨¹ıÂÊ Ñ¡Ïî1ÒÑÍ¶ÈËÊıÕ¼Ó¦µ½ÈËÊıµÄ±ÈÀı
 	int8u  fill[3];
 
 	int32u flag;//AVOTEBASE_FLAG_MARK
-	int32u jsonlen;//é•¿åº¦=å­—ç¬¦ä¸²é•¿åº¦+ç»“å°¾å­—èŠ‚
+	int32u jsonlen;//³¤¶È=×Ö·û´®³¤¶È+½áÎ²×Ö½Ú
 
-	//char json[jsonlen]; //æŠ•ç¥¨å†…å®¹ 
+	//char json[jsonlen]; //Í¶Æ±ÄÚÈİ 
 	//{"content":"","item":["1","2"],"dirid":0}
 }PD_AVoteBaseInfo;
 
-#define AVOTE_SELFLAG_CHECKIN  0x00000001 //è¯¥ä½ä¸º1è¡¨ç¤ºå·²ç»ç­¾åˆ°
-#define AVOTE_SELFLAG_SUBMIT   0x00000002 //è¯¥ä½ä¸º1è¡¨ç¤ºå·²ç»æäº¤
-#define AVOTE_SELFLAG_SIGNDATA 0x00000004 //è¯¥ä½ä¸º1è¡¨ç¤ºæœ‰ç­¾å
-#define AVOTE_SELFLAG_PSWCHECK 0x00000008 //è¯¥ä½ä¸º1è¡¨ç¤ºç»è¿‡å‚ä¼šäººå¯†ç è®¤è¯
+#define AVOTE_SELFLAG_CHECKIN  0x00000001 //¸ÃÎ»Îª1±íÊ¾ÒÑ¾­Ç©µ½
+#define AVOTE_SELFLAG_SUBMIT   0x00000002 //¸ÃÎ»Îª1±íÊ¾ÒÑ¾­Ìá½»
+#define AVOTE_SELFLAG_SIGNDATA 0x00000004 //¸ÃÎ»Îª1±íÊ¾ÓĞÇ©Ãû
+#define AVOTE_SELFLAG_PSWCHECK 0x00000008 //¸ÃÎ»Îª1±íÊ¾¾­¹ı²Î»áÈËÃÜÂëÈÏÖ¤
 
 typedef struct
 {
-	int32u voteid; //æŠ•ç¥¨ID
-	int32u memberid;//æäº¤çš„äººå‘˜ID
+	int32u voteid; //Í¶Æ±ID
+	int32u memberid;//Ìá½»µÄÈËÔ±ID
 
 	int32u flag;//AVOTE_FLAG_SIGN
-	int32u jsonlen;//é•¿åº¦=å­—ç¬¦ä¸²é•¿åº¦+ç»“å°¾å­—èŠ‚
-	int32u pnglen;//ç­¾å
+	int32u jsonlen;//³¤¶È=×Ö·û´®³¤¶È+½áÎ²×Ö½Ú
+	int32u pnglen;//Ç©Ãû
 
-	//char json[jsonlen]; //æŠ•ç¥¨å†…å®¹ 
+	//char json[jsonlen]; //Í¶Æ±ÄÚÈİ 
 	//{"mark":"","item":[{"a":1,"b":"1"},{"a":2,"b":"1"}]} 
 	//char   pngdata[pnglen];
 }PD_AVoteSubmitInfo;
@@ -4175,27 +4203,27 @@ typedef struct
 	int32u memberid;
 
 	int32u flag;//AVOTE_FLAG_SIGN
-	int32u jsonlen;//é•¿åº¦=å­—ç¬¦ä¸²é•¿åº¦+ç»“å°¾å­—èŠ‚
-	int32u pnglen;//ç­¾å
+	int32u jsonlen;//³¤¶È=×Ö·û´®³¤¶È+½áÎ²×Ö½Ú
+	int32u pnglen;//Ç©Ãû
 
-	//char json[jsonlen]; //æŠ•ç¥¨å†…å®¹ 
+	//char json[jsonlen]; //Í¶Æ±ÄÚÈİ 
 	//{"mark":"","item":[{"a":1,"b":"1"},{"a":2,"b":"1"}]} 
 	//char   pngdata[pnglen];
 }PD_AVoteStaticInfo;
 
 //stages:STAGE_AVote
-//funï¼šFUN_VoteRecord
+//fun£ºFUN_VoteRecord
 //method: METHOD_Query
 typedef struct
 {
 	int32u	MeetingId;
 	int32u  voteid;
 	int32u	Num;
-	//PD_AVoteStaticInfo;  å¡«å……curnumä¸ªPD_AVoteStaticInfo
+	//PD_AVoteStaticInfo;  Ìî³äcurnum¸öPD_AVoteStaticInfo
 }PD_AVoteStatic;
 
 //stages:STAGE_AVote
-//funï¼šFUN_All
+//fun£ºFUN_All
 //method: METHOD_Add\METHOD_Modify\METHOD_Query
 typedef struct
 {
@@ -4203,341 +4231,382 @@ typedef struct
 	int32u	TotalNum;
 	int32u	StartId;
 	int32u	CurrNum;
-	//PD_AVoteBaseInfo;  å¡«å……curnumä¸ªPD_AVoteBaseInfo
+	//PD_AVoteBaseInfo;  Ìî³äcurnum¸öPD_AVoteBaseInfo
 }PD_AVote;
 
 //stages:STAGE_AVote
-//funï¼šFUN_Vote
-//method: METHOD_Deleteã€METHOD_Stop
+//fun£ºFUN_Vote
+//method: METHOD_Delete¡¢METHOD_Stop
 typedef struct
 {
 	int32u	MeetingId;
 	int32u	TotalNum;
-	//int32u voteid[totalnum];//æŠ•ç¥¨ID
+	//int32u voteid[totalnum];//Í¶Æ±ID
 }PD_DeleteAVote;
 
 typedef struct
 {
 	int32u meetid;
-	int32u voteflag; //å‘èµ·æŠ•ç¥¨æ ‡å¿— AVOTING_FLAG_NOPOST
-	int32u timeouts; //è®¡æ—¶ç»“æŸ å•ä½ï¼šç§’
+	int32u voteflag; //·¢ÆğÍ¶Æ±±êÖ¾ AVOTING_FLAG_NOPOST
+	int32u timeouts; //¼ÆÊ±½áÊø µ¥Î»£ºÃë
 	int32u votenum;
-	int32u memnum;//å‚ä¸æŠ•ç¥¨çš„å‚ä¼šäººå‘˜æ•°
+	int32u memnum;//²ÎÓëÍ¶Æ±µÄ²Î»áÈËÔ±Êı
 
 	//int32u voteid[votenum];
 	//int32u members[memnum];
 }PD_AVoteStartInfo;
 
 //orderid
-#define NEWVOTE_ORDERID_FTJDPT 1
-//1=æ–¹å›¾æˆ’æ¯’å¹³å°è®¢åˆ¶æŠ•ç¥¨æ¨é€
+#define NEWVOTE_ORDERID_FTJDPT 1 //·½Í¼ÍÆËÍÍ¶Æ±½á¹û¸øOA 	
+/*
+//·¢ËÍ
+{
+"meetid":1,
+"markid":"123",//±êÊ¶Öµ£¬Ö´ĞĞºó»á·µ»Ø¸ÃÖµ
+"voteid":[1,2,3]
+} //voteid Îª¿Õ±íÊ¾È«²¿Í¶Æ±
+
+//·µ»Ø
+{
+"meetid":1,
+"markid":"123",//±êÊ¶Öµ£¬Ö´ĞĞºó»á·µ»Ø¸ÃÖµ
+"code":200,  //200=³É¹¦ ÆäËüÖµÊÇÊ§°Ü
+"message":"³É¹¦"
+}
+
+*/
+#define NEWVOTE_ORDERID_FTZYYH 2 //·½Í¼ÖĞÔ­ÒøĞĞÍÆËÍ»áÒé½á¹û¸øOA 	
+/*
+//·¢ËÍ
+{
+"meetid":1,
+"markid":"123",//±êÊ¶Öµ£¬Ö´ĞĞºó»á·µ»Ø¸ÃÖµ
+}
+
+//·µ»Ø
+{
+"meetid":1,
+"markid":"123",//±êÊ¶Öµ£¬Ö´ĞĞºó»á·µ»Ø¸ÃÖµ
+"code":0, //0=³É¹¦ ÆäËüÖµÊÇÊ§°Ü
+"message":"³É¹¦"
+}
+*/
+
+//1=·½Í¼½ä¶¾Æ½Ì¨¶©ÖÆÍ¶Æ±ÍÆËÍ
 //stages:STAGE_AVote
-//funï¼šFUN_VoteInfo
+//fun£ºFUN_VoteInfo
 //method: METHOD_Notify
 typedef struct
 {
 	int32u  orderid;//NEWVOTE_ORDERID_FTJDPT
-	int32u  jsonlen;//é•¿åº¦=å­—ç¬¦ä¸²é•¿åº¦+ç»“å°¾å­—èŠ‚
+	int32u  jsonlen;//³¤¶È=×Ö·û´®³¤¶È+½áÎ²×Ö½Ú
 
-	//char json[jsonlen]; // 
-	//{"meetid":1,"voteid":[1,2,3]} //voteid ä¸ºç©ºè¡¨ç¤ºå…¨éƒ¨æŠ•ç¥¨
+	//char json[jsonlen]; // ¼ûÉÏ·½json¶¨Òå
 }PD_NotifyAVoteDetail;
 
 ///////////////////////////////20230321///////////////////////////////////////////
-//è¿™ä¸ªç»“æ„ç”¨äºè¡¨ç¤ºæ–¹æ¡ˆå…³è”çš„IDçš„ç±»å‹ï¼Œå¯ä»¥æ˜¯è®®ç¨‹ã€ç›®å½•ï¼Œæ–‡ä»¶ç­‰ä¸åŒçš„ç±»å‹
+//Õâ¸ö½á¹¹ÓÃÓÚ±íÊ¾·½°¸¹ØÁªµÄIDµÄÀàĞÍ£¬¿ÉÒÔÊÇÒé³Ì¡¢Ä¿Â¼£¬ÎÄ¼şµÈ²»Í¬µÄÀàĞÍ
 typedef struct
 {
 	int8u  type;//=0 agenda,=1 dir,=2 file
 	int8u  fill[3];
-	int32u id;//type=0æ˜¯ï¼Œè¿™ä¸ªæ˜¯è®®ç¨‹çš„ID
+	int32u id;//type=0ÊÇ£¬Õâ¸öÊÇÒé³ÌµÄID
 }PD_SeatPlanBindItem;
 
 typedef struct
 {
 	int32u memberid;//
 	int32u deviceid;
-	int8u  role;//å‚ä¼šäººè§’è‰² role_admin
+	int8u  role;//²Î»áÈË½ÇÉ« role_admin
 	int8u  fill[3];
 }PD_SeatPlanMemItem;
 
 typedef struct
 {
-	int32u planid;//æ–¹æ¡ˆid
+	int32u planid;//·½°¸id
 	int32u flag;
 	int32u jsonlen;//
 	//char   json[jsonlen + 1];//{"name":""}
 	int32u bindnum;
-	//PD_SeatPlanBindItem binditem[num];//æ–¹æ¡ˆçš„ç»‘å®šçš„
+	//PD_SeatPlanBindItem binditem[num];//·½°¸µÄ°ó¶¨µÄ
 
 	int32u memnum;
-	//PD_SeatPlanMemItem memitem[num];//æ–¹æ¡ˆçš„å‚ä¼šäººå‘˜
+	//PD_SeatPlanMemItem memitem[num];//·½°¸µÄ²Î»áÈËÔ±
 }PD_SeatPlanItem;
 
 //stages:STAGE_SeatPlan
-//funï¼šFUN_All
+//fun£ºFUN_All
 //method: METHOD_Query
 typedef struct
 {
 	int32u meetid;
 
 	int32u num;
-	//PD_SeatPlanItem item[num];//æ–¹æ¡ˆ
+	//PD_SeatPlanItem item[num];//·½°¸
 }PD_SeatPlan;
 
 //stages:STAGE_SeatPlan
-//funï¼šFUN_All
+//fun£ºFUN_All
 //method: METHOD_Add,METHOD_Modify
 typedef struct
 {
 	int32u meetid;
 
-	int64u markid;//æ·»åŠ æ—¶æŒ‡å®šçš„æ ‡è¯†IDï¼ŒæˆåŠŸæ·»åŠ åä¼šè¿”å›è¯¥å€¼
-	int32u planid;//æ–¹æ¡ˆid
+	int64u markid;//Ìí¼ÓÊ±Ö¸¶¨µÄ±êÊ¶ID£¬³É¹¦Ìí¼Óºó»á·µ»Ø¸ÃÖµ
+	int32u planid;//·½°¸id
 	int32u flag;
 	int32u jsonlen;//
 	//char   json[jsonlen + 1];//{"name":""}
 }PD_AddSeatPlan;
 
 //stages:STAGE_SeatPlan
-//funï¼šFUN_All
+//fun£ºFUN_All
 //method: METHOD_Delete,METHOD_Start
 typedef struct
 {
 	int32u meetid;
 
 	int32u num;
-	//int32u planid[num];//æ–¹æ¡ˆid
+	//int32u planid[num];//·½°¸id
 }PD_DelSeatPlan;
 
 //stages:STAGE_SeatPlan
-//funï¼šFUN_One
+//fun£ºFUN_One
 //method: METHOD_Set
 typedef struct
 {
 	int32u meetid;
-	int32u planid;//æ–¹æ¡ˆid
+	int32u planid;//·½°¸id
 
 	int32u bindnum;
-	//PD_SeatPlanBindItem binditem[num];//æ–¹æ¡ˆçš„ç»‘å®šçš„
+	//PD_SeatPlanBindItem binditem[num];//·½°¸µÄ°ó¶¨µÄ
 }PD_ModSeatPlanBindInfo;
 
 //stages:STAGE_SeatPlan
-//funï¼šFUN_One
+//fun£ºFUN_One
 //method: METHOD_Add,METHOD_Modify,METHOD_Delete
 typedef struct
 {
 	int32u meetid;
-	int32u planid;//æ–¹æ¡ˆid
+	int32u planid;//·½°¸id
 
 	int32u memnum;
-	//PD_SeatPlanMemItem memitem[num];//æ–¹æ¡ˆçš„å‚ä¼šäººå‘˜
+	//PD_SeatPlanMemItem memitem[num];//·½°¸µÄ²Î»áÈËÔ±
 }PD_ModSeatPlanMemInfo;
 
-//è‡ªå®šä¹‰jsonåè®®
-//stagesï¼š*
+//×Ô¶¨ÒåjsonĞ­Òé
+//stages£º*
 //fun: *
 //method:*
 typedef struct
 {
-	int32u deviceid;//æäº¤çš„è®¾å¤‡ID
-	int64u markid;//utcå¾®ç§’æ•°æˆ–è€…å…¶å®ƒç”¨æˆ·çš„æ ‡è¯†ID
-	int32u MeetingId;  //ä¼šè®®ID
+	int32u deviceid;//Ìá½»µÄÉè±¸ID
+	int64u markid;//utcÎ¢ÃëÊı»òÕßÆäËüÓÃ»§µÄ±êÊ¶ID
+	int32u MeetingId;  //»áÒéID
 	int    jsonlen;//json + 1
-	//char   json[];//jsonlen å‚è§meetuserdef.proçš„åè®®å®šä¹‰
+	//char   json[];//jsonlen ²Î¼ûmeetuserdef.proµÄĞ­Òé¶¨Òå
 }PD_SmartJsonProtol;
 
-//è‡ªå®šä¹‰jsonåè®®
-//stagesï¼š*
+//×Ô¶¨ÒåjsonĞ­Òé
+//stages£º*
 //fun: *
 //method:*
-#define SMARTJSON_FLAG_FIRST 0x00000001 //æ˜¯å¦ä¸ºç¬¬ä¸€ä¸ªåŒ…
-#define SMARTJSON_FLAG_LAST  0x00000002 //æ˜¯å¦ä¸ºæœ€åä¸€ä¸ªåŒ…
-#define SMARTJSON_FLAG_7Z    0x00000004 //æ˜¯å¦å‹ç¼©æ•°æ®
+#define SMARTJSON_FLAG_FIRST 0x00000001 //ÊÇ·ñÎªµÚÒ»¸ö°ü
+#define SMARTJSON_FLAG_LAST  0x00000002 //ÊÇ·ñÎª×îºóÒ»¸ö°ü
+#define SMARTJSON_FLAG_7Z    0x00000004 //ÊÇ·ñÑ¹ËõÊı¾İ
 
 typedef struct
 {
-	int32u total;//æ€»åŒ…æ•°
-	int32u cur;//å½“å‰åŒ…çš„ç´¢å¼•
+	int32u total;//×Ü°üÊı
+	int32u cur;//µ±Ç°°üµÄË÷Òı
 	int32u flag;//SMARTJSON_FLAG_FIRST
-	int32u deviceid;//æäº¤çš„è®¾å¤‡ID
-	int64u markid;//utcå¾®ç§’æ•°æˆ–è€…å…¶å®ƒç”¨æˆ·çš„æ ‡è¯†ID
-	int32u MeetingId;  //ä¼šè®®ID
+	int32u deviceid;//Ìá½»µÄÉè±¸ID
+	int64u markid;//utcÎ¢ÃëÊı»òÕßÆäËüÓÃ»§µÄ±êÊ¶ID
+	int32u MeetingId;  //»áÒéID
 	int    jsonlen;//json + 1
-	//char   json[];//jsonlen å‚è§meetuserdef.proçš„åè®®å®šä¹‰
+	//char   json[];//jsonlen ²Î¼ûmeetuserdef.proµÄĞ­Òé¶¨Òå
 }PD_SmartJsonProtolEx;
-///////////////å‚ä¼šäººå‘˜æ–‡ä»¶è‡ªå®šä¹‰æ•°æ®///////////////////////////////////////////////////////////
+///////////////²Î»áÈËÔ±ÎÄ¼ş×Ô¶¨ÒåÊı¾İ///////////////////////////////////////////////////////////
 
-//stagesï¼šSTAGE_MemFileUserInfo
-//fun: FUN_One, å•ä¸ª
-//method:æŸ¥è¯¢|åˆ é™¤
+//stages£ºSTAGE_MemFileUserInfo
+//fun: FUN_One, µ¥¸ö
+//method:²éÑ¯|É¾³ı
 typedef struct
 {
-	int32u meetid;//æ“ä½œçš„ä¼šè®®ID ä¸º0è¡¨ç¤ºä¸ä½œä¸ºæŸ¥è¯¢æ¡ä»¶
-	int8u  memrole;//è§’è‰² ä¸º0è¡¨ç¤ºä¸ä½œä¸ºæŸ¥è¯¢æ¡ä»¶
+	int32u meetid;//²Ù×÷µÄ»áÒéID Îª0±íÊ¾²»×÷Îª²éÑ¯Ìõ¼ş
+	int8u  memrole;//½ÇÉ« Îª0±íÊ¾²»×÷Îª²éÑ¯Ìõ¼ş
 	int8u  fill[3];
-	int32u memid;//äººå‘˜ID ä¸º0è¡¨ç¤ºä¸ä½œä¸ºæŸ¥è¯¢æ¡ä»¶
-	int32u dirid;//ç›®å½•ID ä¸º0è¡¨ç¤ºä¸ä½œä¸ºæŸ¥è¯¢æ¡ä»¶
-	int32u fileid;//æ–‡ä»¶ID ä¸º0è¡¨ç¤ºä¸ä½œä¸ºæŸ¥è¯¢æ¡ä»¶
-	int32u flag;//ç±»å‹æ ‡å¿— ä¸º0è¡¨ç¤ºä¸ä½œä¸ºæŸ¥è¯¢æ¡ä»¶
-	int32u param;//æ ¹æ®æ“ä½œå¯¹åº”çš„æ“ä½œå‚æ•°ï¼Œç”¨äºå¿«é€Ÿç»Ÿè®¡
-	int32u startrow;//æŸ¥è¯¢å¼€å§‹è¡Œ å®ç°åˆ†é¡µæŸ¥è¯¢ å¿…é¡»æœ‰æ•ˆ
-	int32u matchtextlen;//ä¸º0è¡¨ç¤ºä¸ä½œä¸ºæŸ¥è¯¢æ¡ä»¶
+	int32u memid;//ÈËÔ±ID Îª0±íÊ¾²»×÷Îª²éÑ¯Ìõ¼ş
+	int32u dirid;//Ä¿Â¼ID Îª0±íÊ¾²»×÷Îª²éÑ¯Ìõ¼ş
+	int32u fileid;//ÎÄ¼şID Îª0±íÊ¾²»×÷Îª²éÑ¯Ìõ¼ş
+	int32u flag;//ÀàĞÍ±êÖ¾ Îª0±íÊ¾²»×÷Îª²éÑ¯Ìõ¼ş
+	int32u param;//¸ù¾İ²Ù×÷¶ÔÓ¦µÄ²Ù×÷²ÎÊı£¬ÓÃÓÚ¿ìËÙÍ³¼Æ
+	int32u startrow;//²éÑ¯¿ªÊ¼ĞĞ ÊµÏÖ·ÖÒ³²éÑ¯ ±ØĞëÓĞĞ§
+	int32u matchtextlen;//Îª0±íÊ¾²»×÷Îª²éÑ¯Ìõ¼ş
 	//char text[matchtextlen];
 }PD_DoMeetOtherInfo;
 
-//stagesï¼šSTAGE_MemFileUserInfo
-//fun: FUN_One, å•ä¸ª
-//method:æ·»åŠ ã€æŸ¥è¯¢(æ•°æ®åº“è¿”å›)
+//stages£ºSTAGE_MemFileUserInfo
+//fun: FUN_One, µ¥¸ö
+//method:Ìí¼Ó¡¢²éÑ¯(Êı¾İ¿â·µ»Ø)
 typedef struct
 {
-	int32u totalrecord;//æœ¬æ¬¡æŸ¥è¯¢æ€»è®°å½•æ•°
-	int32u startrow;//æŸ¥è¯¢è¿”å›ç”¨æˆ·ä¼ è¿‡æ¥çš„å¼€å§‹è¡Œ
-	int32u CurrNum;//å½“å‰å¸§åŒ…æ‹¬å¤šå°‘ä¸ªæ–‡ä»¶ä¿¡æ¯
-	//PD_Item_MeetOtherInfo; //æ ¹æ®å‰é¢æ€»æ•°åˆ—å†™PD_Item_MeetOtherInfo
+	int32u totalrecord;//±¾´Î²éÑ¯×Ü¼ÇÂ¼Êı
+	int32u startrow;//²éÑ¯·µ»ØÓÃ»§´«¹ıÀ´µÄ¿ªÊ¼ĞĞ
+	int32u CurrNum;//µ±Ç°Ö¡°üÀ¨¶àÉÙ¸öÎÄ¼şĞÅÏ¢
+	//PD_Item_MeetOtherInfo; //¸ù¾İÇ°Ãæ×ÜÊıÁĞĞ´PD_Item_MeetOtherInfo
 }PD_MeetOtherInfo;
 
 typedef struct
 {
 	int32u meetid;//
-	int8u  memrole;//è§’è‰² 
+	int8u  memrole;//½ÇÉ« 
 	int8u  fill[3];
-	int32u memid;//äººå‘˜ID 
-	int32u dirid;//ç›®å½•ID
-	int32u fileid;//æ–‡ä»¶ID
-	int32u flag;//ç±»å‹æ ‡å¿—
-	int32u param;//æ ¹æ®æ“ä½œå¯¹åº”çš„æ“ä½œå‚æ•°ï¼Œç”¨äºå¿«é€Ÿç»Ÿè®¡
+	int32u memid;//ÈËÔ±ID 
+	int32u dirid;//Ä¿Â¼ID
+	int32u fileid;//ÎÄ¼şID
+	int32u flag;//ÀàĞÍ±êÖ¾
+	int32u param;//¸ù¾İ²Ù×÷¶ÔÓ¦µÄ²Ù×÷²ÎÊı£¬ÓÃÓÚ¿ìËÙÍ³¼Æ
 	int    jsonlen;//json + 1
-	//char   json[];//jsonlen ç±»å‹å¯¹åº”çš„jsonåè®®å®šä¹‰
+	//char   json[];//jsonlen ÀàĞÍ¶ÔÓ¦µÄjsonĞ­Òé¶¨Òå
 
 }PD_Item_MeetOtherInfo, *pPD_Item_MeetOtherInfo;
 
-///////////////////////////å®¡æ‰¹ start  æœªå®ç°///////////////////////////////////////////////
-//å®¡æ‰¹ç±»å‹
-#define  APPROVAL_TYPE_MEET		0 //ä¼šè®®
-#define  APPROVAL_TYPE_AGENDA	1 //è®®ç¨‹
-#define  APPROVAL_TYPE_DIR		2 //ç›®å½•
-#define  APPROVAL_TYPE_DIRFILE	3 //æ–‡ä»¶
-#define  APPROVAL_TYPE_VOTE		4 //æŠ•ç¥¨
-#define  APPROVAL_TYPE_MEMBER	5 //å‚ä¼šäºº
+///////////////////////////ÉóÅú start  Î´ÊµÏÖ///////////////////////////////////////////////
+//ÉóÅúÀàĞÍ
+#define  APPROVAL_TYPE_MEET		0 //»áÒé
+#define  APPROVAL_TYPE_AGENDA	1 //Òé³Ì
+#define  APPROVAL_TYPE_DIR		2 //Ä¿Â¼
+#define  APPROVAL_TYPE_DIRFILE	3 //ÎÄ¼ş
+#define  APPROVAL_TYPE_VOTE		4 //Í¶Æ±
+#define  APPROVAL_TYPE_MEMBER	5 //²Î»áÈË
 
-//å®¡æ‰¹æµè½¬çŠ¶æ€
-#define  APPROVAL_STATUS_PED		0 //å‘èµ·å®¡æ‰¹å¹¶ç­‰å¾…å®¡æ‰¹
-#define  APPROVAL_STATUS_ING		1 //å®¡æ‰¹ä¸­
-#define  APPROVAL_STATUS_OK			2 //å®¡æ‰¹é€šè¿‡
-#define  APPROVAL_STATUS_FAILED		3 //å®¡æ‰¹ä¸é€šè¿‡
+//ÉóÅúÁ÷×ª×´Ì¬
+#define  APPROVAL_STATUS_PED		0 //·¢ÆğÉóÅú²¢µÈ´ıÉóÅú
+#define  APPROVAL_STATUS_ING		1 //ÉóÅúÖĞ
+#define  APPROVAL_STATUS_OK			2 //ÉóÅúÍ¨¹ı
+#define  APPROVAL_STATUS_FAILED		3 //ÉóÅú²»Í¨¹ı
 
-//å®¡æ‰¹ç»“æœç»“æœç 
-#define  APPROVAL_CODE_OK		0 //æˆåŠŸ
-#define  APPROVAL_CODE_TIME		1 //æ—¶é—´å†²çª
+//ÉóÅú½á¹û½á¹ûÂë
+#define  APPROVAL_CODE_OK		0 //³É¹¦
+#define  APPROVAL_CODE_TIME		1 //Ê±¼ä³åÍ»
 
-//å®¡æ‰¹ä¼˜å…ˆçº§
-#define  APPROVAL_PRI_L0		0 //æ™®é€šçº§åˆ«
-#define  APPROVAL_PRI_L1		1 //åŠ æ€¥
-#define  APPROVAL_PRI_L2		2 //ç´§æ€¥
-#define  APPROVAL_PRI_L3		3 //çªå‘
+//ÉóÅúÓÅÏÈ¼¶
+#define  APPROVAL_PRI_L0		0 //ÆÕÍ¨¼¶±ğ
+#define  APPROVAL_PRI_L1		1 //¼Ó¼±
+#define  APPROVAL_PRI_L2		2 //½ô¼±
+#define  APPROVAL_PRI_L3		3 //Í»·¢
 
-//stagesï¼š*
+//stages£º*
 //fun: *
 //method:*
 typedef struct
 {
-	int8u  type;//å®¡æ‰¹ç±»å‹ APPROVAL_TYPE_MEET 
-	int8u  pri;//å®¡æ‰¹ä¼˜å…ˆçº§  APPROVAL_PRI_L0
+	int8u  type;//ÉóÅúÀàĞÍ APPROVAL_TYPE_MEET 
+	int8u  pri;//ÉóÅúÓÅÏÈ¼¶  APPROVAL_PRI_L0
 	int8u  fill[2];//
-	int32u adminid;//æŒ‡å®šç®¡ç†å‘˜å®¡æ‰¹ ä¸º0è¡¨ç¤ºé»˜è®¤æ‰€æœ‰ç®¡ç†å¯å®¡æ‰¹
+	int32u adminid;//Ö¸¶¨¹ÜÀíÔ±ÉóÅú Îª0±íÊ¾Ä¬ÈÏËùÓĞ¹ÜÀí¿ÉÉóÅú
 	int32u flag;//
 	int16u status;//APPROVAL_STATUS_PED
 	int16u code;  //APPROVAL_CODE_OK
-	int32u id1; //æ ¹æ®APPROVAL_TYPE_MEETæ¥ç»“åˆä½¿ç”¨
+	int32u id1; //¸ù¾İAPPROVAL_TYPE_MEETÀ´½áºÏÊ¹ÓÃ
 	int32u id2;
 	int32u id3;
 	int32u id4;
 	int32u id5;
 	int32u id6;
-	int16u times;//é‡å¤å‘èµ·å®¡æ‰¹çš„æ¬¡æ•°
-	int32u unactivetime;//utcç§’æ•° æŒ‡å®šå®¡æ‰¹å¤±æ•ˆçš„æ—¶é—´ï¼Œä¸º0è¡¨ç¤ºæ°¸ä¹…æœ‰æ•ˆ
-	int64u addtime;//utcç§’æ•° åˆ›å»ºçš„æ—¶é—´
+	int16u times;//ÖØ¸´·¢ÆğÉóÅúµÄ´ÎÊı
+	int32u unactivetime;//utcÃëÊı Ö¸¶¨ÉóÅúÊ§Ğ§µÄÊ±¼ä£¬Îª0±íÊ¾ÓÀ¾ÃÓĞĞ§
+	int64u addtime;//utcÃëÊı ´´½¨µÄÊ±¼ä
 
 	int    jsonlen;//json + 1
 	//char   json[];//jsonlen
 	/*
 	{
 		"logs":[
-		{"sj":"12345678","bz":"å‘èµ·å®¡æ‰¹"}
+		{"sj":"12345678","bz":"·¢ÆğÉóÅú"}
 		]
 	}
 	*/
 }PD_Approval;
-/////////////////////////å®¡æ‰¹ end/////////////////////////////////////////////////
+/////////////////////////ÉóÅú end/////////////////////////////////////////////////
 
-//////////////////////////// å¤åˆè‡ªå®šä¹‰æ•°æ® 2026.4.20//////////////////////////////////////////////
-#define OTHER_USERINFO_FLAG_CLEARSAVE  0x000000001//è¡¨ç¤ºæ¸…ç©ºå†ä¿®æ”¹ï¼Œå¦åˆ™å°±æ˜¯æ›´æ–°
+//////////////////////////// ¸´ºÏ×Ô¶¨ÒåÊı¾İ 2026.4.20//////////////////////////////////////////////
+#define OTHER_USERINFO_FLAG_CLEARSAVE  0x000000001//±íÊ¾Çå¿ÕÔÙĞŞ¸Ä£¬·ñÔò¾ÍÊÇ¸üĞÂ
 
-//typæœ€å¤§å€¼ä¸èƒ½è¶…è¿‡65535
-//datidæœ€å¤§å€¼ä¸èƒ½è¶…è¿‡65535
-#define COMPLEX_PUBLIC_TYP_ADMIN   1//typ=1æŒ‡ç®¡ç†å‘˜,id1æ˜¯ç®¡ç†å‘˜id
-#define COMPLEX_PUBLIC_TYP_PEOPLE  2//typ=2æŒ‡å¸¸ç”¨äººå‘˜,id1æ˜¯å¸¸ç”¨äººå‘˜id
-#define COMPLEX_PUBLIC_TYP_DEVICE  3//typ=3æŒ‡è®¾å¤‡,id1æ˜¯è®¾å¤‡id
-#define COMPLEX_PUBLIC_TYP_MEET    4//typ=3æŒ‡ä¼šè®®,id1æ˜¯ä¼šè®®id
+//typ×î´óÖµ²»ÄÜ³¬¹ı65535
+//datid×î´óÖµ²»ÄÜ³¬¹ı65535
+#define COMPLEX_PUBLIC_TYP_ADMIN   1//typ=1Ö¸¹ÜÀíÔ±,id1ÊÇ¹ÜÀíÔ±id
+#define COMPLEX_PUBLIC_TYP_PEOPLE  2//typ=2Ö¸³£ÓÃÈËÔ±,id1ÊÇ³£ÓÃÈËÔ±id
+#define COMPLEX_PUBLIC_TYP_DEVICE  3//typ=3Ö¸Éè±¸,id1ÊÇÉè±¸id
+#define COMPLEX_PUBLIC_TYP_MEET    4//typ=4Ö¸»áÒé,id1ÊÇ»áÒéid
+#define COMPLEX_PUBLIC_TYP_FILE    5//typ=5Ö¸Æ½Ì¨ÎÄ¼ş£¬ÎÄ¼ş±£´æ¹«¹²µÄÊı¾İ,id1ÊÇÎÄ¼şid
 
 //typ=COMPLEX_PUBLIC_TYP_ADMIN
-#define CMX_PUBFILE_DATAID_BASE 1 //ç®¡ç†å‘˜çš„åŸºæœ¬ä¿¡æ¯
+#define CMX_PUBFILE_DATAID_BASE 1 //¹ÜÀíÔ±µÄ»ù±¾ĞÅÏ¢
 /*
 {
 }
 */
 
 //typ=COMPLEX_PUBLIC_TYP_PEOPLE
-#define CMX_PUBPEOPLE_DATAID_BASE 1 //å¸¸ç”¨äººå‘˜çš„åŸºæœ¬ä¿¡æ¯
+#define CMX_PUBPEOPLE_DATAID_BASE 1 //³£ÓÃÈËÔ±µÄ»ù±¾ĞÅÏ¢
 /*
 {
 }
 */
 
 //typ=COMPLEX_PUBLIC_TYP_DEVICE
-#define CMX_PUBDEVICE_DATAID_BASE 1 //è®¾å¤‡çš„åŸºæœ¬ä¿¡æ¯
+#define CMX_PUBDEVICE_DATAID_BASE 1 //Éè±¸µÄ»ù±¾ĞÅÏ¢
 /*
 {
 }
 */
 
 //typ=COMPLEX_PUBLIC_TYP_MEET
-#define CMX_PUBMEET_DATAID_BASE 1 //ä¼šè®®çš„åŸºæœ¬ä¿¡æ¯
+#define CMX_PUBMEET_DATAID_BASE 1 //»áÒéµÄ»ù±¾ĞÅÏ¢
 
-#define CMX_PUBMEET_REGUMODE_EVERYDAY 0//æ¯å¤©
-#define CMX_PUBMEET_REGUMODE_WEEK	  1//æŒ‰å‘¨
-#define CMX_PUBMEET_REGUMODE_MONTH	  2//æŒ‰æœˆ
+#define CMX_PUBMEET_REGUMODE_EVERYDAY 0//Ã¿Ìì
+#define CMX_PUBMEET_REGUMODE_WEEK	  1//°´ÖÜ
+#define CMX_PUBMEET_REGUMODE_MONTH	  2//°´ÔÂ
 
-/* jsonç”¨Compactï¼ˆç´§å‡‘/å‹ç¼©ï¼‰é£æ ¼å‡å°‘å­˜å‚¨ç©ºé—´
+/* jsonÓÃCompact£¨½ô´Õ/Ñ¹Ëõ£©·ç¸ñ¼õÉÙ´æ´¢¿Õ¼ä
 {
-"regularenable":0,//æ˜¯å¦å¯ç”¨ =1å¯ç”¨ï¼Œ=0ä¸å¯ç”¨
-"lastyday":130,//è®°å½•æœ€è¿‘ä¸€æ¬¡åˆ›å»ºçš„å¹´æ—¥struct tm.tm_year
-//æŒ‡å®šæ¬¡æ•°çš„åœæ­¢æ—¶é—´çš„è®¡ç®—æ–¹æ³•æ¯å¤©åˆ™æ˜¯+24*60*60,æŒ‰å‘¨+7*24*60*60ï¼ŒæŒ‰æœˆåˆ™æ˜¯+30*24*60*60
-"stoptime":"456789233",//UTCç§’ï¼Œæˆªæ­¢æ—¥æœŸ ä¸ºç©ºæˆ–è€…0è¡¨ç¤ºä¸é™åˆ¶ 
-"mode":0,//0=æ¯å¤©ï¼Œ1=æŒ‰å‘¨ï¼Œ2=æŒ‰æœˆ 
-"days"[1,5],//ä»£è¡¨ä¸€å‘¨ã€ä¸€æœˆçš„ç¬¬å‡ å¤©1=å‘¨ä¸€|æŸæœˆçš„1å·
-"before":"1800"//æå‰å¤šå°‘ç§’åˆ›å»º
+"regularenable":0,//ÊÇ·ñÆôÓÃ =1ÆôÓÃ£¬=0²»ÆôÓÃ
+"lastyday":130,//¼ÇÂ¼×î½üÒ»´Î´´½¨µÄÄêÈÕstruct tm.tm_year
+//Ö¸¶¨´ÎÊıµÄÍ£Ö¹Ê±¼äµÄ¼ÆËã·½·¨Ã¿ÌìÔòÊÇ+24*60*60,°´ÖÜ+7*24*60*60£¬°´ÔÂÔòÊÇ+30*24*60*60
+"stoptime":"456789233",//UTCÃë£¬½ØÖ¹ÈÕÆÚ Îª¿Õ»òÕß0±íÊ¾²»ÏŞÖÆ 
+"mode":0,//0=Ã¿Ìì£¬1=°´ÖÜ£¬2=°´ÔÂ 
+"days"[1,5],//´ú±íÒ»ÖÜ¡¢Ò»ÔÂµÄµÚ¼¸Ìì1=ÖÜÒ»|Ä³ÔÂµÄ1ºÅ
+"before":"1800"//ÌáÇ°¶àÉÙÃë´´½¨
 }
 */
 
-//stagesï¼šSTAGE_ComplexPublicUserInfo
-//fun: FUN_One 
-//method:æŸ¥è¯¢ã€ä¿®æ”¹
+//typ=COMPLEX_PUBLIC_TYP_FILE
+#define CMX_PUBFILE_DATAID_BASE 1 //ÎÄ¼şµÄ»ù±¾ĞÅÏ¢
+/*
+{
+}
+*/
 
-/*ä¿®æ”¹ä½¿ç”¨PD_SmartJsonProtol
+//stages£ºSTAGE_ComplexPublicUserInfo
+//fun: FUN_One 
+//method:²éÑ¯¡¢ĞŞ¸Ä
+
+/*ĞŞ¸ÄÊ¹ÓÃPD_SmartJsonProtol
 {
 "typ":1,//COMPLEX_PUBLIC_TYP_ADMIN
-"flag":1,//OTHER_USERINFO_FLAG_CLEARSAVEè¡¨ç¤ºé’ˆå¯¹typå¯¹åº”çš„é¡¹æ‰§è¡Œæ¸…ç©ºå†ä¿®æ”¹ï¼Œå¦åˆ™å°±æ˜¯æ›´æ–°
+"flag":1,//OTHER_USERINFO_FLAG_CLEARSAVE±íÊ¾Õë¶Ôtyp¶ÔÓ¦µÄÏîÖ´ĞĞÇå¿ÕÔÙĞŞ¸Ä£¬·ñÔò¾ÍÊÇ¸üĞÂ
 "data":[
-{"id1":"1","item":[{"dataid":"1","str":"abc"},{"dataid":2,"str":"efg"}]},//å¦‚æœæ˜¯åˆ é™¤åˆ™ä¸éœ€è¦è®¾ç½®strå­—æ®µå€¼
+{"id1":"1","item":[{"dataid":"1","str":"abc"},{"dataid":2,"str":"efg"}]},//Èç¹ûÊÇÉ¾³ıÔò²»ĞèÒªÉèÖÃstr×Ö¶ÎÖµ
 {"id1":"2","item":[{"dataid":"1","str":"abc"},{"dataid":2,"str":"efg"}]}
 
 ]
 }
 */
 /*
-æŸ¥è¯¢ä½¿ç”¨PD_SmartJsonProtolï¼Œä»…æ”¯æŒæŸ¥è¯¢å…¨éƒ¨
-è¿”å›æŸ¥è¯¢ä½¿ç”¨PD_SmartJsonProtolEx
+²éÑ¯Ê¹ÓÃPD_SmartJsonProtol£¬½öÖ§³Ö²éÑ¯È«²¿
+·µ»Ø²éÑ¯Ê¹ÓÃPD_SmartJsonProtolEx
 {
 "data":[
 {"typ":1,"id1":"1,"dataid":"1","str":"abc"},
@@ -4547,71 +4616,73 @@ typedef struct
 }
 */
 
-//ä¼šæ ¹æ®typå’Œid1ï¼Œåœ¨åˆ é™¤æŒ‡å®šçš„id1æ—¶ä¼šå…³è”åˆ é™¤è¿™äº›è‡ªå®šä¹‰æ•°æ®
-//typæœ€å¤§å€¼ä¸èƒ½è¶…è¿‡255
-//datidæœ€å¤§å€¼ä¸èƒ½è¶…è¿‡255
-#define COMPLEX_MEET_TYP_MEMBER		1///typ=1æŒ‡å‚ä¼šäººå‘˜,id1æ˜¯äººå‘˜idï¼Œid2=0,id3=0
-#define COMPLEX_MEET_TYP_AGENDA		2//typ=2æŒ‡è®®é¢˜,id1æ˜¯è®®é¢˜idï¼Œid2=0,id3=0
-#define COMPLEX_MEET_TYP_DIR		3//typ=3æŒ‡ç›®å½•,id1æ˜¯ç›®å½•idï¼Œid2=0,id3=0
-#define COMPLEX_MEET_TYP_FILE		4//typ=4æŒ‡ç›®å½•æ–‡ä»¶,id1æ˜¯ç›®å½•idï¼Œid2=æ–‡ä»¶id,id3=0
-#define COMPLEX_MEET_TYP_MEMFILE	5//typ=5æŒ‡å‚ä¼šäººæ–‡ä»¶,id1æ˜¯å‚ä¼šäººå‘˜idï¼Œid2=ç›®å½•id,id3=æ–‡ä»¶id
-#define COMPLEX_MEET_TYP_VOTE		6//typ=6æŒ‡æŠ•ç¥¨,id1æ˜¯æŠ•ç¥¨idï¼Œid2=0,id3=0
-#define COMPLEX_MEET_TYP_NEWVOTE	7//typ=6æŒ‡æ–°æŠ•ç¥¨,id1æ˜¯æŠ•ç¥¨idï¼Œid2=0,id3=0
+//»á¸ù¾İtypºÍid1£¬ÔÚÉ¾³ıÖ¸¶¨µÄid1Ê±»á¹ØÁªÉ¾³ıÕâĞ©×Ô¶¨ÒåÊı¾İ
+//typ×î´óÖµ²»ÄÜ³¬¹ı255
+//datid×î´óÖµ²»ÄÜ³¬¹ı255
+#define COMPLEX_MEET_TYP_MEMBER		1///typ=1Ö¸²Î»áÈËÔ±,id1ÊÇÈËÔ±id£¬id2=0,id3=0
+#define COMPLEX_MEET_TYP_AGENDA		2//typ=2Ö¸ÒéÌâ,id1ÊÇÒéÌâid£¬id2=0,id3=0
+#define COMPLEX_MEET_TYP_DIR		3//typ=3Ö¸Ä¿Â¼,id1ÊÇÄ¿Â¼id£¬id2=0,id3=0
+#define COMPLEX_MEET_TYP_FILE		4//typ=4Ö¸Ä¿Â¼ÎÄ¼ş,id1ÊÇÄ¿Â¼id£¬id2=ÎÄ¼şid,id3=0
+#define COMPLEX_MEET_TYP_MEMFILE	5//typ=5Ö¸²Î»áÈËÎÄ¼ş,id1ÊÇ²Î»áÈËÔ±id£¬id2=Ä¿Â¼id,id3=ÎÄ¼şid
+#define COMPLEX_MEET_TYP_VOTE		6//typ=6Ö¸Í¶Æ±,id1ÊÇÍ¶Æ±id£¬id2=0,id3=0
+#define COMPLEX_MEET_TYP_NEWVOTE	7//typ=6Ö¸ĞÂÍ¶Æ±,id1ÊÇÍ¶Æ±id£¬id2=0,id3=0
 
-//çº¦å®šå„typä¸‹çš„dataid=1ç”¨äºå­˜æ”¾åŸºæœ¬ä¿¡æ¯
+//Ô¼¶¨¸÷typÏÂµÄdataid=1ÓÃÓÚ´æ·Å»ù±¾ĞÅÏ¢
 //typ=COMPLEX_MEET_TYP_MEMBER
-#define CMX_MEET_MEM_DATAID_BASE 1 //ç›®å½•æ–‡ä»¶çš„åŸºæœ¬ä¿¡æ¯
+#define CMX_MEET_MEM_DATAID_BASE 1 //Ä¿Â¼ÎÄ¼şµÄ»ù±¾ĞÅÏ¢
 /*
 {
 }
 */
 //typ=COMPLEX_MEET_TYP_AGENDA
-#define CMX_MEET_AGENDA_DATAID_BASE 1 //ç›®å½•æ–‡ä»¶çš„åŸºæœ¬ä¿¡æ¯
+#define CMX_MEET_AGENDA_DATAID_BASE 1 //Ä¿Â¼ÎÄ¼şµÄ»ù±¾ĞÅÏ¢
 /*
 {
 }
 */
 //typ=COMPLEX_MEET_TYP_DIR
-#define CMX_MEET_DIR_DATAID_BASE 1 //ç›®å½•æ–‡ä»¶çš„åŸºæœ¬ä¿¡æ¯
+#define CMX_MEET_DIR_DATAID_BASE 1 //Ä¿Â¼ÎÄ¼şµÄ»ù±¾ĞÅÏ¢
 /*
 {
 }
 */
 //typ=COMPLEX_MEET_TYP_FILE
-#define CMX_MEET_FILE_DATAID_BASE 1 //ç›®å½•æ–‡ä»¶çš„åŸºæœ¬ä¿¡æ¯
+#define CMX_MEET_FILE_DATAID_BASE 1 //Ä¿Â¼ÎÄ¼şµÄ»ù±¾ĞÅÏ¢
 /*
 {
-"pagenum":3,//é¡µç 
+"pagenum":3,//Ò³Âë
+"dirid":3,//Õë¶ÔÅú×¢ÎÄ¼ş£¬±£´æÔ­Ê¼µÄÄ¿Â¼ID
+"fileid":"0x6b000001",//Õë¶ÔÅú×¢ÎÄ¼ş£¬±£´æÔ­Ê¼µÄÄ¿Â¼ID
 }
 */
 //typ=COMPLEX_MEET_TYP_MEMFILE
-#define CMX_MEET_MEEFILE_DATAID_BASE 1 //ç›®å½•æ–‡ä»¶çš„åŸºæœ¬ä¿¡æ¯
+#define CMX_MEET_MEEFILE_DATAID_BASE 1 //Ä¿Â¼ÎÄ¼şµÄ»ù±¾ĞÅÏ¢
 /*
 {
 }
 */
 //typ=COMPLEX_MEET_TYP_VOTE
-#define CMX_MEET_VOTE_DATAID_BASE 1 //ç›®å½•æ–‡ä»¶çš„åŸºæœ¬ä¿¡æ¯
+#define CMX_MEET_VOTE_DATAID_BASE 1 //Ä¿Â¼ÎÄ¼şµÄ»ù±¾ĞÅÏ¢
 /*
 {
 }
 */
 //typ=COMPLEX_MEET_TYP_NEWVOTE
-#define CMX_MEET_NEWVOTE_DATAID_BASE 1 //ç›®å½•æ–‡ä»¶çš„åŸºæœ¬ä¿¡æ¯
+#define CMX_MEET_NEWVOTE_DATAID_BASE 1 //Ä¿Â¼ÎÄ¼şµÄ»ù±¾ĞÅÏ¢
 /*
 {
 }
 */
-//stagesï¼šSTAGE_ComplexMeetUserInfo
+//stages£ºSTAGE_ComplexMeetUserInfo
 //fun: FUN_One 
-//method:æŸ¥è¯¢ã€ä¿®æ”¹
+//method:²éÑ¯¡¢ĞŞ¸Ä
 
-/*ä¿®æ”¹ä½¿ç”¨PD_SmartJsonProtol
+/*ĞŞ¸ÄÊ¹ÓÃPD_SmartJsonProtol
 {
 "typ":1,//COMPLEX_MEET_TYP_MEMBER
-"flag":1,//OTHER_USERINFO_FLAG_CLEARSAVEè¡¨ç¤ºé’ˆå¯¹typçš„é¡¹æ¸…ç©ºå†ä¿®æ”¹ï¼Œå¦åˆ™å°±æ˜¯æ›´æ–°
+"flag":1,//OTHER_USERINFO_FLAG_CLEARSAVE±íÊ¾Õë¶ÔtypµÄÏîÇå¿ÕÔÙĞŞ¸Ä£¬·ñÔò¾ÍÊÇ¸üĞÂ
 "data":[
-{"id1":"1,"id2":"0","id3":"0","item":[{"dataid":"1","str":"abc"},{"dataid":"2","str":"efg"}]},//å¦‚æœæ˜¯åˆ é™¤åˆ™ä¸éœ€è¦è®¾ç½®strå­—æ®µå€¼
+{"id1":"1,"id2":"0","id3":"0","item":[{"dataid":"1","str":"abc"},{"dataid":"2","str":"efg"}]},//Èç¹ûÊÇÉ¾³ıÔò²»ĞèÒªÉèÖÃstr×Ö¶ÎÖµ
 {"id1":"2,"item":[{"dataid":"1","str":"abc"},{"dataid":"2","str":"efg"}]},
 
 ]
@@ -4619,8 +4690,8 @@ typedef struct
 */
 
 /*
-æŸ¥è¯¢ä½¿ç”¨PD_SmartJsonProtolï¼Œä»…æ”¯æŒæŸ¥è¯¢æŒ‡å®šä¼šè®®çš„å…¨éƒ¨
-è¿”å›æŸ¥è¯¢ä½¿ç”¨PD_SmartJsonProtolEx
+²éÑ¯Ê¹ÓÃPD_SmartJsonProtol£¬½öÖ§³Ö²éÑ¯Ö¸¶¨»áÒéµÄÈ«²¿
+·µ»Ø²éÑ¯Ê¹ÓÃPD_SmartJsonProtolEx
 {
 "data":[
 {"typ":1,"id1":"1,"id2":"0","id3":"0","dataid":"1","str":"abc"},
@@ -4631,11 +4702,11 @@ typedef struct
 */
 
 
-//stagesï¼šSTAGE_NewSystemLog
+//stages£ºSTAGE_NewSystemLog
 //fun: FUN_One 
-//method:æŸ¥è¯¢ã€ä¿®æ”¹
+//method:²éÑ¯¡¢ĞŞ¸Ä
 /*
-//æ·»åŠ ç”¨PD_SmartJsonProtol
+//Ìí¼ÓÓÃPD_SmartJsonProtol
 {
 
 "data":[
@@ -4645,16 +4716,16 @@ typedef struct
 */
 
 /*
-//æŸ¥è¯¢ä½¿ç”¨PD_SmartJsonProtol
-//æŸ¥è¯¢ å­—æ®µæŒ‡å®šå€¼ä¸ä¸º0æ˜¯æŒ‡å®šæŸ¥è¯¢,ä¸º0è¡¨ç¤ºåŒ¹é…å…¨éƒ¨,maxrowé»˜è®¤100ï¼Œæ¯æ¬¡ä¸èƒ½è¶…è¿‡500
-//startrowè¡¨ç¤ºä»ç¬¬å‡ æ¡è®°å½•è¿”å›,è·å–ä¸‹ä¸€é¡µæ—¶ä½¿ç”¨
+//²éÑ¯Ê¹ÓÃPD_SmartJsonProtol
+//²éÑ¯ ×Ö¶ÎÖ¸¶¨Öµ²»Îª0ÊÇÖ¸¶¨²éÑ¯,Îª0±íÊ¾Æ¥ÅäÈ«²¿,maxrowÄ¬ÈÏ100£¬Ã¿´Î²»ÄÜ³¬¹ı500
+//startrow±íÊ¾´ÓµÚ¼¸Ìõ¼ÇÂ¼·µ»Ø,»ñÈ¡ÏÂÒ»Ò³Ê±Ê¹ÓÃ
 {"startrow":0,"maxrow":100, "pageid":1,"operid":1,"meetid":1,"roomid":1,"devid",:"0x110000","urole":1,"uid","text":"test", "start":"123145645","end":"123145645"}
 
-è¿”å›æŸ¥è¯¢ä½¿ç”¨PD_SmartJsonProtol
+·µ»Ø²éÑ¯Ê¹ÓÃPD_SmartJsonProtol
 {
-"total":999,//æœ¬æ¬¡æŸ¥è¯¢çš„è®°å½•æ¡æ•°
-"maxrow":"100",//å•æ¬¡æœ€å¤šæŸ¥è¯¢å¤šå°‘è¡Œï¼Œé»˜è®¤100æ¡è®°å½•
-"start":0,//å¼€å§‹çš„è¡Œå·
+"total":999,//±¾´Î²éÑ¯µÄ¼ÇÂ¼ÌõÊı
+"maxrow":"100",//µ¥´Î×î¶à²éÑ¯¶àÉÙĞĞ£¬Ä¬ÈÏ100Ìõ¼ÇÂ¼
+"start":0,//¿ªÊ¼µÄĞĞºÅ
 "data":[
 {"pageid":1,"operid":1,"meetid":1,"roomid":1,"devid",:"0x110000","urole":1,"uid":1,"text":"test", "time":"123145645"},
 {"pageid":1,"operid":1,"meetid":1,"roomid":1,"devid",:"0x110000","urole":1,"uid":1,"text":"123456", "time":"123145645"}
@@ -4663,52 +4734,52 @@ typedef struct
 */
 
 
-////V1è¯¦ç»†çš„ä¼šè®®ç»Ÿè®¡//////////////////////////////////////////////////////////////////////
+////V1ÏêÏ¸µÄ»áÒéÍ³¼Æ//////////////////////////////////////////////////////////////////////
 /*
-//æŸ¥è¯¢ä½¿ç”¨PD_SmartJsonProtol
+//²éÑ¯Ê¹ÓÃPD_SmartJsonProtol
 {
-"ver":1,//ç‰ˆæœ¬å·ï¼Œä¸ºäº†å…¼å®¹åæœŸåè®®å˜æ›´
-"meetid":1,//å¦‚æœæŒ‡å®šmeetidä¼šå¿½ç•¥roomidå’Œæ—¶é—´å­—æ®µåŒ¹é…
+"ver":1,//°æ±¾ºÅ£¬ÎªÁË¼æÈİºóÆÚĞ­Òé±ä¸ü
+"meetid":1,//Èç¹ûÖ¸¶¨meetid»áºöÂÔroomidºÍÊ±¼ä×Ö¶ÎÆ¥Åä
 "roomid":1,"start":"123145645","end":"123145645"}
 
-è¿”å›æŸ¥è¯¢ä½¿ç”¨PD_SmartJsonProtol
+·µ»Ø²éÑ¯Ê¹ÓÃPD_SmartJsonProtol
 {
-"totalpages":"100",//æŸ¥è¯¢æ—¶é•¿çš„æ€»çº¸å¼ æ•°
-"totalduration":"180000",//æŸ¥è¯¢æ—¶é•¿çš„æ€»æ—¶é•¿æ•°
+"totalpages":"100",//²éÑ¯Ê±³¤µÄ×ÜÖ½ÕÅÊı
+"totalduration":"180000",//²éÑ¯Ê±³¤µÄ×ÜÊ±³¤Êı
 "meetnum":23,
 "data":[
 {
 "meetid":1,
-"name":"text",//ä¼šè®®åç§°
+"name":"text",//»áÒéÃû³Æ
 "roomid":1,
-"roomname":"ä¼šè®®å®¤åç§°"
-"starttime":"4236892000",//ä¼šè®®å¼€å§‹æ—¶é—´ï¼Œå•ä½UTCç§’
-"endtime":"42368972000",//ä¼šè®®ç»“æŸæ—¶é—´ï¼Œå•ä½UTCç§’
-"duration":"7200",//ä¼šè®®æ—¶é•¿ï¼Œå•ä½ç§’
-"devicenum":20,//ä¼šè®®å®¤è®¾å¤‡æ•°
-"memnum":20,//å‚ä¼šäººæ•°
-"signnum":18,//ç­¾åˆ°äººæ•°
-"filenum":41,//ä¸Šä¼ ææ–™æ€»æ•°
-"filesize":"8989898989",//ä¸Šä¼ ææ–™æ€»ç©ºé—´å¤§å° å•ä½å­—èŠ‚
-"totalpages":"860",//æ–‡æ¡£ç±»ä¼šè®®æ€»çº¸å¼ æ•°
-"streamcnt":1,//æµè¯·æ¬¡æ•°
-"screencnt":1,//åŒå±æ¬¡æ•°
-"filecnt":1,//æ–‡ä»¶è¯·æ±‚æ¬¡æ•°
-"chatcount":1,//äº¤æµæ¬¡æ•°
-"servicecnt":1,//æœåŠ¡è¯·æ±‚æ¬¡æ•°
-"wbopencnt":1,//ç™½æ¿å‘èµ·æ¬¡æ•°
-"wbusecnt":1,//ç™½æ¿äº¤äº’æ¬¡æ•°
-"votecnt":1,//æŠ•ç¥¨è¡¨å†³æ¬¡æ•°
-"electioncnt":1,//é€‰ä¸¾æ¬¡æ•°
-"questioncnt":1,//é—®å·æ¬¡æ•°
-"bulletcnt":1,//å…¬å‘Šæ ‡è¯­æ¬¡æ•°
+"roomname":"»áÒéÊÒÃû³Æ"
+"starttime":"4236892000",//»áÒé¿ªÊ¼Ê±¼ä£¬µ¥Î»UTCÃë
+"endtime":"42368972000",//»áÒé½áÊøÊ±¼ä£¬µ¥Î»UTCÃë
+"duration":"7200",//»áÒéÊ±³¤£¬µ¥Î»Ãë
+"devicenum":20,//»áÒéÊÒÉè±¸Êı
+"memnum":20,//²Î»áÈËÊı
+"signnum":18,//Ç©µ½ÈËÊı
+"filenum":41,//ÉÏ´«²ÄÁÏ×ÜÊı
+"filesize":"8989898989",//ÉÏ´«²ÄÁÏ×Ü¿Õ¼ä´óĞ¡ µ¥Î»×Ö½Ú
+"totalpages":"860",//ÎÄµµÀà»áÒé×ÜÖ½ÕÅÊı
+"streamcnt":1,//Á÷Çë´ÎÊı
+"screencnt":1,//Í¬ÆÁ´ÎÊı
+"filecnt":1,//ÎÄ¼şÇëÇó´ÎÊı
+"chatcount":1,//½»Á÷´ÎÊı
+"servicecnt":1,//·şÎñÇëÇó´ÎÊı
+"wbopencnt":1,//°×°å·¢Æğ´ÎÊı
+"wbusecnt":1,//°×°å½»»¥´ÎÊı
+"votecnt":1,//Í¶Æ±±í¾ö´ÎÊı
+"electioncnt":1,//Ñ¡¾Ù´ÎÊı
+"questioncnt":1,//ÎÊ¾í´ÎÊı
+"bulletcnt":1,//¹«¸æ±êÓï´ÎÊı
 },
 ],
 "room":[
 {
 "roomid":1,
-"meetnum":2,//æŸ¥è¯¢æ—¶é—´æ®µçš„ä¼šè®®æ•°é‡
-"roomname":"ä¼šè®®å®¤åç§°"
+"meetnum":2,//²éÑ¯Ê±¼ä¶ÎµÄ»áÒéÊıÁ¿
+"roomname":"»áÒéÊÒÃû³Æ"
 }
 ]
 }

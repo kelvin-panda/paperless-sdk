@@ -5,6 +5,7 @@ import android.app.Application
 import android.os.Bundle
 import com.blankj.utilcode.util.CrashUtils
 import com.blankj.utilcode.util.LogUtils
+import com.drake.brv.utils.BRV
 import com.paperless.sdk.Paperless
 import com.paperless.sdk.SdkConfig
 import com.paperless.sdk.SdkVars
@@ -114,5 +115,6 @@ class App : Application() {
                 initial()
             }
         }
+        BRV.modelId = BR.m
     }
 }

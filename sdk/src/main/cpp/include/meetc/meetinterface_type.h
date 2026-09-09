@@ -427,6 +427,7 @@ typedef struct
 #define DEVICE_NAME_MAXLEN   128
 #define DEVICE_IPADDR_MAXLEN 64
 
+#define MEET_MAX_LEVEL_NUM  16 //级别最大值
 //devicestyle
 #define DEVICE_STYLE_VALIDATE  0x00000001//是否审核通过
 #define DEVICE_STYLE_LEVELMASK 0xf0000000//高四位用于表示设备的等级支持16个级别和参会人员和目录和文件一样有16个级别
@@ -1766,6 +1767,7 @@ typedef struct
 #define DEVICECONTORL_ROTATESPEED	25			//翻转速度
 #define DEVICECONTORL_LIFTSPEED		26			//升降速度
 #define DEVICECONTORL_RATATEANGLE	27			//翻转指定角度
+#define DEVICECONTORL_RESETSYSTEM	28			//重置系统所有数据，强制清空所有的数据
 
 //callback
 //method: notify
@@ -1931,6 +1933,7 @@ typedef struct
 #define MEET_UPLOADFLAG_SM4ECBENCRYPTFILE		0x00000020 //对文档进行加密存放 国标SM4 ecb加密
 #define MEET_UPLOADFLAG_SM4CBCENCRYPTFILE		0x00000040 //对文档进行加密存放 国标SM4 cbc加密
 #define MEET_UPLOADFLAG_FILEPOS					0x00000080 //指定文件的序号
+#define MEET_UPLOADFLAG_NOTRANS					0x00000100 //视频不转码
 
 //call
 //系统保留使用的目录ID,用作特别用途
@@ -1964,6 +1967,36 @@ typedef struct
 	int8u  fill[3];
 	int32u filepos;//指定文件的序号 为0表示默认位置  uploadflag|=MEET_UPLOADFLAG_FILEPOS
 }Type_AddUploadFile, *pType_AddUploadFile;
+
+
+//上传文件到服务器V2
+//type:TYPE_MEET_INTERFACE_UPLOAD
+//method: METHOD_MEET_INTERFACE_PUSH
+typedef struct
+{
+	Type_HeaderInfo hdr;
+
+	char   passwd[SHORT_PASSWORD_LENG];//文档加密密码, 为空表示无密码
+	int32u uploadflag;//上传标志
+	int32u dirid;//上传的目录ID
+
+	int32u attrib;//文件属性 参见 owbash.h MEET_FILEATTRIB_BACKGROUND 定义
+	char   newname[MEET_PATHNAME_MAXLEN];//上传后的新名称
+	char   pathname[MEET_PATHNAME_MAXLEN];//全路径名
+
+	int32u userval;//
+	int32u mediaid;//上传时返回的媒体ID --可以传入指定的文件ID表示覆盖上传,用于在线修改文档操作
+	char   userstr[DEFAULT_DESCRIBE_LENG];//用户传入的自定义字串(原编码格式返回)
+
+	int8u  dirfileflag;//目录文件标志 参见FILE_FLAG_SHOWSTATUS
+	int8u  fill[3];
+	int32u filepos;//指定文件的序号 为0表示默认位置  uploadflag|=MEET_UPLOADFLAG_FILEPOS
+
+	char*  puserdata;//可以指定自定义文本数据 {"uptime":"45678997"} 为空表示不指定
+	int    datalen;
+
+	char*  md5;//指定文件的md5 为空表示不指定  固定16字节
+}Type_AddUploadFileV2, *pType_AddUploadFileV2;
 
 //添加本地文件到缓存目录 注:需要会议、会议室都准备好才会成功执行
 //type:TYPE_MEET_INTERFACE_UPLOAD
@@ -2485,6 +2518,7 @@ typedef struct
 #define meet_signin_idcard_finger_face	0x12	//类型--身份证+指纹识别+人脸识别签到
 #define meet_signin_ask					0x13	//请假
 #define meet_signin_late				0x14	//迟到
+#define meet_signin_complex				0x15	//复合签到--将类型放到数据里，数据里增加一个结构头PD_ComplexSignInHdrInfo
 
 //method: query
 typedef struct
@@ -2736,7 +2770,7 @@ typedef struct
 #endif
 	int32u			roomId; //会场ID，即会议室 
 	char			roomname[DEFAULT_DESCRIBE_LENG]; //名称查询返回有效,其它情况不使用,也不需要赋值
-	int				secrecy; //是否为保密会议 1为密保会议
+	int				secrecy; //会议类别 参见ProtocalData.h 定义type_meeting_normal
 	int64u			startTime; //开始时间 单位:秒
 	int64u			endTime;   //结束时间 单位:秒
 	int8u			signin_type;//签到类型
@@ -2769,7 +2803,7 @@ typedef struct
 	"meetname":"", //会议名称
 	"roomId":"", //会场ID，即会议室
 	"roomname":"", //会议室名称
-	"secrecy":"",  //是否为保密会议 1为密保会议
+	"secrecy":"",  //是否为会议类别 参见ProtocalData.h 定义type_meeting_normal
 	"starttime":"", //开始时间 单位:秒
 	"endtime":"",  //结束时间 单位:秒
 	"signin_type":"", //签到类型
@@ -2852,7 +2886,7 @@ typedef struct
 
 //查询会议属性信息
 //property id
-#define MEET_PROPERTY_SECRECY			1 //按会议ID返回会议是否为保密会议 query
+#define MEET_PROPERTY_SECRECY			1 //按会议ID返回会议类别 参见ProtocalData.h 定义type_meeting_normal query
 #define MEET_PROPERTY_ROOMID			2 //按会议ID返回会议会场ID query
 #define MEET_PROPERTY_SIGNINTYPE		3 //按会议ID返回会议签到方式 query
 #define MEET_PROPERTY_MANAGERID			4 //按会议ID返回会议管理员iD query
@@ -3266,6 +3300,7 @@ typedef struct
 #define role_member_secretary 	0x04  //秘书
 #define role_device_projector	0x08  //投影仪
 #define role_admin				0x09  //管理员
+#define role_service			0x0a  //会议服务人员 不参与投票表决，签到
 #define role_root				0x10  //后台管理员
 #define role_sever				0x11  //服务器程序
 #define role_oa					0x12  //第三方系统
@@ -3366,6 +3401,12 @@ typedef struct
 #define MEETFILE_PROPERTY_FILEMD5  6 //文件对应的md5值 query(text：32个字节)
 #define MEETFILE_PROPERTY_CACHEPATHNAME  7 //文件对应的缓存路径 query(text：字节)
 #define MEETFILE_PROPERTY_FILEACCESS  8 //文件对应的权限 query(fixed32) 1表示有权限
+#define MEETFILE_PROPERTY_DOWNSTATE 9 //文件缓存状态 0未下载 1下载中 2下载完成 query 不存在返回ERROR_MEET_INTERFACE_NOFIND
+#define MEETFILE_PROPERTY_ATTACHDATA 10 //文件附加的自定义数据 query(VARtext 返回后需要调用释放)
+
+#define MEDIA_DOWNSTATE_IDLE  0 //未下载
+#define MEDIA_DOWNSTATE_ING   1 //下载中
+#define MEDIA_DOWNSTATE_COMP  2 //下载完成
 
 //method: queryproperty
 typedef struct
@@ -3401,6 +3442,21 @@ typedef struct
 	char   propertytext[MEET_FILESTRING_MAXLEN];//字符串
 
 }Type_MeetMFileQueryPropertyString, *pType_MeetMFileQueryPropertyString;
+
+//method: queryproperty
+typedef struct
+{
+	Type_HeaderInfo hdr;
+
+	int32u propertyid;//数据ID
+	int32u mediaid;//传入参数
+	int32u dirid;//目录ID 如果指定了目录ID则从目录中查找 因为平台的文件名长度只有60字节
+	int32u param;//参数
+
+	//返回数据
+	char   *pbufdata;//数据
+	int    buflen;
+}Type_MeetMFileQueryPropertyVARText, *pType_MeetMFileQueryPropertyVARText;
 
 //修改会议目录文件
 typedef struct
@@ -4064,6 +4120,26 @@ typedef struct
 
 }Type_MeetVoteQueryProperty, *pType_MeetVoteQueryProperty;
 
+//会议签到--signin_complex复合签到数据头
+
+#define MEET_COMPLEXSIGNIN_FLAG_LATE 0x00000001 //迟到
+#define MEET_COMPLEXSIGNIN_FLAG_ASK  0x00000002 //请假
+#define MEET_COMPLEXSIGNIN_FLAG_HELP 0x00000004 //代签
+
+typedef struct
+{
+	int32u		flag;//MEET_COMPLEXSIGNIN_FLAG_LATE
+	int8u       signin_type;	//签到类型
+	int8u       val;//占位值自由使用 -- 
+	int16u		param;//占位值自由使用
+	int32u      helpnameid;//代签人员ID
+	int32u      jsonlen;//json数据长度
+	int32u      lenth;  //图片数据长度
+
+	//char json[jsonlen];		//json文本长度+1
+	//char signin_photo[];		//视频签到图片
+}Type_ComplexSignInHdrInfo, *pType_ComplexSignInHdrInfo;
+
 //会议签到
 //method: notify
 typedef struct
@@ -4481,6 +4557,11 @@ typedef struct
 
 	int32u picsize;			    //char[](长度为 picsize)
 	char*  picdata;
+
+		//for pdf
+	int32u  fileid;
+	int32u  pageindex;
+
 }Type_MeetWhiteBoardPicItem, *pType_MeetWhiteBoardPicItem;
 
 //call return
@@ -5558,6 +5639,7 @@ typedef struct
 #define MEET_PUBLIINFO_AGENDA_QUICKUSER 6   //  方图快捷添加汇报人or传达人{"contents"["1","2"]}
 #define MEET_PUBLIINFO_AGENDA_QUICKMEMBER 7   // 方图快捷添加列席人员{"members"["1","2"]}
 #define MEET_PUBLIINFO_MEETDBINI	 8 //会议数据库后台client.ini文件 
+#define MEET_PUBLIINFO_Shortcuts	 9 //自定义快捷操作
 
 //callback
 //TYPE_MEET_INTERFACE_PUBLICINFO
@@ -6286,9 +6368,9 @@ typedef struct
 	"nomember":1,//不添加参会人
 	"member":  //可选
 	[
-	{"name::"陈工","company":"xx","job":"xx","phone","123456","password":"123456","perm":"0xff","role":3,"devid":"0x1100000"}
-	{"name::"陈工","company":"xx","job":"xx","phone","123456","password":"123456","perm":"0xff","role":4,"devid":"0x1100001"},
-	{"name::"陈工","company":"xx","job":"xx","phone","123456","password":"123456","perm":"0xff","role":1,"devid":"0x1100002"}
+	{"name::"陈工","company":"xx","job":"xx","comment":"xx","phone","123456","email":"xx","password":"123456","perm":"0xff","role":3,"devid":"0x1100000"}
+	{"name::"陈工","company":"xx","job":"xx","comment":"xx","phone","123456","email":"xx","password":"123456","perm":"0xff","role":4,"devid":"0x1100001"},
+	{"name::"陈工","company":"xx","job":"xx","comment":"xx","phone","123456","email":"xx","password":"123456","perm":"0xff","role":1,"devid":"0x1100002"}
 	],
 	"agenda":  //议题 可选
 	[
@@ -6378,6 +6460,7 @@ typedef struct
 #define MEET_AVOTEBASE_FLAG_SIGNPNG		0x0000010 //表示提交时需要签名
 #define MEET_AVOTEBASE_FLAG_PSW			0x0000020 //表示提交时需要参会人密码认证
 #define MEET_AVOTEBASE_FLAG_RAND		0x0000040 //表示投票发起选项随机显示
+#define MEET_AVOTEBASE_FLAG_LAST		0x0000080 //表示投票末位表决
 
 //发起投票标志
 #define MEET_AVOTING_FLAG_NOPOST		0x00000001 //不在投影机上显示投票结果
@@ -6506,7 +6589,41 @@ typedef struct
 }Type_MeetStopNewVoteInfo, *pType_MeetStopNewVoteInfo;
 
 //orderid
-#define MEET_NEWVOTE_ORDERID_FTJDPT 1
+#define NEWVOTE_ORDERID_FTJDPT 1 //方图推送投票结果给OA 	
+/*
+//发送
+{
+"meetid":1,
+"markid":"123",//标识值，执行后会返回该值
+"voteid":[1,2,3]
+} //voteid 为空表示全部投票
+
+//返回
+{
+"meetid":1,
+"markid":"123",//标识值，执行后会返回该值
+"code":200,  //200=成功 其它值是失败
+"message":"成功"
+}
+
+*/
+#define NEWVOTE_ORDERID_FTZYYH 2 //方图中原银行推送会议结果给OA 	
+/*
+//发送
+{
+"meetid":1,
+"markid":"123",//标识值，执行后会返回该值
+}
+
+//返回
+{
+"meetid":1,
+"markid":"123",//标识值，执行后会返回该值
+"code":0, //0=成功 其它值是失败
+"message":"成功"
+}
+*/
+
 //1=方图戒毒平台订制投票推送
 //type:TYPE_MEET_INTERFACE_MEETONNEWVOTING
 //method: METHOD_MEET_INTERFACE_PUSH
@@ -6515,7 +6632,7 @@ typedef struct
 	Type_HeaderInfo hdr;
 
 	int32u  orderid;//MEET_NEWVOTE_ORDERID_FTJDPT
-	char*   pjson;	//{"meetid":1,"voteid":[1,2,3]} //voteid 为空表示全部投票
+	char*   pjson;	//见上方json定义
 }Type_MeetNotifyPushNewVoteInfo, *pType_MeetNotifyPushNewVoteInfo;
 
 typedef struct

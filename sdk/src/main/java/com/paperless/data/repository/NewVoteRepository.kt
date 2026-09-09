@@ -1,4 +1,4 @@
-package com.paperless.data.repository
+﻿package com.paperless.data.repository
 
 import com.mogujie.tt.protobuf.InterfaceBase
 import com.mogujie.tt.protobuf.InterfaceMacro
@@ -12,7 +12,7 @@ import kotlinx.coroutines.launch
 class NewVoteRepository : BaseRepository<InterfaceVote.pbui_Item_MeetNewVoteDetailInfo>(
     InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_MEETNEWVOTEINFO_VALUE
 ) {
-    override fun handleNotifyCallback(data: ByteArray?) {
+    override fun handleNotifyCallback(type: Int, data: ByteArray?) {
         InterfaceBase.pbui_MeetNotifyMsg.parseFrom(data)?.let {
             when (it.opermethod) {
                 //开始投票
@@ -49,3 +49,4 @@ class NewVoteRepository : BaseRepository<InterfaceVote.pbui_Item_MeetNewVoteDeta
         }
     }
 }
+

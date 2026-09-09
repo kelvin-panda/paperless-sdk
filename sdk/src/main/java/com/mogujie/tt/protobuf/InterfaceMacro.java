@@ -6975,6 +6975,14 @@ public final class InterfaceMacro {
      * <code>Pb_DEVICECONTORL_RATATEANGLE = 27;</code>
      */
     Pb_DEVICECONTORL_RATATEANGLE(27),
+    /**
+     * <pre>
+     *重置系统所有数据，强制清空所有的数据
+     * </pre>
+     *
+     * <code>Pb_DEVICECONTORL_RESETSYSTEM = 28;</code>
+     */
+    Pb_DEVICECONTORL_RESETSYSTEM(28),
     UNRECOGNIZED(-1),
     ;
 
@@ -7198,6 +7206,14 @@ public final class InterfaceMacro {
      * <code>Pb_DEVICECONTORL_RATATEANGLE = 27;</code>
      */
     public static final int Pb_DEVICECONTORL_RATATEANGLE_VALUE = 27;
+    /**
+     * <pre>
+     *重置系统所有数据，强制清空所有的数据
+     * </pre>
+     *
+     * <code>Pb_DEVICECONTORL_RESETSYSTEM = 28;</code>
+     */
+    public static final int Pb_DEVICECONTORL_RESETSYSTEM_VALUE = 28;
 
 
     public final int getNumber() {
@@ -7242,6 +7258,7 @@ public final class InterfaceMacro {
         case 25: return Pb_DEVICECONTORL_ROTATESPEED;
         case 26: return Pb_DEVICECONTORL_LIFTSPEED;
         case 27: return Pb_DEVICECONTORL_RATATEANGLE;
+        case 28: return Pb_DEVICECONTORL_RESETSYSTEM;
         default: return null;
       }
     }
@@ -8210,6 +8227,14 @@ public final class InterfaceMacro {
      * <code>Pb_MEET_UPLOADFLAG_FILEPOS = 128;</code>
      */
     Pb_MEET_UPLOADFLAG_FILEPOS(128),
+    /**
+     * <pre>
+     *视频不转码
+     * </pre>
+     *
+     * <code>Pb_MEET_UPLOADFLAG_NOTRANS = 256;</code>
+     */
+    Pb_MEET_UPLOADFLAG_NOTRANS(256),
     UNRECOGNIZED(-1),
     ;
 
@@ -8281,6 +8306,14 @@ public final class InterfaceMacro {
      * <code>Pb_MEET_UPLOADFLAG_FILEPOS = 128;</code>
      */
     public static final int Pb_MEET_UPLOADFLAG_FILEPOS_VALUE = 128;
+    /**
+     * <pre>
+     *视频不转码
+     * </pre>
+     *
+     * <code>Pb_MEET_UPLOADFLAG_NOTRANS = 256;</code>
+     */
+    public static final int Pb_MEET_UPLOADFLAG_NOTRANS_VALUE = 256;
 
 
     public final int getNumber() {
@@ -8306,6 +8339,7 @@ public final class InterfaceMacro {
         case 32: return Pb_MEET_UPLOADFLAG_SM4ECBENCRYPTFILE;
         case 64: return Pb_MEET_UPLOADFLAG_SM4CBCENCRYPTFILE;
         case 128: return Pb_MEET_UPLOADFLAG_FILEPOS;
+        case 256: return Pb_MEET_UPLOADFLAG_NOTRANS;
         default: return null;
       }
     }
@@ -8842,6 +8876,30 @@ public final class InterfaceMacro {
      * <code>Pb_signin_idcard_finger_face = 18;</code>
      */
     Pb_signin_idcard_finger_face(18),
+    /**
+     * <pre>
+     *请假
+     * </pre>
+     *
+     * <code>Pb_meet_signin_ask = 19;</code>
+     */
+    Pb_meet_signin_ask(19),
+    /**
+     * <pre>
+     *迟到
+     * </pre>
+     *
+     * <code>Pb_meet_signin_late = 20;</code>
+     */
+    Pb_meet_signin_late(20),
+    /**
+     * <pre>
+     *复合签到--将类型放到数据里，数据里增加一个结构头PD_ComplexSignInHdrInfo
+     * </pre>
+     *
+     * <code>Pb_meet_signin_complex = 21;</code>
+     */
+    Pb_meet_signin_complex(21),
     UNRECOGNIZED(-1),
     ;
 
@@ -8949,6 +9007,30 @@ public final class InterfaceMacro {
      * <code>Pb_signin_idcard_finger_face = 18;</code>
      */
     public static final int Pb_signin_idcard_finger_face_VALUE = 18;
+    /**
+     * <pre>
+     *请假
+     * </pre>
+     *
+     * <code>Pb_meet_signin_ask = 19;</code>
+     */
+    public static final int Pb_meet_signin_ask_VALUE = 19;
+    /**
+     * <pre>
+     *迟到
+     * </pre>
+     *
+     * <code>Pb_meet_signin_late = 20;</code>
+     */
+    public static final int Pb_meet_signin_late_VALUE = 20;
+    /**
+     * <pre>
+     *复合签到--将类型放到数据里，数据里增加一个结构头PD_ComplexSignInHdrInfo
+     * </pre>
+     *
+     * <code>Pb_meet_signin_complex = 21;</code>
+     */
+    public static final int Pb_meet_signin_complex_VALUE = 21;
 
 
     public final int getNumber() {
@@ -8978,6 +9060,9 @@ public final class InterfaceMacro {
         case 16: return Pb_signin_idcard_face;
         case 17: return Pb_signin_finger_face;
         case 18: return Pb_signin_idcard_finger_face;
+        case 19: return Pb_meet_signin_ask;
+        case 20: return Pb_meet_signin_late;
+        case 21: return Pb_meet_signin_complex;
         default: return null;
       }
     }
@@ -9816,6 +9901,14 @@ public final class InterfaceMacro {
     Pb_role_admin(9),
     /**
      * <pre>
+     *会议服务人员 不参与投票表决，签到
+     * </pre>
+     *
+     * <code>Pb_role_service = 10;</code>
+     */
+    Pb_role_service(10),
+    /**
+     * <pre>
      *后台管理员
      * </pre>
      *
@@ -9907,6 +10000,14 @@ public final class InterfaceMacro {
     public static final int Pb_role_admin_VALUE = 9;
     /**
      * <pre>
+     *会议服务人员 不参与投票表决，签到
+     * </pre>
+     *
+     * <code>Pb_role_service = 10;</code>
+     */
+    public static final int Pb_role_service_VALUE = 10;
+    /**
+     * <pre>
      *后台管理员
      * </pre>
      *
@@ -9967,6 +10068,7 @@ public final class InterfaceMacro {
         case 4: return Pb_role_member_secretary;
         case 8: return Pb_role_device_projector;
         case 9: return Pb_role_admin;
+        case 10: return Pb_role_service;
         case 16: return Pb_role_root;
         case 17: return Pb_role_sever;
         case 18: return Pb_role_oa;
@@ -10438,6 +10540,14 @@ public final class InterfaceMacro {
      * <code>Pb_MEETFILE_PROPERTY_FILEACCESS = 8;</code>
      */
     Pb_MEETFILE_PROPERTY_FILEACCESS(8),
+    /**
+     * <pre>
+     *文件缓存状态 Pb_MediaDownState 0未下载 1下载中 2下载完成 query 不存在返回ERROR_MEET_INTERFACE_NOFIND
+     * </pre>
+     *
+     * <code>Pb_MEETFILE_PROPERTY_DOWNSTATE = 9;</code>
+     */
+    Pb_MEETFILE_PROPERTY_DOWNSTATE(9),
     UNRECOGNIZED(-1),
     ;
 
@@ -10509,6 +10619,14 @@ public final class InterfaceMacro {
      * <code>Pb_MEETFILE_PROPERTY_FILEACCESS = 8;</code>
      */
     public static final int Pb_MEETFILE_PROPERTY_FILEACCESS_VALUE = 8;
+    /**
+     * <pre>
+     *文件缓存状态 Pb_MediaDownState 0未下载 1下载中 2下载完成 query 不存在返回ERROR_MEET_INTERFACE_NOFIND
+     * </pre>
+     *
+     * <code>Pb_MEETFILE_PROPERTY_DOWNSTATE = 9;</code>
+     */
+    public static final int Pb_MEETFILE_PROPERTY_DOWNSTATE_VALUE = 9;
 
 
     public final int getNumber() {
@@ -10534,6 +10652,7 @@ public final class InterfaceMacro {
         case 6: return Pb_MEETFILE_PROPERTY_FILEMD5;
         case 7: return Pb_MEETFILE_PROPERTY_CACHEPATHNAME;
         case 8: return Pb_MEETFILE_PROPERTY_FILEACCESS;
+        case 9: return Pb_MEETFILE_PROPERTY_DOWNSTATE;
         default: return null;
       }
     }
@@ -10557,6 +10676,110 @@ public final class InterfaceMacro {
     }
 
     // @@protoc_insertion_point(enum_scope:Pb_MeetFilePropertyID)
+  }
+
+  /**
+   * <pre>
+   *文件缓存状态
+   * </pre>
+   *
+   * Protobuf enum {@code Pb_MediaDownState}
+   */
+  public enum Pb_MediaDownState
+      implements com.google.protobuf.Internal.EnumLite {
+    /**
+     * <pre>
+     *未下载
+     * </pre>
+     *
+     * <code>Pb_MEDIA_DOWNSTATE_IDLE = 0;</code>
+     */
+    Pb_MEDIA_DOWNSTATE_IDLE(0),
+    /**
+     * <pre>
+     *下载中
+     * </pre>
+     *
+     * <code>Pb_MEDIA_DOWNSTATE_ING = 1;</code>
+     */
+    Pb_MEDIA_DOWNSTATE_ING(1),
+    /**
+     * <pre>
+     *下载完成
+     * </pre>
+     *
+     * <code>Pb_MEDIA_DOWNSTATE_COMP = 2;</code>
+     */
+    Pb_MEDIA_DOWNSTATE_COMP(2),
+    UNRECOGNIZED(-1),
+    ;
+
+    /**
+     * <pre>
+     *未下载
+     * </pre>
+     *
+     * <code>Pb_MEDIA_DOWNSTATE_IDLE = 0;</code>
+     */
+    public static final int Pb_MEDIA_DOWNSTATE_IDLE_VALUE = 0;
+    /**
+     * <pre>
+     *下载中
+     * </pre>
+     *
+     * <code>Pb_MEDIA_DOWNSTATE_ING = 1;</code>
+     */
+    public static final int Pb_MEDIA_DOWNSTATE_ING_VALUE = 1;
+    /**
+     * <pre>
+     *下载完成
+     * </pre>
+     *
+     * <code>Pb_MEDIA_DOWNSTATE_COMP = 2;</code>
+     */
+    public static final int Pb_MEDIA_DOWNSTATE_COMP_VALUE = 2;
+
+
+    public final int getNumber() {
+      return value;
+    }
+
+    /**
+     * @deprecated Use {@link #forNumber(int)} instead.
+     */
+    @java.lang.Deprecated
+    public static Pb_MediaDownState valueOf(int value) {
+      return forNumber(value);
+    }
+
+    public static Pb_MediaDownState forNumber(int value) {
+      switch (value) {
+        case 0: return Pb_MEDIA_DOWNSTATE_IDLE;
+        case 1: return Pb_MEDIA_DOWNSTATE_ING;
+        case 2: return Pb_MEDIA_DOWNSTATE_COMP;
+        default: return null;
+      }
+    }
+
+    public static com.google.protobuf.Internal.EnumLiteMap<Pb_MediaDownState>
+        internalGetValueMap() {
+      return internalValueMap;
+    }
+    private static final com.google.protobuf.Internal.EnumLiteMap<
+        Pb_MediaDownState> internalValueMap =
+          new com.google.protobuf.Internal.EnumLiteMap<Pb_MediaDownState>() {
+            public Pb_MediaDownState findValueByNumber(int number) {
+              return Pb_MediaDownState.forNumber(number);
+            }
+          };
+
+    private final int value;
+
+    private Pb_MediaDownState(int value) {
+      this.value = value;
+    }
+
+    // @@protoc_insertion_point(enum_scope:Pb_MediaDownState)
   }
 
   /**

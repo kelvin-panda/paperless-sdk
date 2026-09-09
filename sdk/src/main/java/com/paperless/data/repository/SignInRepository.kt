@@ -6,6 +6,9 @@ import com.paperless.data.repository.base.BaseRepository
 import com.paperless.sdk.SdkJni
 import kotlinx.coroutines.launch
 
+/**
+ * 签到信息
+ */
 class SignInRepository : BaseRepository<InterfaceSignin.pbui_Item_MeetSignInDetailInfo>(
     InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_MEETSIGN_VALUE
 ) {

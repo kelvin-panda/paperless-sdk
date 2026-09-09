@@ -162,21 +162,6 @@ int AndroidDevice_ARGBToNV21(const int8u* src_frame, int src_stride_frame,
 	int8u* dst_uv, int dst_stride_uv,
 	int width, int height);
 
-//#define AD_MAX_PIX_LINESIZE 4
-//#define AD_PIX_FMT_YUV420P  0   ///< planar YUV 4:2:0, 12bpp, (1 Cr & Cb sample per 2x2 Y samples)
-//#define AD_PIX_FMT_RGB24	1   ///< packed RGB 8:8:8, 24bpp, RGBRGB...
-//#define AD_PIX_FMT_BGR24    2   ///< packed RGB 8:8:8, 24bpp, BGRBGR...
-//#define AD_PIX_FMT_NV12     3   ///< planar YUV 4:2:0, 12bpp, 1 plane for Y and 1 plane for the UV components, which are interleaved (first byte U and the following byte V)
-//#define AD_PIX_FMT_NV21     4   ///< as above, but U and V bytes are swapped
-//#define AD_PIX_FMT_ARGB		5   ///< packed ARGB 8:8:8:8, 32bpp, ARGBARGB...
-//#define AD_PIX_FMT_RGBA     6   ///< packed RGBA 8:8:8:8, 32bpp, RGBARGBA...
-//#define AD_PIX_FMT_ABGR     7   ///< packed ABGR 8:8:8:8, 32bpp, ABGRABGR...
-//#define AD_PIX_FMT_BGRA     8   ///< packed BGRA 8:8:8:8, 32bpp, BGRABGRA...
-//void*	AndroidDevice_video_convertinit(int outwidth, int outheigth, int out_sample_fmt, int inwidth, int inheigth, int in_sample_fmt);
-//void    AndroidDevice_video_convertfree(void* pvideoconvert);
-//int		AndroidDevice_video_convert(void* paudioconvert, int8u*** poutbuf, int** out_linesizes, int8u** pinbuf, int* in_linesize);
-//int		AndroidDevice_video_convertex(void* paudioconvert, int8u* poutbuf, int8u** pinbuf, int* in_linesize);
-
 #ifdef __cplusplus
 }
 #endif

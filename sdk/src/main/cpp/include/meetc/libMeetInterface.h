@@ -18,6 +18,17 @@ extern "C" {
 #endif
 #endif
 
+	//是否是简易版本授权
+	//简易版返回1 否则返回0
+	MEETCPPDLL_API int meetcore_IsSimpleVer();
+
+	//检测指定的标志位
+	//有效返回1 否则返回0
+	MEETCPPDLL_API int meetcore_IsEnableRegUserDef641(int64 flag);
+
+	//获取授权里的64位自定义值1
+	MEETCPPDLL_API int64 meetcore_GetRegUserDef641();
+
 	//检查该程序有没有运行另一个实例
 	//检查出错返回-1 有另一个实例在运行返回1 没有实例运行返回0
 	MEETCPPDLL_API int meetcore_checkselfrun();

@@ -1,10 +1,9 @@
-package com.paperless.data.repository.base
+﻿package com.paperless.data.repository.base
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.asFlow
 import com.mogujie.tt.protobuf.InterfaceBase
-import com.paperless.data.repository.base.DataRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -33,7 +32,7 @@ abstract class BaseSingleRepository<T>(
 
     override fun handleCallback(method: Int, data: ByteArray?) {}
 
-    override fun handleNotifyCallback(data: ByteArray?) {
+    override fun handleNotifyCallback(type: Int, data: ByteArray?) {
         try {
             InterfaceBase.pbui_MeetNotifyMsg.parseFrom(data)?.let { query() }
         } catch (e: Exception) {
@@ -44,8 +43,10 @@ abstract class BaseSingleRepository<T>(
     abstract override fun query()
 
     override fun destroy() {
-        CallbackDispatcher.unregister(type)
-        additionalTypes.forEach { CallbackDispatcher.unregister(it) }
+        CallbackDispatcher.unregister(type, this)
+        additionalTypes.forEach { CallbackDispatcher.unregister(it, this) }
         scope.cancel()
     }
 }
+
+

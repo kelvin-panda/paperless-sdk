@@ -13011,6 +13011,24 @@ public final class InterfaceWhiteboard {
      * <code>optional bytes picdata = 9;</code>
      */
     com.google.protobuf.ByteString getPicdata();
+
+    /**
+     * <pre>
+     *for pdf
+     * </pre>
+     *
+     * <code>optional fixed32 fileid = 10;</code>
+     */
+    int getFileid();
+
+    /**
+     * <pre>
+     *文件页码
+     * </pre>
+     *
+     * <code>optional fixed32 pageindex = 11;</code>
+     */
+    int getPageindex();
   }
   /**
    * <pre>
@@ -13348,6 +13366,76 @@ public final class InterfaceWhiteboard {
       picdata_ = getDefaultInstance().getPicdata();
     }
 
+    public static final int FILEID_FIELD_NUMBER = 10;
+    private int fileid_;
+    /**
+     * <pre>
+     *for pdf
+     * </pre>
+     *
+     * <code>optional fixed32 fileid = 10;</code>
+     */
+    public int getFileid() {
+      return fileid_;
+    }
+    /**
+     * <pre>
+     *for pdf
+     * </pre>
+     *
+     * <code>optional fixed32 fileid = 10;</code>
+     */
+    private void setFileid(int value) {
+      
+      fileid_ = value;
+    }
+    /**
+     * <pre>
+     *for pdf
+     * </pre>
+     *
+     * <code>optional fixed32 fileid = 10;</code>
+     */
+    private void clearFileid() {
+      
+      fileid_ = 0;
+    }
+
+    public static final int PAGEINDEX_FIELD_NUMBER = 11;
+    private int pageindex_;
+    /**
+     * <pre>
+     *文件页码
+     * </pre>
+     *
+     * <code>optional fixed32 pageindex = 11;</code>
+     */
+    public int getPageindex() {
+      return pageindex_;
+    }
+    /**
+     * <pre>
+     *文件页码
+     * </pre>
+     *
+     * <code>optional fixed32 pageindex = 11;</code>
+     */
+    private void setPageindex(int value) {
+      
+      pageindex_ = value;
+    }
+    /**
+     * <pre>
+     *文件页码
+     * </pre>
+     *
+     * <code>optional fixed32 pageindex = 11;</code>
+     */
+    private void clearPageindex() {
+      
+      pageindex_ = 0;
+    }
+
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
       if (operid_ != 0) {
@@ -13376,6 +13464,12 @@ public final class InterfaceWhiteboard {
       }
       if (!picdata_.isEmpty()) {
         output.writeBytes(9, picdata_);
+      }
+      if (fileid_ != 0) {
+        output.writeFixed32(10, fileid_);
+      }
+      if (pageindex_ != 0) {
+        output.writeFixed32(11, pageindex_);
       }
     }
 
@@ -13419,6 +13513,14 @@ public final class InterfaceWhiteboard {
       if (!picdata_.isEmpty()) {
         size += com.google.protobuf.CodedOutputStream
           .computeBytesSize(9, picdata_);
+      }
+      if (fileid_ != 0) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeFixed32Size(10, fileid_);
+      }
+      if (pageindex_ != 0) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeFixed32Size(11, pageindex_);
       }
       memoizedSerializedSize = size;
       return size;
@@ -13828,6 +13930,76 @@ public final class InterfaceWhiteboard {
         return this;
       }
 
+      /**
+       * <pre>
+       *for pdf
+       * </pre>
+       *
+       * <code>optional fixed32 fileid = 10;</code>
+       */
+      public int getFileid() {
+        return instance.getFileid();
+      }
+      /**
+       * <pre>
+       *for pdf
+       * </pre>
+       *
+       * <code>optional fixed32 fileid = 10;</code>
+       */
+      public Builder setFileid(int value) {
+        copyOnWrite();
+        instance.setFileid(value);
+        return this;
+      }
+      /**
+       * <pre>
+       *for pdf
+       * </pre>
+       *
+       * <code>optional fixed32 fileid = 10;</code>
+       */
+      public Builder clearFileid() {
+        copyOnWrite();
+        instance.clearFileid();
+        return this;
+      }
+
+      /**
+       * <pre>
+       *文件页码
+       * </pre>
+       *
+       * <code>optional fixed32 pageindex = 11;</code>
+       */
+      public int getPageindex() {
+        return instance.getPageindex();
+      }
+      /**
+       * <pre>
+       *文件页码
+       * </pre>
+       *
+       * <code>optional fixed32 pageindex = 11;</code>
+       */
+      public Builder setPageindex(int value) {
+        copyOnWrite();
+        instance.setPageindex(value);
+        return this;
+      }
+      /**
+       * <pre>
+       *文件页码
+       * </pre>
+       *
+       * <code>optional fixed32 pageindex = 11;</code>
+       */
+      public Builder clearPageindex() {
+        copyOnWrite();
+        instance.clearPageindex();
+        return this;
+      }
+
       // @@protoc_insertion_point(builder_scope:pbui_Item_MeetWBPictureDetail)
     }
     protected final Object dynamicMethod(
@@ -13867,6 +14039,10 @@ public final class InterfaceWhiteboard {
               other.ly_ != 0F, other.ly_);
           picdata_ = visitor.visitByteString(picdata_ != com.google.protobuf.ByteString.EMPTY, picdata_,
               other.picdata_ != com.google.protobuf.ByteString.EMPTY, other.picdata_);
+          fileid_ = visitor.visitInt(fileid_ != 0, fileid_,
+              other.fileid_ != 0, other.fileid_);
+          pageindex_ = visitor.visitInt(pageindex_ != 0, pageindex_,
+              other.pageindex_ != 0, other.pageindex_);
           if (visitor == com.google.protobuf.GeneratedMessageLite.MergeFromVisitor
               .INSTANCE) {
           }
@@ -13934,6 +14110,16 @@ public final class InterfaceWhiteboard {
                 case 74: {
 
                   picdata_ = input.readBytes();
+                  break;
+                }
+                case 85: {
+
+                  fileid_ = input.readFixed32();
+                  break;
+                }
+                case 93: {
+
+                  pageindex_ = input.readFixed32();
                   break;
                 }
               }

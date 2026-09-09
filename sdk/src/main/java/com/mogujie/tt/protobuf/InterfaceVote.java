@@ -581,6 +581,14 @@ public final class InterfaceVote {
      * <code>Pb_MEET_AVOTEBASE_FLAG_RAND = 64;</code>
      */
     Pb_MEET_AVOTEBASE_FLAG_RAND(64),
+    /**
+     * <pre>
+     *表示投票末位表决
+     * </pre>
+     *
+     * <code>Pb_MEET_AVOTEBASE_FLAG_LAST = 128;</code>
+     */
+    Pb_MEET_AVOTEBASE_FLAG_LAST(128),
     UNRECOGNIZED(-1),
     ;
 
@@ -648,6 +656,14 @@ public final class InterfaceVote {
      * <code>Pb_MEET_AVOTEBASE_FLAG_RAND = 64;</code>
      */
     public static final int Pb_MEET_AVOTEBASE_FLAG_RAND_VALUE = 64;
+    /**
+     * <pre>
+     *表示投票末位表决
+     * </pre>
+     *
+     * <code>Pb_MEET_AVOTEBASE_FLAG_LAST = 128;</code>
+     */
+    public static final int Pb_MEET_AVOTEBASE_FLAG_LAST_VALUE = 128;
 
 
     public final int getNumber() {
@@ -672,6 +688,7 @@ public final class InterfaceVote {
         case 16: return Pb_MEET_AVOTEBASE_FLAG_SIGNPNG;
         case 32: return Pb_MEET_AVOTEBASE_FLAG_PSW;
         case 64: return Pb_MEET_AVOTEBASE_FLAG_RAND;
+        case 128: return Pb_MEET_AVOTEBASE_FLAG_LAST;
         default: return null;
       }
     }
@@ -869,6 +886,26 @@ public final class InterfaceVote {
      * <code>Pb_MEET_NEWVOTE_ORDERID_FTJDPT = 1;</code>
      */
     Pb_MEET_NEWVOTE_ORDERID_FTJDPT(1),
+    /**
+     * <pre>
+     * //发送
+     *{
+     *"meetid":1,
+     *"markid":"123",//标识值，执行后会返回该值
+     *"voteid":[1,2,3]
+     *} //voteid 为空表示全部投票
+     * //返回
+     *{
+     *"meetid":1,
+     *"markid":"123",//标识值，执行后会返回该值
+     *"code":200,  //200=成功 其它值是失败
+     *"message":"成功"
+     *}
+     * </pre>
+     *
+     * <code>Pb_NEWVOTE_ORDERID_FTZYYH = 2;</code>
+     */
+    Pb_NEWVOTE_ORDERID_FTZYYH(2),
     UNRECOGNIZED(-1),
     ;
 
@@ -884,6 +921,26 @@ public final class InterfaceVote {
      * <code>Pb_MEET_NEWVOTE_ORDERID_FTJDPT = 1;</code>
      */
     public static final int Pb_MEET_NEWVOTE_ORDERID_FTJDPT_VALUE = 1;
+    /**
+     * <pre>
+     * //发送
+     *{
+     *"meetid":1,
+     *"markid":"123",//标识值，执行后会返回该值
+     *"voteid":[1,2,3]
+     *} //voteid 为空表示全部投票
+     * //返回
+     *{
+     *"meetid":1,
+     *"markid":"123",//标识值，执行后会返回该值
+     *"code":200,  //200=成功 其它值是失败
+     *"message":"成功"
+     *}
+     * </pre>
+     *
+     * <code>Pb_NEWVOTE_ORDERID_FTZYYH = 2;</code>
+     */
+    public static final int Pb_NEWVOTE_ORDERID_FTZYYH_VALUE = 2;
 
 
     public final int getNumber() {
@@ -902,6 +959,7 @@ public final class InterfaceVote {
       switch (value) {
         case 0: return Pb_MEET_NEWVOTE_ORDERID_ZERO;
         case 1: return Pb_MEET_NEWVOTE_ORDERID_FTJDPT;
+        case 2: return Pb_NEWVOTE_ORDERID_FTZYYH;
         default: return null;
       }
     }
@@ -19250,7 +19308,7 @@ public final class InterfaceVote {
 
     /**
      * <pre>
-     *{"meetid":1,"voteid":[1,2,3]} //voteid 为空表示全部投票
+     *&#47;/见上方json定义
      * </pre>
      *
      * <code>optional bytes pjson = 2;</code>
@@ -19312,7 +19370,7 @@ public final class InterfaceVote {
     private com.google.protobuf.ByteString pjson_;
     /**
      * <pre>
-     *{"meetid":1,"voteid":[1,2,3]} //voteid 为空表示全部投票
+     *&#47;/见上方json定义
      * </pre>
      *
      * <code>optional bytes pjson = 2;</code>
@@ -19322,7 +19380,7 @@ public final class InterfaceVote {
     }
     /**
      * <pre>
-     *{"meetid":1,"voteid":[1,2,3]} //voteid 为空表示全部投票
+     *&#47;/见上方json定义
      * </pre>
      *
      * <code>optional bytes pjson = 2;</code>
@@ -19336,7 +19394,7 @@ public final class InterfaceVote {
     }
     /**
      * <pre>
-     *{"meetid":1,"voteid":[1,2,3]} //voteid 为空表示全部投票
+     *&#47;/见上方json定义
      * </pre>
      *
      * <code>optional bytes pjson = 2;</code>
@@ -19497,7 +19555,7 @@ public final class InterfaceVote {
 
       /**
        * <pre>
-       *{"meetid":1,"voteid":[1,2,3]} //voteid 为空表示全部投票
+       *&#47;/见上方json定义
        * </pre>
        *
        * <code>optional bytes pjson = 2;</code>
@@ -19507,7 +19565,7 @@ public final class InterfaceVote {
       }
       /**
        * <pre>
-       *{"meetid":1,"voteid":[1,2,3]} //voteid 为空表示全部投票
+       *&#47;/见上方json定义
        * </pre>
        *
        * <code>optional bytes pjson = 2;</code>
@@ -19519,7 +19577,7 @@ public final class InterfaceVote {
       }
       /**
        * <pre>
-       *{"meetid":1,"voteid":[1,2,3]} //voteid 为空表示全部投票
+       *&#47;/见上方json定义
        * </pre>
        *
        * <code>optional bytes pjson = 2;</code>

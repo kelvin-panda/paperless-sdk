@@ -85,9 +85,9 @@ afterEvaluate {
             create<MavenPublication>("release") {
                 groupId = "com.gitee.xlk_gitee"
                 artifactId = "sdk-library"
-                //定义：大更新.库更新.java层更新
+                //定义：库更新.添加.修复
                 // 移除 version 的硬编码，让 JitPack 从 Git Tag 获取
-                version = "1.4.11"
+                version = "2.5.12"
                 from(components["release"])
             }
         }

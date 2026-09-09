@@ -1,32 +1,24 @@
 package com.xlk.paperless.sdk
 
 import android.app.AppOpsManager
-import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
-import android.content.ServiceConnection
 import android.graphics.Color
 import android.graphics.PixelFormat
 import android.media.projection.MediaProjectionManager
 import android.os.Build
 import android.os.Build.VERSION_CODES
 import android.os.Bundle
-import android.os.IBinder
 import android.provider.Settings.ACTION_USAGE_ACCESS_SETTINGS
 import android.util.DisplayMetrics
 import android.view.Gravity
 import android.view.WindowManager
-import android.widget.Button
-import android.widget.CheckBox
-import android.widget.EditText
 import android.widget.FrameLayout
 import android.widget.TextView
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
 import com.blankj.utilcode.util.AppUtils
 import com.blankj.utilcode.util.DeviceUtils
 import com.blankj.utilcode.util.FileUtils
@@ -36,10 +28,7 @@ import com.blankj.utilcode.util.ToastUtils
 import com.hjq.permissions.XXPermissions
 import com.hjq.permissions.permission.PermissionLists
 import com.mogujie.tt.protobuf.InterfaceBase
-import com.mogujie.tt.protobuf.InterfaceDevice
 import com.mogujie.tt.protobuf.InterfaceMacro
-import com.mogujie.tt.protobuf.InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_DEVICEFACESHOW_VALUE
-import com.mogujie.tt.protobuf.InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_DEVICEINFO_VALUE
 import com.mogujie.tt.protobuf.InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_DEVICEVALIDATE_VALUE
 import com.mogujie.tt.protobuf.InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_MEDIAPLAY_VALUE
 import com.mogujie.tt.protobuf.InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_READY_VALUE
@@ -48,7 +37,7 @@ import com.mogujie.tt.protobuf.InterfacePlaymedia
 import com.mogujie.tt.protobuf.InterfaceStream
 import com.paperless.bus.EventBusMessage
 import com.paperless.bus.SdkBusType
-import com.paperless.data.repository.base.DataRepositoryManager
+import com.paperless.data.repository.base.DataRepoManager
 import com.paperless.player.DecodeQueue
 import com.paperless.sdk.Call
 import com.paperless.sdk.MAIN_TYPE_BITMASK
@@ -65,14 +54,13 @@ import com.paperless.sdk.SdkVars.Companion.localDeviceId
 import com.paperless.util.IniUtil
 import com.xlk.paperless.sdk.databinding.ActivityMainBinding
 import com.xlk.paperless.sdk.helper.AppNetworkMonitor
-import com.xlk.paperless.sdk.screen.ScreenRecordService
 import com.xlk.paperless.sdk.service.ScreenShareService
+import com.xlk.paperless.sdk.view.MeetAct
 import org.greenrobot.eventbus.EventBus
 import org.greenrobot.eventbus.Subscribe
 import org.greenrobot.eventbus.ThreadMode
 import java.io.File
 import kotlin.system.exitProcess
-import kotlin.toString
 
 class MainActivity : AppCompatActivity() {
     lateinit var mBinding: ActivityMainBinding
@@ -125,6 +113,7 @@ class MainActivity : AppCompatActivity() {
                 SdkVars.root_dir + "client.ini", DeviceUtils.getUniqueDeviceId(), 4, 0
             )
         }.start()
+        dataRepositoryListener()
     }
 
     private fun viewEvent() {
@@ -259,7 +248,7 @@ class MainActivity : AppCompatActivity() {
                 tvShowBlackList.text = sb.toString()
             }
             btnTest.setOnClickListener {
-                dataRepositoryListener()
+                startActivity(Intent(this@MainActivity, MeetAct::class.java))
             }
         }
     }
@@ -339,14 +328,14 @@ class MainActivity : AppCompatActivity() {
         //修改本机界面状态
         Jni.modPageStatus(InterfaceMacro.Pb_MeetFaceStatus.Pb_MemState_MainFace_VALUE)
 
-        DataRepositoryManager.init()
-        DataRepositoryManager.refreshAll()
+        DataRepoManager.init()
+        DataRepoManager.refreshAll()
 
 //        dataRepositoryListener()
     }
 
     private fun dataRepositoryListener() {
-        DataRepositoryManager.deviceMeetInfoRepository.data.observe(this) {
+        DataRepoManager.deviceMeetInfoRepository.data.observe(this) {
             SdkVars.localMeetingId = it?.meetingid ?: 0
             SdkVars.localMeetingName = it?.meetingname?.toStringUtf8() ?: ""
             SdkVars.localMemberId = it?.memberid ?: 0
@@ -357,94 +346,106 @@ class MainActivity : AppCompatActivity() {
             mBinding.tvMeetingId.text = "会议id：${SdkVars.localMeetingId}"
             mBinding.tvMeetingName.text = "会议名称：${SdkVars.localMeetingName}"
         }
-        DataRepositoryManager.roomRepository.data.observe(this) {
+        DataRepoManager.roomRepository.data.observe(this) {
             LogUtils.i("roomRepository: ${it.size}")
         }
-        DataRepositoryManager.memberDetailRepository.data.observe(this) {
-            LogUtils.i("memberDetailRepository: ${it.size}")
+        DataRepoManager.memberRepository.apply {
+            data.observe(this@MainActivity) {
+                LogUtils.i("memberRepository: ${it.size}")
+            }
+            member.observe(this@MainActivity) {
+                LogUtils.i("memberRepository member: ${it.size}")
+            }
+            onlineMember.observe(this@MainActivity) {
+                LogUtils.i("memberRepository onlineMember: ${it.size}")
+            }
         }
-        DataRepositoryManager.deviceInfoRepository.data.observe(this) {
-            LogUtils.i("deviceInfoRepository: ${it.size}")
-        }
-        DataRepositoryManager.meetingInfoRepository.data.observe(this) {
+        DataRepoManager.meetingInfoRepository.data.observe(this) {
             LogUtils.i("meetingInfoRepository: ${it.size}")
         }
-        DataRepositoryManager.agendaRepository.data.observe(this) {
+        DataRepoManager.agendaRepository.data.observe(this) {
             LogUtils.i("agendaRepository: ${it.size}")
         }
-        DataRepositoryManager.bulletinRepository.data.observe(this) {
+        DataRepoManager.bulletinRepository.data.observe(this) {
             LogUtils.i("bulletinRepository: ${it.size}")
         }
-        DataRepositoryManager.directoryRepository.data.observe(this) {
+        DataRepoManager.directoryRepository.data.observe(this) {
             LogUtils.i("directoryRepository: ${it.size}")
         }
-        DataRepositoryManager.directoryFileRepository.data.observe(this){
+        DataRepoManager.directoryFileRepository.data.observe(this) {
             LogUtils.i("directoryFileRepository: ${it.size}")
         }
-        DataRepositoryManager.voteRepository.data.observe(this) {
+        DataRepoManager.voteRepository.data.observe(this) {
             LogUtils.i("voteRepository: ${it.size}")
         }
-        DataRepositoryManager.signInRepository.data.observe(this) {
+        DataRepoManager.signInRepository.data.observe(this) {
             LogUtils.i("signInRepository: ${it.size}")
         }
-        DataRepositoryManager.adminRepository.data.observe(this) {
+        DataRepoManager.adminRepository.data.observe(this) {
             LogUtils.i("adminRepository: ${it.size}")
         }
-        DataRepositoryManager.peopleRepository.data.observe(this) {
+        DataRepoManager.peopleRepository.data.observe(this) {
             LogUtils.i("peopleRepository: ${it.size}")
         }
-        DataRepositoryManager.memberPermissionRepository.data.observe(this) {
+        DataRepoManager.memberPermissionRepository.data.observe(this) {
             LogUtils.i("memberPermissionRepository: ${it.size}")
         }
-        DataRepositoryManager.tableCardRepository.data.observe(this) {
+        DataRepoManager.tableCardRepository.data.observe(this) {
             LogUtils.i("tableCardRepository: ${it.size}")
         }
-        DataRepositoryManager.functionConfigRepository.data.observe(this) {
-            LogUtils.i("functionConfigRepository: ${it.size}")
-        }
-        DataRepositoryManager.newVoteRepository.data.observe(this) {
+//        DataRepoManager.functionConfigRepository.data.observe(this) {
+//            LogUtils.i("functionConfigRepository: ${it.size}")
+//        }
+        DataRepoManager.newVoteRepository.data.observe(this) {
             LogUtils.i("newVoteRepository: ${it.size}")
         }
-
-        DataRepositoryManager.interfaceConfigRepository.data.observe(this) {
-            LogUtils.i("interfaceConfigRepository: data:${it?.size}")
+        //界面配置
+        DataRepoManager.interfaceConfigRepository.apply {
+            data.observe(this@MainActivity) {
+                LogUtils.i("interfaceConfigRepository: data:${it?.size}")
+            }
+            mainFilePath.observe(this@MainActivity) {
+                LogUtils.i("interfaceConfigRepository: mainFilePath:${it}")
+            }
+            subFilePath.observe(this@MainActivity) {
+                LogUtils.i("interfaceConfigRepository: subFilePath:${it}")
+            }
+            logoFilePath.observe(this@MainActivity) {
+                LogUtils.i("interfaceConfigRepository: logoFilePath:${it}")
+            }
+            bulletinBgFilePath.observe(this@MainActivity) {
+                LogUtils.i("interfaceConfigRepository: bulletinBgFilePath:${it}")
+            }
+            bulletinLogoFilePath.observe(this@MainActivity) {
+                LogUtils.i("interfaceConfigRepository: bulletinLogoFilePath:${it}")
+            }
+            companyName.observe(this@MainActivity) {
+                LogUtils.i("interfaceConfigRepository: companyName:${it}")
+            }
         }
-        DataRepositoryManager.interfaceConfigRepository.mainFilePath.observe(this) {
-            LogUtils.i("interfaceConfigRepository: mainFilePath:${it}")
-        }
-        DataRepositoryManager.interfaceConfigRepository.subFilePath.observe(this) {
-            LogUtils.i("interfaceConfigRepository: subFilePath:${it}")
-        }
-        DataRepositoryManager.interfaceConfigRepository.logoFilePath.observe(this) {
-            LogUtils.i("interfaceConfigRepository: logoFilePath:${it}")
-        }
-        DataRepositoryManager.interfaceConfigRepository.bulletinBgFilePath.observe(this) {
-            LogUtils.i("interfaceConfigRepository: bulletinBgFilePath:${it}")
-        }
-        DataRepositoryManager.interfaceConfigRepository.bulletinLogoFilePath.observe(this) {
-            LogUtils.i("interfaceConfigRepository: bulletinLogoFilePath:${it}")
-        }
-        DataRepositoryManager.interfaceConfigRepository.companyName.observe(this) {
-            LogUtils.i("interfaceConfigRepository: companyName:${it}")
-        }
-        //本机设备名称
-        DataRepositoryManager.deviceInfoRepository.devName.observe(this) {
-            LogUtils.i("deviceInfoRepository: devName:${it}")
-            mBinding.tvDevName.text = it ?: ""
-        }
-        //本机在线状态
-        DataRepositoryManager.deviceInfoRepository.online.observe(this) {
-            LogUtils.i("deviceInfoRepository: online:${it}")
-            mBinding.tvOnline.text = if (it) "在线" else "离线"
+        DataRepoManager.deviceInfoRepository.apply {
+            data.observe(this@MainActivity){
+                LogUtils.i("deviceInfoRepository: data:${it.size}")
+            }
+            //本机设备名称
+            devName.observe(this@MainActivity){
+                LogUtils.i("deviceInfoRepository: devName:${it}")
+                mBinding.tvDevName.text = it ?: ""
+            }
+            //本机在线状态
+            online.observe(this@MainActivity){
+                LogUtils.i("deviceInfoRepository: online:${it}")
+                mBinding.tvOnline.text = if (it) "在线" else "离线"
+            }
         }
     }
 
     private suspend fun repositoryFlow() {
-        DataRepositoryManager.roomRepository.dataFlow().collect {
+        DataRepoManager.roomRepository.dataFlow().collect {
             LogUtils.i("repositoryFlow: roomRepository:${it.size}")
         }
-        DataRepositoryManager.memberDetailRepository.dataFlow().collect {
-            LogUtils.i("repositoryFlow: memberDetailRepository:${it.size}")
+        DataRepoManager.memberRepository.dataFlow().collect {
+            LogUtils.i("repositoryFlow: memberRepository:${it.size}")
         }
     }
 

@@ -1,7 +1,6 @@
-package com.paperless.data.repository.base
+﻿package com.paperless.data.repository.base
 
 import com.mogujie.tt.protobuf.InterfaceMacro
-import com.paperless.data.repository.base.DataRepository
 import com.paperless.sdk.Call
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -15,7 +14,7 @@ object CallbackDispatcher : Call.DataChangeCallback {
     /** 同类型 notify 的去抖窗口，窗口内多次通知只处理最后一次 */
     private const val NOTIFY_DEBOUNCE_MS = 200L
 
-    private val repositories = mutableMapOf<Int, DataRepository>()
+    private val repositories = mutableMapOf<Int, MutableSet<DataRepository>>()
 
     /** 去抖协程作用域，每个 type 独立维护一个待执行任务 */
     private val debounceScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
@@ -23,11 +22,14 @@ object CallbackDispatcher : Call.DataChangeCallback {
     private val jobLock = Any()
 
     fun register(type: Int, repo: DataRepository) {
-        repositories[type] = repo
+        repositories.getOrPut(type) { mutableSetOf() }.add(repo)
     }
 
-    fun unregister(type: Int) {
-        repositories.remove(type)
+    fun unregister(type: Int, repo: DataRepository) {
+        repositories[type]?.remove(repo)
+        if (repositories[type].isNullOrEmpty()) {
+            repositories.remove(type)
+        }
         synchronized(jobLock) {
             pendingNotifyJobs.remove(type)?.cancel()
         }
@@ -38,15 +40,15 @@ object CallbackDispatcher : Call.DataChangeCallback {
             if (needDelay(type)) {
                 dispatchNotify(type, data)
             } else {
-                repositories[type]?.handleNotifyCallback(data)
+                repositories[type]?.forEach { it.handleNotifyCallback(type, data) }
             }
         } else {
-            repositories[type]?.handleCallback(method, data)
+            repositories[type]?.forEach { it.handleCallback(method, data) }
         }
     }
 
     /**
-     * 只有部分类型的变更通知需要防抖处理
+     * 只有部分类型的变更通知需要防抖处理（预防极端情况下短时间内上百个变更通知）
      */
     private fun needDelay(type: Int): Boolean {
         return type == InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_DEVICEINFO_VALUE              //设备
@@ -83,11 +85,15 @@ object CallbackDispatcher : Call.DataChangeCallback {
      * 这里做去抖：每次到来都取消上一个未执行的任务，仅保留并执行最后一次，避免重复查询。
      * 不同 type 之间互不阻塞。
      */
+    fun queryReposByType(type: Int) {
+        repositories[type]?.forEach { it.query() }
+    }
+
     private fun dispatchNotify(type: Int, data: ByteArray?) {
-        val repo = repositories[type] ?: return
+        val repos = repositories[type] ?: return
         val job = debounceScope.launch {
             delay(NOTIFY_DEBOUNCE_MS)
-            repo.handleNotifyCallback(data)
+            repos.forEach { it.handleNotifyCallback(type, data) }
         }
         synchronized(jobLock) {
             pendingNotifyJobs.put(type, job)?.cancel()

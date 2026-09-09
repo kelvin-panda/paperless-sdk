@@ -10,6 +10,119 @@ public final class InterfaceSignin {
   }
   /**
    * <pre>
+   *会议签到--signin_complex复合签到数据头
+   * </pre>
+   *
+   * Protobuf enum {@code Pb_MeetCMPSignFlag}
+   */
+  public enum Pb_MeetCMPSignFlag
+      implements com.google.protobuf.Internal.EnumLite {
+    /**
+     * <code>Pb_MEET_COMPLEXSIGNIN_FLAG_ZERO = 0;</code>
+     */
+    Pb_MEET_COMPLEXSIGNIN_FLAG_ZERO(0),
+    /**
+     * <pre>
+     *迟到
+     * </pre>
+     *
+     * <code>Pb_MEET_COMPLEXSIGNIN_FLAG_LATE = 1;</code>
+     */
+    Pb_MEET_COMPLEXSIGNIN_FLAG_LATE(1),
+    /**
+     * <pre>
+     *请假
+     * </pre>
+     *
+     * <code>Pb_MEET_COMPLEXSIGNIN_FLAG_ASK = 2;</code>
+     */
+    Pb_MEET_COMPLEXSIGNIN_FLAG_ASK(2),
+    /**
+     * <pre>
+     *代签
+     * </pre>
+     *
+     * <code>Pb_MEET_COMPLEXSIGNIN_FLAG_HELP = 4;</code>
+     */
+    Pb_MEET_COMPLEXSIGNIN_FLAG_HELP(4),
+    UNRECOGNIZED(-1),
+    ;
+
+    /**
+     * <code>Pb_MEET_COMPLEXSIGNIN_FLAG_ZERO = 0;</code>
+     */
+    public static final int Pb_MEET_COMPLEXSIGNIN_FLAG_ZERO_VALUE = 0;
+    /**
+     * <pre>
+     *迟到
+     * </pre>
+     *
+     * <code>Pb_MEET_COMPLEXSIGNIN_FLAG_LATE = 1;</code>
+     */
+    public static final int Pb_MEET_COMPLEXSIGNIN_FLAG_LATE_VALUE = 1;
+    /**
+     * <pre>
+     *请假
+     * </pre>
+     *
+     * <code>Pb_MEET_COMPLEXSIGNIN_FLAG_ASK = 2;</code>
+     */
+    public static final int Pb_MEET_COMPLEXSIGNIN_FLAG_ASK_VALUE = 2;
+    /**
+     * <pre>
+     *代签
+     * </pre>
+     *
+     * <code>Pb_MEET_COMPLEXSIGNIN_FLAG_HELP = 4;</code>
+     */
+    public static final int Pb_MEET_COMPLEXSIGNIN_FLAG_HELP_VALUE = 4;
+
+
+    public final int getNumber() {
+      return value;
+    }
+
+    /**
+     * @deprecated Use {@link #forNumber(int)} instead.
+     */
+    @java.lang.Deprecated
+    public static Pb_MeetCMPSignFlag valueOf(int value) {
+      return forNumber(value);
+    }
+
+    public static Pb_MeetCMPSignFlag forNumber(int value) {
+      switch (value) {
+        case 0: return Pb_MEET_COMPLEXSIGNIN_FLAG_ZERO;
+        case 1: return Pb_MEET_COMPLEXSIGNIN_FLAG_LATE;
+        case 2: return Pb_MEET_COMPLEXSIGNIN_FLAG_ASK;
+        case 4: return Pb_MEET_COMPLEXSIGNIN_FLAG_HELP;
+        default: return null;
+      }
+    }
+
+    public static com.google.protobuf.Internal.EnumLiteMap<Pb_MeetCMPSignFlag>
+        internalGetValueMap() {
+      return internalValueMap;
+    }
+    private static final com.google.protobuf.Internal.EnumLiteMap<
+        Pb_MeetCMPSignFlag> internalValueMap =
+          new com.google.protobuf.Internal.EnumLiteMap<Pb_MeetCMPSignFlag>() {
+            public Pb_MeetCMPSignFlag findValueByNumber(int number) {
+              return Pb_MeetCMPSignFlag.forNumber(number);
+            }
+          };
+
+    private final int value;
+
+    private Pb_MeetCMPSignFlag(int value) {
+      this.value = value;
+    }
+
+    // @@protoc_insertion_point(enum_scope:Pb_MeetCMPSignFlag)
+  }
+
+  /**
+   * <pre>
    *&#47;///////////////////////////////////////////////////////////////////////////////////////
    *生物认证删除
    * </pre>
@@ -105,6 +218,768 @@ public final class InterfaceSignin {
     // @@protoc_insertion_point(enum_scope:Pb_MeetIdentifyFlag)
   }
 
+  public interface pbui_Type_ComplexSignInHdrInfoOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:pbui_Type_ComplexSignInHdrInfo)
+      com.google.protobuf.MessageLiteOrBuilder {
+
+    /**
+     * <pre>
+     *Pb_MeetCMPSignFlag
+     * </pre>
+     *
+     * <code>optional fixed32 flag = 1;</code>
+     */
+    int getFlag();
+
+    /**
+     * <pre>
+     *签到类型
+     * </pre>
+     *
+     * <code>optional fixed32 signin_type = 2;</code>
+     */
+    int getSigninType();
+
+    /**
+     * <pre>
+     *占位值自由使用 -- 
+     * </pre>
+     *
+     * <code>optional fixed32 val = 3;</code>
+     */
+    int getVal();
+
+    /**
+     * <pre>
+     *占位值自由使用
+     * </pre>
+     *
+     * <code>optional fixed32 param = 4;</code>
+     */
+    int getParam();
+
+    /**
+     * <pre>
+     *代签人员ID
+     * </pre>
+     *
+     * <code>optional fixed32 helpnameid = 5;</code>
+     */
+    int getHelpnameid();
+
+    /**
+     * <pre>
+     *json文本长度+1
+     * </pre>
+     *
+     * <code>optional bytes json = 6;</code>
+     */
+    com.google.protobuf.ByteString getJson();
+  }
+  /**
+   * Protobuf type {@code pbui_Type_ComplexSignInHdrInfo}
+   */
+  public  static final class pbui_Type_ComplexSignInHdrInfo extends
+      com.google.protobuf.GeneratedMessageLite<
+          pbui_Type_ComplexSignInHdrInfo, pbui_Type_ComplexSignInHdrInfo.Builder> implements
+      // @@protoc_insertion_point(message_implements:pbui_Type_ComplexSignInHdrInfo)
+      pbui_Type_ComplexSignInHdrInfoOrBuilder {
+    private pbui_Type_ComplexSignInHdrInfo() {
+      json_ = com.google.protobuf.ByteString.EMPTY;
+    }
+    public static final int FLAG_FIELD_NUMBER = 1;
+    private int flag_;
+    /**
+     * <pre>
+     *Pb_MeetCMPSignFlag
+     * </pre>
+     *
+     * <code>optional fixed32 flag = 1;</code>
+     */
+    public int getFlag() {
+      return flag_;
+    }
+    /**
+     * <pre>
+     *Pb_MeetCMPSignFlag
+     * </pre>
+     *
+     * <code>optional fixed32 flag = 1;</code>
+     */
+    private void setFlag(int value) {
+      
+      flag_ = value;
+    }
+    /**
+     * <pre>
+     *Pb_MeetCMPSignFlag
+     * </pre>
+     *
+     * <code>optional fixed32 flag = 1;</code>
+     */
+    private void clearFlag() {
+      
+      flag_ = 0;
+    }
+
+    public static final int SIGNIN_TYPE_FIELD_NUMBER = 2;
+    private int signinType_;
+    /**
+     * <pre>
+     *签到类型
+     * </pre>
+     *
+     * <code>optional fixed32 signin_type = 2;</code>
+     */
+    public int getSigninType() {
+      return signinType_;
+    }
+    /**
+     * <pre>
+     *签到类型
+     * </pre>
+     *
+     * <code>optional fixed32 signin_type = 2;</code>
+     */
+    private void setSigninType(int value) {
+      
+      signinType_ = value;
+    }
+    /**
+     * <pre>
+     *签到类型
+     * </pre>
+     *
+     * <code>optional fixed32 signin_type = 2;</code>
+     */
+    private void clearSigninType() {
+      
+      signinType_ = 0;
+    }
+
+    public static final int VAL_FIELD_NUMBER = 3;
+    private int val_;
+    /**
+     * <pre>
+     *占位值自由使用 -- 
+     * </pre>
+     *
+     * <code>optional fixed32 val = 3;</code>
+     */
+    public int getVal() {
+      return val_;
+    }
+    /**
+     * <pre>
+     *占位值自由使用 -- 
+     * </pre>
+     *
+     * <code>optional fixed32 val = 3;</code>
+     */
+    private void setVal(int value) {
+      
+      val_ = value;
+    }
+    /**
+     * <pre>
+     *占位值自由使用 -- 
+     * </pre>
+     *
+     * <code>optional fixed32 val = 3;</code>
+     */
+    private void clearVal() {
+      
+      val_ = 0;
+    }
+
+    public static final int PARAM_FIELD_NUMBER = 4;
+    private int param_;
+    /**
+     * <pre>
+     *占位值自由使用
+     * </pre>
+     *
+     * <code>optional fixed32 param = 4;</code>
+     */
+    public int getParam() {
+      return param_;
+    }
+    /**
+     * <pre>
+     *占位值自由使用
+     * </pre>
+     *
+     * <code>optional fixed32 param = 4;</code>
+     */
+    private void setParam(int value) {
+      
+      param_ = value;
+    }
+    /**
+     * <pre>
+     *占位值自由使用
+     * </pre>
+     *
+     * <code>optional fixed32 param = 4;</code>
+     */
+    private void clearParam() {
+      
+      param_ = 0;
+    }
+
+    public static final int HELPNAMEID_FIELD_NUMBER = 5;
+    private int helpnameid_;
+    /**
+     * <pre>
+     *代签人员ID
+     * </pre>
+     *
+     * <code>optional fixed32 helpnameid = 5;</code>
+     */
+    public int getHelpnameid() {
+      return helpnameid_;
+    }
+    /**
+     * <pre>
+     *代签人员ID
+     * </pre>
+     *
+     * <code>optional fixed32 helpnameid = 5;</code>
+     */
+    private void setHelpnameid(int value) {
+      
+      helpnameid_ = value;
+    }
+    /**
+     * <pre>
+     *代签人员ID
+     * </pre>
+     *
+     * <code>optional fixed32 helpnameid = 5;</code>
+     */
+    private void clearHelpnameid() {
+      
+      helpnameid_ = 0;
+    }
+
+    public static final int JSON_FIELD_NUMBER = 6;
+    private com.google.protobuf.ByteString json_;
+    /**
+     * <pre>
+     *json文本长度+1
+     * </pre>
+     *
+     * <code>optional bytes json = 6;</code>
+     */
+    public com.google.protobuf.ByteString getJson() {
+      return json_;
+    }
+    /**
+     * <pre>
+     *json文本长度+1
+     * </pre>
+     *
+     * <code>optional bytes json = 6;</code>
+     */
+    private void setJson(com.google.protobuf.ByteString value) {
+      if (value == null) {
+    throw new NullPointerException();
+  }
+  
+      json_ = value;
+    }
+    /**
+     * <pre>
+     *json文本长度+1
+     * </pre>
+     *
+     * <code>optional bytes json = 6;</code>
+     */
+    private void clearJson() {
+      
+      json_ = getDefaultInstance().getJson();
+    }
+
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      if (flag_ != 0) {
+        output.writeFixed32(1, flag_);
+      }
+      if (signinType_ != 0) {
+        output.writeFixed32(2, signinType_);
+      }
+      if (val_ != 0) {
+        output.writeFixed32(3, val_);
+      }
+      if (param_ != 0) {
+        output.writeFixed32(4, param_);
+      }
+      if (helpnameid_ != 0) {
+        output.writeFixed32(5, helpnameid_);
+      }
+      if (!json_.isEmpty()) {
+        output.writeBytes(6, json_);
+      }
+    }
+
+    public int getSerializedSize() {
+      int size = memoizedSerializedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (flag_ != 0) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeFixed32Size(1, flag_);
+      }
+      if (signinType_ != 0) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeFixed32Size(2, signinType_);
+      }
+      if (val_ != 0) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeFixed32Size(3, val_);
+      }
+      if (param_ != 0) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeFixed32Size(4, param_);
+      }
+      if (helpnameid_ != 0) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeFixed32Size(5, helpnameid_);
+      }
+      if (!json_.isEmpty()) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBytesSize(6, json_);
+      }
+      memoizedSerializedSize = size;
+      return size;
+    }
+
+    public static com.mogujie.tt.protobuf.InterfaceSignin.pbui_Type_ComplexSignInHdrInfo parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return com.google.protobuf.GeneratedMessageLite.parseFrom(
+          DEFAULT_INSTANCE, data);
+    }
+    public static com.mogujie.tt.protobuf.InterfaceSignin.pbui_Type_ComplexSignInHdrInfo parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return com.google.protobuf.GeneratedMessageLite.parseFrom(
+          DEFAULT_INSTANCE, data, extensionRegistry);
+    }
+    public static com.mogujie.tt.protobuf.InterfaceSignin.pbui_Type_ComplexSignInHdrInfo parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return com.google.protobuf.GeneratedMessageLite.parseFrom(
+          DEFAULT_INSTANCE, data);
+    }
+    public static com.mogujie.tt.protobuf.InterfaceSignin.pbui_Type_ComplexSignInHdrInfo parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return com.google.protobuf.GeneratedMessageLite.parseFrom(
+          DEFAULT_INSTANCE, data, extensionRegistry);
+    }
+    public static com.mogujie.tt.protobuf.InterfaceSignin.pbui_Type_ComplexSignInHdrInfo parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageLite.parseFrom(
+          DEFAULT_INSTANCE, input);
+    }
+    public static com.mogujie.tt.protobuf.InterfaceSignin.pbui_Type_ComplexSignInHdrInfo parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageLite.parseFrom(
+          DEFAULT_INSTANCE, input, extensionRegistry);
+    }
+    public static com.mogujie.tt.protobuf.InterfaceSignin.pbui_Type_ComplexSignInHdrInfo parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return parseDelimitedFrom(DEFAULT_INSTANCE, input);
+    }
+    public static com.mogujie.tt.protobuf.InterfaceSignin.pbui_Type_ComplexSignInHdrInfo parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return parseDelimitedFrom(DEFAULT_INSTANCE, input, extensionRegistry);
+    }
+    public static com.mogujie.tt.protobuf.InterfaceSignin.pbui_Type_ComplexSignInHdrInfo parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageLite.parseFrom(
+          DEFAULT_INSTANCE, input);
+    }
+    public static com.mogujie.tt.protobuf.InterfaceSignin.pbui_Type_ComplexSignInHdrInfo parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageLite.parseFrom(
+          DEFAULT_INSTANCE, input, extensionRegistry);
+    }
+
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(com.mogujie.tt.protobuf.InterfaceSignin.pbui_Type_ComplexSignInHdrInfo prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+
+    /**
+     * Protobuf type {@code pbui_Type_ComplexSignInHdrInfo}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageLite.Builder<
+          com.mogujie.tt.protobuf.InterfaceSignin.pbui_Type_ComplexSignInHdrInfo, Builder> implements
+        // @@protoc_insertion_point(builder_implements:pbui_Type_ComplexSignInHdrInfo)
+        com.mogujie.tt.protobuf.InterfaceSignin.pbui_Type_ComplexSignInHdrInfoOrBuilder {
+      // Construct using com.mogujie.tt.protobuf.InterfaceSignin.pbui_Type_ComplexSignInHdrInfo.newBuilder()
+      private Builder() {
+        super(DEFAULT_INSTANCE);
+      }
+
+
+      /**
+       * <pre>
+       *Pb_MeetCMPSignFlag
+       * </pre>
+       *
+       * <code>optional fixed32 flag = 1;</code>
+       */
+      public int getFlag() {
+        return instance.getFlag();
+      }
+      /**
+       * <pre>
+       *Pb_MeetCMPSignFlag
+       * </pre>
+       *
+       * <code>optional fixed32 flag = 1;</code>
+       */
+      public Builder setFlag(int value) {
+        copyOnWrite();
+        instance.setFlag(value);
+        return this;
+      }
+      /**
+       * <pre>
+       *Pb_MeetCMPSignFlag
+       * </pre>
+       *
+       * <code>optional fixed32 flag = 1;</code>
+       */
+      public Builder clearFlag() {
+        copyOnWrite();
+        instance.clearFlag();
+        return this;
+      }
+
+      /**
+       * <pre>
+       *签到类型
+       * </pre>
+       *
+       * <code>optional fixed32 signin_type = 2;</code>
+       */
+      public int getSigninType() {
+        return instance.getSigninType();
+      }
+      /**
+       * <pre>
+       *签到类型
+       * </pre>
+       *
+       * <code>optional fixed32 signin_type = 2;</code>
+       */
+      public Builder setSigninType(int value) {
+        copyOnWrite();
+        instance.setSigninType(value);
+        return this;
+      }
+      /**
+       * <pre>
+       *签到类型
+       * </pre>
+       *
+       * <code>optional fixed32 signin_type = 2;</code>
+       */
+      public Builder clearSigninType() {
+        copyOnWrite();
+        instance.clearSigninType();
+        return this;
+      }
+
+      /**
+       * <pre>
+       *占位值自由使用 -- 
+       * </pre>
+       *
+       * <code>optional fixed32 val = 3;</code>
+       */
+      public int getVal() {
+        return instance.getVal();
+      }
+      /**
+       * <pre>
+       *占位值自由使用 -- 
+       * </pre>
+       *
+       * <code>optional fixed32 val = 3;</code>
+       */
+      public Builder setVal(int value) {
+        copyOnWrite();
+        instance.setVal(value);
+        return this;
+      }
+      /**
+       * <pre>
+       *占位值自由使用 -- 
+       * </pre>
+       *
+       * <code>optional fixed32 val = 3;</code>
+       */
+      public Builder clearVal() {
+        copyOnWrite();
+        instance.clearVal();
+        return this;
+      }
+
+      /**
+       * <pre>
+       *占位值自由使用
+       * </pre>
+       *
+       * <code>optional fixed32 param = 4;</code>
+       */
+      public int getParam() {
+        return instance.getParam();
+      }
+      /**
+       * <pre>
+       *占位值自由使用
+       * </pre>
+       *
+       * <code>optional fixed32 param = 4;</code>
+       */
+      public Builder setParam(int value) {
+        copyOnWrite();
+        instance.setParam(value);
+        return this;
+      }
+      /**
+       * <pre>
+       *占位值自由使用
+       * </pre>
+       *
+       * <code>optional fixed32 param = 4;</code>
+       */
+      public Builder clearParam() {
+        copyOnWrite();
+        instance.clearParam();
+        return this;
+      }
+
+      /**
+       * <pre>
+       *代签人员ID
+       * </pre>
+       *
+       * <code>optional fixed32 helpnameid = 5;</code>
+       */
+      public int getHelpnameid() {
+        return instance.getHelpnameid();
+      }
+      /**
+       * <pre>
+       *代签人员ID
+       * </pre>
+       *
+       * <code>optional fixed32 helpnameid = 5;</code>
+       */
+      public Builder setHelpnameid(int value) {
+        copyOnWrite();
+        instance.setHelpnameid(value);
+        return this;
+      }
+      /**
+       * <pre>
+       *代签人员ID
+       * </pre>
+       *
+       * <code>optional fixed32 helpnameid = 5;</code>
+       */
+      public Builder clearHelpnameid() {
+        copyOnWrite();
+        instance.clearHelpnameid();
+        return this;
+      }
+
+      /**
+       * <pre>
+       *json文本长度+1
+       * </pre>
+       *
+       * <code>optional bytes json = 6;</code>
+       */
+      public com.google.protobuf.ByteString getJson() {
+        return instance.getJson();
+      }
+      /**
+       * <pre>
+       *json文本长度+1
+       * </pre>
+       *
+       * <code>optional bytes json = 6;</code>
+       */
+      public Builder setJson(com.google.protobuf.ByteString value) {
+        copyOnWrite();
+        instance.setJson(value);
+        return this;
+      }
+      /**
+       * <pre>
+       *json文本长度+1
+       * </pre>
+       *
+       * <code>optional bytes json = 6;</code>
+       */
+      public Builder clearJson() {
+        copyOnWrite();
+        instance.clearJson();
+        return this;
+      }
+
+      // @@protoc_insertion_point(builder_scope:pbui_Type_ComplexSignInHdrInfo)
+    }
+    protected final Object dynamicMethod(
+        com.google.protobuf.GeneratedMessageLite.MethodToInvoke method,
+        Object arg0, Object arg1) {
+      switch (method) {
+        case NEW_MUTABLE_INSTANCE: {
+          return new com.mogujie.tt.protobuf.InterfaceSignin.pbui_Type_ComplexSignInHdrInfo();
+        }
+        case IS_INITIALIZED: {
+          return DEFAULT_INSTANCE;
+        }
+        case MAKE_IMMUTABLE: {
+          return null;
+        }
+        case NEW_BUILDER: {
+          return new Builder();
+        }
+        case VISIT: {
+          Visitor visitor = (Visitor) arg0;
+          com.mogujie.tt.protobuf.InterfaceSignin.pbui_Type_ComplexSignInHdrInfo other = (com.mogujie.tt.protobuf.InterfaceSignin.pbui_Type_ComplexSignInHdrInfo) arg1;
+          flag_ = visitor.visitInt(flag_ != 0, flag_,
+              other.flag_ != 0, other.flag_);
+          signinType_ = visitor.visitInt(signinType_ != 0, signinType_,
+              other.signinType_ != 0, other.signinType_);
+          val_ = visitor.visitInt(val_ != 0, val_,
+              other.val_ != 0, other.val_);
+          param_ = visitor.visitInt(param_ != 0, param_,
+              other.param_ != 0, other.param_);
+          helpnameid_ = visitor.visitInt(helpnameid_ != 0, helpnameid_,
+              other.helpnameid_ != 0, other.helpnameid_);
+          json_ = visitor.visitByteString(json_ != com.google.protobuf.ByteString.EMPTY, json_,
+              other.json_ != com.google.protobuf.ByteString.EMPTY, other.json_);
+          if (visitor == com.google.protobuf.GeneratedMessageLite.MergeFromVisitor
+              .INSTANCE) {
+          }
+          return this;
+        }
+        case MERGE_FROM_STREAM: {
+          com.google.protobuf.CodedInputStream input =
+              (com.google.protobuf.CodedInputStream) arg0;
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry =
+              (com.google.protobuf.ExtensionRegistryLite) arg1;
+          try {
+            boolean done = false;
+            while (!done) {
+              int tag = input.readTag();
+              switch (tag) {
+                case 0:
+                  done = true;
+                  break;
+                default: {
+                  if (!input.skipField(tag)) {
+                    done = true;
+                  }
+                  break;
+                }
+                case 13: {
+
+                  flag_ = input.readFixed32();
+                  break;
+                }
+                case 21: {
+
+                  signinType_ = input.readFixed32();
+                  break;
+                }
+                case 29: {
+
+                  val_ = input.readFixed32();
+                  break;
+                }
+                case 37: {
+
+                  param_ = input.readFixed32();
+                  break;
+                }
+                case 45: {
+
+                  helpnameid_ = input.readFixed32();
+                  break;
+                }
+                case 50: {
+
+                  json_ = input.readBytes();
+                  break;
+                }
+              }
+            }
+          } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+            throw new RuntimeException(e.setUnfinishedMessage(this));
+          } catch (java.io.IOException e) {
+            throw new RuntimeException(
+                new com.google.protobuf.InvalidProtocolBufferException(
+                    e.getMessage()).setUnfinishedMessage(this));
+          } finally {
+          }
+        }
+        case GET_DEFAULT_INSTANCE: {
+          return DEFAULT_INSTANCE;
+        }
+        case GET_PARSER: {
+          if (PARSER == null) {    synchronized (com.mogujie.tt.protobuf.InterfaceSignin.pbui_Type_ComplexSignInHdrInfo.class) {
+              if (PARSER == null) {
+                PARSER = new DefaultInstanceBasedParser(DEFAULT_INSTANCE);
+              }
+            }
+          }
+          return PARSER;
+        }
+      }
+      throw new UnsupportedOperationException();
+    }
+
+
+    // @@protoc_insertion_point(class_scope:pbui_Type_ComplexSignInHdrInfo)
+    private static final com.mogujie.tt.protobuf.InterfaceSignin.pbui_Type_ComplexSignInHdrInfo DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new pbui_Type_ComplexSignInHdrInfo();
+      DEFAULT_INSTANCE.makeImmutable();
+    }
+
+    public static com.mogujie.tt.protobuf.InterfaceSignin.pbui_Type_ComplexSignInHdrInfo getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static volatile com.google.protobuf.Parser<pbui_Type_ComplexSignInHdrInfo> PARSER;
+
+    public static com.google.protobuf.Parser<pbui_Type_ComplexSignInHdrInfo> parser() {
+      return DEFAULT_INSTANCE.getParserForType();
+    }
+  }
+
   public interface pbui_Item_MeetSignInDetailInfoOrBuilder extends
       // @@protoc_insertion_point(interface_extends:pbui_Item_MeetSignInDetailInfo)
       com.google.protobuf.MessageLiteOrBuilder {
@@ -153,6 +1028,23 @@ public final class InterfaceSignin {
      * <code>optional bytes psigndata = 5;</code>
      */
     com.google.protobuf.ByteString getPsigndata();
+
+    /**
+     * <pre>
+     *组合自定义数据 signin_type=Pb_meet_signin_complex才有效
+     * </pre>
+     *
+     * <code>optional .pbui_Type_ComplexSignInHdrInfo cmplexdata = 6;</code>
+     */
+    boolean hasCmplexdata();
+    /**
+     * <pre>
+     *组合自定义数据 signin_type=Pb_meet_signin_complex才有效
+     * </pre>
+     *
+     * <code>optional .pbui_Type_ComplexSignInHdrInfo cmplexdata = 6;</code>
+     */
+    com.mogujie.tt.protobuf.InterfaceSignin.pbui_Type_ComplexSignInHdrInfo getCmplexdata();
   }
   /**
    * <pre>
@@ -351,6 +1243,82 @@ public final class InterfaceSignin {
       psigndata_ = getDefaultInstance().getPsigndata();
     }
 
+    public static final int CMPLEXDATA_FIELD_NUMBER = 6;
+    private com.mogujie.tt.protobuf.InterfaceSignin.pbui_Type_ComplexSignInHdrInfo cmplexdata_;
+    /**
+     * <pre>
+     *组合自定义数据 signin_type=Pb_meet_signin_complex才有效
+     * </pre>
+     *
+     * <code>optional .pbui_Type_ComplexSignInHdrInfo cmplexdata = 6;</code>
+     */
+    public boolean hasCmplexdata() {
+      return cmplexdata_ != null;
+    }
+    /**
+     * <pre>
+     *组合自定义数据 signin_type=Pb_meet_signin_complex才有效
+     * </pre>
+     *
+     * <code>optional .pbui_Type_ComplexSignInHdrInfo cmplexdata = 6;</code>
+     */
+    public com.mogujie.tt.protobuf.InterfaceSignin.pbui_Type_ComplexSignInHdrInfo getCmplexdata() {
+      return cmplexdata_ == null ? com.mogujie.tt.protobuf.InterfaceSignin.pbui_Type_ComplexSignInHdrInfo.getDefaultInstance() : cmplexdata_;
+    }
+    /**
+     * <pre>
+     *组合自定义数据 signin_type=Pb_meet_signin_complex才有效
+     * </pre>
+     *
+     * <code>optional .pbui_Type_ComplexSignInHdrInfo cmplexdata = 6;</code>
+     */
+    private void setCmplexdata(com.mogujie.tt.protobuf.InterfaceSignin.pbui_Type_ComplexSignInHdrInfo value) {
+      if (value == null) {
+        throw new NullPointerException();
+      }
+      cmplexdata_ = value;
+      
+      }
+    /**
+     * <pre>
+     *组合自定义数据 signin_type=Pb_meet_signin_complex才有效
+     * </pre>
+     *
+     * <code>optional .pbui_Type_ComplexSignInHdrInfo cmplexdata = 6;</code>
+     */
+    private void setCmplexdata(
+        com.mogujie.tt.protobuf.InterfaceSignin.pbui_Type_ComplexSignInHdrInfo.Builder builderForValue) {
+      cmplexdata_ = builderForValue.build();
+      
+    }
+    /**
+     * <pre>
+     *组合自定义数据 signin_type=Pb_meet_signin_complex才有效
+     * </pre>
+     *
+     * <code>optional .pbui_Type_ComplexSignInHdrInfo cmplexdata = 6;</code>
+     */
+    private void mergeCmplexdata(com.mogujie.tt.protobuf.InterfaceSignin.pbui_Type_ComplexSignInHdrInfo value) {
+      if (cmplexdata_ != null &&
+          cmplexdata_ != com.mogujie.tt.protobuf.InterfaceSignin.pbui_Type_ComplexSignInHdrInfo.getDefaultInstance()) {
+        cmplexdata_ =
+          com.mogujie.tt.protobuf.InterfaceSignin.pbui_Type_ComplexSignInHdrInfo.newBuilder(cmplexdata_).mergeFrom(value).buildPartial();
+      } else {
+        cmplexdata_ = value;
+      }
+      
+    }
+    /**
+     * <pre>
+     *组合自定义数据 signin_type=Pb_meet_signin_complex才有效
+     * </pre>
+     *
+     * <code>optional .pbui_Type_ComplexSignInHdrInfo cmplexdata = 6;</code>
+     */
+    private void clearCmplexdata() {  cmplexdata_ = null;
+      
+    }
+
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
       if (nameId_ != 0) {
@@ -367,6 +1335,9 @@ public final class InterfaceSignin {
       }
       if (!psigndata_.isEmpty()) {
         output.writeBytes(5, psigndata_);
+      }
+      if (cmplexdata_ != null) {
+        output.writeMessage(6, getCmplexdata());
       }
     }
 
@@ -394,6 +1365,10 @@ public final class InterfaceSignin {
       if (!psigndata_.isEmpty()) {
         size += com.google.protobuf.CodedOutputStream
           .computeBytesSize(5, psigndata_);
+      }
+      if (cmplexdata_ != null) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(6, getCmplexdata());
       }
       memoizedSerializedSize = size;
       return size;
@@ -660,6 +1635,75 @@ public final class InterfaceSignin {
         return this;
       }
 
+      /**
+       * <pre>
+       *组合自定义数据 signin_type=Pb_meet_signin_complex才有效
+       * </pre>
+       *
+       * <code>optional .pbui_Type_ComplexSignInHdrInfo cmplexdata = 6;</code>
+       */
+      public boolean hasCmplexdata() {
+        return instance.hasCmplexdata();
+      }
+      /**
+       * <pre>
+       *组合自定义数据 signin_type=Pb_meet_signin_complex才有效
+       * </pre>
+       *
+       * <code>optional .pbui_Type_ComplexSignInHdrInfo cmplexdata = 6;</code>
+       */
+      public com.mogujie.tt.protobuf.InterfaceSignin.pbui_Type_ComplexSignInHdrInfo getCmplexdata() {
+        return instance.getCmplexdata();
+      }
+      /**
+       * <pre>
+       *组合自定义数据 signin_type=Pb_meet_signin_complex才有效
+       * </pre>
+       *
+       * <code>optional .pbui_Type_ComplexSignInHdrInfo cmplexdata = 6;</code>
+       */
+      public Builder setCmplexdata(com.mogujie.tt.protobuf.InterfaceSignin.pbui_Type_ComplexSignInHdrInfo value) {
+        copyOnWrite();
+        instance.setCmplexdata(value);
+        return this;
+        }
+      /**
+       * <pre>
+       *组合自定义数据 signin_type=Pb_meet_signin_complex才有效
+       * </pre>
+       *
+       * <code>optional .pbui_Type_ComplexSignInHdrInfo cmplexdata = 6;</code>
+       */
+      public Builder setCmplexdata(
+          com.mogujie.tt.protobuf.InterfaceSignin.pbui_Type_ComplexSignInHdrInfo.Builder builderForValue) {
+        copyOnWrite();
+        instance.setCmplexdata(builderForValue);
+        return this;
+      }
+      /**
+       * <pre>
+       *组合自定义数据 signin_type=Pb_meet_signin_complex才有效
+       * </pre>
+       *
+       * <code>optional .pbui_Type_ComplexSignInHdrInfo cmplexdata = 6;</code>
+       */
+      public Builder mergeCmplexdata(com.mogujie.tt.protobuf.InterfaceSignin.pbui_Type_ComplexSignInHdrInfo value) {
+        copyOnWrite();
+        instance.mergeCmplexdata(value);
+        return this;
+      }
+      /**
+       * <pre>
+       *组合自定义数据 signin_type=Pb_meet_signin_complex才有效
+       * </pre>
+       *
+       * <code>optional .pbui_Type_ComplexSignInHdrInfo cmplexdata = 6;</code>
+       */
+      public Builder clearCmplexdata() {  copyOnWrite();
+        instance.clearCmplexdata();
+        return this;
+      }
+
       // @@protoc_insertion_point(builder_scope:pbui_Item_MeetSignInDetailInfo)
     }
     protected final Object dynamicMethod(
@@ -691,6 +1735,7 @@ public final class InterfaceSignin {
               other.password_ != com.google.protobuf.ByteString.EMPTY, other.password_);
           psigndata_ = visitor.visitByteString(psigndata_ != com.google.protobuf.ByteString.EMPTY, psigndata_,
               other.psigndata_ != com.google.protobuf.ByteString.EMPTY, other.psigndata_);
+          cmplexdata_ = visitor.visitMessage(cmplexdata_, other.cmplexdata_);
           if (visitor == com.google.protobuf.GeneratedMessageLite.MergeFromVisitor
               .INSTANCE) {
           }
@@ -738,6 +1783,19 @@ public final class InterfaceSignin {
                 case 42: {
 
                   psigndata_ = input.readBytes();
+                  break;
+                }
+                case 50: {
+                  com.mogujie.tt.protobuf.InterfaceSignin.pbui_Type_ComplexSignInHdrInfo.Builder subBuilder = null;
+                  if (cmplexdata_ != null) {
+                    subBuilder = cmplexdata_.toBuilder();
+                  }
+                  cmplexdata_ = input.readMessage(com.mogujie.tt.protobuf.InterfaceSignin.pbui_Type_ComplexSignInHdrInfo.parser(), extensionRegistry);
+                  if (subBuilder != null) {
+                    subBuilder.mergeFrom(cmplexdata_);
+                    cmplexdata_ = subBuilder.buildPartial();
+                  }
+
                   break;
                 }
               }
@@ -1285,6 +2343,23 @@ public final class InterfaceSignin {
      * <code>optional bytes psigndata = 4;</code>
      */
     com.google.protobuf.ByteString getPsigndata();
+
+    /**
+     * <pre>
+     *组合自定义数据 signin_type=Pb_meet_signin_complex才有效
+     * </pre>
+     *
+     * <code>optional .pbui_Type_ComplexSignInHdrInfo cmplexdata = 6;</code>
+     */
+    boolean hasCmplexdata();
+    /**
+     * <pre>
+     *组合自定义数据 signin_type=Pb_meet_signin_complex才有效
+     * </pre>
+     *
+     * <code>optional .pbui_Type_ComplexSignInHdrInfo cmplexdata = 6;</code>
+     */
+    com.mogujie.tt.protobuf.InterfaceSignin.pbui_Type_ComplexSignInHdrInfo getCmplexdata();
   }
   /**
    * <pre>
@@ -1450,6 +2525,82 @@ public final class InterfaceSignin {
       psigndata_ = getDefaultInstance().getPsigndata();
     }
 
+    public static final int CMPLEXDATA_FIELD_NUMBER = 6;
+    private com.mogujie.tt.protobuf.InterfaceSignin.pbui_Type_ComplexSignInHdrInfo cmplexdata_;
+    /**
+     * <pre>
+     *组合自定义数据 signin_type=Pb_meet_signin_complex才有效
+     * </pre>
+     *
+     * <code>optional .pbui_Type_ComplexSignInHdrInfo cmplexdata = 6;</code>
+     */
+    public boolean hasCmplexdata() {
+      return cmplexdata_ != null;
+    }
+    /**
+     * <pre>
+     *组合自定义数据 signin_type=Pb_meet_signin_complex才有效
+     * </pre>
+     *
+     * <code>optional .pbui_Type_ComplexSignInHdrInfo cmplexdata = 6;</code>
+     */
+    public com.mogujie.tt.protobuf.InterfaceSignin.pbui_Type_ComplexSignInHdrInfo getCmplexdata() {
+      return cmplexdata_ == null ? com.mogujie.tt.protobuf.InterfaceSignin.pbui_Type_ComplexSignInHdrInfo.getDefaultInstance() : cmplexdata_;
+    }
+    /**
+     * <pre>
+     *组合自定义数据 signin_type=Pb_meet_signin_complex才有效
+     * </pre>
+     *
+     * <code>optional .pbui_Type_ComplexSignInHdrInfo cmplexdata = 6;</code>
+     */
+    private void setCmplexdata(com.mogujie.tt.protobuf.InterfaceSignin.pbui_Type_ComplexSignInHdrInfo value) {
+      if (value == null) {
+        throw new NullPointerException();
+      }
+      cmplexdata_ = value;
+      
+      }
+    /**
+     * <pre>
+     *组合自定义数据 signin_type=Pb_meet_signin_complex才有效
+     * </pre>
+     *
+     * <code>optional .pbui_Type_ComplexSignInHdrInfo cmplexdata = 6;</code>
+     */
+    private void setCmplexdata(
+        com.mogujie.tt.protobuf.InterfaceSignin.pbui_Type_ComplexSignInHdrInfo.Builder builderForValue) {
+      cmplexdata_ = builderForValue.build();
+      
+    }
+    /**
+     * <pre>
+     *组合自定义数据 signin_type=Pb_meet_signin_complex才有效
+     * </pre>
+     *
+     * <code>optional .pbui_Type_ComplexSignInHdrInfo cmplexdata = 6;</code>
+     */
+    private void mergeCmplexdata(com.mogujie.tt.protobuf.InterfaceSignin.pbui_Type_ComplexSignInHdrInfo value) {
+      if (cmplexdata_ != null &&
+          cmplexdata_ != com.mogujie.tt.protobuf.InterfaceSignin.pbui_Type_ComplexSignInHdrInfo.getDefaultInstance()) {
+        cmplexdata_ =
+          com.mogujie.tt.protobuf.InterfaceSignin.pbui_Type_ComplexSignInHdrInfo.newBuilder(cmplexdata_).mergeFrom(value).buildPartial();
+      } else {
+        cmplexdata_ = value;
+      }
+      
+    }
+    /**
+     * <pre>
+     *组合自定义数据 signin_type=Pb_meet_signin_complex才有效
+     * </pre>
+     *
+     * <code>optional .pbui_Type_ComplexSignInHdrInfo cmplexdata = 6;</code>
+     */
+    private void clearCmplexdata() {  cmplexdata_ = null;
+      
+    }
+
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
       if (memberid_ != 0) {
@@ -1463,6 +2614,9 @@ public final class InterfaceSignin {
       }
       if (!psigndata_.isEmpty()) {
         output.writeBytes(4, psigndata_);
+      }
+      if (cmplexdata_ != null) {
+        output.writeMessage(6, getCmplexdata());
       }
     }
 
@@ -1486,6 +2640,10 @@ public final class InterfaceSignin {
       if (!psigndata_.isEmpty()) {
         size += com.google.protobuf.CodedOutputStream
           .computeBytesSize(4, psigndata_);
+      }
+      if (cmplexdata_ != null) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(6, getCmplexdata());
       }
       memoizedSerializedSize = size;
       return size;
@@ -1719,6 +2877,75 @@ public final class InterfaceSignin {
         return this;
       }
 
+      /**
+       * <pre>
+       *组合自定义数据 signin_type=Pb_meet_signin_complex才有效
+       * </pre>
+       *
+       * <code>optional .pbui_Type_ComplexSignInHdrInfo cmplexdata = 6;</code>
+       */
+      public boolean hasCmplexdata() {
+        return instance.hasCmplexdata();
+      }
+      /**
+       * <pre>
+       *组合自定义数据 signin_type=Pb_meet_signin_complex才有效
+       * </pre>
+       *
+       * <code>optional .pbui_Type_ComplexSignInHdrInfo cmplexdata = 6;</code>
+       */
+      public com.mogujie.tt.protobuf.InterfaceSignin.pbui_Type_ComplexSignInHdrInfo getCmplexdata() {
+        return instance.getCmplexdata();
+      }
+      /**
+       * <pre>
+       *组合自定义数据 signin_type=Pb_meet_signin_complex才有效
+       * </pre>
+       *
+       * <code>optional .pbui_Type_ComplexSignInHdrInfo cmplexdata = 6;</code>
+       */
+      public Builder setCmplexdata(com.mogujie.tt.protobuf.InterfaceSignin.pbui_Type_ComplexSignInHdrInfo value) {
+        copyOnWrite();
+        instance.setCmplexdata(value);
+        return this;
+        }
+      /**
+       * <pre>
+       *组合自定义数据 signin_type=Pb_meet_signin_complex才有效
+       * </pre>
+       *
+       * <code>optional .pbui_Type_ComplexSignInHdrInfo cmplexdata = 6;</code>
+       */
+      public Builder setCmplexdata(
+          com.mogujie.tt.protobuf.InterfaceSignin.pbui_Type_ComplexSignInHdrInfo.Builder builderForValue) {
+        copyOnWrite();
+        instance.setCmplexdata(builderForValue);
+        return this;
+      }
+      /**
+       * <pre>
+       *组合自定义数据 signin_type=Pb_meet_signin_complex才有效
+       * </pre>
+       *
+       * <code>optional .pbui_Type_ComplexSignInHdrInfo cmplexdata = 6;</code>
+       */
+      public Builder mergeCmplexdata(com.mogujie.tt.protobuf.InterfaceSignin.pbui_Type_ComplexSignInHdrInfo value) {
+        copyOnWrite();
+        instance.mergeCmplexdata(value);
+        return this;
+      }
+      /**
+       * <pre>
+       *组合自定义数据 signin_type=Pb_meet_signin_complex才有效
+       * </pre>
+       *
+       * <code>optional .pbui_Type_ComplexSignInHdrInfo cmplexdata = 6;</code>
+       */
+      public Builder clearCmplexdata() {  copyOnWrite();
+        instance.clearCmplexdata();
+        return this;
+      }
+
       // @@protoc_insertion_point(builder_scope:pbui_Type_DoMeetSignIno)
     }
     protected final Object dynamicMethod(
@@ -1748,6 +2975,7 @@ public final class InterfaceSignin {
               other.password_ != com.google.protobuf.ByteString.EMPTY, other.password_);
           psigndata_ = visitor.visitByteString(psigndata_ != com.google.protobuf.ByteString.EMPTY, psigndata_,
               other.psigndata_ != com.google.protobuf.ByteString.EMPTY, other.psigndata_);
+          cmplexdata_ = visitor.visitMessage(cmplexdata_, other.cmplexdata_);
           if (visitor == com.google.protobuf.GeneratedMessageLite.MergeFromVisitor
               .INSTANCE) {
           }
@@ -1790,6 +3018,19 @@ public final class InterfaceSignin {
                 case 34: {
 
                   psigndata_ = input.readBytes();
+                  break;
+                }
+                case 50: {
+                  com.mogujie.tt.protobuf.InterfaceSignin.pbui_Type_ComplexSignInHdrInfo.Builder subBuilder = null;
+                  if (cmplexdata_ != null) {
+                    subBuilder = cmplexdata_.toBuilder();
+                  }
+                  cmplexdata_ = input.readMessage(com.mogujie.tt.protobuf.InterfaceSignin.pbui_Type_ComplexSignInHdrInfo.parser(), extensionRegistry);
+                  if (subBuilder != null) {
+                    subBuilder.mergeFrom(cmplexdata_);
+                    cmplexdata_ = subBuilder.buildPartial();
+                  }
+
                   break;
                 }
               }

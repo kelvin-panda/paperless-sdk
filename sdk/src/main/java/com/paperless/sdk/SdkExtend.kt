@@ -2,11 +2,13 @@ package com.paperless.sdk
 
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.graphics.Color
 import android.view.Gravity
 import com.google.protobuf.ByteString
 import com.mogujie.tt.protobuf.InterfaceMacro
 import java.io.ByteArrayOutputStream
 import java.nio.charset.Charset
+import java.text.DecimalFormat
 
 /**
  *  @author : Administrator
@@ -39,7 +41,40 @@ fun Bitmap.format2ByteString(): ByteString {
     return ByteString.copyFrom(bos.toByteArray())
 }
 
+/**
+ * 文件大小转成可读格式 MB
+ */
+fun Long.formatFileSize(): String{
+    val df = DecimalFormat("#.00")
+    var fileSizeString = ""
+    val wrongSize = "0B"
+    if (this == 0L) {
+        return wrongSize
+    }
+    fileSizeString = if (this < 1024) {
+        df.format(this.toDouble()) + "B"
+    } else if (this < 1048576) {
+        df.format(this.toDouble() / 1024) + "KB"
+    } else if (this < 1073741824) {
+        df.format(this.toDouble() / 1048576) + "MB"
+    } else {
+        df.format(this.toDouble() / 1073741824) + "GB"
+    }
+    return fileSizeString
+}
+
 //<editor-fold desc="桌牌">
+
+/**
+ * 桌牌纯色背景使用，mediaId 大于0小于0x6000000则非文件id，而是rgb颜色值
+ */
+fun Int.tableCardBgColor(): Int{
+    val r = (this shr 16) and 0xFF
+    val g = (this shr 8) and 0xFF
+    val b = this and 0xFF
+    return Color.rgb(r, g, b)
+}
+
 fun Int.getTableCardNameByType(): String {
     return when (this) {
         InterfaceMacro.Pb_TableCardType.Pb_conf_memname_VALUE -> "姓名"

@@ -1,3 +1,27 @@
+
+### 2.5.12
+#### 库更新
+   - 添加pdf签名推送相关API
+#### 新增
+1. `com.paperless.data.repository.base.DataRepoManager`
+   - 添加数据的监听管理：以实现调用方随时取的数据都是服务器中最新的数据
+#### 修复
+1. 双指缩放时的崩溃异常
+   - 缩放范围算成空区间后 coerceIn 直接抛异常：`java.lang.IllegalArgumentException: Cannot coerce value to an empty range: maximum -99.9035 is less than minimum 99.9035.`
+   - 对应`com.paperless.player.controller.PlayerControlView`中做修改
+    ```kotlin
+    view.translationX = if (maxTranslateX > 0f) {
+        view.translationX.coerceIn(-maxTranslateX, maxTranslateX)
+    } else {
+        0f
+    }
+    view.translationY = if (maxTranslateY > 0f) {
+        view.translationY.coerceIn(-maxTranslateY, maxTranslateY)
+    } else {
+        0f
+    }
+    ```
+
 1.4.11
 1. 使用`DecodeQueue`存取帧数据
 2. 删除`decodeMap`相关数据

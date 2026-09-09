@@ -1,4 +1,4 @@
-package com.paperless.data.repository
+﻿package com.paperless.data.repository
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -10,6 +10,9 @@ import com.paperless.sdk.SdkJni
 import com.paperless.sdk.SdkVars
 import kotlinx.coroutines.launch
 
+/**
+ * 设备列表-顺便更新本机信息
+ */
 class DeviceInfoRepository : BaseRepository<InterfaceDevice.pbui_Item_DeviceDetailInfo>(
     InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_DEVICEINFO_VALUE
 ) {
@@ -19,7 +22,7 @@ class DeviceInfoRepository : BaseRepository<InterfaceDevice.pbui_Item_DeviceDeta
     private val _online = MutableLiveData<Boolean>()
     val online: LiveData<Boolean> = _online
 
-    override fun handleNotifyCallback(data: ByteArray?) {
+    override fun handleNotifyCallback(type: Int, data: ByteArray?) {
         InterfaceDevice.pbui_Type_MeetDeviceBaseInfo.parseFrom(data)?.let {
             //寄存器id 0:net status  50:res status  63:base info
             if (it.deviceid == SdkVars.localDeviceId) {
@@ -60,3 +63,4 @@ class DeviceInfoRepository : BaseRepository<InterfaceDevice.pbui_Item_DeviceDeta
 
 
 }
+

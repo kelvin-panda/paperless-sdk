@@ -6,6 +6,9 @@ import com.paperless.data.repository.base.BaseRepository
 import com.paperless.sdk.SdkJni
 import kotlinx.coroutines.launch
 
+/**
+ * 会议室信息
+ */
 class RoomRepository : BaseRepository<InterfaceRoom.pbui_Item_MeetRoomDetailInfo>(
     InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_ROOM_VALUE
 ) {
