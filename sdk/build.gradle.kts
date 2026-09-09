@@ -87,7 +87,7 @@ afterEvaluate {
                 artifactId = "sdk-library"
                 //定义：库更新.添加.修复
                 // 移除 version 的硬编码，让 JitPack 从 Git Tag 获取
-                version = "2.5.12"
+                version = "2.5.13"
                 from(components["release"])
             }
         }
