@@ -1,4 +1,16 @@
-[![](https://jitpack.io/v/com.gitee.xlk_gitee/paperless_sdk.svg)](https://jitpack.io/#com.gitee.xlk_gitee/paperless_sdk)
+[![](https://jitpack.io/v/kelvin-panda/paperless-sdk.svg)](https://jitpack.io/#kelvin-panda/paperless-sdk)
+
+# 依赖
+
+```kotlin
+repositories {
+    maven { url = uri("https://jitpack.io") }
+}
+
+dependencies {
+    implementation("com.github.kelvin-panda:paperless-sdk:2.5.16")
+}
+```
 
 # 使用
 调用方`app/build.gradle`配置

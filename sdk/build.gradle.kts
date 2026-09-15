@@ -83,11 +83,10 @@ afterEvaluate {
     publishing {
         publications {
             create<MavenPublication>("release") {
-                groupId = "com.gitee.xlk_gitee"
-                artifactId = "sdk-library"
-                //定义：库更新.添加.修复
-                // 移除 version 的硬编码，让 JitPack 从 Git Tag 获取
-                version = "2.5.15"
+                // JitPack 会注入 GROUP、ARTIFACT、VERSION，本地构建使用兜底值。
+                groupId = providers.environmentVariable("GROUP").orElse("com.github.kelvin-panda").get()
+                artifactId = providers.environmentVariable("ARTIFACT").orElse("paperless-sdk").get()
+                version = providers.environmentVariable("VERSION").orElse("2.5.16").get()
                 from(components["release"])
             }
         }
