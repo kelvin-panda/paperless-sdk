@@ -37,6 +37,7 @@ object Fps {
                 // put 操作是原子的，返回旧值，然后立即将 map 中的值置为 0
                 val fps = mFpsMap.put(resId, 0) ?: 0
                 // 发送 FPS 数据（每秒帧数）
+                LogUtils.i("每秒帧数 resId:$resId,FPS:$fps")
                 Bus.postVararg(type = SdkBusType.fps, fps, resId)
             }
 

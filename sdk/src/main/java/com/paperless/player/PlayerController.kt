@@ -126,7 +126,7 @@ class PlayerController(
     }
 
     fun start() {
-        LogUtils.i(TAG, "start ${isPlaying()} ")
+        LogUtils.i(TAG, "isPlaying: ${isPlaying()} ")
         if (isPlaying()) {
             return
         }
@@ -206,7 +206,7 @@ class PlayerController(
 
         override fun run() {
             // 设置线程优先级
-            LogUtils.i(TAG, "DecodeThread started with priority: ${threadPriority.get()},${isPlaying()},${isInterrupted}")
+            LogUtils.i(TAG, "DecodeThread started with priority: ${threadPriority.get()},isPlaying=${isPlaying()},isInterrupted=${isInterrupted}")
 
             while (isPlaying() && !isInterrupted) {
                 try {
@@ -214,8 +214,11 @@ class PlayerController(
                     if (frameData == null) {
                         // 无帧可处理，短暂休眠
                         sleep(noFrameSleepTime)
+                        updateDecodeStatus(1.01f)
                         continue
                     }
+
+                    updateDecodeStatus(1.05f)
 
                     // 检查是否需要重新配置解码器
                     val needsReConfig = !isCodecConfigured.get() ||

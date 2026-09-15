@@ -223,6 +223,7 @@ object Call {
 
     var COLOR_FORMAT = 1
     fun callback(type: Int, oper: Int): Int {
+        LogUtils.e("callback type:$type,oper:$oper")
         when (oper) {
             //pixel format
             1 -> {
