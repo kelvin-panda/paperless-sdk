@@ -73,12 +73,6 @@ class PlayerControlView(context: Context, attrs: AttributeSet? = null) : FrameLa
 
     private var mScreenWidth = 0
     private var mScreenHeight = 0
-
-    // 等比适配黑边（见 video_control_layout.xml 里的说明：必须画在 SurfaceView 之后）
-    private var mLetterboxTop: View? = null
-    private var mLetterboxBottom: View? = null
-    private var mLetterboxLeft: View? = null
-    private var mLetterboxRight: View? = null
     var callback: ControlCallback? = null
 
     private var mEnableSeekGesture = false      // 是否允许进度滑动
@@ -246,16 +240,6 @@ class PlayerControlView(context: Context, attrs: AttributeSet? = null) : FrameLa
         mBottomProgressBar = findViewById<ProgressBar?>(R.id.bottom_progressbar)?.apply {
             visibility = if (isVideo) VISIBLE else INVISIBLE
         }
-        mLetterboxTop = findViewById(R.id.letterbox_top)
-        mLetterboxBottom = findViewById(R.id.letterbox_bottom)
-        mLetterboxLeft = findViewById(R.id.letterbox_left)
-        mLetterboxRight = findViewById(R.id.letterbox_right)
-        // 显式声明"本 View 会自己绘制"：确保框架把黑条算作绘制中的 View
-        // （gatherTransparentRegion 里对绘制中的 View 做 region DIFFERENCE，才会把窗口透明区挖小）
-        mLetterboxTop?.setWillNotDraw(false)
-        mLetterboxBottom?.setWillNotDraw(false)
-        mLetterboxLeft?.setWillNotDraw(false)
-        mLetterboxRight?.setWillNotDraw(false)
     }
 
     private fun initInflate(context: Context) {
@@ -359,7 +343,6 @@ class PlayerControlView(context: Context, attrs: AttributeSet? = null) : FrameLa
         if (width <= 0 || height <= 0 || maxWidth <= 0 || maxHeight <= 0) {
             PlayerLog.w(L_RENDER, "resetPlayerViewRenderSize: 尺寸无效，忽略本次等比适配")
             LogUtils.e("resetPlayerViewRenderSize 无效尺寸，忽略本次适配")
-            clearLetterbox()
             return
         }
         val scale = min(maxWidth.toFloat() / width, maxHeight.toFloat() / height)
@@ -372,98 +355,13 @@ class PlayerControlView(context: Context, attrs: AttributeSet? = null) : FrameLa
                     "渲染比例=${String.format(Locale.US, "%.4f", newWidth.toFloat() / newHeight)}"
         )
         LogUtils.e("resetPlayerViewRenderSize 适配后宽高:$newWidth x $newHeight")
+        // 等比适配只改画面控件的尺寸并居中：黑边由父布局黑底提供。
+        // 注意：承载画面必须用 TextureView（普通 view 绘制，无独立子图层、无窗口挖洞）；
+        // 若用 z-below 的 SurfaceView，缩小+居中后其子图层几何不随布局更新，
+        // 会出现"画面偏上/变小、view 矩形内透出下层"的问题（详见 app 侧 FloatingPlayer 注释）。
         mVideoView?.layoutParams = RelativeLayout.LayoutParams(newWidth, newHeight)
             .apply { addRule(RelativeLayout.CENTER_IN_PARENT) }
         mVideoView?.invalidate()
-        applyLetterbox(newWidth, newHeight, maxWidth, maxHeight)
-    }
-
-    /**
-     * 等比适配黑边。
-     *
-     * 为什么不靠"父布局/根布局的黑底"：z-below 的 SurfaceView 会在窗口图层上 punchHole（CLEAR），
-     * 把它之前画进这一层的像素（包括各级黑底）一起清成透明；而窗口的透明/挖洞区域并不会跟着
-     * 缩小的视频一起收窄（收窄的只是 SurfaceView 的子图层），于是"视频之外 + 没有任何 View 覆盖"
-     * 的地方就是真透明，会直接透出下层界面（底部控件在流播放时全是 INVISIBLE，所以表现为底部透视）。
-     *
-     * 因此黑边必须由「画在 SurfaceView 之后的 View」来画：它的边界会把窗口透明区重新"挖小"
-     * （ViewGroup.gatherTransparentRegion 按 Z 序对绘制中的 View 做 DIFFERENCE），
-     * 同时它自己也会画出不透明像素。顶部平时看着正常，就是因为 48dp 的 layout_top 起的是这个作用。
-     *
-     * 黑边尺寸按"容器实测尺寸 - 适配后画面尺寸"分配，与 CENTER_IN_PARENT 的居中结果严格对齐。
-     */
-    private fun applyLetterbox(videoW: Int, videoH: Int, maxWidth: Int, maxHeight: Int) {
-        val container = mTextureViewContainer
-        // ⚠️ 调用时机常常是"紧跟 windowManager.updateViewLayout() 之后"，此刻容器还没重新布局，
-        // 它的 width/height 仍是**旧窗口**尺寸；而 maxWidth/maxHeight 就是本次要适配的**新窗口**
-        // （= 新容器）尺寸。所以必须以 maxWidth/maxHeight 为准，否则会算出巨大的黑条把画面盖住
-        // （典型现象：缩放/切全屏后，黑框中间只剩很小一块画面）。
-        val containerW = if (maxWidth > 0) maxWidth else (container?.width ?: 0)
-        val containerH = if (maxHeight > 0) maxHeight else (container?.height ?: 0)
-        if (containerW <= 0 || containerH <= 0) {
-            clearLetterbox()
-            return
-        }
-        setLetterboxBands(videoW, videoH, containerW, containerH)
-        // 布局完成后再按容器实测尺寸校正一次（防止 maxWidth/maxHeight 与容器实际不一致）
-        container?.post {
-            val cw = container.width
-            val ch = container.height
-            if (cw > 0 && ch > 0 && (cw != containerW || ch != containerH)) {
-                LogUtils.e("applyLetterbox 布局后按实测校正 容器:${cw}x$ch 画面:${videoW}x$videoH")
-                setLetterboxBands(videoW, videoH, cw, ch)
-            }
-        }
-    }
-
-    private fun setLetterboxBands(videoW: Int, videoH: Int, containerW: Int, containerH: Int) {
-        // 与 RelativeLayout 的 CENTER_IN_PARENT 居中断言严格一致（整除，不是四舍五入），
-        // 否则黑条与视频之间会差 1px（那 1px 同样会透出下层）
-        val top = ((containerH - videoH) / 2).coerceIn(0, containerH)
-        val bottom = (containerH - videoH - top).coerceIn(0, containerH)
-        val left = ((containerW - videoW) / 2).coerceIn(0, containerW)
-        val right = (containerW - videoW - left).coerceIn(0, containerW)
-        setLetterboxSize(mLetterboxTop, LayoutParams.MATCH_PARENT, top)
-        setLetterboxSize(mLetterboxBottom, LayoutParams.MATCH_PARENT, bottom)
-        setLetterboxSize(mLetterboxLeft, left, LayoutParams.MATCH_PARENT)
-        setLetterboxSize(mLetterboxRight, right, LayoutParams.MATCH_PARENT)
-        PlayerLog.i(
-            L_RENDER,
-            "applyLetterbox: 容器=${containerW}x$containerH 画面=${videoW}x$videoH " +
-                    "黑边 上=$top 下=$bottom 左=$left 右=$right"
-        )
-        LogUtils.e("applyLetterbox 容器:${containerW}x$containerH 画面:${videoW}x$videoH 黑边:上$top 下$bottom 左$left 右$right")
-        post { logLetterboxRect("apply后") }
-    }
-
-    /** 黑条真正布局后的位置/尺寸（排查"黑条没生效"时看这一行） */
-    private fun logLetterboxRect(tag: String) {
-        fun r(v: View?): String =
-            if (v == null) "null"
-            else "[${v.left},${v.top},${v.right},${v.bottom}] ${v.width}x${v.height} vis=${v.visibility} willNotDraw=${v.willNotDraw()}"
-        LogUtils.e(
-            "LETTERBOX[$tag] top=${r(mLetterboxTop)} bottom=${r(mLetterboxBottom)} " +
-                    "left=${r(mLetterboxLeft)} right=${r(mLetterboxRight)} " +
-                    "容器=${mTextureViewContainer?.width}x${mTextureViewContainer?.height} " +
-                    "视频=${mVideoView?.left},${mVideoView?.top},${mVideoView?.right},${mVideoView?.bottom}"
-        )
-    }
-
-    private fun clearLetterbox() {
-        setLetterboxSize(mLetterboxTop, LayoutParams.MATCH_PARENT, 0)
-        setLetterboxSize(mLetterboxBottom, LayoutParams.MATCH_PARENT, 0)
-        setLetterboxSize(mLetterboxLeft, 0, LayoutParams.MATCH_PARENT)
-        setLetterboxSize(mLetterboxRight, 0, LayoutParams.MATCH_PARENT)
-    }
-
-    private fun setLetterboxSize(v: View?, w: Int, h: Int) {
-        if (v == null) return
-        val lp = v.layoutParams as? RelativeLayout.LayoutParams
-            ?: RelativeLayout.LayoutParams(w, h)
-        if (lp.width == w && lp.height == h) return
-        lp.width = w
-        lp.height = h
-        v.layoutParams = lp
     }
 
     override fun onClick(v: View?) {

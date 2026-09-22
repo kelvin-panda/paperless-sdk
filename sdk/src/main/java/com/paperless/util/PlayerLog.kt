@@ -24,7 +24,8 @@ import java.util.Locale
  * - `[4.312s]`：该会话从第一行日志开始的耗时，用来定位「卡在哪一步、这一步花了多久」
  * - `[main]`：线程名，用来确认回调线程（主线程 / JNI 回调线程 / 解码线程）
  *
- * 关闭方式：[PlayerLog.enable] = false（运行期）或 [ENABLE] = false（编译期）
+ * 关闭方式（默认关闭）：[com.paperless.sdk.SdkConfig.playLogEnable] = true 打开；置 false 关闭。
+ * 另有编译期总开关 [ENABLE] 与运行期开关 [enable]，二者与 SdkConfig 开关是「与」关系。
  *
  * @author : Administrator
  * created on 2026/7/9
@@ -51,7 +52,7 @@ object PlayerLog {
     const val NO_SESSION = -1
 
     /**
-     * 运行期开关，默认开启；线上需要静默时在 Application 里置为 false
+     * 运行期开关（保留给历史调用），与 [com.paperless.sdk.SdkConfig.playLogEnable] 是「与」关系
      */
     @Volatile
     var enable: Boolean = true
@@ -70,7 +71,10 @@ object PlayerLog {
     @Volatile
     private var sessionStart: Long = 0L
 
-    private fun isOn() = ENABLE && enable
+    /**
+     * 最终开关：编译期 ENABLE、SdkConfig.playLogEnable（依赖方控制，默认 false）、运行期 enable 三者都为真才输出
+     */
+    private fun isOn() = ENABLE && enable && com.paperless.sdk.SdkConfig.playLogEnable
 
     //<editor-fold desc="会话管理">
 

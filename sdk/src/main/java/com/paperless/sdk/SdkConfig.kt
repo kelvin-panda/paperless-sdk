@@ -35,6 +35,14 @@ class SdkConfig {
         var logEnable: Boolean = true
 
         /**
+         * 播放流程调试日志开关（logcat TAG = PlayWin）
+         * - 覆盖整条链路：事件入口 → 窗口创建 → Surface → 解码配置 → 首帧 → 帧率 → 等比适配 → 停止销毁
+         * - 由依赖方（App）按需打开，默认关闭；打开方式：SdkConfig.playLogEnable = true
+         * - 抓取：`adb logcat -c && adb logcat -d -s PlayWin > playwin.log`
+         */
+        var playLogEnable: Boolean = false
+
+        /**
          * 使用悬浮窗口播放，默认false
          */
         var floatingPlayEnable: Boolean = false

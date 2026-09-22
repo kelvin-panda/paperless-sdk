@@ -65,7 +65,11 @@ PlayWin: [帧][S3][4.501s][VideoDecodeThread-0] 首帧已渲染（解码器配�
 
 ## 开关与约定
 
-- 关闭日志：`PlayerLog.enable = false`（运行期）或把 `PlayerLog.ENABLE` 改成 `false`（编译期）。
+- 开关（**默认关闭**）：`SdkConfig.playLogEnable = true` 打开；另保留 `PlayerLog.enable`（运行期）与 `PlayerLog.ENABLE`（编译期），三者是「与」关系。
+  ```kotlin
+  // 依赖方 App 启动处，需要排查播放问题时打开
+  SdkConfig.playLogEnable = true
+  ```
 - 低频约束：逐帧、触摸移动、队列溢出等高频日志均已节流（默认 1~2 秒一条），不会刷爆 logcat。
 - 新增链路日志时统一用 `PlayerLog.i("环节标签", "…")`，需要会话 / 耗时 / 线程前缀时不要再手写 `LogUtils`。
 - 兼容：原 `LogUtils` 日志全部保留，新链路日志只做追加，不影响既有排查习惯。
