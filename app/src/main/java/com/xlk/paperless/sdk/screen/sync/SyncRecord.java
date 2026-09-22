@@ -260,6 +260,17 @@ public class SyncRecord {
 
         LogUtils.i(TAG, "VirtualDisplay created: " + width + "x" + height + "@" + dpi + "dpi");
 
+        //<editor-fold desc="诊断：采集/编码尺寸 vs 屏幕尺寸（临时，可整块删除）">
+        float screenRatio = (screenHeight > 0) ? (float) screenWidth / screenHeight : 0f;
+        float encodeRatio = (height > 0) ? (float) width / height : 0f;
+        LogUtils.e("DIAG-ENC",
+                "[DIAG-ENC] SyncRecord 屏幕=" + screenWidth + "x" + screenHeight
+                        + " 屏幕比例=" + screenRatio
+                        + " 采集(编码)=" + width + "x" + height
+                        + " 采集比例=" + encodeRatio
+                        + " 比例是否一致=" + (Math.abs(screenRatio - encodeRatio) < 0.0001f));
+        //</editor-fold>
+
         mHandler.post(this::encodeLoop);
     }
 

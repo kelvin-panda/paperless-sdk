@@ -8,6 +8,7 @@ import com.paperless.data.YuvData
 import com.paperless.player.DecodeQueue
 import com.paperless.player.Fps
 import com.paperless.player.FrameDataPool
+import com.paperless.util.PlayerLog
 import java.nio.ByteBuffer
 
 /**
@@ -15,6 +16,16 @@ import java.nio.ByteBuffer
  *  created on 2025/7/5 16:49
  */
 object Call {
+
+    /**
+     * 日志链路标签（配合 PlayerLog 使用）
+     */
+    private const val L_FRAME = "帧"
+
+    /**
+     * 已经打印过「首帧到达」的资源，避免逐帧日志刷屏
+     */
+    private val firstFrameLogged: MutableSet<Int> = java.util.Collections.synchronizedSet(mutableSetOf<Int>())
 
     lateinit var m_dbuf: ByteBuffer
     lateinit var m_dexbuf: ByteBuffer
@@ -297,6 +308,7 @@ object Call {
         frameData.pts = pts
         frameData.setPacketBytes(packet)
         frameData.setCodecDataBytes(codecdata)
+        logFirstFrame(res, isKeyframe, codecid, w, h, packet.size, pts, "callback_videodecode")
         Fps.add(res)
         // 放入到待处理解码的集合中
         if (!DecodeQueue.offer(res, frameData)) {
@@ -351,6 +363,7 @@ object Call {
         frameData.pts = pts
         frameData.setPacketBuffer(m_dbuf)
         frameData.setCodecDataBuffer(m_dexbuf)
+        logFirstFrame(res, isKeyframe, codecid, w, h, datalen, pts, "callback_directvideodecode")
         Fps.add(res)
         // 放入到待处理解码的集合中
         if (!DecodeQueue.offer(res, frameData)) {
@@ -359,5 +372,27 @@ object Call {
             DecodeQueue.remove(frameData)
         }
         return 0
+    }
+
+    /**
+     * 每个资源只在第一次收到帧时打印一次「首帧到达」，标记整条链路真正开始；
+     * 后续帧由解码线程按每 100 帧统计，避免 JNI 回调逐帧刷屏。
+     */
+    private fun logFirstFrame(
+        res: Int,
+        isKeyframe: Int,
+        codecid: Int,
+        w: Int,
+        h: Int,
+        dataLen: Int,
+        pts: Long,
+        source: String
+    ) {
+        if (!firstFrameLogged.add(res)) return
+        PlayerLog.i(
+            L_FRAME,
+            "首帧到达（JNI 回调 $source）：res=$res 关键帧=$isKeyframe 编码id=$codecid " +
+                    "尺寸=${w}x$h 数据长度=$dataLen pts=$pts 队列长度=${DecodeQueue.getSize(res)}"
+        )
     }
 }

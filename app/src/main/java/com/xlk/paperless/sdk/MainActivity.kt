@@ -53,6 +53,7 @@ import com.paperless.sdk.SdkVars
 import com.paperless.sdk.SdkVars.Companion.localDeviceId
 import com.paperless.util.IniUtil
 import com.xlk.paperless.sdk.databinding.ActivityMainBinding
+import com.xlk.paperless.sdk.floating.FloatingPlayer
 import com.xlk.paperless.sdk.helper.AppNetworkMonitor
 import com.xlk.paperless.sdk.service.ScreenShareService
 import com.xlk.paperless.sdk.view.MeetAct
@@ -250,7 +251,49 @@ class MainActivity : AppCompatActivity() {
             btnTest.setOnClickListener {
                 startActivity(Intent(this@MainActivity, MeetAct::class.java))
             }
+            // 悬浮窗 isForceFullScreen 开关：应用后重建播放器，下一次播放即按新配置生效
+            cbForceFullScreen.isChecked = TestConfig.IS_FORCE_FULL_SCREEN
+            refreshFloatingConfigText()
+            cbForceFullScreen.setOnCheckedChangeListener { _, checked ->
+                TestConfig.IS_FORCE_FULL_SCREEN = checked
+                refreshFloatingConfigText()
+                LogUtils.e("isForceFullScreen 已切换为：$checked（重建悬浮窗后生效）")
+            }
+            btnApplyFloatingConfig.setOnClickListener {
+                rebuildFloatingPlayer()
+                ToastUtils.showShort("已应用 isForceFullScreen = ${TestConfig.IS_FORCE_FULL_SCREEN}")
+            }
         }
+    }
+
+    /**
+     * 悬浮窗配置展示
+     */
+    private fun refreshFloatingConfigText() {
+        mBinding.tvFloatingConfig.text =
+            "当前 isForceFullScreen = ${TestConfig.IS_FORCE_FULL_SCREEN}（播放中修改需点“应用并重建”）"
+    }
+
+    /**
+     * 重建悬浮窗播放器，使 configure(...) 的新参数生效
+     */
+    private fun rebuildFloatingPlayer() {
+        if (!SdkConfig.floatingPlayEnable) {
+            LogUtils.e("floatingPlayEnable=false，跳过重建悬浮窗播放器")
+            return
+        }
+        FloatingPlayer.destroyInstance()
+        FloatingPlayer.getInstance(applicationContext).apply {
+            configure(
+                0,
+                TestConfig.FLOATING_SIZE_TOGGLE_ENABLE,
+                TestConfig.FLOATING_RESIZE_ENABLE,
+                scaleProportionally = !TestConfig.IS_FORCE_FULL_SCREEN,
+                isForceFullScreen = TestConfig.IS_FORCE_FULL_SCREEN
+            )
+            initial()
+        }
+        LogUtils.e("悬浮窗播放器已重建：isForceFullScreen=${TestConfig.IS_FORCE_FULL_SCREEN}")
     }
 
     private fun networkSpeedWindow() {

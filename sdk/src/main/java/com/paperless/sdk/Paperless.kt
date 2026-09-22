@@ -68,7 +68,18 @@ object Paperless {
         SdkVars.record_width = encodeSize.width
         SdkVars.record_height = encodeSize.height
         LogUtils.e("屏幕采集宽高：${SdkVars.record_width} x ${SdkVars.record_height}")
+        LogUtils.e(
+            "[DIAG-ENC] 屏幕=${SdkVars.screen_width}x${SdkVars.screen_height}" +
+                    " 采集=${SdkVars.record_width}x${SdkVars.record_height}" +
+                    " 屏幕比例=${r(SdkVars.screen_width, SdkVars.screen_height)}" +
+                    " 采集比例=${r(SdkVars.record_width, SdkVars.record_height)}"
+        )
     }
+
+    //<editor-fold desc="诊断辅助（临时，可整块删除）">
+    private fun r(w: Int, h: Int): String =
+        if (w <= 0 || h <= 0) "n/a" else String.format(java.util.Locale.US, "%.4f", w.toDouble() / h.toDouble())
+    //</editor-fold>
 
     private fun initDirPath(context: Context) {
         SdkVars.root_dir = context.getExternalFilesDir("Paperless")!!.absolutePath + File.separator

@@ -28,6 +28,7 @@ import com.paperless.player.controller.listener.ControlCallback
 import com.paperless.sdk.R
 import com.paperless.util.CommonUtil
 import com.paperless.util.CommonUtil.stringForTime
+import com.paperless.util.PlayerLog
 import java.util.Locale
 import kotlin.math.abs
 import kotlin.math.min
@@ -37,6 +38,11 @@ class PlayerControlView(context: Context, attrs: AttributeSet? = null) : FrameLa
     SeekBar.OnSeekBarChangeListener, View.OnTouchListener {
 
     companion object {
+        /**
+         * 日志链路标签（配合 PlayerLog 使用）
+         */
+        private const val L_RENDER = "渲染"
+        private const val L_CONTROL = "控制"
 
         /**
          * 播放视频文件模式
@@ -67,6 +73,12 @@ class PlayerControlView(context: Context, attrs: AttributeSet? = null) : FrameLa
 
     private var mScreenWidth = 0
     private var mScreenHeight = 0
+
+    // 等比适配黑边（见 video_control_layout.xml 里的说明：必须画在 SurfaceView 之后）
+    private var mLetterboxTop: View? = null
+    private var mLetterboxBottom: View? = null
+    private var mLetterboxLeft: View? = null
+    private var mLetterboxRight: View? = null
     var callback: ControlCallback? = null
 
     private var mEnableSeekGesture = false      // 是否允许进度滑动
@@ -152,6 +164,7 @@ class PlayerControlView(context: Context, attrs: AttributeSet? = null) : FrameLa
     init {
         mScreenWidth = ScreenUtils.getScreenWidth() // context.resources.displayMetrics.widthPixels
         mScreenHeight = ScreenUtils.getScreenHeight() // context.resources.displayMetrics.heightPixels
+        PlayerLog.i(L_RENDER, "构造 PlayerControlView 屏幕宽高=[$mScreenWidth x $mScreenHeight]")
         LogUtils.i("播放界面宽高: [$mScreenWidth] [$mScreenHeight]")
         initInflate(context)
         initView()
@@ -163,6 +176,7 @@ class PlayerControlView(context: Context, attrs: AttributeSet? = null) : FrameLa
     fun setFullEnabled(enabled: Boolean) {
         mEnableFull = enabled
         mFullImageView?.visibility = if (enabled) VISIBLE else GONE
+        PlayerLog.d(L_CONTROL, "setFullEnabled: 全屏按钮可用=$enabled")
     }
 
     /**
@@ -171,6 +185,7 @@ class PlayerControlView(context: Context, attrs: AttributeSet? = null) : FrameLa
      */
     fun setFloatingMode(enable: Boolean) {
         mFloatingMode = enable
+        PlayerLog.i(L_CONTROL, "setFloatingMode: 悬浮窗模式=$enable（禁用亮度调节与所有 Dialog）")
         if (enable) {
             LogUtils.i("PlayerControlView 已切换到悬浮窗模式，将禁用亮度调节和弹窗")
         }
@@ -231,6 +246,10 @@ class PlayerControlView(context: Context, attrs: AttributeSet? = null) : FrameLa
         mBottomProgressBar = findViewById<ProgressBar?>(R.id.bottom_progressbar)?.apply {
             visibility = if (isVideo) VISIBLE else INVISIBLE
         }
+        mLetterboxTop = findViewById(R.id.letterbox_top)
+        mLetterboxBottom = findViewById(R.id.letterbox_bottom)
+        mLetterboxLeft = findViewById(R.id.letterbox_left)
+        mLetterboxRight = findViewById(R.id.letterbox_right)
     }
 
     private fun initInflate(context: Context) {
@@ -246,6 +265,11 @@ class PlayerControlView(context: Context, attrs: AttributeSet? = null) : FrameLa
         isMandatory = isPlayingMandatory()
         isStream = isPlayingStream()
         isVideo = isPlayingVideo()
+        PlayerLog.i(
+            L_CONTROL,
+            "setupPlayFlag: flag=$flag 视频=$isVideo 流=$isStream 强制播放=$isMandatory" +
+                    "（悬浮窗模式=$mFloatingMode）"
+        )
         LogUtils.i("setupPlayFlag: flag=$flag,isVideo=${isVideo},isStream=${isStream},isMandatory=${isMandatory}")
         setupMandatoryStatus()
     }
@@ -292,16 +316,23 @@ class PlayerControlView(context: Context, attrs: AttributeSet? = null) : FrameLa
     }
 
     fun preparePlay() {
+        PlayerLog.i(L_CONTROL, "preparePlay: 进入准备播放状态")
         setStateAndUi(CURRENT_STATE_PREPAREING)
         startDismissControlViewTimer()
     }
 
     fun startPlay() {
+        PlayerLog.i(L_CONTROL, "startPlay: 进入播放状态")
         setStateAndUi(CURRENT_STATE_PLAYING)
         startDismissControlViewTimer()
     }
 
     fun setPlayView(view: View) {
+        PlayerLog.i(
+            L_RENDER,
+            "setPlayView: 挂载视频 SurfaceView 类型=${view.javaClass.simpleName} " +
+                    "原始父容器=${view.parent != null}"
+        )
         mVideoView = view
         mTextureViewContainer?.addView(
             view, RelativeLayout.LayoutParams(
@@ -310,25 +341,95 @@ class PlayerControlView(context: Context, attrs: AttributeSet? = null) : FrameLa
             ).apply {
                 addRule(RelativeLayout.CENTER_IN_PARENT)
             })
+        PlayerLog.i(L_RENDER, "setPlayView: 已挂载到 surface_container，初始按 MATCH_PARENT 铺满")
     }
 
     fun resetPlayerViewRenderSize(width: Int, height: Int, maxWidth: Int, maxHeight: Int) {
+        PlayerLog.i(
+            L_RENDER,
+            "resetPlayerViewRenderSize: 视频源=${width}x$height 窗口上限=${maxWidth}x$maxHeight"
+        )
         LogUtils.e("resetPlayerViewRenderSize 视频源:$width x $height,最大宽高:$maxWidth x $maxHeight")
         if (width <= 0 || height <= 0 || maxWidth <= 0 || maxHeight <= 0) {
+            PlayerLog.w(L_RENDER, "resetPlayerViewRenderSize: 尺寸无效，忽略本次等比适配")
             LogUtils.e("resetPlayerViewRenderSize 无效尺寸，忽略本次适配")
+            clearLetterbox()
             return
         }
         val scale = min(maxWidth.toFloat() / width, maxHeight.toFloat() / height)
         val newWidth = (width * scale).roundToInt().coerceAtLeast(1)
         val newHeight = (height * scale).roundToInt().coerceAtLeast(1)
+        PlayerLog.i(
+            L_RENDER,
+            "resetPlayerViewRenderSize: 缩放系数=${String.format(Locale.US, "%.4f", scale)} " +
+                    "适配后=${newWidth}x$newHeight 视频源比例=${String.format(Locale.US, "%.4f", width.toFloat() / height)} " +
+                    "渲染比例=${String.format(Locale.US, "%.4f", newWidth.toFloat() / newHeight)}"
+        )
         LogUtils.e("resetPlayerViewRenderSize 适配后宽高:$newWidth x $newHeight")
         mVideoView?.layoutParams = RelativeLayout.LayoutParams(newWidth, newHeight)
             .apply { addRule(RelativeLayout.CENTER_IN_PARENT) }
         mVideoView?.invalidate()
+        applyLetterbox(newWidth, newHeight, maxWidth, maxHeight)
+    }
+
+    /**
+     * 等比适配黑边。
+     *
+     * 为什么不靠"父布局/根布局的黑底"：z-below 的 SurfaceView 会在窗口图层上 punchHole（CLEAR），
+     * 把它之前画进这一层的像素（包括各级黑底）一起清成透明；而窗口的透明/挖洞区域并不会跟着
+     * 缩小的视频一起收窄（收窄的只是 SurfaceView 的子图层），于是"视频之外 + 没有任何 View 覆盖"
+     * 的地方就是真透明，会直接透出下层界面（底部控件在流播放时全是 INVISIBLE，所以表现为底部透视）。
+     *
+     * 因此黑边必须由「画在 SurfaceView 之后的 View」来画：它的边界会把窗口透明区重新"挖小"
+     * （ViewGroup.gatherTransparentRegion 按 Z 序对绘制中的 View 做 DIFFERENCE），
+     * 同时它自己也会画出不透明像素。顶部平时看着正常，就是因为 48dp 的 layout_top 起的是这个作用。
+     *
+     * 黑边尺寸按"容器实测尺寸 - 适配后画面尺寸"分配，与 CENTER_IN_PARENT 的居中结果严格对齐。
+     */
+    private fun applyLetterbox(videoW: Int, videoH: Int, maxWidth: Int, maxHeight: Int) {
+        val container = mTextureViewContainer
+        val containerW = if ((container?.width ?: 0) > 0) container!!.width else maxWidth
+        val containerH = if ((container?.height ?: 0) > 0) container!!.height else maxHeight
+        if (containerW <= 0 || containerH <= 0) {
+            clearLetterbox()
+            return
+        }
+        val top = ((containerH - videoH) / 2f).roundToInt().coerceIn(0, containerH)
+        val bottom = (containerH - videoH - top).coerceIn(0, containerH)
+        val left = ((containerW - videoW) / 2f).roundToInt().coerceIn(0, containerW)
+        val right = (containerW - videoW - left).coerceIn(0, containerW)
+        setLetterboxSize(mLetterboxTop, LayoutParams.MATCH_PARENT, top)
+        setLetterboxSize(mLetterboxBottom, LayoutParams.MATCH_PARENT, bottom)
+        setLetterboxSize(mLetterboxLeft, left, LayoutParams.MATCH_PARENT)
+        setLetterboxSize(mLetterboxRight, right, LayoutParams.MATCH_PARENT)
+        PlayerLog.i(
+            L_RENDER,
+            "applyLetterbox: 容器=${containerW}x$containerH 画面=${videoW}x$videoH " +
+                    "黑边 上=$top 下=$bottom 左=$left 右=$right"
+        )
+        LogUtils.e("applyLetterbox 容器:${containerW}x$containerH 画面:${videoW}x$videoH 黑边:上$top 下$bottom 左$left 右$right")
+    }
+
+    private fun clearLetterbox() {
+        setLetterboxSize(mLetterboxTop, LayoutParams.MATCH_PARENT, 0)
+        setLetterboxSize(mLetterboxBottom, LayoutParams.MATCH_PARENT, 0)
+        setLetterboxSize(mLetterboxLeft, 0, LayoutParams.MATCH_PARENT)
+        setLetterboxSize(mLetterboxRight, 0, LayoutParams.MATCH_PARENT)
+    }
+
+    private fun setLetterboxSize(v: View?, w: Int, h: Int) {
+        if (v == null) return
+        val lp = v.layoutParams as? RelativeLayout.LayoutParams
+            ?: RelativeLayout.LayoutParams(w, h)
+        if (lp.width == w && lp.height == h) return
+        lp.width = w
+        lp.height = h
+        v.layoutParams = lp
     }
 
     override fun onClick(v: View?) {
         v?.let {
+            PlayerLog.i(L_CONTROL, "点击控件 id=${it.resources.getResourceEntryName(it.id)}")
             when (it.id) {
                 R.id.surface_container -> {
                     startDismissControlViewTimer()
@@ -671,6 +772,7 @@ class PlayerControlView(context: Context, attrs: AttributeSet? = null) : FrameLa
     }
 
     private fun setStateAndUi(state: Int) {
+        PlayerLog.d(L_CONTROL, "播放状态切换 $mCurrentState → $state")
         mCurrentState = state
         when (state) {
             CURRENT_STATE_NORMAL -> {
@@ -743,6 +845,7 @@ class PlayerControlView(context: Context, attrs: AttributeSet? = null) : FrameLa
     }
 
     fun setDragWindowTouchListener(listener: OnTouchListener, locked: Boolean = false) {
+        PlayerLog.d(L_CONTROL, "setDragWindowTouchListener: 锁定窗口=$locked")
         if (locked) {
             mTopContainer?.setOnTouchListener(null)
             setOnTouchListener(listener)
@@ -753,6 +856,7 @@ class PlayerControlView(context: Context, attrs: AttributeSet? = null) : FrameLa
     }
 
     fun setTitle(title: String) {
+        PlayerLog.d(L_CONTROL, "setTitle: $title")
         mTitleTextView?.text = title
     }
 
@@ -762,6 +866,10 @@ class PlayerControlView(context: Context, attrs: AttributeSet? = null) : FrameLa
 
     fun setProgressAndTime(progress: Long, secProgress: Long, currentTime: Long, totalTime: Long, forceChange: Boolean) {
         if (mProgressBar == null || mTotalTimeTextView == null || mCurrentTimeTextView == null) return
+        PlayerLog.d(
+            L_CONTROL,
+            "setProgressAndTime: 进度=$progress% 当前=${currentTime}ms 总时长=${totalTime}ms 强制刷新=$forceChange"
+        )
         mCurPosition = currentTime
         mTotalPosition = totalTime
         if (progress > 0 || forceChange) mProgressBar?.progress = progress.toInt()
@@ -829,6 +937,7 @@ class PlayerControlView(context: Context, attrs: AttributeSet? = null) : FrameLa
     override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {}
     override fun onStartTrackingTouch(seekBar: SeekBar?) {}
     override fun onStopTrackingTouch(seekBar: SeekBar?) {
+        PlayerLog.i(L_CONTROL, "拖动进度条结束，seekBar 进度=${seekBar?.progress} 强制播放=$isMandatory")
         if (isMandatory) return
         callback?.seekTo(seekBar?.progress!!)
     }
@@ -905,6 +1014,7 @@ class PlayerControlView(context: Context, attrs: AttributeSet? = null) : FrameLa
      * 外部（如悬浮窗）在销毁时需调用此方法。
      */
     fun release() {
+        PlayerLog.i(L_CONTROL, "release: 释放播放控制层（当前状态=$mCurrentState）")
         // 取消定时器
         cancelDismissControlViewTimer()
         // 清理弹窗

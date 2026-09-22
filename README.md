@@ -43,3 +43,9 @@ object Jni :BaseJni(){
 	//自定义父类中没有的接口
 }
 ```
+
+# 调试
+
+播放窗口（悬浮窗播放）的完整链路日志见 [sdk/README.md](sdk/README.md#播放窗口日志链调试用)，
+一次播放的所有日志共用会话 ID，可用 `adb logcat -s PlayWin` 一次性抓取
+「入口事件 → 窗口创建 → Surface → 解码配置 → 帧渲染 → 停止销毁」全过程。

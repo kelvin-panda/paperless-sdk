@@ -42,6 +42,7 @@ import com.paperless.sdk.MEDIA_FILE_TYPE_VIDEO
 import com.paperless.sdk.R
 import com.paperless.sdk.SUB_TYPE_BITMASK
 import com.paperless.sdk.SdkVars
+import com.paperless.util.PlayerLog
 import org.greenrobot.eventbus.EventBus
 import org.greenrobot.eventbus.Subscribe
 import org.greenrobot.eventbus.ThreadMode
@@ -57,17 +58,27 @@ class FloatingPlayerWindow private constructor(val context: Context){
         private const val DRAG_BAR_HEIGHT_DP = 40
         private const val RESIZE_HOTSPOT_SIZE_DP = 36
 
+        //<editor-fold desc="日志链路标签（配合 PlayerLog 使用，过滤：adb logcat -s PlayWin）">
+        private const val L_WINDOW = "窗口"
+        private const val L_EVENT = "事件"
+        private const val L_CONTROL = "控制"
+        //</editor-fold>
+
         @SuppressLint("StaticFieldLeak")
         @Volatile
         private var INSTANCE: FloatingPlayerWindow? = null
         fun getInstance(context: Context): FloatingPlayerWindow {
             return INSTANCE ?: synchronized(this) {
-                INSTANCE ?: FloatingPlayerWindow(context.applicationContext).also { INSTANCE = it }
+                INSTANCE ?: FloatingPlayerWindow(context.applicationContext).also {
+                    INSTANCE = it
+                    PlayerLog.i(L_WINDOW, "创建 FloatingPlayerWindow 单例（应用上下文）")
+                }
             }
         }
 
         // 在 App 退出时调用，避免单例长期持有
         fun destroyInstance() {
+            PlayerLog.i(L_WINDOW, "销毁 FloatingPlayerWindow 单例")
             INSTANCE?.onDestroy()
             INSTANCE = null
         }
@@ -124,6 +135,18 @@ class FloatingPlayerWindow private constructor(val context: Context){
     var currentMediaId = 0
     var currentProgress = 0
 
+    //<editor-fold desc="日志链路辅助（不参与业务逻辑）">
+    /** 待执行的延迟销毁任务，收到新的播放请求时需要撤销 */
+    private var pendingDismiss: Runnable? = null
+
+    /** 拖拽/缩放过程日志节流 */
+    private val dragLogCounter = PlayerLog.ThrottleCounter()
+    private val resizeLogCounter = PlayerLog.ThrottleCounter()
+
+    /** 当前是否持有播放窗口资源 */
+    private fun inPlaySession() = isShowing || playerController != null || playerControlView != null
+    //</editor-fold>
+
     private var mExitFloatingPlayListener: ExitFloatingPlayListener? = null
 
     interface ExitFloatingPlayListener {
@@ -156,11 +179,20 @@ class FloatingPlayerWindow private constructor(val context: Context){
         this.sizeToggleEnabled = sizeToggleEnabled
         this.resizeHandleEnabled = resizeHandleEnabled
         this.scaleProportionally = scaleProportionally
+        PlayerLog.i(
+            L_WINDOW,
+            "configure 播放窗口配置: curResId=$curResId 窗口大小切换=$sizeToggleEnabled " +
+                    "右下角缩放=$resizeHandleEnabled 等比适配=$scaleProportionally " +
+                    "屏幕=${screenSize.x}x${screenSize.y}"
+        )
     }
 
     fun initial() {
         if (!EventBus.getDefault().isRegistered(this)) {
             EventBus.getDefault().register(this)
+            PlayerLog.i(L_EVENT, "initial: 已注册 EventBus 播放事件监听")
+        } else {
+            PlayerLog.w(L_EVENT, "initial: EventBus 已注册，跳过重复注册")
         }
     }
 
@@ -182,6 +214,11 @@ class FloatingPlayerWindow private constructor(val context: Context){
                         it.triggeruserval == InterfaceMacro.Pb_TriggerUsedef.Pb_EXCEC_USERDEF_FLAG_NOCREATEWINOPER_VALUE
                     val type = it.mediaid and MAIN_TYPE_BITMASK.toInt()
                     it.mediaid and SUB_TYPE_BITMASK
+                    PlayerLog.i(
+                        L_EVENT,
+                        "收到媒体播放通知 res=${it.res} mediaid=${it.mediaid} 类型=$type " +
+                                "强制播放=$isMandatory triggeruserval=${it.triggeruserval}"
+                    )
                     if (type == MEDIA_FILE_TYPE_AUDIO
                         || type == MEDIA_FILE_TYPE_VIDEO
                         || type == MEDIA_FILE_TYPE_RECORD
@@ -189,8 +226,13 @@ class FloatingPlayerWindow private constructor(val context: Context){
                         if (it.res == 0) {
                             DecodeQueue.cleanup(it.res)
                             val fileName = jni.queryFileName(it.mediaid)
+                            PlayerLog.i(L_EVENT, "媒体播放走播放窗口 文件名=$fileName mediaId=${it.mediaid}")
                             showPlayerWindow(true, fileName, isMandatory, it.res)
+                        } else {
+                            PlayerLog.w(L_EVENT, "媒体播放资源 res=${it.res} 不属于当前窗口(curResId=$curResId)，忽略")
                         }
+                    } else {
+                        PlayerLog.d(L_EVENT, "媒体类型 $type 不需要播放窗口，忽略")
                     }
                 }
             }
@@ -199,12 +241,20 @@ class FloatingPlayerWindow private constructor(val context: Context){
                 InterfaceStream.pbui_Type_MeetStreamPlay.parseFrom(msg.data)?.let {
                     val isMandatory =
                         it.triggeruserval == InterfaceMacro.Pb_TriggerUsedef.Pb_EXCEC_USERDEF_FLAG_NOCREATEWINOPER_VALUE
+                    PlayerLog.i(
+                        L_EVENT,
+                        "收到流播放通知 res=${it.res} deviceid=${it.deviceid} subid=${it.subid} " +
+                                "强制播放=$isMandatory triggeruserval=${it.triggeruserval}"
+                    )
                     if (it.res == 0) {
                         DecodeQueue.cleanup(it.res)
                         currentDeviceId = it.deviceid
                         currentSubId = it.subid
                         val devName = jni.queryDeviceNameById(it.deviceid)
+                        PlayerLog.i(L_EVENT, "流播放走播放窗口 设备名=$devName deviceId=${it.deviceid} subId=${it.subid}")
                         showPlayerWindow(false, devName, isMandatory, it.res)
+                    } else {
+                        PlayerLog.w(L_EVENT, "流播放资源 res=${it.res} 不属于当前窗口(curResId=$curResId)，忽略")
                     }
                 }
             }
@@ -212,6 +262,10 @@ class FloatingPlayerWindow private constructor(val context: Context){
             //平台播放进度通知
             Pb_TYPE_MEET_INTERFACE_MEDIAPLAYPOSINFO_VALUE -> {
                 InterfacePlaymedia.pbui_Type_PlayPosCb.parseFrom(msg.data)?.let {
+                    PlayerLog.d(
+                        L_EVENT,
+                        "收到平台播放进度 resId=${it.resId} mediaId=${it.mediaId} 进度=${it.per}% 秒=${it.sec} 状态=${it.status}"
+                    )
                     if (it.resId == 0) {
                         currentMediaId = it.mediaId
                         updateTitle(jni.queryFileName(it.mediaId))
@@ -230,6 +284,7 @@ class FloatingPlayerWindow private constructor(val context: Context){
             Pb_TYPE_MEET_INTERFACE_STOPPLAY_VALUE -> {
                 if (msg.method == Pb_METHOD_MEET_INTERFACE_CLOSE_VALUE) {
                     InterfaceStop.pbui_Type_MeetStopResWork.parseFrom(msg.data)?.let {
+                        PlayerLog.i(L_EVENT, "收到流播放停止资源通知(CLOSE) res列表=${it.resList}")
                         it.resList.forEach { resId ->
                             LogUtils.e("流播放停止资源通知 $resId")
                             if (resId == 0) {
@@ -240,6 +295,10 @@ class FloatingPlayerWindow private constructor(val context: Context){
                     }
                 } else if (msg.method == Pb_METHOD_MEET_INTERFACE_NOTIFY_VALUE) {
                     InterfaceStop.pbui_Type_MeetStopPlay.parseFrom(msg.data)?.let {
+                        PlayerLog.i(
+                            L_EVENT,
+                            "收到流播放停止通知(NOTIFY) res=${it.res} createdeviceid=${it.createdeviceid} triggerid=${it.triggerid}"
+                        )
                         LogUtils.i("流播放停止通知: res[${it.res}] createdeviceid[${it.createdeviceid}] triggerid[${it.triggerid}]")
                         if (it.res == 0) {
                             Fps.clear(it.res)
@@ -252,9 +311,20 @@ class FloatingPlayerWindow private constructor(val context: Context){
     }
 
     fun showPlayerWindow(isMedia: Boolean = true, title: String = "", isMandatory: Boolean = false, resid: Int = curResId) {
-        //LogUtils.i("showPlayerWindow: isMedia=$isMedia,isMandatory=$isMandatory,title=$title")
+        PlayerLog.i(
+            L_WINDOW,
+            "showPlayerWindow 请求: 媒体=$isMedia 标题=$title 强制播放=$isMandatory " +
+                    "resid=$resid 当前窗口显示中=$isShowing"
+        )
         hasNewPlay = true
+        // 新的播放请求到来，撤销上一次「延迟销毁」
+        pendingDismiss?.let {
+            handler.removeCallbacks(it)
+            pendingDismiss = null
+            PlayerLog.i(L_WINDOW, "showPlayerWindow: 已撤销上一次待执行的延迟销毁任务（新播放到来）")
+        }
         if (isShowing) {
+            PlayerLog.i(L_WINDOW, "复用已有播放窗口，仅更新标题与播放标记")
             updateTitle(title)
             playerControlView?.setupPlayFlag(
                 if (isMedia) {
@@ -264,6 +334,7 @@ class FloatingPlayerWindow private constructor(val context: Context){
                 }
             )
         } else {
+            PlayerLog.step(L_WINDOW, "窗口未显示，开始创建新的播放会话")
             val surfaceView = SurfaceView(appContext)
             show(surfaceView, title, isMedia, isMandatory, resid)
         }
@@ -276,23 +347,68 @@ class FloatingPlayerWindow private constructor(val context: Context){
         isMandatory: Boolean = false,
         resid: Int = curResId
     ) {
-        if (isShowing) return
+        if (isShowing) {
+            PlayerLog.w(L_WINDOW, "show: 窗口已在显示中，忽略本次调用")
+            return
+        }
+        val session = PlayerLog.openSession()
+        PlayerLog.i(
+            L_WINDOW,
+            "===== 播放窗口创建开始 会话=S$session 类型=${if (isMedia) "媒体文件" else "流媒体"} " +
+                    "标题=$title 强制播放=$isMandatory resid=$resid 等比适配=$scaleProportionally"
+        )
+        PlayerLog.i(
+            L_WINDOW,
+            "窗口参数: 尺寸=${layoutParams.width}x${layoutParams.height} 位置=(${layoutParams.x},${layoutParams.y}) " +
+                    "type=${layoutParams.type} flags=${layoutParams.flags} format=${layoutParams.format}"
+        )
         playerController = PlayerController(resid, onSurfaceReady = {
+            PlayerLog.i(L_WINDOW, "Surface 已就绪，解码即将开始（窗口层回调）")
             LogUtils.i("FloatingPlayer: Surface ready, decoding started")
         }).apply {
             initialize(surfaceView)   // 绑定 Surface，内部会监听 surfaceCreated
         }
+        PlayerLog.i(L_WINDOW, "PlayerController 已创建并绑定 SurfaceView resId=$resid")
         if (scaleProportionally) {
             playerController?.setPlayerViewResetListener(object : PlayerController.PlayerViewResetListener {
                 override fun onPlayerViewReset(width: Int, height: Int) {
+                    PlayerLog.i(
+                        L_WINDOW,
+                        "收到视频源尺寸回调（解码线程）：${width}x$height，" +
+                                "窗口=${screenSize().x}x${screenSize().y}，切主线程做等比适配"
+                    )
                     // 从解码线程回调的，需要切换到主线程
-                    handler.post { playerControlView?.resetPlayerViewRenderSize(width, height, screenSize().x, screenSize().y) }
+                    handler.post {
+                        playerControlView?.resetPlayerViewRenderSize(width, height, screenSize().x, screenSize().y)
+                    }
                 }
             })
         }
         createFloatingView(surfaceView, title, isMedia, isMandatory)
-        windowManager.addView(floatingView, layoutParams)
+        try {
+            windowManager.addView(floatingView, layoutParams)
+            PlayerLog.i(
+                L_WINDOW,
+                "addView 成功 窗口=${layoutParams.width}x${layoutParams.height}"
+            )
+        } catch (e: Exception) {
+            PlayerLog.e(L_WINDOW, "addView 失败（多因缺少悬浮权限或窗口已存在），回滚本次创建的播放资源", e)
+            playerControlView?.callback = null
+            playerControlView?.release()
+            playerControlView = null
+            playerController?.setPlayerViewResetListener(null)
+            playerController?.release()
+            playerController = null
+            floatingView = null
+            isShowing = false
+            PlayerLog.closeSession()
+            throw e
+        }
         isShowing = true
+        PlayerLog.i(
+            L_WINDOW,
+            "===== 播放窗口创建完成 会话=S$session isShowing=$isShowing，等待 Surface 创建与首帧渲染"
+        )
     }
 
     fun setProgressAndTime(progress: Long, secProgress: Long, currentTime: Long, totalTime: Long, forceChange: Boolean) {
@@ -306,6 +422,11 @@ class FloatingPlayerWindow private constructor(val context: Context){
         isMedia: Boolean = true,
         isMandatory: Boolean = false
     ) {
+        PlayerLog.i(
+            L_WINDOW,
+            "开始构建播放窗口视图树 标题=$title 媒体=$isMedia 强制播放=$isMandatory " +
+                    "窗口大小切换=$sizeToggleEnabled 右下角缩放=$resizeHandleEnabled"
+        )
         // 根布局：FrameLayout，所有子视图叠加
         val root = FrameLayout(appContext).apply {
             layoutParams = ViewGroup.LayoutParams(
@@ -333,38 +454,49 @@ class FloatingPlayerWindow private constructor(val context: Context){
             startPlay()
             setDragWindowTouchListener(dragBarTouchListener) // 拖动顶部标题栏实现拖动窗口
         }
+        PlayerLog.i(L_WINDOW, "PlayerControlView 构建完成并切换到播放态（悬浮窗模式）")
         playerControlView?.callback = object : ControlCallback {
             override fun seekTo(progress: Int) {
+                PlayerLog.i(L_CONTROL, "用户拖动进度到 $progress% → mediaPlayPos + 通知同屏进度")
                 Bus.postObj(type = SdkBusType.floating_same_play_progress, progress)
                 jni.mediaPlayPos(0, progress, mutableListOf(SdkVars.localDeviceId), 0, 0)
             }
 
             override fun start() {
+                PlayerLog.i(L_CONTROL, "用户点击继续播放 → mediaPlayRecover")
                 jni.mediaPlayRecover(0, SdkVars.localDeviceId)
             }
 
             override fun pause() {
+                PlayerLog.i(L_CONTROL, "用户点击暂停 → mediaPlayPause")
                 jni.mediaPlayPause(0, SdkVars.localDeviceId)
             }
 
             override fun onBack() {
+                PlayerLog.i(L_CONTROL, "用户点击退出播放 → stopResource(res=$curResId)")
                 jni.stopResource(curResId, SdkVars.localDeviceId)
             }
 
             override fun onLock(locked: Boolean) {
+                PlayerLog.i(L_CONTROL, "窗口锁定状态切换 locked=$locked")
                 playerControlView?.setDragWindowTouchListener(dragBarTouchListener, locked)
             }
 
             override fun toggleScreen() {
+                PlayerLog.i(L_CONTROL, "用户点击全屏/窗口切换按钮")
                 toggleFullscreen()
             }
 
             override fun onMoreMenuItemClick(itemId: Int) {
-                println("onMoreMenuItemClick: $itemId")
+                PlayerLog.i(L_CONTROL, "用户点击更多菜单 itemId=$itemId")
                 when (itemId) {
                     // 开始同屏
                     1 -> {
-                        //LogUtils.i("onMoreMenuItemClick: $currentDeviceId，$currentSubId,$currentMediaId,$currentProgress")
+                        PlayerLog.i(
+                            L_CONTROL,
+                            "开始同屏：交由 Activity 处理 videoSource=(deviceId=$currentDeviceId," +
+                                    "subId=$currentSubId,mediaId=$currentMediaId,progress=$currentProgress)"
+                        )
                         Bus.postVararg(
                             type = SdkBusType.floating_start_screen_share,
                             currentDeviceId,
@@ -375,6 +507,7 @@ class FloatingPlayerWindow private constructor(val context: Context){
                     }
                     // 结束同屏
                     2 -> {
+                        PlayerLog.i(L_CONTROL, "结束同屏：交由 Activity 处理")
                         Bus.post(SdkBusType.floating_stop_screen_share)
                     }
                 }
@@ -402,6 +535,11 @@ class FloatingPlayerWindow private constructor(val context: Context){
         }
 
         floatingView = root
+        PlayerLog.i(
+            L_WINDOW,
+            "播放窗口视图树构建完成: PlayerControlView(MATCH_PARENT) + " +
+                    "缩放把手=${if (resizeHandleEnabled) "${dp2px(RESIZE_HOTSPOT_SIZE_DP)}px" else "未启用"}"
+        )
     }
 
 
@@ -413,6 +551,7 @@ class FloatingPlayerWindow private constructor(val context: Context){
                 isDragging = true
                 dragStartX = event.rawX.toInt()
                 dragStartY = event.rawY.toInt()
+                PlayerLog.i(L_CONTROL, "开始拖动窗口 起点=($dragStartX,$dragStartY) 位置=(${layoutParams.x},${layoutParams.y})")
                 true
             }
 
@@ -424,6 +563,9 @@ class FloatingPlayerWindow private constructor(val context: Context){
                     layoutParams.y += dy
                     clampWindowPosition()
                     windowManager.updateViewLayout(floatingView, layoutParams)
+                    if (PlayerLog.shouldLog(dragLogCounter, 500L)) {
+                        PlayerLog.d(L_CONTROL, "拖动中 位移=($dx,$dy) 位置=(${layoutParams.x},${layoutParams.y})")
+                    }
                     dragStartX = event.rawX.toInt()
                     dragStartY = event.rawY.toInt()
                 }
@@ -432,6 +574,7 @@ class FloatingPlayerWindow private constructor(val context: Context){
 
             MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
                 isDragging = false
+                PlayerLog.i(L_CONTROL, "结束拖动 最终位置=(${layoutParams.x},${layoutParams.y})")
                 true
             }
 
@@ -449,6 +592,10 @@ class FloatingPlayerWindow private constructor(val context: Context){
                 resizeStartHeight = layoutParams.height
                 resizeStartX = event.rawX.toInt()
                 resizeStartY = event.rawY.toInt()
+                PlayerLog.i(
+                    L_CONTROL,
+                    "开始缩放窗口 起点=($resizeStartX,$resizeStartY) 起始尺寸=${resizeStartWidth}x$resizeStartHeight"
+                )
                 true
             }
 
@@ -464,12 +611,16 @@ class FloatingPlayerWindow private constructor(val context: Context){
                     layoutParams.height = newHeight
                     isFullscreen = false
                     windowManager.updateViewLayout(floatingView, layoutParams)
+                    if (PlayerLog.shouldLog(resizeLogCounter, 500L)) {
+                        PlayerLog.d(L_CONTROL, "缩放中 位移=($dx,$dy) 窗口尺寸=${newWidth}x$newHeight")
+                    }
                 }
                 true
             }
 
             MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
                 isResizing = false
+                PlayerLog.i(L_CONTROL, "结束缩放 最终尺寸=${layoutParams.width}x${layoutParams.height}")
                 true
             }
 
@@ -500,31 +651,62 @@ class FloatingPlayerWindow private constructor(val context: Context){
             layoutParams.x = (screenSize.x - halfWidth) / 2
             layoutParams.y = (screenSize.y - halfHeight) / 2
         }
+        PlayerLog.i(
+            L_CONTROL,
+            "窗口大小切换 → ${if (isFullscreen) "全屏" else "半屏/窗口"} " +
+                    "尺寸=${layoutParams.width}x${layoutParams.height} 位置=(${layoutParams.x},${layoutParams.y})"
+        )
         windowManager.updateViewLayout(floatingView, layoutParams)
     }
 
     fun hide() {
+        PlayerLog.i(L_WINDOW, "hide: 隐藏播放窗口（播放继续，未释放解码资源）")
         floatingView?.visibility = View.GONE
     }
 
     fun showAgain() {
+        PlayerLog.i(L_WINDOW, "showAgain: 重新显示播放窗口")
         floatingView?.visibility = View.VISIBLE
     }
 
     fun delayDismiss() {
         hasNewPlay = false
-        handler.postDelayed({
+        pendingDismiss?.let { handler.removeCallbacks(it) }
+        val task = Runnable {
+            pendingDismiss = null
+            PlayerLog.i(
+                L_WINDOW,
+                "延迟销毁到期(500ms) hasNewPlay=$hasNewPlay isShowing=$isShowing " +
+                        "解码已就绪=${playerController?.isCodecReady}"
+            )
             LogUtils.i("delayDismiss: hasNewPlay=$hasNewPlay")
             if (!hasNewPlay) {
                 // 停止后立马进行播放是无效的，需要延迟
                 mExitFloatingPlayListener?.exitFloatingPlayListener()
                 dismiss()
+            } else {
+                PlayerLog.i(L_WINDOW, "延迟销毁被新的播放请求取消，窗口保持显示")
             }
-        }, 500L)
+        }
+        pendingDismiss = task
+        PlayerLog.i(L_WINDOW, "已安排 500ms 后延迟销毁播放窗口（等待可能马上到来的新播放请求）")
+        handler.postDelayed(task, 500L)
     }
 
     private fun dismiss() {
+        if (!inPlaySession()) {
+            PlayerLog.w(L_WINDOW, "dismiss: 当前没有播放窗口资源，忽略本次销毁（可能是重复调用）")
+            return
+        }
+        PlayerLog.i(
+            L_WINDOW,
+            "===== 播放窗口销毁开始 会话=S${PlayerLog.currentSession()} isShowing=$isShowing " +
+                    "floatingView=${floatingView != null} 当前资源: mediaId=$currentMediaId " +
+                    "deviceId=$currentDeviceId subId=$currentSubId 进度=$currentProgress"
+        )
+        PlayerLog.stack(L_WINDOW, "dismiss 调用来源", 5)
         handler.removeCallbacksAndMessages(null)
+        pendingDismiss = null
         if (isShowing && floatingView != null) {
             // 恢复窗口全屏
             layoutParams.width = screenSize.x
@@ -532,11 +714,23 @@ class FloatingPlayerWindow private constructor(val context: Context){
             layoutParams.x = 0
             layoutParams.y = 0
 
-            windowManager.removeView(floatingView)
+            try {
+                windowManager.removeView(floatingView)
+                PlayerLog.i(L_WINDOW, "removeView 成功，悬浮窗已从 WindowManager 移除")
+            } catch (e: Exception) {
+                PlayerLog.e(L_WINDOW, "removeView 失败（窗口可能已被系统移除）", e)
+            }
             floatingView = null
             isShowing = false
             jni.stopResource(0, SdkVars.localDeviceId)
+            PlayerLog.i(L_WINDOW, "已通知平台停止资源 stopResource(res=0, devId=${SdkVars.localDeviceId})")
             LogUtils.i("FloatingPlayerWindow dismissed")
+        } else {
+            PlayerLog.w(
+                L_WINDOW,
+                "dismiss: 窗口未处于显示状态（isShowing=$isShowing floatingView=${floatingView != null}），" +
+                        "仅释放播放器资源"
+            )
         }
 
         playerControlView?.callback = null
@@ -545,15 +739,19 @@ class FloatingPlayerWindow private constructor(val context: Context){
         playerController?.setPlayerViewResetListener(null)
         playerController?.release()
         playerController = null
+        PlayerLog.i(L_WINDOW, "播放控制层与解码器资源已释放")
 
         mExitFloatingPlayListener = null
         currentDeviceId = 0
         currentSubId = 0
         currentMediaId = 0
         currentProgress = 0
+        PlayerLog.i(L_WINDOW, "===== 播放窗口销毁完成，播放状态已复位")
+        PlayerLog.closeSession()
     }
 
     fun updateTitle(title: String) {
+        PlayerLog.d(L_WINDOW, "updateTitle: $title")
         playerControlView?.setTitle(title)
     }
 
@@ -575,10 +773,20 @@ class FloatingPlayerWindow private constructor(val context: Context){
     }
 
     fun onDestroy() {
+        PlayerLog.i(
+            L_WINDOW,
+            "onDestroy: 释放播放窗口 会话=S${PlayerLog.currentSession()} isShowing=$isShowing " +
+                    "floatingView=${floatingView != null} playerController=${playerController != null}"
+        )
         LogUtils.i("onDestroy: ")
-        dismiss()
+        // 无论是否处于播放会话中，都要确保窗口被移除，避免 WindowManager 泄漏
+        if (isShowing || floatingView != null || inPlaySession()) {
+            dismiss()
+        }
         if (EventBus.getDefault().isRegistered(this)) {
             EventBus.getDefault().unregister(this)
+            PlayerLog.i(L_EVENT, "onDestroy: 已注销 EventBus 监听")
         }
+        PlayerLog.closeSession()
     }
 }

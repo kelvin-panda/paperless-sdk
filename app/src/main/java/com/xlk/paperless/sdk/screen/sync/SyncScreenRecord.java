@@ -211,6 +211,18 @@ public class SyncScreenRecord extends Service {
                     ", height: " + mHeight + ", fps: " + mFrameRate +
                     ", bitrate: " + mBitrate + ", iframe: " + mIFrameInterval);
 
+            //<editor-fold desc="诊断：请求的采集尺寸 vs 屏幕尺寸（临时，可整块删除）">
+            {
+                float sr = (screenHeight > 0) ? (float) screenWidth / screenHeight : 0f;
+                float er = (mHeight > 0) ? (float) mWidth / mHeight : 0f;
+                LogUtils.e("DIAG-ENC",
+                        "[DIAG-ENC] SyncScreenRecord 请求 extra: " + mWidth + "x" + mHeight
+                                + " 屏幕=" + screenWidth + "x" + screenHeight
+                                + " 屏幕比例=" + sr + " 请求比例=" + er
+                                + " 比例是否一致=" + (Math.abs(sr - er) < 0.0001f));
+            }
+            //</editor-fold>
+
             // 2. 创建MediaProjection
             MediaProjectionManager projectionManager =
                     (MediaProjectionManager) getSystemService(Context.MEDIA_PROJECTION_SERVICE);

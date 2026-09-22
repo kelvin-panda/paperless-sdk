@@ -361,6 +361,10 @@ public class ScreenRecord implements IScreenRecord {
             // 设置VirtualDisplay的Surface
             mVirtualDisplay.setSurface(mSurface);
 
+            //<editor-fold desc="诊断：采集/编码尺寸 vs 屏幕尺寸（临时，可整块删除）">
+            diagEncodeSize("ScreenRecord.startRecording", 0);
+            //</editor-fold>
+
             // 更新状态
             mIsRunning.set(true);
             mState = RecordState.RUNNING;
@@ -462,8 +466,7 @@ public class ScreenRecord implements IScreenRecord {
     /**
      * 创建MediaFormat
      */
-    private MediaFormat createMediaFormat(int width, int height, int orientation) {
-        try {
+    private MediaFormat createMediaFormat(int width, int height, int orientation) {        try {
             MediaFormat format = MediaFormat.createVideoFormat(
                     MediaFormat.MIMETYPE_VIDEO_AVC, width, height);
 
@@ -563,6 +566,22 @@ public class ScreenRecord implements IScreenRecord {
             throw new RuntimeException("Failed to create MediaFormat", e);
         }
     }
+
+    //<editor-fold desc="诊断：采集/编码尺寸 vs 屏幕尺寸（临时，可整块删除）">
+    private void diagEncodeSize(String tag, int orientation) {
+        int screenW = SdkVars.Companion.getScreen_width();
+        int screenH = SdkVars.Companion.getScreen_height();
+        float screenRatio = (screenH > 0) ? (float) screenW / screenH : 0f;
+        float encodeRatio = (height > 0) ? (float) width / height : 0f;
+        LogUtils.e("DIAG-ENC",
+                "[DIAG-ENC] " + tag + " 屏幕=" + screenW + "x" + screenH
+                        + " 屏幕比例=" + screenRatio
+                        + " 采集(编码)=" + width + "x" + height
+                        + " 采集比例=" + encodeRatio
+                        + " rotation=" + orientation
+                        + " 比例是否一致=" + (Math.abs(screenRatio - encodeRatio) < 0.0001f));
+    }
+    //</editor-fold>
 
     /**
      * 记录设备编码能力

@@ -9,7 +9,7 @@ import com.drake.brv.utils.BRV
 import com.paperless.sdk.Paperless
 import com.paperless.sdk.SdkConfig
 import com.paperless.sdk.SdkVars
-import com.xlk.paperless.sdk.floating.FloatingPlayerWindow
+import com.xlk.paperless.sdk.floating.FloatingPlayer
 
 /**
  *  @author : Administrator
@@ -111,7 +111,16 @@ class App : Application() {
             }
         })
         if (SdkConfig.floatingPlayEnable) {
-            FloatingPlayerWindow.getInstance(applicationContext).apply {
+            FloatingPlayer.getInstance(applicationContext).apply {
+                // 是否强制全屏（等价于 hengxun 的 Macro.isForceFullScreen）
+                // false：按视频源宽高比等比适配；true：拉伸铺满窗口
+                configure(
+                    0,
+                    TestConfig.FLOATING_SIZE_TOGGLE_ENABLE,
+                    TestConfig.FLOATING_RESIZE_ENABLE,
+                    scaleProportionally = !TestConfig.IS_FORCE_FULL_SCREEN,
+                    isForceFullScreen = TestConfig.IS_FORCE_FULL_SCREEN
+                )
                 initial()
             }
         }

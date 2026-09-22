@@ -6,6 +6,7 @@ import android.os.Looper
 import com.blankj.utilcode.util.LogUtils
 import com.paperless.bus.Bus
 import com.paperless.bus.SdkBusType
+import com.paperless.util.PlayerLog
 
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicBoolean
@@ -15,6 +16,8 @@ import java.util.concurrent.atomic.AtomicBoolean
  *  created on 2026/6/30 9:30
  */
 object Fps {
+
+    private const val L_FRAME = "帧"
 
     // 存储每个资源 ID (res) 对应的帧计数
     private val mFpsMap = ConcurrentHashMap<Int, Int>()
@@ -37,6 +40,7 @@ object Fps {
                 // put 操作是原子的，返回旧值，然后立即将 map 中的值置为 0
                 val fps = mFpsMap.put(resId, 0) ?: 0
                 // 发送 FPS 数据（每秒帧数）
+                PlayerLog.i(L_FRAME, "帧率上报：每秒帧数 resId=$resId FPS=$fps")
                 LogUtils.i("每秒帧数 resId:$resId,FPS:$fps")
                 Bus.postVararg(type = SdkBusType.fps, fps, resId)
             }
@@ -90,6 +94,7 @@ object Fps {
      * 结束播放时调用
      */
     fun clear(res: Int) {
+        PlayerLog.i(L_FRAME, "帧率统计清理 resId=$res 剩余资源数=${mFpsMap.size - 1}")
         mFpsMap.remove(res)
         if (mFpsMap.isEmpty()) {
             stopPost()

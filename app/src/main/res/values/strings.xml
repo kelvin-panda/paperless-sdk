@@ -8,4 +8,15 @@
         <item>3</item>
         <item>4</item>
     </string-array>
+
+    <!-- FloatingPlayer 悬浮窗同屏选择弹窗 -->
+    <string name="floating_screen_title">同屏</string>
+    <string name="floating_force">强制</string>
+    <string name="floating_member">参会人员</string>
+    <string name="floating_projector">会场设备</string>
+    <string name="floating_choose_all">全选</string>
+    <string name="floating_ensure">确认</string>
+    <string name="floating_cancel">取消</string>
+    <string name="floating_start_screen">开始同屏</string>
+    <string name="floating_stop_screen">结束同屏</string>
 </resources>

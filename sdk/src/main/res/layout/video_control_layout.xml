@@ -13,6 +13,41 @@
 
     </RelativeLayout>
 
+    <!-- 等比适配黑边：必须声明在 surface_container 之后、且始终处于绘制状态。
+         原因：z-below 的 SurfaceView 会在窗口图层上 punchHole，把它之前画的像素（含各级黑底）一起清成透明；
+         而窗口的透明/挖洞区域不会随缩小的视频一起收窄，于是视频之外没有被 View 覆盖的地方会真透明（透出下层界面）。
+         截图证据：顶部平时不露，只是因为 48dp 的 layout_top 正好画在 SurfaceView 之后。
+         尺寸由 PlayerControlView.resetPlayerViewRenderSize() 按适配结果设置，默认 0（等于不占位）。 -->
+    <View
+        android:id="@+id/letterbox_top"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_alignParentTop="true"
+        android:background="@android:color/black" />
+
+    <View
+        android:id="@+id/letterbox_bottom"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_alignParentBottom="true"
+        android:background="@android:color/black" />
+
+    <View
+        android:id="@+id/letterbox_left"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentLeft="true"
+        android:background="@android:color/black" />
+
+    <View
+        android:id="@+id/letterbox_right"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true"
+        android:background="@android:color/black" />
+
     <RelativeLayout
         android:id="@+id/thumb"
         android:layout_width="match_parent"

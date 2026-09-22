@@ -14,7 +14,7 @@ import com.paperless.bus.EventBusMessage
 import com.paperless.player.SplitSurfaceView
 import com.paperless.sdk.Protocol
 import com.paperless.sdk.SdkVars
-import com.xlk.paperless.sdk.floating.FloatingPlayerWindow
+import com.xlk.paperless.sdk.floating.FloatingPlayer
 import org.greenrobot.eventbus.EventBus
 import org.greenrobot.eventbus.Subscribe
 import org.greenrobot.eventbus.ThreadMode
@@ -193,8 +193,14 @@ class SplitPlayActivity : AppCompatActivity() {
         model?.let {
             fullResId = resId
             stopPlay()
-            FloatingPlayerWindow.getInstance(this).apply {
-                configure(0,false,false)
+            FloatingPlayer.getInstance(this).apply {
+                configure(
+                    0,
+                    false,
+                    false,
+                    scaleProportionally = !TestConfig.IS_FORCE_FULL_SCREEN,
+                    isForceFullScreen = TestConfig.IS_FORCE_FULL_SCREEN
+                )
                 initial()
                 if (it.isVideo) {
                     Jni.mediaPlay(
@@ -210,7 +216,7 @@ class SplitPlayActivity : AppCompatActivity() {
                         it.value1, it.value2, Protocol.resource_id_0, SdkVars.localDeviceId
                     )
                 }
-                setExitFloatingPlayListener(object : FloatingPlayerWindow.ExitFloatingPlayListener {
+                setExitFloatingPlayListener(object : FloatingPlayer.ExitFloatingPlayListener {
                     override fun exitFloatingPlayListener() {
                         // 退出全屏后恢复播放
                         LogUtils.i("exitFloatingPlayListener: 退出全屏后恢复播放")
