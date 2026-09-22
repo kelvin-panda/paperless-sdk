@@ -278,6 +278,16 @@ class PlayerController(
         else -> MIME_VIDEO_AVC
     }
 
+    //<editor-fold desc="诊断辅助（临时，可整块删除）">
+    /** 保留4位小数的宽高比，用于日志比对 */
+    private fun fmtRatio(w: Int, h: Int): String =
+        if (w <= 0 || h <= 0) "n/a" else String.format(java.util.Locale.US, "%.4f", w.toDouble() / h.toDouble())
+
+    /** MediaFormat 可选整型键读取，缺省时返回默认值 */
+    private fun MediaFormat.getIntOr(key: String, def: Int): Int =
+        if (containsKey(key)) getInteger(key) else def
+    //</editor-fold>
+
     private fun configureCodec(configFrame: FrameData) {
         try {
             LogUtils.i(TAG, "configureCodec start ")
@@ -317,6 +327,16 @@ class PlayerController(
 //                glSurfaceView?.setVideoRotation(configFrame.getRotation(), configFrame.w, configFrame.h)
 //            }
             val isSupported = mediaCodec?.codecInfo?.getCapabilitiesForType(mimeType)?.isFormatSupported(format) ?: false
+            //<editor-fold desc="诊断：定位画面变形来源（临时，可整块删除）">
+            val requestedW = format.getInteger(MediaFormat.KEY_WIDTH)
+            val requestedH = format.getInteger(MediaFormat.KEY_HEIGHT)
+            LogUtils.e(
+                TAG,
+                "[DIAG] codec=$mimeType isSupported=$isSupported " +
+                        "上报流尺寸=${configFrame.w}x${configFrame.h} 配置解码尺寸=${requestedW}x${requestedH} " +
+                        "上报比例=${fmtRatio(configFrame.w, configFrame.h)} 配置比例=${fmtRatio(requestedW, requestedH)}"
+            )
+            //</editor-fold>
             val displayWidth = if (rotation == 90 || rotation == 270) configFrame.h else configFrame.w
             val displayHeight = if (rotation == 90 || rotation == 270) configFrame.w else configFrame.h
             LogUtils.i(
@@ -411,6 +431,37 @@ class PlayerController(
                         // 处理格式变化
                         val newFormat = mediaCodec?.outputFormat
                         LogUtils.d(TAG, "Output format changed: $newFormat")
+                        //<editor-fold desc="诊断：解码器真实输出的尺寸/裁剪（临时，可整块删除）">
+                        try {
+                            if (newFormat != null) {
+                                val ow = newFormat.getInteger("width")
+                                val oh = newFormat.getInteger("height")
+                                val cl = newFormat.getIntOr("crop-left", 0)
+                                val ct = newFormat.getIntOr("crop-top", 0)
+                                val cr = newFormat.getIntOr("crop-right", ow - 1)
+                                val cb = newFormat.getIntOr("crop-bottom", oh - 1)
+                                val visibleW = cr - cl + 1
+                                val visibleH = cb - ct + 1
+                                LogUtils.e(
+                                    TAG,
+                                    "[DIAG] 解码器实际输出 buffer=${ow}x$oh crop=($cl,$ct,$cr,$cb) " +
+                                            "可见=$visibleW x $visibleH 可见比例=${fmtRatio(visibleW, visibleH)} " +
+                                            "buffer比例=${fmtRatio(ow, oh)}"
+                                )
+                                val reported = if (currentRotation == 90 || currentRotation == 270) {
+                                    "${currentHeight}x$currentWidth"
+                                } else {
+                                    "${currentWidth}x$currentHeight"
+                                }
+                                LogUtils.e(
+                                    TAG,
+                                    "[DIAG] 对比 上报显示尺寸=$reported 解码可见尺寸=$visibleW x $visibleH"
+                                )
+                            }
+                        } catch (e: Exception) {
+                            LogUtils.e(TAG, "[DIAG] 读取解码输出格式失败", e)
+                        }
+                        //</editor-fold>
                     }
 
                     MediaCodec.INFO_TRY_AGAIN_LATER -> {
