@@ -250,6 +250,12 @@ class PlayerControlView(context: Context, attrs: AttributeSet? = null) : FrameLa
         mLetterboxBottom = findViewById(R.id.letterbox_bottom)
         mLetterboxLeft = findViewById(R.id.letterbox_left)
         mLetterboxRight = findViewById(R.id.letterbox_right)
+        // 显式声明"本 View 会自己绘制"：确保框架把黑条算作绘制中的 View
+        // （gatherTransparentRegion 里对绘制中的 View 做 region DIFFERENCE，才会把窗口透明区挖小）
+        mLetterboxTop?.setWillNotDraw(false)
+        mLetterboxBottom?.setWillNotDraw(false)
+        mLetterboxLeft?.setWillNotDraw(false)
+        mLetterboxRight?.setWillNotDraw(false)
     }
 
     private fun initInflate(context: Context) {
@@ -388,15 +394,34 @@ class PlayerControlView(context: Context, attrs: AttributeSet? = null) : FrameLa
      */
     private fun applyLetterbox(videoW: Int, videoH: Int, maxWidth: Int, maxHeight: Int) {
         val container = mTextureViewContainer
-        val containerW = if ((container?.width ?: 0) > 0) container!!.width else maxWidth
-        val containerH = if ((container?.height ?: 0) > 0) container!!.height else maxHeight
+        // ⚠️ 调用时机常常是"紧跟 windowManager.updateViewLayout() 之后"，此刻容器还没重新布局，
+        // 它的 width/height 仍是**旧窗口**尺寸；而 maxWidth/maxHeight 就是本次要适配的**新窗口**
+        // （= 新容器）尺寸。所以必须以 maxWidth/maxHeight 为准，否则会算出巨大的黑条把画面盖住
+        // （典型现象：缩放/切全屏后，黑框中间只剩很小一块画面）。
+        val containerW = if (maxWidth > 0) maxWidth else (container?.width ?: 0)
+        val containerH = if (maxHeight > 0) maxHeight else (container?.height ?: 0)
         if (containerW <= 0 || containerH <= 0) {
             clearLetterbox()
             return
         }
-        val top = ((containerH - videoH) / 2f).roundToInt().coerceIn(0, containerH)
+        setLetterboxBands(videoW, videoH, containerW, containerH)
+        // 布局完成后再按容器实测尺寸校正一次（防止 maxWidth/maxHeight 与容器实际不一致）
+        container?.post {
+            val cw = container.width
+            val ch = container.height
+            if (cw > 0 && ch > 0 && (cw != containerW || ch != containerH)) {
+                LogUtils.e("applyLetterbox 布局后按实测校正 容器:${cw}x$ch 画面:${videoW}x$videoH")
+                setLetterboxBands(videoW, videoH, cw, ch)
+            }
+        }
+    }
+
+    private fun setLetterboxBands(videoW: Int, videoH: Int, containerW: Int, containerH: Int) {
+        // 与 RelativeLayout 的 CENTER_IN_PARENT 居中断言严格一致（整除，不是四舍五入），
+        // 否则黑条与视频之间会差 1px（那 1px 同样会透出下层）
+        val top = ((containerH - videoH) / 2).coerceIn(0, containerH)
         val bottom = (containerH - videoH - top).coerceIn(0, containerH)
-        val left = ((containerW - videoW) / 2f).roundToInt().coerceIn(0, containerW)
+        val left = ((containerW - videoW) / 2).coerceIn(0, containerW)
         val right = (containerW - videoW - left).coerceIn(0, containerW)
         setLetterboxSize(mLetterboxTop, LayoutParams.MATCH_PARENT, top)
         setLetterboxSize(mLetterboxBottom, LayoutParams.MATCH_PARENT, bottom)
@@ -408,6 +433,20 @@ class PlayerControlView(context: Context, attrs: AttributeSet? = null) : FrameLa
                     "黑边 上=$top 下=$bottom 左=$left 右=$right"
         )
         LogUtils.e("applyLetterbox 容器:${containerW}x$containerH 画面:${videoW}x$videoH 黑边:上$top 下$bottom 左$left 右$right")
+        post { logLetterboxRect("apply后") }
+    }
+
+    /** 黑条真正布局后的位置/尺寸（排查"黑条没生效"时看这一行） */
+    private fun logLetterboxRect(tag: String) {
+        fun r(v: View?): String =
+            if (v == null) "null"
+            else "[${v.left},${v.top},${v.right},${v.bottom}] ${v.width}x${v.height} vis=${v.visibility} willNotDraw=${v.willNotDraw()}"
+        LogUtils.e(
+            "LETTERBOX[$tag] top=${r(mLetterboxTop)} bottom=${r(mLetterboxBottom)} " +
+                    "left=${r(mLetterboxLeft)} right=${r(mLetterboxRight)} " +
+                    "容器=${mTextureViewContainer?.width}x${mTextureViewContainer?.height} " +
+                    "视频=${mVideoView?.left},${mVideoView?.top},${mVideoView?.right},${mVideoView?.bottom}"
+        )
     }
 
     private fun clearLetterbox() {
