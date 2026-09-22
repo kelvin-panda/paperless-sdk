@@ -64,10 +64,20 @@ object Paperless {
     }
 
     private fun initScreenRecordParameter() {
+        // 方案A：采集尺寸由依赖方(App)按"档位长边预算 + 屏幕比例"自适应计算并写入 SdkVars；
+        // 这里只在"尚未设置"时兜底，避免 SDK 的固定 1080P 默认值把依赖方的自适应结果覆盖掉。
+        if (SdkVars.record_width > 0 && SdkVars.record_height > 0) {
+            LogUtils.e(
+                "屏幕采集宽高：沿用依赖方设置 ${SdkVars.record_width} x ${SdkVars.record_height}" +
+                        "（屏幕=${SdkVars.screen_width}x${SdkVars.screen_height}，" +
+                        "比例一致=${r(SdkVars.screen_width, SdkVars.screen_height) == r(SdkVars.record_width, SdkVars.record_height)}）"
+            )
+            return
+        }
         val encodeSize: Size = CodecUtil.getEncodeSize(SdkVars.screen_width, SdkVars.screen_height, 1)
         SdkVars.record_width = encodeSize.width
         SdkVars.record_height = encodeSize.height
-        LogUtils.e("屏幕采集宽高：${SdkVars.record_width} x ${SdkVars.record_height}")
+        LogUtils.e("屏幕采集宽高(兜底)：${SdkVars.record_width} x ${SdkVars.record_height}")
         LogUtils.e(
             "[DIAG-ENC] 屏幕=${SdkVars.screen_width}x${SdkVars.screen_height}" +
                     " 采集=${SdkVars.record_width}x${SdkVars.record_height}" +
