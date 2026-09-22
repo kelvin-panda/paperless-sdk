@@ -317,7 +317,14 @@ class PlayerController(
 //                glSurfaceView?.setVideoRotation(configFrame.getRotation(), configFrame.w, configFrame.h)
 //            }
             val isSupported = mediaCodec?.codecInfo?.getCapabilitiesForType(mimeType)?.isFormatSupported(format) ?: false
-            mPlayerViewResetListener?.onPlayerViewReset(configFrame.w, configFrame.h)
+            val displayWidth = if (rotation == 90 || rotation == 270) configFrame.h else configFrame.w
+            val displayHeight = if (rotation == 90 || rotation == 270) configFrame.w else configFrame.h
+            LogUtils.i(
+                TAG,
+                "onPlayerViewReset source=${configFrame.w}x${configFrame.h}, " +
+                        "rotation=$rotation, display=${displayWidth}x${displayHeight}"
+            )
+            mPlayerViewResetListener?.onPlayerViewReset(displayWidth, displayHeight)
             mediaCodec?.configure(format, surface, null, 0)
             mediaCodec?.start()
             isCodecConfigured.set(true)
@@ -349,6 +356,12 @@ class PlayerController(
         val dummyFrame = FrameData().apply {
             w = savedWidth
             h = savedHeight
+            isKeyFrame = when (savedRotation) {
+                90 -> 32
+                180 -> 64
+                270 -> 128
+                else -> 0
+            }
             codecid = when (savedMimeType) {
                 MIME_VIDEO_MPEG4 -> 12
                 MIME_VIDEO_VP8 -> 139

@@ -30,6 +30,8 @@ import com.paperless.util.CommonUtil
 import com.paperless.util.CommonUtil.stringForTime
 import java.util.Locale
 import kotlin.math.abs
+import kotlin.math.min
+import kotlin.math.roundToInt
 
 class PlayerControlView(context: Context, attrs: AttributeSet? = null) : FrameLayout(context, attrs), View.OnClickListener,
     SeekBar.OnSeekBarChangeListener, View.OnTouchListener {
@@ -311,24 +313,14 @@ class PlayerControlView(context: Context, attrs: AttributeSet? = null) : FrameLa
     }
 
     fun resetPlayerViewRenderSize(width: Int, height: Int, maxWidth: Int, maxHeight: Int) {
-        var newWidth = 0
-        var newHeight = 0
         LogUtils.e("resetPlayerViewRenderSize 视频源:$width x $height,最大宽高:$maxWidth x $maxHeight")
-        //视频源是横屏
-        if (width > height) {
-            //根据播放区域宽进行适配新高度
-            newHeight = height * maxWidth / width
-            newWidth = maxWidth
-            if (newHeight > maxHeight) {
-                //适配后进行计算后的高度太高了，则改成进行基于高度的适配
-                newHeight = maxHeight
-                newWidth = width * newHeight / height
-            }
-        } else {
-            //视频源是竖屏
-            newHeight = maxHeight
-            newWidth = width * newHeight / height
+        if (width <= 0 || height <= 0 || maxWidth <= 0 || maxHeight <= 0) {
+            LogUtils.e("resetPlayerViewRenderSize 无效尺寸，忽略本次适配")
+            return
         }
+        val scale = min(maxWidth.toFloat() / width, maxHeight.toFloat() / height)
+        val newWidth = (width * scale).roundToInt().coerceAtLeast(1)
+        val newHeight = (height * scale).roundToInt().coerceAtLeast(1)
         LogUtils.e("resetPlayerViewRenderSize 适配后宽高:$newWidth x $newHeight")
         mVideoView?.layoutParams = RelativeLayout.LayoutParams(newWidth, newHeight)
             .apply { addRule(RelativeLayout.CENTER_IN_PARENT) }

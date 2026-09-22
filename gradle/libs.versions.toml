@@ -11,6 +11,7 @@ junitVersion = "1.1.5"
 espressoCore = "3.5.1"
 recyclerview = "1.3.0"
 lifecycle = "2.5.1"
+xxPermissions = "28.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -18,6 +19,8 @@ androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version
 material = { group = "com.google.android.material", name = "material", version.ref = "material" }
 androidx-activity = { group = "androidx.activity", name = "activity", version.ref = "activity" }
 androidx-constraintlayout = { group = "androidx.constraintlayout", name = "constraintlayout", version.ref = "constraintlayout" }
+# 权限请求框架：https://github.com/getActivity/XXPermissions
+xxPermissions = { group = "com.github.getActivity", name = "XXPermissions", version.ref = "xxPermissions" }
 
 # https://mvnrepository.com/artifact/androidx.lifecycle/lifecycle-extensions
 lifecycle-extensions = { module = "androidx.lifecycle:lifecycle-extensions", version = "2.2.0" }
@@ -33,8 +36,6 @@ lifecycle-livedata = { module = "androidx.lifecycle:lifecycle-livedata", version
 eventbus = { group = "org.greenrobot", name = "eventbus", version = "3.3.1" }
 # 基础工具类大全：https://github.com/Blankj/AndroidUtilCode/blob/master/lib/utilcode/README-CN.md
 utilcodex = { group = "com.blankj", name = "utilcodex", version = "1.31.1" }
-# 权限请求框架：https://github.com/getActivity/XXPermissions
-xxPermissions = { group = "com.github.getActivity", name = "XXPermissions", version = "28.0" }
 # https://github.com/liangjingkanji/BRV
 brv = { group = "com.github.liangjingkanji", name = "BRV", version = "1.6.1" }
 

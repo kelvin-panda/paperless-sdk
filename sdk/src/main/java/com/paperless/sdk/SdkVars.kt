@@ -1,5 +1,6 @@
 package com.paperless.sdk
 
+import android.content.Intent
 import com.paperless.data.FrameData
 import java.util.concurrent.LinkedBlockingQueue
 
@@ -32,6 +33,23 @@ class SdkVars {
         var initializationFinished = false
         var initializationIsOver = false
         var isServerConnected = false
+
+        //<editor-fold desc="截屏（帧缓存）权限">
+        /**
+         * 是否已经拿到截屏权限
+         */
+        var isScreenCapturePermissionGranted = false
+
+        /**
+         * 截屏权限申请返回的 resultCode
+         */
+        var screenCaptureResultCode = 0
+
+        /**
+         * 截屏权限申请返回的 data，用于 [android.media.projection.MediaProjectionManager.getMediaProjection]
+         */
+        var screenCaptureResultData: Intent? = null
+        //</editor-fold>
 
         /**
          * 存放当前的界面状态

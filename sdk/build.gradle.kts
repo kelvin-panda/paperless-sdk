@@ -86,7 +86,7 @@ afterEvaluate {
                 // JitPack 会注入 GROUP、ARTIFACT、VERSION，本地构建使用兜底值。
                 groupId = providers.environmentVariable("GROUP").orElse("com.github.kelvin-panda").get()
                 artifactId = providers.environmentVariable("ARTIFACT").orElse("paperless-sdk").get()
-                version = providers.environmentVariable("VERSION").orElse("2.5.16").get()
+                version = providers.environmentVariable("VERSION").orElse("2.5.18").get()
                 from(components["release"])
             }
         }
