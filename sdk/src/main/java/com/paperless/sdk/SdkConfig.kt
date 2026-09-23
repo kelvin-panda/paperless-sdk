@@ -30,9 +30,14 @@ class SdkConfig {
         var decodeDiscardSize: Point = Point(1920, 1080)
 
         /**
-         * Call 类中的日志打印开关
+         * Call / BaseJni 中的高频日志打印开关（默认关闭）
+         * - 覆盖：`Call.error_ret`（每次 native 回调返回，实测 ~3.4 次/秒，其中 43% 是 ret=0）、
+         *   `Call.callback_method`（~1 次/秒）、`Call` 后台接收包长、队列满、BaseJni 查询结果等共 8 处；
+         * - 实测这些日志占依赖方 App 全部日志量的 **56%**，且 `error_ret` 里大量是正常返回，排查价值低；
+         * - 需要排查时由依赖方打开（例如跟随 App 的"调试开关"）：
+         *   `SdkConfig.logEnable = true`
          */
-        var logEnable: Boolean = true
+        var logEnable: Boolean = false
 
         /**
          * 播放流程调试日志开关（logcat TAG = PlayWin）

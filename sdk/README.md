@@ -74,6 +74,25 @@ PlayWin: [帧][S3][4.501s][VideoDecodeThread-0] 首帧已渲染（解码器配�
 - 新增链路日志时统一用 `PlayerLog.i("环节标签", "…")`，需要会话 / 耗时 / 线程前缀时不要再手写 `LogUtils`。
 - 兼容：原 `LogUtils` 日志全部保留，新链路日志只做追加，不影响既有排查习惯。
 
+### 高频回调日志开关（`SdkConfig.logEnable`，**默认已关闭**）
+
+`Call` / `BaseJni` 里有 8 处跟随**每次 native 回调**打印的日志，实测占依赖方 App 全部日志量的 **56%**，
+其中 `Call.error_ret` 有很大比例是 `ret=0`（正常返回），排查价值低，因此**默认关闭**：
+
+| 位置 | 内容 | 实测频率 |
+| --- | --- | --- |
+| `Call.error_ret` | `error_ret：type=…,method=…,ret=…` | ~3.4 次/秒（43% 是 ret=0） |
+| `Call.callback_method` | `callback_method：type=…,method=…,datalen=…` | ~1 次/秒 |
+| `Call` | 后台接收包长、队列已满移除最旧帧 | 随收包频率 |
+| `BaseJni` | 查询设备硬件信息成功/失败、参会人权限查询失败、参会人颜色 | 随调用频率 |
+
+```kotlin
+// 依赖方按需打开（建议跟随自己的"调试开关"，默认保持 false）
+SdkConfig.logEnable = true
+```
+
+> 关闭它**不影响任何功能**，只是不再打印上述日志；需要排查回调/权限问题时再打开。
+
 ### 2.5.13
 #### 库更新
    - 添加pdf签名推送相关API
