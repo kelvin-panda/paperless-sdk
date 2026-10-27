@@ -63,13 +63,29 @@ class SdkVars {
 
 
         //<editor-fold desc="应用目录">
+        /**
+         * 内部存储根目录（`context.getFilesDir()`）。
+         *
+         * 非手动点击下载的文件（打开文件时自动下载、缓存、议程/批注、离线会议、升级包等）都放这里，
+         * 避免会议资料落在外部存储被随意读取造成泄漏。
+         */
         var root_dir: String = ""
         var cache_dir: String = ""
         var externalCacheDir: String = ""
+        /**
+         * 外部存储根目录（`context.getExternalFilesDir("Paperless")`，客户可查找）。
+         *
+         * 只放需要客户回传/查看的内容：日志、崩溃日志、系统日志，以及用户手动点击"下载"的文件。
+         */
+        var external_root_dir: String = ""
         var logcat_dir: String = ""
         var crash_dir: String = ""
         var system_logcat_dir: String = ""
         var files_dir: String = ""
+        /**
+         * 手动下载目录：`context.getExternalFilesDir("Paperless")/files`
+         */
+        var external_files_dir: String = ""
         var download_dir: String = ""
         var agenda_dir: String = ""
         var bind_pdf_dir: String = ""

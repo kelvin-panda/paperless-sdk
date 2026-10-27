@@ -92,23 +92,33 @@ object Paperless {
     //</editor-fold>
 
     private fun initDirPath(context: Context) {
-        SdkVars.root_dir = context.getExternalFilesDir("Paperless")!!.absolutePath + File.separator
-        SdkVars.logcat_dir = SdkVars.root_dir + "logcat" + File.separator
-        SdkVars.crash_dir = SdkVars.root_dir + "crash" + File.separator
-        SdkVars.system_logcat_dir = SdkVars.root_dir + "systemLogcat" + File.separator
+        //内部存储根目录：非手动点击下载的文件（打开文件、缓存、议程、批注、离线会议、升级包等）都放这里，
+        //避免会议资料落在外部存储被随意读取造成泄漏
+        SdkVars.root_dir = context.filesDir.absolutePath + File.separator
+        //外部存储根目录（客户可查找）：日志/崩溃日志/系统日志，以及用户手动点击“下载”的文件
+        val externalRoot =
+            context.getExternalFilesDir("Paperless")?.absolutePath ?: context.filesDir.absolutePath
+        SdkVars.external_root_dir = externalRoot + File.separator
+        SdkVars.logcat_dir = SdkVars.external_root_dir + "logcat" + File.separator
+        SdkVars.crash_dir = SdkVars.external_root_dir + "crash" + File.separator
+        SdkVars.system_logcat_dir = SdkVars.external_root_dir + "systemLogcat" + File.separator
         SdkVars.files_dir = SdkVars.root_dir + "files" + File.separator
+        //用户手动点击“下载”的默认目录：context.getExternalFilesDir("Paperless")/files
+        SdkVars.external_files_dir = SdkVars.external_root_dir + "files" + File.separator
         SdkVars.cache_dir = context.cacheDir?.absolutePath + File.separator
         SdkVars.externalCacheDir = context.externalCacheDir?.absolutePath + File.separator
-        SdkVars.download_dir = SdkVars.root_dir + "download" + File.separator
+        SdkVars.download_dir = SdkVars.external_files_dir
         SdkVars.agenda_dir = SdkVars.files_dir + "agendaFile" + File.separator
         SdkVars.bind_pdf_dir = SdkVars.files_dir + "bindPdfFile" + File.separator
         LogUtils.e(
             "目录："
-                    + "\nroot_dir:${SdkVars.root_dir}"
+                    + "\nroot_dir(内部存储):${SdkVars.root_dir}"
+                    + "\nexternal_root_dir(外部存储):${SdkVars.external_root_dir}"
                     + "\nlogcat_dir:${SdkVars.logcat_dir}"
                     + "\ncrash_dir:${SdkVars.crash_dir}"
                     + "\nsystem_logcat_dir:${SdkVars.system_logcat_dir}"
                     + "\nfiles_dir:${SdkVars.files_dir}"
+                    + "\nexternal_files_dir:${SdkVars.external_files_dir}"
                     + "\ncache_dir:${SdkVars.cache_dir}"
                     + "\nexternalCacheDir:${SdkVars.externalCacheDir}"
                     + "\nagenda_dir:${SdkVars.agenda_dir}"
