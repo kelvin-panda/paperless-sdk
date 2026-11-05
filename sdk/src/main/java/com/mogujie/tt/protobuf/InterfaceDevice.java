@@ -1757,6 +1757,7 @@ public final class InterfaceDevice {
   /**
    * <pre>
    *texttype=TEXTBRODCAST_TYPE_JSON时,json的mode
+   *对应的json协议约定参见meetuserdef.h文件
    * </pre>
    *
    * Protobuf enum {@code Pb_TextBroadcast_JsonMode}
@@ -1842,6 +1843,54 @@ public final class InterfaceDevice {
      * <code>Pb_ResShowMode_expand = 9;</code>
      */
     Pb_ResShowMode_expand(9),
+    /**
+     * <pre>
+     *参会人向主持人|管理员|秘书角色获取他当前正在打开的文档ID
+     * </pre>
+     *
+     * <code>Pb_ResShowMode_file = 10;</code>
+     */
+    Pb_ResShowMode_file(10),
+    /**
+     * <pre>
+     *向参人发送一些消息提示
+     * </pre>
+     *
+     * <code>Pb_ResShowMode_notify = 11;</code>
+     */
+    Pb_ResShowMode_notify(11),
+    /**
+     * <pre>
+     *和会议记录设备的通讯
+     * </pre>
+     *
+     * <code>Pb_ResShowMode_recogn = 12;</code>
+     */
+    Pb_ResShowMode_recogn(12),
+    /**
+     * <pre>
+     *新投票-提醒参会人投票 id对应的是投票id 数组
+     * </pre>
+     *
+     * <code>Pb_ResShowMode_notifynewvote = 13;</code>
+     */
+    Pb_ResShowMode_notifynewvote(13),
+    /**
+     * <pre>
+     *关闭单个投票窗口 998=单个 999=批量
+     * </pre>
+     *
+     * <code>Pb_ResShowMode_closeVote = 14;</code>
+     */
+    Pb_ResShowMode_closeVote(14),
+    /**
+     * <pre>
+     *新投票-跳过参会人投票 id对应的是投票id 数组
+     * </pre>
+     *
+     * <code>Pb_ResShowMode_skipnewvote = 15;</code>
+     */
+    Pb_ResShowMode_skipnewvote(15),
     UNRECOGNIZED(-1),
     ;
 
@@ -1924,6 +1973,54 @@ public final class InterfaceDevice {
      * <code>Pb_ResShowMode_expand = 9;</code>
      */
     public static final int Pb_ResShowMode_expand_VALUE = 9;
+    /**
+     * <pre>
+     *参会人向主持人|管理员|秘书角色获取他当前正在打开的文档ID
+     * </pre>
+     *
+     * <code>Pb_ResShowMode_file = 10;</code>
+     */
+    public static final int Pb_ResShowMode_file_VALUE = 10;
+    /**
+     * <pre>
+     *向参人发送一些消息提示
+     * </pre>
+     *
+     * <code>Pb_ResShowMode_notify = 11;</code>
+     */
+    public static final int Pb_ResShowMode_notify_VALUE = 11;
+    /**
+     * <pre>
+     *和会议记录设备的通讯
+     * </pre>
+     *
+     * <code>Pb_ResShowMode_recogn = 12;</code>
+     */
+    public static final int Pb_ResShowMode_recogn_VALUE = 12;
+    /**
+     * <pre>
+     *新投票-提醒参会人投票 id对应的是投票id 数组
+     * </pre>
+     *
+     * <code>Pb_ResShowMode_notifynewvote = 13;</code>
+     */
+    public static final int Pb_ResShowMode_notifynewvote_VALUE = 13;
+    /**
+     * <pre>
+     *关闭单个投票窗口 998=单个 999=批量
+     * </pre>
+     *
+     * <code>Pb_ResShowMode_closeVote = 14;</code>
+     */
+    public static final int Pb_ResShowMode_closeVote_VALUE = 14;
+    /**
+     * <pre>
+     *新投票-跳过参会人投票 id对应的是投票id 数组
+     * </pre>
+     *
+     * <code>Pb_ResShowMode_skipnewvote = 15;</code>
+     */
+    public static final int Pb_ResShowMode_skipnewvote_VALUE = 15;
 
 
     public final int getNumber() {
@@ -1950,6 +2047,12 @@ public final class InterfaceDevice {
         case 7: return Pb_ResShowMode_image;
         case 8: return Pb_ResShowMode_fold;
         case 9: return Pb_ResShowMode_expand;
+        case 10: return Pb_ResShowMode_file;
+        case 11: return Pb_ResShowMode_notify;
+        case 12: return Pb_ResShowMode_recogn;
+        case 13: return Pb_ResShowMode_notifynewvote;
+        case 14: return Pb_ResShowMode_closeVote;
+        case 15: return Pb_ResShowMode_skipnewvote;
         default: return null;
       }
     }
@@ -1973,6 +2076,194 @@ public final class InterfaceDevice {
     }
 
     // @@protoc_insertion_point(enum_scope:Pb_TextBroadcast_JsonMode)
+  }
+
+  /**
+   * <pre>
+   *语音转写软件控制码
+   *对应的json协议约定参见meetuserdef.h 文件 Pb_ResShowMode_recogn的协议约定
+   * </pre>
+   *
+   * Protobuf enum {@code Pb_Recognition_oper}
+   */
+  public enum Pb_Recognition_oper
+      implements com.google.protobuf.Internal.EnumLite {
+    /**
+     * <pre>
+     * </pre>
+     *
+     * <code>Pb_RECOGNITION_OPER_ZERO = 0;</code>
+     */
+    Pb_RECOGNITION_OPER_ZERO(0),
+    /**
+     * <pre>
+     *通知会议记录设备开始采集或识别
+     * </pre>
+     *
+     * <code>Pb_RECOGNITION_OPER_START = 1;</code>
+     */
+    Pb_RECOGNITION_OPER_START(1),
+    /**
+     * <pre>
+     *通知会议记录设备停止采集或识别
+     * </pre>
+     *
+     * <code>Pb_RECOGNITION_OPER_STOP = 2;</code>
+     */
+    Pb_RECOGNITION_OPER_STOP(2),
+    /**
+     * <pre>
+     *通知会议记录设备停止采集识别并上传录音和转写内容
+     * </pre>
+     *
+     * <code>Pb_RECOGNITION_OPER_UPLOAD = 3;</code>
+     */
+    Pb_RECOGNITION_OPER_UPLOAD(3),
+    /**
+     * <pre>
+     *通知会议记录设备停止采集识别并清空数据
+     * </pre>
+     *
+     * <code>Pb_RECOGNITION_OPER_CLEAR = 4;</code>
+     */
+    Pb_RECOGNITION_OPER_CLEAR(4),
+    /**
+     * <pre>
+     *通知会议记录设备停止采集识别,上传数据，然后清空数据
+     * </pre>
+     *
+     * <code>Pb_RECOGNITION_OPER_CLOSE = 5;</code>
+     */
+    Pb_RECOGNITION_OPER_CLOSE(5),
+    /**
+     * <pre>
+     *获取会议记录设备采集状态数据
+     * </pre>
+     *
+     * <code>Pb_RECOGNITION_OPER_STATUS = 6;</code>
+     */
+    Pb_RECOGNITION_OPER_STATUS(6),
+    /**
+     * <pre>
+     *获取会议记录设备的转写原始结果
+     * </pre>
+     *
+     * <code>Pb_RECOGNITION_OPER_RESULT = 7;</code>
+     */
+    Pb_RECOGNITION_OPER_RESULT(7),
+    UNRECOGNIZED(-1),
+    ;
+
+    /**
+     * <pre>
+     * </pre>
+     *
+     * <code>Pb_RECOGNITION_OPER_ZERO = 0;</code>
+     */
+    public static final int Pb_RECOGNITION_OPER_ZERO_VALUE = 0;
+    /**
+     * <pre>
+     *通知会议记录设备开始采集或识别
+     * </pre>
+     *
+     * <code>Pb_RECOGNITION_OPER_START = 1;</code>
+     */
+    public static final int Pb_RECOGNITION_OPER_START_VALUE = 1;
+    /**
+     * <pre>
+     *通知会议记录设备停止采集或识别
+     * </pre>
+     *
+     * <code>Pb_RECOGNITION_OPER_STOP = 2;</code>
+     */
+    public static final int Pb_RECOGNITION_OPER_STOP_VALUE = 2;
+    /**
+     * <pre>
+     *通知会议记录设备停止采集识别并上传录音和转写内容
+     * </pre>
+     *
+     * <code>Pb_RECOGNITION_OPER_UPLOAD = 3;</code>
+     */
+    public static final int Pb_RECOGNITION_OPER_UPLOAD_VALUE = 3;
+    /**
+     * <pre>
+     *通知会议记录设备停止采集识别并清空数据
+     * </pre>
+     *
+     * <code>Pb_RECOGNITION_OPER_CLEAR = 4;</code>
+     */
+    public static final int Pb_RECOGNITION_OPER_CLEAR_VALUE = 4;
+    /**
+     * <pre>
+     *通知会议记录设备停止采集识别,上传数据，然后清空数据
+     * </pre>
+     *
+     * <code>Pb_RECOGNITION_OPER_CLOSE = 5;</code>
+     */
+    public static final int Pb_RECOGNITION_OPER_CLOSE_VALUE = 5;
+    /**
+     * <pre>
+     *获取会议记录设备采集状态数据
+     * </pre>
+     *
+     * <code>Pb_RECOGNITION_OPER_STATUS = 6;</code>
+     */
+    public static final int Pb_RECOGNITION_OPER_STATUS_VALUE = 6;
+    /**
+     * <pre>
+     *获取会议记录设备的转写原始结果
+     * </pre>
+     *
+     * <code>Pb_RECOGNITION_OPER_RESULT = 7;</code>
+     */
+    public static final int Pb_RECOGNITION_OPER_RESULT_VALUE = 7;
+
+
+    public final int getNumber() {
+      return value;
+    }
+
+    /**
+     * @deprecated Use {@link #forNumber(int)} instead.
+     */
+    @java.lang.Deprecated
+    public static Pb_Recognition_oper valueOf(int value) {
+      return forNumber(value);
+    }
+
+    public static Pb_Recognition_oper forNumber(int value) {
+      switch (value) {
+        case 0: return Pb_RECOGNITION_OPER_ZERO;
+        case 1: return Pb_RECOGNITION_OPER_START;
+        case 2: return Pb_RECOGNITION_OPER_STOP;
+        case 3: return Pb_RECOGNITION_OPER_UPLOAD;
+        case 4: return Pb_RECOGNITION_OPER_CLEAR;
+        case 5: return Pb_RECOGNITION_OPER_CLOSE;
+        case 6: return Pb_RECOGNITION_OPER_STATUS;
+        case 7: return Pb_RECOGNITION_OPER_RESULT;
+        default: return null;
+      }
+    }
+
+    public static com.google.protobuf.Internal.EnumLiteMap<Pb_Recognition_oper>
+        internalGetValueMap() {
+      return internalValueMap;
+    }
+    private static final com.google.protobuf.Internal.EnumLiteMap<
+        Pb_Recognition_oper> internalValueMap =
+          new com.google.protobuf.Internal.EnumLiteMap<Pb_Recognition_oper>() {
+            public Pb_Recognition_oper findValueByNumber(int number) {
+              return Pb_Recognition_oper.forNumber(number);
+            }
+          };
+
+    private final int value;
+
+    private Pb_Recognition_oper(int value) {
+      this.value = value;
+    }
+
+    // @@protoc_insertion_point(enum_scope:Pb_Recognition_oper)
   }
 
   /**

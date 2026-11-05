@@ -24,6 +24,9 @@ void jni_enablebackgroud(JNIEnv *env, jobject thiz, jint benable);
 //sucess return a bytearray parse with type and method,failed return a null bytearray
 jbyteArray jni_call(JNIEnv *env, jobject thiz, jint type, jint method, jbyteArray pdata);
 
+//check type
+int jni_checkcache(JNIEnv *env, jobject thiz, jint type, jint id, jint cacheflag);
+
 //for init android camara capture
 //channelstart is channelindex
 int jni_AndroidDevice_initcapture(JNIEnv *env, jobject thiz, jint type, jint channelstart);
@@ -35,13 +38,13 @@ int jni_AndroidDevice_InitRtspcapture(JNIEnv *env, jobject thiz, jint channelsta
 
 //for pass android camara capture data
 //channelstart is channelindex
-//iskeyframe is video encode key frame flag 0´ú±íÆÕÍ¨Ö¡£¬1´ú±í¹Ø¼üÖ¡
+//iskeyframe is video encode key frame flag 0ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Í¨Ö¡ï¿½ï¿½1ï¿½ï¿½ï¿½ï¿½Ø¼ï¿½Ö¡
 //pts playtimestamp microseconds
 int jni_AndroidDevice_call(JNIEnv *env, jobject thiz, jint channelstart, jint iskeyframe, jlong pts, jbyteArray pdata);
 int jni_AndroidDevice_bytebuffercall(JNIEnv *env, jobject thiz, jint channelstart, jint iskeyframe, jlong pts, jobject dbuf, jint length);
 
-//Outdbuf´óĞ¡×îºÃÉèÖÃÎªÊı¾İµÄwidth*height*2
-//³É¹¦·µ»ØoutdbufµÄÊı¾İ´óĞ¡£¬Ê§°Ü·µ»Ø0
+//Outdbufï¿½ï¿½Ğ¡ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Îªï¿½ï¿½ï¿½İµï¿½width*height*2
+//ï¿½É¹ï¿½ï¿½ï¿½ï¿½ï¿½outdbufï¿½ï¿½ï¿½ï¿½ï¿½İ´ï¿½Ğ¡ï¿½ï¿½Ê§ï¿½Ü·ï¿½ï¿½ï¿½0
 int jni_AndroidDevice_NV21ToI420(JNIEnv *env, jobject thiz, jobject dbuf, jobject outdbuf, jint width, jint height);
 int jni_AndroidDevice_NV21ToNV12(JNIEnv *env, jobject thiz, jobject dbuf, jobject outdbuf, jint width, jint height);
 int jni_AndroidDevice_I420ToNV12(JNIEnv *env, jobject thiz, jobject dbuf, jobject outdbuf, jint width, jint height);
@@ -52,93 +55,96 @@ int jni_AndroidDevice_I420ToNV12(JNIEnv *env, jobject thiz, jobject dbuf, jobjec
 //rgbmode= 4://(bgr in memory)
 //rgbmode= 5://(rgb in memory)
 int jni_AndroidDevice_RGBToI420(JNIEnv *env, jobject thiz, jint rgbmode, jobject dbuf, jobject outdbuf, jint width, jint height);
-//Outdbuf´óĞ¡×îºÃÉèÖÃÎªÊı¾İµÄdstwidth*dstheight*2
-//³É¹¦·µ»ØoutdbufµÄÊı¾İ´óĞ¡£¬Ê§°Ü·µ»Ø0
+//Outdbufï¿½ï¿½Ğ¡ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Îªï¿½ï¿½ï¿½İµï¿½dstwidth*dstheight*2
+//ï¿½É¹ï¿½ï¿½ï¿½ï¿½ï¿½outdbufï¿½ï¿½ï¿½ï¿½ï¿½İ´ï¿½Ğ¡ï¿½ï¿½Ê§ï¿½Ü·ï¿½ï¿½ï¿½0
 int jni_AndroidDevice_I420Scale(JNIEnv *env, jobject thiz, jobject dbuf, jobject outdbuf, jint srcwidth, jint srcheight, jint dstwidth, jint dstheight);
 
 //(ARGB=bgra in memory)
-//³É¹¦·µ»ØoutdbufµÄÊı¾İ´óĞ¡£¬Ê§°Ü·µ»Ø0
+//ï¿½É¹ï¿½ï¿½ï¿½ï¿½ï¿½outdbufï¿½ï¿½ï¿½ï¿½ï¿½İ´ï¿½Ğ¡ï¿½ï¿½Ê§ï¿½Ü·ï¿½ï¿½ï¿½0
 int jni_AndroidDevice_ARGBScale(JNIEnv *env, jobject thiz, jobject dbuf, jobject outdbuf, jint srcwidth, jint srcheight, jint dstwidth, jint dstheight);
 
-//rgb×ª»»
+//rgb×ªï¿½ï¿½
 //(ARGB=bgra in memory)
 //dst_rgbmode= 0://(abgr in memory)
 //dst_rgbmode= 2://(argb in memory)
 //dst_rgbmode= 3://(rgba in memory)
 //dst_rgbmode= 4://(bgr in memory)
 //dst_rgbmode= 5://(rgb in memory)
-//³É¹¦·µ»ØoutdbufµÄÊı¾İ´óĞ¡£¬Ê§°Ü·µ»Ø0
+//ï¿½É¹ï¿½ï¿½ï¿½ï¿½ï¿½outdbufï¿½ï¿½ï¿½ï¿½ï¿½İ´ï¿½Ğ¡ï¿½ï¿½Ê§ï¿½Ü·ï¿½ï¿½ï¿½0
 int jni_AndroidDevice_ARGBToXRGB(JNIEnv *env, jobject thiz, jobject dbuf, jobject outdbuf, int dstrgbmode, jint width, jint height);
 
 int jni_AndroidDevice_ARGBToNV21(JNIEnv *env, jobject thiz, jobject dbuf, jobject outdbuf, jint width, jint height);
 int jni_AndroidDevice_ARGBToNV12(JNIEnv *env, jobject thiz, jobject dbuf, jobject outdbuf, jint width, jint height);
 
-//ÎªÁË±£Ö¤Ğ§ÂÊ£¬dbufµÄÄÚ´æjniÄÚ²¿»áÊ¹ÓÃ£¬È·±£dbufµÄÊı¾İ¸²¸ÇÃ»ÓĞÎÊÌâ
-//Outdbuf´óĞ¡×îºÃÉèÖÃÎªÊı¾İµÄmax(srcwidth*srcheight*2, dstwidth*dstheight*2)
-//³É¹¦·µ»ØoutdbufµÄÊı¾İ´óĞ¡£¬Ê§°Ü·µ»Ø0
-//Âß¼­argb-->I420-->I420SCALE-->I4202NV12
-int jni_AndroidDevice_RGBToNV12(JNIEnv *env, jobject thiz, int rgbmode, jobject dbuf, jobject outdbuf, jint srcwidth, jint srcheight, jint dstwidth, jint dstheight);
-//Âß¼­argb-->argbSCALE-->argb2NV12
+//Îªï¿½Ë±ï¿½Ö¤Ğ§ï¿½Ê£ï¿½dbufï¿½ï¿½ï¿½Ú´ï¿½jniï¿½Ú²ï¿½ï¿½ï¿½Ê¹ï¿½Ã£ï¿½È·ï¿½ï¿½dbufï¿½ï¿½ï¿½ï¿½ï¿½İ¸ï¿½ï¿½ï¿½Ã»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+//Outdbufï¿½ï¿½Ğ¡ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Îªï¿½ï¿½ï¿½İµï¿½max(srcwidth*srcheight*2, dstwidth*dstheight*2)
+//ï¿½É¹ï¿½ï¿½ï¿½ï¿½ï¿½outdbufï¿½ï¿½ï¿½ï¿½ï¿½İ´ï¿½Ğ¡ï¿½ï¿½Ê§ï¿½Ü·ï¿½ï¿½ï¿½0
+//ï¿½ß¼ï¿½argb-->I420-->I420SCALE-->I4202NV12
+int jni_AndroidDevice_RGBToNV12(JNIEnv *env, jobject thiz, int rgbmode, jobject dbuf, jobject outdbuf, jint srcwidth, jint srcheight, jint dstwidth, jint dstheight,jint rowStride);
+int jni_AndroidDevice_FFmpegRGBToNV12(JNIEnv *env, jobject thiz, int rgbmode, jobject dbuf, jobject outdbuf, jint srcwidth, jint srcheight, jint dstwidth, jint dstheight,jint rowStride);
+//ï¿½ß¼ï¿½argb-->argbSCALE-->argb2NV12
 int jni_AndroidDevice_RGBToNV12EX(JNIEnv *env, jobject thiz, jobject dbuf, jobject outdbuf, jint srcwidth, jint srcheight, jint dstwidth, jint dstheight);
 jbyteArray jni_AndroidDevice_RGBToNV12BA(JNIEnv *env, jobject thiz, int rgbmode, jbyteArray pdata, jint srcwidth, jint srcheight, jint dstwidth, jint dstheight);
 
 
-//³õÊ¼»¯Ò»¸öÏÂÔØ»á»°
-//³É¹¦·µ»ØÒ»¸ö»áÒéË÷Òı -1Ê§°Ü
+//ï¿½ï¿½Ê¼ï¿½ï¿½Ò»ï¿½ï¿½ï¿½ï¿½ï¿½Ø»á»°
+//ï¿½É¹ï¿½ï¿½ï¿½ï¿½ï¿½Ò»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ -1Ê§ï¿½ï¿½
 int jni_downloadinit(JNIEnv *env, jobject thiz, jlong mdieaid);
-//ÏÂÔØÎÄ¼şÊı¾İ
-//dbuf ÓÃÀ´½ÓÊÕÊı¾İµÄbuf
-//readsizeĞèÒªµÄÊı¾İ´óĞ¡
-//·µ»Ø¶ÁÈ¡µÄ´óĞ¡
+//ï¿½ï¿½ï¿½ï¿½ï¿½Ä¼ï¿½ï¿½ï¿½ï¿½ï¿½
+//dbuf ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½İµï¿½buf
+//readsizeï¿½ï¿½Òªï¿½ï¿½ï¿½ï¿½ï¿½İ´ï¿½Ğ¡
+//ï¿½ï¿½ï¿½Ø¶ï¿½È¡ï¿½Ä´ï¿½Ğ¡
 int jni_downloadread(JNIEnv *env, jobject thiz, jint opindex, jobject dbuf, jint readsize);
-//ÉèÖÃÏÂÔØµÄÆ«ÒÆ
-//³É¹¦·µ»Ø0 Ê§°Ü·µ»Ø-1
+//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Øµï¿½Æ«ï¿½ï¿½
+//ï¿½É¹ï¿½ï¿½ï¿½ï¿½ï¿½0 Ê§ï¿½Ü·ï¿½ï¿½ï¿½-1
 int jni_downloadseek(JNIEnv *env, jobject thiz, jint opindex, jlong offset);
 void jni_downloadclose(JNIEnv *env, jobject thiz, jint opindex);
 
 //direct get audio play audio data
-//readsize Òª¶ÁÈ¡µÄ´óĞ¡
-//³É¹¦·µ»Ø¶ÁÈ¡µÄ´óĞ¡
+//readsize Òªï¿½ï¿½È¡ï¿½Ä´ï¿½Ğ¡
+//ï¿½É¹ï¿½ï¿½ï¿½ï¿½Ø¶ï¿½È¡ï¿½Ä´ï¿½Ğ¡
 int jni_directgetaudiodata(JNIEnv *env, jobject thiz, jobject dbuf, jint readsize);
 
 //direct get audio play audio data
-//mode =0¼ÇÂ¼·½·¨ =1×¢²áÏß³Ì =2ÖØÖÃ
+//mode =0ï¿½ï¿½Â¼ï¿½ï¿½ï¿½ï¿½ =1×¢ï¿½ï¿½ï¿½ß³ï¿½ =2ï¿½ï¿½ï¿½ï¿½
 void jni_crashhandle(JNIEnv *env, jobject thiz, jint mode, jstring pdata);
 
-//»Øµ÷º¯Êı java callback function c++ return to 
-//Êı¾İ±ä¸üÍ¨Öª»Øµ÷
+void jni_enableagendav3(JNIEnv *env, jobject thiz, jint enable);
+
+//ï¿½Øµï¿½ï¿½ï¿½ï¿½ï¿½ java callback function c++ return to 
+//ï¿½ï¿½ï¿½İ±ï¿½ï¿½Í¨Öªï¿½Øµï¿½
 //int callback_method(int type, int method, byte[] pdata, int datalen);
 
-//Á÷Í¨µÀ²Ù×÷»Øµ÷
-//channelstart Á÷Í¨µÀË÷Òı
-//oper ²Ù×÷Öµ ²Î¼ûlibDevice_android.hÍ·ÎÄ¼şÖĞANDROID_OPERFLAG_PIXFORMATµÄ¶¨Òå
+//ï¿½ï¿½Í¨ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Øµï¿½
+//channelstart ï¿½ï¿½Í¨ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+//oper ï¿½ï¿½ï¿½ï¿½Öµ ï¿½Î¼ï¿½libDevice_android.hÍ·ï¿½Ä¼ï¿½ï¿½ï¿½ANDROID_OPERFLAG_PIXFORMATï¿½Ä¶ï¿½ï¿½ï¿½
 //int callback(int channelstart, int oper);
 
-//jni_callÖ´ĞĞºóµÄ´íÎóÂë»Øµ÷º¯Êı
-//type ÀàĞÍ
-//method ÀàĞÍ¶ÔÓÚµÄ·½·¨
-//retcode ´íÎóÂë£¬²Î¼û´íÎóÂëµÄ¶¨Òå
+//jni_callÖ´ï¿½Ğºï¿½Ä´ï¿½ï¿½ï¿½ï¿½ï¿½Øµï¿½ï¿½ï¿½ï¿½ï¿½
+//type ï¿½ï¿½ï¿½ï¿½
+//method ï¿½ï¿½ï¿½Í¶ï¿½ï¿½ÚµÄ·ï¿½ï¿½ï¿½
+//retcode ï¿½ï¿½ï¿½ï¿½ï¿½ë£¬ï¿½Î¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ä¶ï¿½ï¿½ï¿½
 //void error_ret(int type, int method, int retcode);
 
-//½«yuvµÄÍ¼ÏñÊı¾İ·µ»Ø¸ø°²×¿²ãÏÔÊ¾
-//res ×ÊÔ´id
+//ï¿½ï¿½yuvï¿½ï¿½Í¼ï¿½ï¿½ï¿½ï¿½ï¿½İ·ï¿½ï¿½Ø¸ï¿½ï¿½ï¿½×¿ï¿½ï¿½ï¿½ï¿½Ê¾
+//res ï¿½ï¿½Ô´id
 //int callback_yuvdisplay(int res, int w, int h, byte[] y, byte[] u, byte[] v);
 
-//½«Î´½âÂëµÄÍ¼ÏñÖ¡Êı¾İ·µ»Ø¸ø°²×¿²ã½âÂëÏÔÊ¾
-//res ×ÊÔ´id
-//codecid Ö¡µÄ±àÂëid
-//w,h¿í¸ß
-//packetÖ¡Êı¾İ
-//pts¸ÃÖ¡Êı¾İµÄÏÔÊ¾Ê±¼ä´Á µ¥Î»£ººÁÃë
-//codecdata sps/ppsÊı¾İ
+//ï¿½ï¿½Î´ï¿½ï¿½ï¿½ï¿½ï¿½Í¼ï¿½ï¿½Ö¡ï¿½ï¿½ï¿½İ·ï¿½ï¿½Ø¸ï¿½ï¿½ï¿½×¿ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê¾
+//res ï¿½ï¿½Ô´id
+//codecid Ö¡ï¿½Ä±ï¿½ï¿½ï¿½id
+//w,hï¿½ï¿½ï¿½
+//packetÖ¡ï¿½ï¿½ï¿½ï¿½
+//ptsï¿½ï¿½Ö¡ï¿½ï¿½ï¿½İµï¿½ï¿½ï¿½Ê¾Ê±ï¿½ï¿½ï¿½ ï¿½ï¿½Î»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+//codecdata sps/ppsï¿½ï¿½ï¿½ï¿½
 //int callback_videodecode(int iskeyframe, int res, int codecid, int w, int h, byte[] packet, long pts, byte[] codecdata);
 
-//³õÊ¼»¯½âÂëÏÔÊ¾Í¨Öª
-//res ×ÊÔ´id
+//ï¿½ï¿½Ê¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê¾Í¨Öª
+//res ï¿½ï¿½Ô´id
 //int callback_startdisplay(int res);
 
-//Í£Ö¹½âÂëÏÔÊ¾Í¨Öª
-//res ×ÊÔ´id
+//Í£Ö¹ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê¾Í¨Öª
+//res ï¿½ï¿½Ô´id
 //int callback_stopdisplay(int res);
 #ifdef __cplusplus
 }

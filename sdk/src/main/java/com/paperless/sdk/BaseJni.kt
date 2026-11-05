@@ -3,6 +3,7 @@ package com.paperless.sdk
 import android.graphics.Color
 import android.graphics.PointF
 import android.os.Build
+import com.blankj.utilcode.util.GsonUtils
 import com.blankj.utilcode.util.LogUtils
 import com.blankj.utilcode.util.SPUtils
 import com.google.protobuf.ByteString
@@ -48,6 +49,7 @@ import com.mogujie.tt.protobuf.InterfaceVideo
 import com.mogujie.tt.protobuf.InterfaceVote
 import com.mogujie.tt.protobuf.InterfaceVote.pbui_Type_MeetOnVotingDetailInfo
 import com.mogujie.tt.protobuf.InterfaceWhiteboard
+import com.paperless.data.json.MeetCreateTimeJson
 import com.paperless.sdk.SdkVars.Companion.localDeviceId
 import com.paperless.sdk.SdkVars.Companion.localMemberId
 import com.paperless.util.SdkUtil
@@ -59,6 +61,19 @@ import java.util.UUID
  *  created on 2025/7/7 14:50
  */
 open class BaseJni {
+
+    companion object {
+
+        /**
+         * ERASE / UNDO 在协议里没有对应的 figuretype 枚举，沿用旧版约定：
+         * `8 = 擦除`、`9 = 撤销`（[InterfaceMacro.Pb_MeetPostilFigureType] 现有值只到 7 = ARROW）。
+         *
+         * 目标操作标识按 64 位拆成两段传输：`linesize` 存低 32 位、`argb` 存高 32 位，
+         * 与接收端 `((argb.toLong() shl 32) or (linesize.toLong() and 0xffffffffL))` 对称。
+         */
+        const val PDF_FIGURETYPE_ERASE = 8
+        const val PDF_FIGURETYPE_UNDO = 9
+    }
 
     //    @RequiresApi(api = Build.VERSION_CODES.O)
     open fun getUUID(): String {
@@ -722,6 +737,13 @@ open class BaseJni {
 
     open fun queryCurrentRoomId(): Int {
         queryContextAttribute(InterfaceMacro.Pb_ContextPropertyID.Pb_MEETCONTEXT_PROPERTY_CURROOMID.number)?.let {
+            return it.propertyval
+        }
+        return 0
+    }
+
+    fun queryCurrentMemberId(): Int {
+        queryContextAttribute(InterfaceMacro.Pb_ContextPropertyID.Pb_MEETCONTEXT_PROPERTY_SELFMEMBERID.number)?.let {
             return it.propertyval
         }
         return 0
@@ -3451,6 +3473,228 @@ open class BaseJni {
         )
     }
 
+
+    //</editor-fold>
+
+
+    //<editor-fold desc="PDF 批注：擦除 / 撤销">
+
+    /**
+     * 广播「擦除一笔」。
+     *
+     * [utcstamp] 传本次操作自己的 operationId，[targetOperationId] 传被擦除那一笔的 operationId。
+     */
+    /**
+     * 通用图元发送：与 SDK 的 `pdfArtBoardInk` 走同一条协议通道（PDFWHITEBOARD + ADDINK），
+     * 但 figuretype 由调用方指定，因此可以发 INK / LINE / RECTANGLE（高亮）等任意图元。
+     *
+     * @param figuretype        [InterfaceMacro.Pb_MeetPostilFigureType] 的值，
+     *                          或 [PDF_FIGURETYPE_ERASE] / [PDF_FIGURETYPE_UNDO]
+     * @param linesize          线宽（擦除/撤销时忽略）
+     * @param argb              颜色 ARGB（擦除/撤销时忽略）
+     * @param utcstamp          本次操作的 operationId
+     * @param inkList           百分比坐标（与 `pdfArtBoardInk` 一致），擦除/撤销时传空
+     * @param pageindex         页码（索引 + 1）
+     * @param targetOperationId 擦除/撤销的目标 operationId；其它图元传 0
+     */
+    fun pdfArtBoardFigure(
+        opermemberid: Int,
+        srcmemid: Int,
+        srcwbid: Long,
+        operid: Int,
+        figuretype: Int,
+        linesize: Int,
+        argb: Int,
+        utcstamp: Long,
+        inkList: MutableList<PointF> = mutableListOf(),
+        fileid: Int = 0,
+        pageindex: Int = 0,
+        targetOperationId: Long = 0L
+    ) {
+        val flat = ArrayList<Float>(inkList.size * 2)
+        for (point in inkList) {
+            flat.add(point.x)
+            flat.add(point.y)
+        }
+        val builder = InterfaceWhiteboard.pbui_Type_MeetWhiteBoardInkItem.newBuilder()
+            .setOpermemberid(opermemberid)
+            .setSrcmemid(srcmemid)
+            .setSrcwbid(srcwbid)
+            .setOperid(operid)
+            .setUtcstamp(utcstamp)
+            .setFiguretype(figuretype)
+            .setLinesize(linesize)
+            .setArgb(argb)
+            .setFileid(fileid)
+            .setPageindex(pageindex)
+        if (flat.isNotEmpty()) {
+            builder.addAllPinklist(flat)
+        }
+        if (targetOperationId != 0L) {
+            // 擦除/撤销：目标 operationId 按 64 位拆成 低32 → linesize、高32 → argb
+            builder.setLinesize((targetOperationId and 0xffffffffL).toInt())
+            builder.setArgb((targetOperationId ushr 32).toInt())
+        }
+        Call.callMethod(
+            Pb_Type.Pb_TYPE_MEET_INTERFACE_PDFWHITEBOARD.number,
+            Pb_Method.Pb_METHOD_MEET_INTERFACE_ADDINK.number,
+            builder.build().toByteArray()
+        )
+    }
+
+    /**
+     * 广播「擦除一笔」。
+     *
+     * [utcstamp] 传本次操作自己的 operationId，[targetOperationId] 传被擦除那一笔的 operationId。
+     */
+    fun pdfArtBoardErase(
+        opermemberid: Int,
+        srcmemid: Int,
+        srcwbid: Long,
+        operid: Int,
+        utcstamp: Long,
+        targetOperationId: Long,
+        fileid: Int
+    ) = pdfArtBoardFigure(
+        opermemberid = opermemberid,
+        srcmemid = srcmemid,
+        srcwbid = srcwbid,
+        operid = operid,
+        figuretype = PDF_FIGURETYPE_ERASE,
+        linesize = 0,
+        argb = 0,
+        utcstamp = utcstamp,
+        fileid = fileid,
+        targetOperationId = targetOperationId
+    )
+
+    /**
+     * 广播「撤销一笔」，参数含义同 [pdfArtBoardErase]。
+     */
+    fun pdfArtBoardUndo(
+        opermemberid: Int,
+        srcmemid: Int,
+        srcwbid: Long,
+        operid: Int,
+        utcstamp: Long,
+        targetOperationId: Long,
+        fileid: Int
+    ) = pdfArtBoardFigure(
+        opermemberid = opermemberid,
+        srcmemid = srcmemid,
+        srcwbid = srcwbid,
+        operid = operid,
+        figuretype = PDF_FIGURETYPE_UNDO,
+        linesize = 0,
+        argb = 0,
+        utcstamp = utcstamp,
+        fileid = fileid,
+        targetOperationId = targetOperationId
+    )
+
+    /**
+     * 广播一条墨迹/图元（INK 专用便捷入口，等价于 `pdfArtBoardFigure(figuretype = INK)`）。
+     */
+    fun pdfArtBoardInkFigure(
+        opermemberid: Int,
+        srcmemid: Int,
+        srcwbid: Long,
+        operid: Int,
+        figuretype: Int,
+        linesize: Int,
+        argb: Int,
+        utcstamp: Long,
+        inkList: MutableList<PointF>,
+        fileid: Int,
+        pageindex: Int
+    ) = pdfArtBoardFigure(
+        opermemberid, srcmemid, srcwbid, operid, figuretype,
+        linesize, argb, utcstamp, inkList, fileid, pageindex, 0L
+    )
+
+    /**
+     * 删除一条 PDF 批注（供擦除 / 撤销使用）。
+     *
+     * **为什么不走 ADDINK**：服务端对 ADDINK 的 `figuretype` 只认 INK（实测 2 直线、8 擦除、9 撤销
+     * 都会被拒/无效）。删除改用与画板 `artBoardDel` 同构的独立方法：
+     * `(PDFWHITEBOARD, DEL)` + `pbui_Type_MeetDoClearWhiteBoard`，
+     * 其中 `utcstamp` = **被删除操作自己的 operationId**。
+     *
+     * @param memberid 0 = 不按作者过滤（按 utcstamp 精确定位）
+     */
+    fun pdfArtBoardDel(
+        opermemberid: Int,
+        srcmemid: Int,
+        srcwbid: Long,
+        operid: Int,
+        targetOperationId: Long,
+        memberid: Int = 0,
+        fileid: Int = 0
+    ) {
+        Call.callMethod(
+            Pb_Type.Pb_TYPE_MEET_INTERFACE_PDFWHITEBOARD.number,
+            Pb_Method.Pb_METHOD_MEET_INTERFACE_DEL.number,
+            InterfaceWhiteboard.pbui_Type_MeetDoClearWhiteBoard.newBuilder()
+                .setOpermemberid(opermemberid)
+                .setSrcmemid(srcmemid)
+                .setSrcwbid(srcwbid)
+                // 目标图元当初的 operid（服务端按 opermemberid + operid + srcwbid 定位）
+                .setOperid(operid)
+                .setUtcstamp(targetOperationId)
+                .setMemberid(memberid)
+                .setFiguretype(InterfaceMacro.Pb_MeetPostilFigureType.Pb_WB_FIGURETYPE_ZERO_VALUE)
+                .setFileid(fileid)
+                .build()
+                .toByteArray()
+        )
+    }
+
+    /**
+     * 发矩形类图元（PDF 高亮 / 方框）。
+     *
+     * 走高亮专用通道 `(PDFWHITEBOARD, ADDRECT)` + `pbui_Item_MeetWBRectDetail`，
+     * 不塞进 ADDINK —— 否则对端只能按墨迹画成一条线，和本地的高亮完全不是一个东西。
+     *
+     * 注意：该载荷没有 fileid / pageindex 字段，靠 srcmemid + srcwbid 定位会话。
+     *
+     * @param points 百分比坐标，交错 [x0,y0,x1,y1]（矩形取对角两点）
+     */
+    fun pdfArtBoardRect(
+        opermemberid: Int,
+        srcmemid: Int,
+        srcwbid: Long,
+        operid: Int,
+        linesize: Int,
+        argb: Int,
+        utcstamp: Long,
+        points: MutableList<Float>
+    ) {
+        Call.callMethod(
+            Pb_Type.Pb_TYPE_MEET_INTERFACE_PDFWHITEBOARD.number,
+            Pb_Method.Pb_METHOD_MEET_INTERFACE_ADDRECT.number,
+            InterfaceWhiteboard.pbui_Item_MeetWBRectDetail.newBuilder()
+                .setOpermemberid(opermemberid)
+                .setSrcmemid(srcmemid)
+                .setSrcwbid(srcwbid)
+                .setOperid(operid)
+                .setUtcstamp(utcstamp)
+                .setLinesize(linesize)
+                .setArgb(argb)
+                .addAllPt(points)
+                .setFiguretype(InterfaceMacro.Pb_MeetPostilFigureType.Pb_WB_FIGURETYPE_RECTANGLE_VALUE)
+                .build()
+                .toByteArray()
+        )
+    }
+
+    // pdf批注共享图片
+    fun pdfArtBoardPicture(build: InterfaceWhiteboard.pbui_Item_MeetWBPictureDetail) {
+        Call.callMethod(
+            Pb_Type.Pb_TYPE_MEET_INTERFACE_PDFWHITEBOARD.number,
+            Pb_Method.Pb_METHOD_MEET_INTERFACE_ADDPICTURE.number,
+            build.toByteArray()
+        )
+    }
     //</editor-fold>
 
     //<editor-fold desc="会议功能">
@@ -4266,6 +4510,55 @@ open class BaseJni {
         }
         return null
     }
+
+    /**
+     * 查询指定会议的创建时间戳（用于保证会议的唯一性）
+     *
+     * 数据来源：复合公共自定义数据
+     * `typ = PB_COMPLEX_PUBLIC_TYP_MEET`、`dataid = Pb_CMX_PUBMEET_DATAID_BASE`，
+     * 其 `ptext` 为 json：
+     * ```json
+     * {"createtime":"1793787681716806"}
+     * ```
+     *
+     * @param meetId 会议id
+     * @return 创建时间戳（微秒字符串）；无数据或解析失败时返回空串
+     */
+    fun queryMeetingCreatetime(meetId: Int): String {
+        val bytes = Call.callMethod(
+            Pb_Type.Pb_TYPE_MEET_INTERFACE_COMPLEXPUBLICUSERDEF.getNumber(),
+            Pb_Method.Pb_METHOD_MEET_INTERFACE_QUERY.getNumber(),
+            InterfacePublicinfo.pbui_Type_QueComplexPubInfo.newBuilder()
+                .setTyp(InterfacePublicinfo.PB_COMPLEX_PUBLIC_TYP.PB_COMPLEX_PUBLIC_TYP_MEET_VALUE)
+                .setId1(meetId)
+                .addItem(
+                    InterfacePublicinfo.pbui_Item_ComplexPubInfo.newBuilder()
+                        .setDataid(InterfacePublicinfo.Pb_CMX_PUBMEET_DATAID.Pb_CMX_PUBMEET_DATAID_BASE_VALUE)
+                        .build()
+                )
+                .build().toByteArray()
+        ) ?: return ""
+        return try {
+            val info = InterfacePublicinfo.pbui_Type_QueComplexPubInfo.parseFrom(bytes)
+            val item = info.itemList.firstOrNull {
+                it.dataid == InterfacePublicinfo.Pb_CMX_PUBMEET_DATAID.Pb_CMX_PUBMEET_DATAID_BASE_VALUE
+            }
+            if (item == null) {
+                if (SdkConfig.logEnable) {
+                    LogUtils.e("queryMeetingCreatetime meetId=$meetId 未返回创建时间数据, typ=${info.typ}")
+                }
+                ""
+            } else {
+                GsonUtils.fromJson(item.ptext.toStringUtf8(), MeetCreateTimeJson::class.java)?.createtime ?: ""
+            }
+        } catch (e: Exception) {
+            if (SdkConfig.logEnable) {
+                LogUtils.e("queryMeetingCreatetime 解析失败 meetId=$meetId: ${e.message}")
+            }
+            ""
+        }
+    }
+
     //</editor-fold>
 
     //<editor-fold desc="复合会议自定义数据相关\20260424">

@@ -18,6 +18,18 @@ extern "C" {
 #endif
 #endif
 
+	//获取数据库返回的状态码对应的文本,不需要释放, Type_MeetDBServerOperError::status
+	const char* meetcore_GetStatusMsg(int32u status);
+
+	//获取Type对应的文本,不需要释放
+	const char* meetcore_GettypeStr(int32u type);
+
+	//获取method对应的文本,不需要释放
+	const char* meetcore_GetMethodStr(int32u method);
+
+	//获取库调用错误码对应的文本,不需要释放
+	const char* meetcore_GetErrorStr(int err);
+
 	//是否是简易版本授权
 	//简易版返回1 否则返回0
 	MEETCPPDLL_API int meetcore_IsSimpleVer();

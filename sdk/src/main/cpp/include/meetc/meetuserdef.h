@@ -45,12 +45,32 @@
 #define 	ResShowMode_expand		9 //展开议题将议题附件显示 如果id数组为空默认是全部议题
 #define 	ResShowMode_file	    10 //参会人向主持人|管理员|秘书角色获取他当前正在打开的文档ID
 #define 	ResShowMode_notify	    11 //向参人发送一些消息提示
+#define 	ResShowMode_recogn	    12 //和会议记录设备的通讯
+#define 	ResShowMode_notifynewvote	13 //新投票-提醒参会人投票 id对应的是投票id 数组
+#define 	ResShowMode_closeVote	14 //关闭单个投票窗口 998=单个 999=批量
+#define 	ResShowMode_skipnewvote	15 //新投票-跳过参会人投票 id对应的是投票id 数组
+
+#define  RECOGNITION_OPER_START  1 //通知会议记录设备开始采集或识别
+#define  RECOGNITION_OPER_STOP   2 //通知会议记录设备停止采集或识别
+#define  RECOGNITION_OPER_UPLOAD 3 //通知会议记录设备停止采集识别并上传录音和转写内容
+#define  RECOGNITION_OPER_CLEAR  4 //通知会议记录设备停止采集识别并清空数据
+#define  RECOGNITION_OPER_CLOSE  5 //通知会议记录设备停止采集识别,上传数据，然后清空数据
+#define  RECOGNITION_OPER_STATUS 6 //获取会议记录设备采集状态数据
+#define  RECOGNITION_OPER_RESULT 7 //获取会议记录设备的转写原始结果
 
 /*
 //发送
 {
 "mode":1,//投屏模式
 "markid":"123",//该值用于标识，在一些需要返回的数据中将该字段返回
+"id":[1,2,3]//投票的ID
+}
+
+//发送跳过投票 mode=ResShowMode_skipnewvote
+{
+"mode":15,//跳过投票
+"markid":"123",//该值用于标识，在一些需要返回的数据中将该字段返回
+"memid":[1,2,3],参会人ID指定谁跳过投票
 "id":[1,2,3]//投票的ID
 }
 
@@ -71,6 +91,40 @@
 "markid":"123",//该值用于标识，在一些需要返回的数据中将该字段返回
 "memberid":1,//参会人ID
 "fileid":"0x6b000001"//文件ID
+}
+
+//发送 mode=ResShowMode_recogn
+{
+"mode":12,//ResShowMode_recogn 和会议记录设备的通讯
+"meetid":1,//会议ID
+"markid":"123",//该值用于标识，在一些需要返回的数据中将该字段返回
+"oper":1,//操作码 RECOGNITION_OPER_START
+"srcdevid":"0x1100000"//发送的设备ID,后续的通知直接返回给这个设备
+}
+
+//返回 mode=ResShowMode_recogn---会议记录设备返回操作的状态
+{
+"mode":12,//
+"markid":"123",//该值用于标识，在一些需要返回的数据中将该字段返回
+"meetid":1,//会议ID
+"recdevid":"0x1180000",//返回该消息的会议记录设备ID
+"oper":1,//操作码 RECOGNITION_OPER_START
+"msg":"开始成功"//oper=RECOGNITION_OPER_STATUS {"stat":1,"sec":"3600","byte":"1024","msg":"录音中,时长06:30,大小1KB"}
+}
+
+//返回 mode=ResShowMode_recogn---会议记录设备返回操作的状态 当oper=RECOGNITION_OPER_STATUS时返回
+{
+"mode":12,//
+"markid":"123",//该值用于标识，在一些需要返回的数据中将该字段返回
+"meetid":1,//会议ID
+"recdevid":"0x1180000",//返回该消息的会议记录设备ID
+"oper":6,//操作码 oper=RECOGNITION_OPER_STATUS 
+"msg":{
+"stat":1,//录音状态 -1=异常, 0=空闲，1=录音中
+"sec":"3600",//录音文件累计录音时长 单位秒
+"byte":"1024",//录音文件累计大小 单位字节
+"msg":"录音中,时长06:30,大小1KB"//状态信息，如果启动出错误这里会有错误信息
+}
 }
 */
 ///end//////////////////////////////////////////////////////////////////////

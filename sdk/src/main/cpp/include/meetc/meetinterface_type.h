@@ -1087,6 +1087,7 @@ typedef struct
 #define TEXTBRODCAST_TYPE_MASK_PROJECT		  0x02000000 //表示只针对投影设备
 #define TEXTBRODCAST_TYPE_MASK_PUBLISH		  0x04000000 //表示只针对发布机设备
 #define TEXTBRODCAST_TYPE_MASK_SERVICE		  0x08000000 //表示只针对茶水设备
+#define TEXTBRODCAST_TYPE_MASK_RECOGNIT		  0x10000000 //表示只针对会议记录设备
 
 #define TEXTBRODCAST_TYPE_COMMONTEXT  0   //普通文本信息
 #define TEXTBRODCAST_TYPE_MEETINGTEXT 1   //会议名称文本信息
@@ -1097,7 +1098,8 @@ typedef struct
 #define TEXTBRODCAST_TYPE_PUBLISH	  6   //发布机通知显示的文本信息
 #define TEXTBRODCAST_TYPE_JSON		  7   //json文本信息 参见meetuserdef.h 注:提醒投票直接发送投票ID的字符串格式
 #define TEXTBRODCAST_TYPE_DEVINFO	  8   //设备信息json文本信息 参见meetuserdef.h 
-
+#define TEXTBRODCAST_TYPE_NEWBULLETIN	  9       //新会议公告--全json结构
+#define TEXTBRODCAST_TYPE_NEWBULLETIN_CLOSE	  10  //关闭新会议公告
 /*
 #define TEXTBRODCAST_TYPE_IATTEXT     3   //实时会议纪要文本信息  {"name":"陈生","lang":0, "stat":0, "text":""}
 lang是语言
@@ -3300,7 +3302,7 @@ typedef struct
 #define role_member_secretary 	0x04  //秘书
 #define role_device_projector	0x08  //投影仪
 #define role_admin				0x09  //管理员
-#define role_service			0x0a  //会议服务人员 不参与投票表决，签到
+#define role_service			0x0a  //会议服务人员 不参与投票表决，签到 --有管理秘书权限，可以发起投票
 #define role_root				0x10  //后台管理员
 #define role_sever				0x11  //服务器程序
 #define role_oa					0x12  //第三方系统
@@ -6461,6 +6463,7 @@ typedef struct
 #define MEET_AVOTEBASE_FLAG_PSW			0x0000020 //表示提交时需要参会人密码认证
 #define MEET_AVOTEBASE_FLAG_RAND		0x0000040 //表示投票发起选项随机显示
 #define MEET_AVOTEBASE_FLAG_LAST		0x0000080 //表示投票末位表决
+#define MEET_AVOTEBASE_FLAG_BIGPER		0x0000100 //表示投票通过按照大于per，默认是大于等于per
 
 //发起投票标志
 #define MEET_AVOTING_FLAG_NOPOST		0x00000001 //不在投影机上显示投票结果
@@ -6547,6 +6550,22 @@ typedef struct
 	//int32u members[memnum];
 }Type_MeetStartNewVoteInfo, *pType_MeetStartNewVoteInfo;
 
+/*
+//批量发起投票 Type_SmartJsonProtol
+//type:TYPE_MEET_INTERFACE_MEETONNEWVOTING
+//method: send
+//客户端从变更回调typeTYPE_MEET_INTERFACE_MEETONNEWVOTING|method=start|结构体Type_MeetStopNewVoteInfo接收批量投票发起通知
+{
+"data":
+{
+"voteid":1,
+"timeouts":"600"//
+"flag":"0x001",//发起投票标志 AVOTING_FLAG_NOPOST
+"mem":[1,2,3]//为空表示全部参会人
+}
+}
+*/
+
 //投票标志 
 #define AVOTE_SELFLAG_CHECKIN  0x00000001 //该位为1表示已经签到
 #define AVOTE_SELFLAG_SUBMIT   0x00000002 //该位为1表示已经提交
@@ -6567,7 +6586,7 @@ typedef struct
 }Item_MeetSubmitNewVote, *pItem_MeetSubmitNewVote;
 
 //type:TYPE_MEET_INTERFACE_MEETONNEWVOTING
-//method: submit
+//method: submit|如果希望批量提交使用方法批量提交update，直接添加多个Item_MeetSubmitNewVote
 typedef struct
 {
 	Type_HeaderInfo hdr;
@@ -6581,7 +6600,8 @@ typedef struct
 }Item_MeetStopNewVoteInfo, *pItem_MeetStopNewVoteInfo;
 
 //type:TYPE_MEET_INTERFACE_MEETONNEWVOTING
-//method: stop/del
+//call method: stop/del|close批量结束投票,使用此方法会收到批量结束通知
+//callback method: start批量投票开始通知|stop批量结束投票通知
 typedef struct
 {
 	Type_HeaderInfo hdr;

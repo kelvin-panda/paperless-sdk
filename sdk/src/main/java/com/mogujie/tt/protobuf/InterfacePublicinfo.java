@@ -362,6 +362,22 @@ public final class InterfacePublicinfo {
      * <code>PB_COMPLEX_PUBLIC_TYP_DEVICE = 3;</code>
      */
     PB_COMPLEX_PUBLIC_TYP_DEVICE(3),
+    /**
+     * <pre>
+     *typ=4指会议,id1是会议id
+     * </pre>
+     *
+     * <code>PB_COMPLEX_PUBLIC_TYP_MEET = 4;</code>
+     */
+    PB_COMPLEX_PUBLIC_TYP_MEET(4),
+    /**
+     * <pre>
+     *typ=5指平台文件，文件保存公共的数据,id1是文件id
+     * </pre>
+     *
+     * <code>PB_COMPLEX_PUBLIC_TYP_FILE = 5;</code>
+     */
+    PB_COMPLEX_PUBLIC_TYP_FILE(5),
     UNRECOGNIZED(-1),
     ;
 
@@ -393,6 +409,22 @@ public final class InterfacePublicinfo {
      * <code>PB_COMPLEX_PUBLIC_TYP_DEVICE = 3;</code>
      */
     public static final int PB_COMPLEX_PUBLIC_TYP_DEVICE_VALUE = 3;
+    /**
+     * <pre>
+     *typ=4指会议,id1是会议id
+     * </pre>
+     *
+     * <code>PB_COMPLEX_PUBLIC_TYP_MEET = 4;</code>
+     */
+    public static final int PB_COMPLEX_PUBLIC_TYP_MEET_VALUE = 4;
+    /**
+     * <pre>
+     *typ=5指平台文件，文件保存公共的数据,id1是文件id
+     * </pre>
+     *
+     * <code>PB_COMPLEX_PUBLIC_TYP_FILE = 5;</code>
+     */
+    public static final int PB_COMPLEX_PUBLIC_TYP_FILE_VALUE = 5;
 
 
     public final int getNumber() {
@@ -413,6 +445,8 @@ public final class InterfacePublicinfo {
         case 1: return PB_COMPLEX_PUBLIC_TYP_ADMIN;
         case 2: return PB_COMPLEX_PUBLIC_TYP_PEOPLE;
         case 3: return PB_COMPLEX_PUBLIC_TYP_DEVICE;
+        case 4: return PB_COMPLEX_PUBLIC_TYP_MEET;
+        case 5: return PB_COMPLEX_PUBLIC_TYP_FILE;
         default: return null;
       }
     }
@@ -443,37 +477,37 @@ public final class InterfacePublicinfo {
    *typ=COMPLEX_PUBLIC_TYP_ADMIN
    * </pre>
    *
-   * Protobuf enum {@code Pb_CMX_PUBFILE_DATAID}
+   * Protobuf enum {@code Pb_CMX_PUBADMIN_DATAID}
    */
-  public enum Pb_CMX_PUBFILE_DATAID
+  public enum Pb_CMX_PUBADMIN_DATAID
       implements com.google.protobuf.Internal.EnumLite {
     /**
-     * <code>Pb_CMX_PUBFILE_DATAID_ZERO = 0;</code>
+     * <code>Pb_CMX_PUBADMIN_DATAID_ZERO = 0;</code>
      */
-    Pb_CMX_PUBFILE_DATAID_ZERO(0),
+    Pb_CMX_PUBADMIN_DATAID_ZERO(0),
     /**
      * <pre>
      *管理员的基本信息
      * </pre>
      *
-     * <code>Pb_CMX_PUBFILE_DATAID_BASE = 1;</code>
+     * <code>Pb_CMX_PUBADMIN_DATAID_BASE = 1;</code>
      */
-    Pb_CMX_PUBFILE_DATAID_BASE(1),
+    Pb_CMX_PUBADMIN_DATAID_BASE(1),
     UNRECOGNIZED(-1),
     ;
 
     /**
-     * <code>Pb_CMX_PUBFILE_DATAID_ZERO = 0;</code>
+     * <code>Pb_CMX_PUBADMIN_DATAID_ZERO = 0;</code>
      */
-    public static final int Pb_CMX_PUBFILE_DATAID_ZERO_VALUE = 0;
+    public static final int Pb_CMX_PUBADMIN_DATAID_ZERO_VALUE = 0;
     /**
      * <pre>
      *管理员的基本信息
      * </pre>
      *
-     * <code>Pb_CMX_PUBFILE_DATAID_BASE = 1;</code>
+     * <code>Pb_CMX_PUBADMIN_DATAID_BASE = 1;</code>
      */
-    public static final int Pb_CMX_PUBFILE_DATAID_BASE_VALUE = 1;
+    public static final int Pb_CMX_PUBADMIN_DATAID_BASE_VALUE = 1;
 
 
     public final int getNumber() {
@@ -484,37 +518,37 @@ public final class InterfacePublicinfo {
      * @deprecated Use {@link #forNumber(int)} instead.
      */
     @java.lang.Deprecated
-    public static Pb_CMX_PUBFILE_DATAID valueOf(int value) {
+    public static Pb_CMX_PUBADMIN_DATAID valueOf(int value) {
       return forNumber(value);
     }
 
-    public static Pb_CMX_PUBFILE_DATAID forNumber(int value) {
+    public static Pb_CMX_PUBADMIN_DATAID forNumber(int value) {
       switch (value) {
-        case 0: return Pb_CMX_PUBFILE_DATAID_ZERO;
-        case 1: return Pb_CMX_PUBFILE_DATAID_BASE;
+        case 0: return Pb_CMX_PUBADMIN_DATAID_ZERO;
+        case 1: return Pb_CMX_PUBADMIN_DATAID_BASE;
         default: return null;
       }
     }
 
-    public static com.google.protobuf.Internal.EnumLiteMap<Pb_CMX_PUBFILE_DATAID>
+    public static com.google.protobuf.Internal.EnumLiteMap<Pb_CMX_PUBADMIN_DATAID>
         internalGetValueMap() {
       return internalValueMap;
     }
     private static final com.google.protobuf.Internal.EnumLiteMap<
-        Pb_CMX_PUBFILE_DATAID> internalValueMap =
-          new com.google.protobuf.Internal.EnumLiteMap<Pb_CMX_PUBFILE_DATAID>() {
-            public Pb_CMX_PUBFILE_DATAID findValueByNumber(int number) {
-              return Pb_CMX_PUBFILE_DATAID.forNumber(number);
+        Pb_CMX_PUBADMIN_DATAID> internalValueMap =
+          new com.google.protobuf.Internal.EnumLiteMap<Pb_CMX_PUBADMIN_DATAID>() {
+            public Pb_CMX_PUBADMIN_DATAID findValueByNumber(int number) {
+              return Pb_CMX_PUBADMIN_DATAID.forNumber(number);
             }
           };
 
     private final int value;
 
-    private Pb_CMX_PUBFILE_DATAID(int value) {
+    private Pb_CMX_PUBADMIN_DATAID(int value) {
       this.value = value;
     }
 
-    // @@protoc_insertion_point(enum_scope:Pb_CMX_PUBFILE_DATAID)
+    // @@protoc_insertion_point(enum_scope:Pb_CMX_PUBADMIN_DATAID)
   }
 
   /**
@@ -673,6 +707,268 @@ public final class InterfacePublicinfo {
     }
 
     // @@protoc_insertion_point(enum_scope:Pb_CMX_PUBDEVICE_DATAID)
+  }
+
+  /**
+   * <pre>
+   *typ=COMPLEX_PUBLIC_TYP_MEET
+   * </pre>
+   *
+   * Protobuf enum {@code Pb_CMX_PUBMEET_DATAID}
+   */
+  public enum Pb_CMX_PUBMEET_DATAID
+      implements com.google.protobuf.Internal.EnumLite {
+    /**
+     * <code>Pb_CMX_PUBMEET_DATAID_ZERO = 0;</code>
+     */
+    Pb_CMX_PUBMEET_DATAID_ZERO(0),
+    /**
+     * <pre>
+     *会议的基本信息
+     * </pre>
+     *
+     * <code>Pb_CMX_PUBMEET_DATAID_BASE = 1;</code>
+     */
+    Pb_CMX_PUBMEET_DATAID_BASE(1),
+    UNRECOGNIZED(-1),
+    ;
+
+    /**
+     * <code>Pb_CMX_PUBMEET_DATAID_ZERO = 0;</code>
+     */
+    public static final int Pb_CMX_PUBMEET_DATAID_ZERO_VALUE = 0;
+    /**
+     * <pre>
+     *会议的基本信息
+     * </pre>
+     *
+     * <code>Pb_CMX_PUBMEET_DATAID_BASE = 1;</code>
+     */
+    public static final int Pb_CMX_PUBMEET_DATAID_BASE_VALUE = 1;
+
+
+    public final int getNumber() {
+      return value;
+    }
+
+    /**
+     * @deprecated Use {@link #forNumber(int)} instead.
+     */
+    @java.lang.Deprecated
+    public static Pb_CMX_PUBMEET_DATAID valueOf(int value) {
+      return forNumber(value);
+    }
+
+    public static Pb_CMX_PUBMEET_DATAID forNumber(int value) {
+      switch (value) {
+        case 0: return Pb_CMX_PUBMEET_DATAID_ZERO;
+        case 1: return Pb_CMX_PUBMEET_DATAID_BASE;
+        default: return null;
+      }
+    }
+
+    public static com.google.protobuf.Internal.EnumLiteMap<Pb_CMX_PUBMEET_DATAID>
+        internalGetValueMap() {
+      return internalValueMap;
+    }
+    private static final com.google.protobuf.Internal.EnumLiteMap<
+        Pb_CMX_PUBMEET_DATAID> internalValueMap =
+          new com.google.protobuf.Internal.EnumLiteMap<Pb_CMX_PUBMEET_DATAID>() {
+            public Pb_CMX_PUBMEET_DATAID findValueByNumber(int number) {
+              return Pb_CMX_PUBMEET_DATAID.forNumber(number);
+            }
+          };
+
+    private final int value;
+
+    private Pb_CMX_PUBMEET_DATAID(int value) {
+      this.value = value;
+    }
+
+    // @@protoc_insertion_point(enum_scope:Pb_CMX_PUBMEET_DATAID)
+  }
+
+  /**
+   * <pre>
+   *周期会议模式
+   * </pre>
+   *
+   * Protobuf enum {@code Pb_CMX_PUBMEET_RegularMODE}
+   */
+  public enum Pb_CMX_PUBMEET_RegularMODE
+      implements com.google.protobuf.Internal.EnumLite {
+    /**
+     * <pre>
+     *每天
+     * </pre>
+     *
+     * <code>Pb_CMX_PUBMEET_REGUMODE_EVERYDAY = 0;</code>
+     */
+    Pb_CMX_PUBMEET_REGUMODE_EVERYDAY(0),
+    /**
+     * <pre>
+     *按周
+     * </pre>
+     *
+     * <code>Pb_CMX_PUBMEET_REGUMODE_WEEK = 1;</code>
+     */
+    Pb_CMX_PUBMEET_REGUMODE_WEEK(1),
+    /**
+     * <pre>
+     *按月
+     * </pre>
+     *
+     * <code>Pb_CMX_PUBMEET_REGUMODE_MONTH = 2;</code>
+     */
+    Pb_CMX_PUBMEET_REGUMODE_MONTH(2),
+    UNRECOGNIZED(-1),
+    ;
+
+    /**
+     * <pre>
+     *每天
+     * </pre>
+     *
+     * <code>Pb_CMX_PUBMEET_REGUMODE_EVERYDAY = 0;</code>
+     */
+    public static final int Pb_CMX_PUBMEET_REGUMODE_EVERYDAY_VALUE = 0;
+    /**
+     * <pre>
+     *按周
+     * </pre>
+     *
+     * <code>Pb_CMX_PUBMEET_REGUMODE_WEEK = 1;</code>
+     */
+    public static final int Pb_CMX_PUBMEET_REGUMODE_WEEK_VALUE = 1;
+    /**
+     * <pre>
+     *按月
+     * </pre>
+     *
+     * <code>Pb_CMX_PUBMEET_REGUMODE_MONTH = 2;</code>
+     */
+    public static final int Pb_CMX_PUBMEET_REGUMODE_MONTH_VALUE = 2;
+
+
+    public final int getNumber() {
+      return value;
+    }
+
+    /**
+     * @deprecated Use {@link #forNumber(int)} instead.
+     */
+    @java.lang.Deprecated
+    public static Pb_CMX_PUBMEET_RegularMODE valueOf(int value) {
+      return forNumber(value);
+    }
+
+    public static Pb_CMX_PUBMEET_RegularMODE forNumber(int value) {
+      switch (value) {
+        case 0: return Pb_CMX_PUBMEET_REGUMODE_EVERYDAY;
+        case 1: return Pb_CMX_PUBMEET_REGUMODE_WEEK;
+        case 2: return Pb_CMX_PUBMEET_REGUMODE_MONTH;
+        default: return null;
+      }
+    }
+
+    public static com.google.protobuf.Internal.EnumLiteMap<Pb_CMX_PUBMEET_RegularMODE>
+        internalGetValueMap() {
+      return internalValueMap;
+    }
+    private static final com.google.protobuf.Internal.EnumLiteMap<
+        Pb_CMX_PUBMEET_RegularMODE> internalValueMap =
+          new com.google.protobuf.Internal.EnumLiteMap<Pb_CMX_PUBMEET_RegularMODE>() {
+            public Pb_CMX_PUBMEET_RegularMODE findValueByNumber(int number) {
+              return Pb_CMX_PUBMEET_RegularMODE.forNumber(number);
+            }
+          };
+
+    private final int value;
+
+    private Pb_CMX_PUBMEET_RegularMODE(int value) {
+      this.value = value;
+    }
+
+    // @@protoc_insertion_point(enum_scope:Pb_CMX_PUBMEET_RegularMODE)
+  }
+
+  /**
+   * <pre>
+   *typ=COMPLEX_PUBLIC_TYP_FILE
+   * </pre>
+   *
+   * Protobuf enum {@code Pb_CMX_PUBFILE_DATAID}
+   */
+  public enum Pb_CMX_PUBFILE_DATAID
+      implements com.google.protobuf.Internal.EnumLite {
+    /**
+     * <code>Pb_CMX_PUBFILE_DATAID_ZERO = 0;</code>
+     */
+    Pb_CMX_PUBFILE_DATAID_ZERO(0),
+    /**
+     * <pre>
+     *文件的基本信息
+     * </pre>
+     *
+     * <code>Pb_CMX_PUBFILE_DATAID_BASE = 1;</code>
+     */
+    Pb_CMX_PUBFILE_DATAID_BASE(1),
+    UNRECOGNIZED(-1),
+    ;
+
+    /**
+     * <code>Pb_CMX_PUBFILE_DATAID_ZERO = 0;</code>
+     */
+    public static final int Pb_CMX_PUBFILE_DATAID_ZERO_VALUE = 0;
+    /**
+     * <pre>
+     *文件的基本信息
+     * </pre>
+     *
+     * <code>Pb_CMX_PUBFILE_DATAID_BASE = 1;</code>
+     */
+    public static final int Pb_CMX_PUBFILE_DATAID_BASE_VALUE = 1;
+
+
+    public final int getNumber() {
+      return value;
+    }
+
+    /**
+     * @deprecated Use {@link #forNumber(int)} instead.
+     */
+    @java.lang.Deprecated
+    public static Pb_CMX_PUBFILE_DATAID valueOf(int value) {
+      return forNumber(value);
+    }
+
+    public static Pb_CMX_PUBFILE_DATAID forNumber(int value) {
+      switch (value) {
+        case 0: return Pb_CMX_PUBFILE_DATAID_ZERO;
+        case 1: return Pb_CMX_PUBFILE_DATAID_BASE;
+        default: return null;
+      }
+    }
+
+    public static com.google.protobuf.Internal.EnumLiteMap<Pb_CMX_PUBFILE_DATAID>
+        internalGetValueMap() {
+      return internalValueMap;
+    }
+    private static final com.google.protobuf.Internal.EnumLiteMap<
+        Pb_CMX_PUBFILE_DATAID> internalValueMap =
+          new com.google.protobuf.Internal.EnumLiteMap<Pb_CMX_PUBFILE_DATAID>() {
+            public Pb_CMX_PUBFILE_DATAID findValueByNumber(int number) {
+              return Pb_CMX_PUBFILE_DATAID.forNumber(number);
+            }
+          };
+
+    private final int value;
+
+    private Pb_CMX_PUBFILE_DATAID(int value) {
+      this.value = value;
+    }
+
+    // @@protoc_insertion_point(enum_scope:Pb_CMX_PUBFILE_DATAID)
   }
 
   public interface pbui_Type_meetQueryPublicInfoOrBuilder extends

@@ -123,6 +123,26 @@
             android:layout_height="wrap_content"
             android:orientation="horizontal">
 
+            <Button
+                android:id="@+id/btnCreateMeetTime"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="查询当前会议的创建时间戳" />
+
+            <TextView
+                android:id="@+id/tvCreateMeetTime"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                tools:text="1654651651654164" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
             <EditText
                 android:id="@+id/edtType"
                 android:layout_width="0dp"

@@ -22,6 +22,7 @@ import androidx.appcompat.app.AppCompatActivity
 import com.blankj.utilcode.util.AppUtils
 import com.blankj.utilcode.util.DeviceUtils
 import com.blankj.utilcode.util.FileUtils
+import com.blankj.utilcode.util.GsonUtils
 import com.blankj.utilcode.util.LogUtils
 import com.blankj.utilcode.util.ResourceUtils
 import com.blankj.utilcode.util.ToastUtils
@@ -34,9 +35,11 @@ import com.mogujie.tt.protobuf.InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_MED
 import com.mogujie.tt.protobuf.InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_READY_VALUE
 import com.mogujie.tt.protobuf.InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_STREAMPLAY_VALUE
 import com.mogujie.tt.protobuf.InterfacePlaymedia
+import com.mogujie.tt.protobuf.InterfacePublicinfo
 import com.mogujie.tt.protobuf.InterfaceStream
 import com.paperless.bus.EventBusMessage
 import com.paperless.bus.SdkBusType
+import com.paperless.data.json.MeetCreateTimeJson
 import com.paperless.data.repository.base.DataRepoManager
 import com.paperless.player.DecodeQueue
 import com.paperless.sdk.Call
@@ -126,6 +129,10 @@ class MainActivity : AppCompatActivity() {
                 IniUtil.port = edtPort.text.toString()
                 IniUtil.store()
                 AppUtils.relaunchApp(true)
+            }
+            btnCreateMeetTime.setOnClickListener {
+                val meetId = Jni.queryCurrentMeetId()
+                tvCreateMeetTime.text = Jni.queryMeetingCreatetime(meetId)
             }
             //网络监控
             btnNetwork.setOnClickListener {
@@ -368,6 +375,7 @@ class MainActivity : AppCompatActivity() {
         Jni.initialResource(SdkVars.screen_width, SdkVars.screen_height, 2)
         Jni.initialResource(SdkVars.screen_width, SdkVars.screen_height, 3)
         Jni.initialResource(SdkVars.screen_width, SdkVars.screen_height, 4)
+        Jni.cache(InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_COMPLEXPUBLICUSERDEF_VALUE) //复合全局自定义数据
         //修改本机界面状态
         Jni.modPageStatus(InterfaceMacro.Pb_MeetFaceStatus.Pb_MemState_MainFace_VALUE)
 
@@ -467,16 +475,16 @@ class MainActivity : AppCompatActivity() {
             }
         }
         DataRepoManager.deviceInfoRepository.apply {
-            data.observe(this@MainActivity){
+            data.observe(this@MainActivity) {
                 LogUtils.i("deviceInfoRepository: data:${it.size}")
             }
             //本机设备名称
-            devName.observe(this@MainActivity){
+            devName.observe(this@MainActivity) {
                 LogUtils.i("deviceInfoRepository: devName:${it}")
                 mBinding.tvDevName.text = it ?: ""
             }
             //本机在线状态
-            online.observe(this@MainActivity){
+            online.observe(this@MainActivity) {
                 LogUtils.i("deviceInfoRepository: online:${it}")
                 mBinding.tvOnline.text = if (it) "在线" else "离线"
             }

@@ -3318,7 +3318,7 @@ public final class InterfaceMeetuserdef {
    *call
    *type:TYPE_MEET_INTERFACE_COMPLEXMEETUSERDEF
    *method: 
-   *modify|使用Interface_base.proto 中的pbui_Type_SmartJsonProtol  
+   *modify|使用Interface_base.proto 中的pbui_Type_SmartJsonProtol   
    *METHOD_MEET_INTERFACE_SINGLEQUERYBYID|使用Type_SingleQueComplexMeetInfo 
    * </pre>
    *
@@ -3601,7 +3601,7 @@ public final class InterfaceMeetuserdef {
      *call
      *type:TYPE_MEET_INTERFACE_COMPLEXMEETUSERDEF
      *method: 
-     *modify|使用Interface_base.proto 中的pbui_Type_SmartJsonProtol  
+     *modify|使用Interface_base.proto 中的pbui_Type_SmartJsonProtol   
      *METHOD_MEET_INTERFACE_SINGLEQUERYBYID|使用Type_SingleQueComplexMeetInfo 
      * </pre>
      *

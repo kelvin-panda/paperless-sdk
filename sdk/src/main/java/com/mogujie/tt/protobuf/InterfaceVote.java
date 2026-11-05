@@ -589,6 +589,14 @@ public final class InterfaceVote {
      * <code>Pb_MEET_AVOTEBASE_FLAG_LAST = 128;</code>
      */
     Pb_MEET_AVOTEBASE_FLAG_LAST(128),
+    /**
+     * <pre>
+     *表示投票通过按照大于per，默认是大于等于per
+     * </pre>
+     *
+     * <code>Pb_MEET_AVOTEBASE_FLAG_BIGPER = 256;</code>
+     */
+    Pb_MEET_AVOTEBASE_FLAG_BIGPER(256),
     UNRECOGNIZED(-1),
     ;
 
@@ -664,6 +672,14 @@ public final class InterfaceVote {
      * <code>Pb_MEET_AVOTEBASE_FLAG_LAST = 128;</code>
      */
     public static final int Pb_MEET_AVOTEBASE_FLAG_LAST_VALUE = 128;
+    /**
+     * <pre>
+     *表示投票通过按照大于per，默认是大于等于per
+     * </pre>
+     *
+     * <code>Pb_MEET_AVOTEBASE_FLAG_BIGPER = 256;</code>
+     */
+    public static final int Pb_MEET_AVOTEBASE_FLAG_BIGPER_VALUE = 256;
 
 
     public final int getNumber() {
@@ -689,6 +705,7 @@ public final class InterfaceVote {
         case 32: return Pb_MEET_AVOTEBASE_FLAG_PSW;
         case 64: return Pb_MEET_AVOTEBASE_FLAG_RAND;
         case 128: return Pb_MEET_AVOTEBASE_FLAG_LAST;
+        case 256: return Pb_MEET_AVOTEBASE_FLAG_BIGPER;
         default: return null;
       }
     }
@@ -13522,7 +13539,7 @@ public final class InterfaceVote {
   /**
    * <pre>
    *type:TYPE_MEET_INTERFACE_MEETONNEWVOTING
-   *method: submit
+   *method: submit|如果希望批量提交使用方法update，直接添加多个Item_MeetSubmitNewVote
    * </pre>
    *
    * Protobuf type {@code pbui_Type_MeetSubmitNewVote}
@@ -13788,7 +13805,7 @@ public final class InterfaceVote {
     /**
      * <pre>
      *type:TYPE_MEET_INTERFACE_MEETONNEWVOTING
-     *method: submit
+     *method: submit|如果希望批量提交使用方法update，直接添加多个Item_MeetSubmitNewVote
      * </pre>
      *
      * Protobuf type {@code pbui_Type_MeetSubmitNewVote}
@@ -14069,7 +14086,8 @@ public final class InterfaceVote {
    * <pre>
    *会议停止、删除投票信息
    *type:TYPE_MEET_INTERFACE_MEETONNEWVOTING
-   *method: stop/del
+   *call method: stop/del|close批量结束投票,使用此方法会收到批量结束通知
+   *callback method: start批量投票开始通知|stop批量结束投票通知
    * </pre>
    *
    * Protobuf type {@code pbui_Type_MeetStopNewVoteInfo}
@@ -14256,7 +14274,8 @@ public final class InterfaceVote {
      * <pre>
      *会议停止、删除投票信息
      *type:TYPE_MEET_INTERFACE_MEETONNEWVOTING
-     *method: stop/del
+     *call method: stop/del|close批量结束投票,使用此方法会收到批量结束通知
+     *callback method: start批量投票开始通知|stop批量结束投票通知
      * </pre>
      *
      * Protobuf type {@code pbui_Type_MeetStopNewVoteInfo}

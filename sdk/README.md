@@ -93,6 +93,24 @@ SdkConfig.logEnable = true
 
 > 关闭它**不影响任何功能**，只是不再打印上述日志；需要排查回调/权限问题时再打开。
 
+### 2.5.26
+#### 库更新
+   - 添加会议创建时间戳查询API，用于保证会议的唯一性
+   - 将恒迅工程中新增的 PDF 批注相关方法上移到 `BaseJni`
+#### 新增
+1. `BaseJni.queryMeetingCreatetime(meetId: Int): String`
+   - 查询指定会议的创建时间戳（微秒字符串），无数据或解析失败时返回空串
+   - 数据模型：`com.paperless.data.json.MeetCreateTimeJson`
+   - 数据来源：复合公共自定义数据 `Pb_COMPLEX_PUBLIC_TYP_MEET` + `Pb_CMX_PUBMEET_DATAID_BASE`
+2. `BaseJni` 新增 PDF 批注相关方法（由恒迅工程上移，签名与实现与其保持一致）
+   - `pdfArtBoardFigure` / `pdfArtBoardInkFigure` / `pdfArtBoardErase` / `pdfArtBoardUndo`
+   - `pdfArtBoardDel` / `pdfArtBoardRect` / `pdfArtBoardPicture`
+   - 常量 `PDF_FIGURETYPE_ERASE` / `PDF_FIGURETYPE_UNDO`
+3. `BaseJni.queryCurrentMemberId(): Int`（同样由恒迅工程上移）
+#### 说明
+   - `sdk/consumer-rules.pro` 增加 `com.paperless.data.json.**` 的 keep 规则（Gson 反射解析的模型不能被混淆）
+   - 同步更新平台库文件与 protobuf 定义
+
 ### 2.5.13
 #### 库更新
    - 添加pdf签名推送相关API
