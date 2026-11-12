@@ -1,4 +1,4 @@
-﻿syntax = "proto3";
+syntax = "proto3";
 option java_package = "com.mogujie.tt.protobuf";
 option optimize_for = LITE_RUNTIME;
 
@@ -274,12 +274,15 @@ message pbui_Type_MeetUpdateStatusNotify
 }
 
 //SmartJsonProtol  数据库查询 type
+//type=TYPE_MEET_INTERFACE_DBSERACH
+//methon=METHOD_MEET_INTERFACE_SEARCH
 enum Pb_DBSearch_Type 
 {
 Pb_DBSEARCH_TYPE_ZERO=0;
 Pb_DBSEARCH_TYPE_AGENDA=		1; //根据议题标题匹配，返回匹配成功的会议ID和议题
 Pb_DBSEARCH_TYPE_DIR=			2; //根据目录名称匹配，返回匹配成功的会议ID和目录
 Pb_DBSEARCH_TYPE_FILE=			3; //根据文件标题匹配，返回匹配成功的会议ID，目录ID和文件ID,文件名称
+Pb_DBSEARCH_TYPE_MEETFILE=		4; //返回指定会议的所有目录文件
 }
 
 //自定义json协议

@@ -102,16 +102,6 @@
 "srcdevid":"0x1100000"//发送的设备ID,后续的通知直接返回给这个设备
 }
 
-//返回 mode=ResShowMode_recogn---会议记录设备返回操作的状态
-{
-"mode":12,//
-"markid":"123",//该值用于标识，在一些需要返回的数据中将该字段返回
-"meetid":1,//会议ID
-"recdevid":"0x1180000",//返回该消息的会议记录设备ID
-"oper":1,//操作码 RECOGNITION_OPER_START
-"msg":"开始成功"//oper=RECOGNITION_OPER_STATUS {"stat":1,"sec":"3600","byte":"1024","msg":"录音中,时长06:30,大小1KB"}
-}
-
 //返回 mode=ResShowMode_recogn---会议记录设备返回操作的状态 当oper=RECOGNITION_OPER_STATUS时返回
 {
 "mode":12,//
@@ -156,6 +146,7 @@
 #define DBSEARCH_TYPE_AGENDA		1 //根据议题标题匹配，返回匹配成功的会议ID和议题
 #define DBSEARCH_TYPE_DIR			2 //根据目录名称匹配，返回匹配成功的会议ID和目录
 #define DBSEARCH_TYPE_FILE			3 //根据文件标题匹配，返回匹配成功的会议ID，目录ID和文件ID,文件名称
+#define DBSEARCH_TYPE_MEETFILE		4 //返回指定会议的所有目录文件
 
 //type=TYPE_MEET_INTERFACE_DBSERACH
 //methon=METHOD_MEET_INTERFACE_SEARCH
@@ -163,7 +154,8 @@
 /*
 {
 "type": 1,//执行查询的类型 参见DBSEARCH_TYPE_AGENDA
- "name":"要匹配的文本"
+"meetid:1,//会议ID type=DBSEARCH_TYPE_MEETFILE
+ "name":"要匹配的文本"//type[1-3]
 }
 */
 
@@ -192,6 +184,41 @@
  }
  */
  ///end//////////////////////////////////////////////////////////////////////
+
+///start add on 20261111//////////////////////////////////////////////////////////////////////
+//SmartJsonProtol  查询指定会议的所有目录及目录下的所有文件
+//type=TYPE_MEET_INTERFACE_DBSERACH
+//methon=METHOD_MEET_INTERFACE_SEARCH
+//请求 client--->meetdb，type=DBSEARCH_TYPE_MEETFILE
+/*
+{
+"type":4,//DBSEARCH_TYPE_MEETFILE
+"meetid":1,//会议ID，为0时使用协议头中的会议ID
+"excludedir":[1,3]//可选，需要排除的目录ID，支持数组或单个数字/字符串
+}
+*/
+//响应 meetdb--->client，无目录或无文件时 item 返回空数组
+//type=TYPE_MEET_INTERFACE_DBSERACH
+//methon=METHOD_MEET_INTERFACE_SEARCH
+/*
+{
+"type":4,
+"meetid":1,
+"item":[
+    {
+    "dirid":1,//目录ID
+    "name":"目录名称",
+    "parentid":0,//上级目录ID
+    "dirpos":1,//目录排序
+    "item":[
+        {"fileid":"0x6b00001","name":"文件名称","md5":"d41d8cd98f00b204e9800998ecf8427e","size":102400}
+    ]
+    }
+]
+}
+//md5 为32位小写十六进制字符串，取不到时该字段不返回；size 单位为字节
+*/
+///end//////////////////////////////////////////////////////////////////////
 
 
 ///start add on 20240604//////////////////////////////////////////////////////////////////////

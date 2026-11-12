@@ -93,6 +93,25 @@ SdkConfig.logEnable = true
 
 > 关闭它**不影响任何功能**，只是不再打印上述日志；需要排查回调/权限问题时再打开。
 
+### 2.5.27
+#### 库更新
+   - 添加按会议ID查询服务端该会议下所有目录及文件信息的接口（异步回调返回）
+#### 新增
+1. `BaseJni.queryFileByDatabase(meetId: Int, json: String)`
+   - 发起数据库查询：`(TYPE_MEET_INTERFACE_DBSERACH, METHOD_MEET_INTERFACE_SEARCH)`
+   - 请求 json：`{"type":4,"meetid":1,"excludedir":[1,3]}`，`type=4` 即
+     `InterfaceBase.Pb_DBSearch_Type.Pb_DBSEARCH_TYPE_MEETFILE_VALUE`（返回指定会议的所有目录文件）
+   - 结果为**异步通知**，监听 `Pb_TYPE_MEET_INTERFACE_DBSERACH` +
+     `Pb_METHOD_MEET_INTERFACE_SEARCH`，报文为 `InterfaceBase.pbui_Type_SmartJsonProtolNotify`，
+     `json` 字段格式：
+     ```json
+     {"type":4,"meetid":1,
+      "item":[{"dirid":1,"name":"目录名称","parentid":0,"dirpos":1,
+               "item":[{"fileid":"0x6b00001","name":"文件名称","md5":"d41d8cd98f00b204e9800998ecf8427e","size":102400}]}]}
+     ```
+   - `md5` 为32位小写十六进制，取不到时不返回；`size` 单位为字节；无目录/无文件时 `item` 为空数组
+   - 同步更新平台库文件、`meetuserdef.h` / `ProtocalData.h` 与 protobuf 定义
+
 ### 2.5.26
 #### 库更新
    - 添加会议创建时间戳查询API，用于保证会议的唯一性

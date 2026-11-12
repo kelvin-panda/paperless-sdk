@@ -2409,6 +2409,7 @@ typedef struct
 #define memperm_postilview				0x00000020		//批注查看权限 -- 不保存到数据库
 #define memperm_record					0x00000040		//录制权限 
 #define memperm_lookvote				0x00000080		//投票查看权限 
+#define memperm_pushfile				0x00000100      //文件推送权限
 
 typedef struct
 {
@@ -5533,6 +5534,8 @@ typedef struct
 
 #define MEET_FACE_SeatNameShow_GEO		92 //排位 设备名称 是否显示 text 
 
+#define MEET_FACE_MAIN_ASSISTANT_GEO		93 //主页快捷控件--显示和隐藏
+
 #define MEET_FACEID_PROJECTIVE_MIANBG		101  //投影界面 png
 #define MEET_FACEID_PROJECTIVE_LOGO			102  //logo png
 #define MEET_FACEID_PROJECTIVE_MEETNAME		103  //会议名称 text
@@ -6571,6 +6574,7 @@ typedef struct
 #define AVOTE_SELFLAG_SUBMIT   0x00000002 //该位为1表示已经提交
 #define AVOTE_SELFLAG_SIGNDATA 0x00000004 //该位为1表示有签名
 #define AVOTE_SELFLAG_PSWCHECK 0x00000008 //该位为1表示经过参会人密码认证
+#define AVOTE_SELFLAG_UNVOTE   0x00000010 //该位为1表示参会人未投票默认提交
 
 //提交会议投票信息
 typedef struct

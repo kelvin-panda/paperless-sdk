@@ -4654,5 +4654,28 @@ open class BaseJni {
     }
     //</editor-fold>
 
+    //<editor-fold desc="数据库查询">
 
+    /**
+     * 查询指定会议的文件
+     * ```json
+     * {
+     * "type": 1,//执行查询的类型 参见InterfaceBase.Pb_DBSearch_Type
+     * "meetid:1,//会议ID type=InterfaceBase.Pb_DBSearch_Type.Pb_DBSEARCH_TYPE_MEETFILE_VALUE
+     *  "name":"要匹配的文本"//type[1-3]
+     * }
+     * ```
+     */
+    fun queryFileByDatabase(meetId: Int, json: String) {
+        Call.callMethod(
+            Pb_Type.Pb_TYPE_MEET_INTERFACE_DBSERACH.number,
+            Pb_Method.Pb_METHOD_MEET_INTERFACE_SEARCH.number,
+            InterfaceBase.pbui_Type_SmartJsonProtol.newBuilder()
+                .setMeetid(meetId)
+                .setMarkid(System.currentTimeMillis() * 1000)
+                .setJson(json.s2b())
+                .build().toByteArray()
+        )
+    }
+    //</editor-fold>
 }

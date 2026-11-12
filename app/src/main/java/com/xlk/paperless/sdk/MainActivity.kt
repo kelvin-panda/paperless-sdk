@@ -11,6 +11,7 @@ import android.os.Build.VERSION_CODES
 import android.os.Bundle
 import android.provider.Settings.ACTION_USAGE_ACCESS_SETTINGS
 import android.util.DisplayMetrics
+import android.util.Log
 import android.view.Gravity
 import android.view.WindowManager
 import android.widget.FrameLayout
@@ -269,6 +270,14 @@ class MainActivity : AppCompatActivity() {
             btnApplyFloatingConfig.setOnClickListener {
                 rebuildFloatingPlayer()
                 ToastUtils.showShort("已应用 isForceFullScreen = ${TestConfig.IS_FORCE_FULL_SCREEN}")
+            }
+            btnQuery.setOnClickListener {
+                val id = edtMeetId.text.toString()
+                val meetId = Integer.parseInt(id)
+                Jni.queryFileByDatabase(
+                    meetId,
+                    "{\"type\":${InterfaceBase.Pb_DBSearch_Type.Pb_DBSEARCH_TYPE_MEETFILE_VALUE},\"meetid\":${meetId},\"name\":\"\"}"
+                )
             }
         }
     }
@@ -687,6 +696,16 @@ class MainActivity : AppCompatActivity() {
                             putInt("deviceid", it.deviceid)
                             putInt("subid", it.subid)
                         })
+                    }
+                }
+            }
+
+            InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_DBSERACH_VALUE -> {
+                LogUtils.e("数据库查询 ${msg.method}")
+                if (msg.method == InterfaceMacro.Pb_Method.Pb_METHOD_MEET_INTERFACE_SEARCH_VALUE) {
+                    InterfaceBase.pbui_Type_SmartJsonProtolNotify.parseFrom(msg.data)?.let {
+                        val json = it.json.toStringUtf8()
+                        LogUtils.e("${it.meetid},${it.markid},json=${json}")
                     }
                 }
             }

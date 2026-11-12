@@ -332,6 +332,8 @@ public final class InterfaceBase {
   /**
    * <pre>
    *SmartJsonProtol  数据库查询 type
+   *type=TYPE_MEET_INTERFACE_DBSERACH
+   *methon=METHOD_MEET_INTERFACE_SEARCH
    * </pre>
    *
    * Protobuf enum {@code Pb_DBSearch_Type}
@@ -366,6 +368,14 @@ public final class InterfaceBase {
      * <code>Pb_DBSEARCH_TYPE_FILE = 3;</code>
      */
     Pb_DBSEARCH_TYPE_FILE(3),
+    /**
+     * <pre>
+     *返回指定会议的所有目录文件
+     * </pre>
+     *
+     * <code>Pb_DBSEARCH_TYPE_MEETFILE = 4;</code>
+     */
+    Pb_DBSEARCH_TYPE_MEETFILE(4),
     UNRECOGNIZED(-1),
     ;
 
@@ -397,6 +407,14 @@ public final class InterfaceBase {
      * <code>Pb_DBSEARCH_TYPE_FILE = 3;</code>
      */
     public static final int Pb_DBSEARCH_TYPE_FILE_VALUE = 3;
+    /**
+     * <pre>
+     *返回指定会议的所有目录文件
+     * </pre>
+     *
+     * <code>Pb_DBSEARCH_TYPE_MEETFILE = 4;</code>
+     */
+    public static final int Pb_DBSEARCH_TYPE_MEETFILE_VALUE = 4;
 
 
     public final int getNumber() {
@@ -417,6 +435,7 @@ public final class InterfaceBase {
         case 1: return Pb_DBSEARCH_TYPE_AGENDA;
         case 2: return Pb_DBSEARCH_TYPE_DIR;
         case 3: return Pb_DBSEARCH_TYPE_FILE;
+        case 4: return Pb_DBSEARCH_TYPE_MEETFILE;
         default: return null;
       }
     }
