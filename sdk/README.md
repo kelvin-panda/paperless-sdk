@@ -93,6 +93,18 @@ SdkConfig.logEnable = true
 
 > 关闭它**不影响任何功能**，只是不再打印上述日志；需要排查回调/权限问题时再打开。
 
+### 2.5.28
+#### 修复
+   - 修复 `BaseJni.queryFileByDatabase`（`DBSERACH`/`SEARCH`）异步回调导致的**原生 SIGSEGV**
+     - 崩溃栈：`HandleDBSearch → meetcore_callback → CallbackFunc`（JNI 回调），fault PC 落在 `libart.so`
+     - 触发条件：回调密集 + 与其他原生调用并发（单次调用不易复现）
+     - 更新 `libmeetcoreAnd.so`、`libPBmeetcoreAnd.so`（2026-11-12）
+#### 验证
+   - demo 压测（3 后台线程 × 100 次 + 主线程 50 次 + 并发原生查询负载）：
+     修复前 3/3 轮崩溃；修复后 3/3 轮完成，每轮 350 次查询 / 350 次响应 / 0 错误 / 0 崩溃
+   - 恒迅启动场景（7 个会议并发查询）：7 次查询 / 7 次响应，0 崩溃
+   - 详细报告：`docs/dbsearch-jni-crash-report.md`
+
 ### 2.5.27
 #### 库更新
    - 添加按会议ID查询服务端该会议下所有目录及文件信息的接口（异步回调返回）
