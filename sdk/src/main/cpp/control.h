@@ -4,9 +4,12 @@
 // 在需要的地方添加： #include "control.h"
 //
 
-// 日志打印开关
+// 日志打印开关（运行时可修改，默认关闭）
+// 由 jni_wallet_netinit.cpp 中的 g_logable 保存实际值，
+// java 端可通过 Call.setLogable(true/false) 动态开关日志打印。
 #ifndef logable
-#define logable true
+extern volatile bool g_logable;
+#define logable g_logable
 #endif
 
 // 对应java接口操作类

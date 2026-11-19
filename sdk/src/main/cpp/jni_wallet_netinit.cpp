@@ -42,6 +42,10 @@ static int g_disbufsize = 0;
 static char *g_disbufexdata = NULL;
 static int g_disbufexdatasize = 0;
 
+// 日志打印开关的实际存储，默认关闭（保持原有行为），
+// 由 java 端调用 Call.setLogable() 动态修改，control.h 中 logable 宏即指向该变量。
+volatile bool g_logable = false;
+
 void AddCacheData(int32u type, int32u method, void *pdata, int datalen) {
     pJniCacheData ptmp = new JniCacheData;
     do {
@@ -437,6 +441,28 @@ int InternalAndroidDevice_GetInfoCB(int channelstart, int oper) {
 extern "C" JNIEXPORT void JNICALL
 Java_com_paperless_sdk_Call_enablebackgroud(JNIEnv *env, jobject thiz, jint benable) {
     g_pinternalparam->bisbackgroud = benable;
+}
+
+/**
+ * 开关底层日志打印（运行时可随时调用，默认关闭）
+ *
+ * @param benable JNI_TRUE 打开日志，JNI_FALSE 关闭日志
+ */
+extern "C" JNIEXPORT void JNICALL
+Java_com_paperless_sdk_Call_setLogable(JNIEnv *env, jobject thiz, jboolean benable) {
+    g_logable = (benable != JNI_FALSE);
+    // 打开后立即输出一条，便于确认开关已生效；关闭时不打印
+    if (logable) LOGI("%s: logable=%d", __FUNCTION__, (int) g_logable);
+}
+
+/**
+ * 获取当前日志打印开关状态
+ *
+ * @return JNI_TRUE 已打开，JNI_FALSE 已关闭
+ */
+extern "C" JNIEXPORT jboolean JNICALL
+Java_com_paperless_sdk_Call_getLogable(JNIEnv *env, jobject thiz) {
+    return logable ? JNI_TRUE : JNI_FALSE;
 }
 
 extern "C" JNIEXPORT int JNICALL

@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+    <meta name="color-scheme" content="light dark">
+    <title>ONLYOFFICE</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background: #ffffff;
+            color: #1b1b1b;
+            font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        html.dark,
+        html.dark body {
+            background: #1e1e1e;
+            color: #eeeeee;
+        }
+
+        .editor {
+            position: absolute;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        .overlay {
+            position: absolute;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            left: 0;
+            z-index: 10;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 14px;
+            padding: 24px;
+            background: inherit;
+            transition: opacity 0.25s ease;
+        }
+
+        .overlay.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .spinner {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            border: 3px solid rgba(0, 0, 0, 0.12);
+            border-top-color: #ff6f3d;
+            animation: spin 0.9s linear infinite;
+        }
+
+        html.dark .spinner {
+            border-color: rgba(255, 255, 255, 0.18);
+            border-top-color: #ff6f3d;
+        }
+
+        #loading.error .spinner {
+            display: none;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .title {
+            font-size: 15px;
+            font-weight: 600;
+            text-align: center;
+            max-width: 92%;
+        }
+
+        .hint {
+            font-size: 12px;
+            line-height: 1.5;
+            opacity: 0.65;
+            text-align: center;
+            max-width: 92%;
+            word-break: break-word;
+        }
+
+        #loading.error .title {
+            color: #b3261e;
+        }
+
+        html.dark #loading.error .title {
+            color: #ffb4ab;
+        }
+    </style>
+</head>
+<body>
+<div id="placeholder" class="editor"></div>
+
+<div id="loading" class="overlay">
+    <div class="spinner"></div>
+    <div id="loadingText" class="title">正在连接 ONLYOFFICE…</div>
+    <div id="loadingHint" class="hint">首次加载可能需要数秒</div>
+</div>
+
+<script>
+    (function () {
+        "use strict";
+
+        var bridge = window.OOAndroid || null;
+        var loading = document.getElementById("loading");
+        var loadingText = document.getElementById("loadingText");
+        var loadingHint = document.getElementById("loadingHint");
+        var booted = false;
+        var ready = false;
+
+        function applyTheme() {
+            try {
+                if (bridge && bridge.isDarkTheme()) {
+                    document.documentElement.classList.add("dark");
+                }
+            } catch (ignored) {
+                /* no-op */
+            }
+        }
+
+        function setStatus(title, hint, isError) {
+            if (loadingText) loadingText.textContent = title;
+            if (loadingHint) loadingHint.textContent = hint || "";
+            if (loading) loading.classList.toggle("error", !!isError);
+        }
+
+        function hideLoading() {
+            if (!loading) return;
+            loading.classList.add("hidden");
+            window.setTimeout(function () {
+                loading.style.display = "none";
+            }, 260);
+        }
+
+        function post(name, event) {
+            var payload;
+            try {
+                payload = JSON.stringify(event || {});
+            } catch (ignored) {
+                payload = "{}";
+            }
+            try {
+                if (bridge) bridge.onEvent(String(name), payload);
+            } catch (ignored) {
+                /* bridge unavailable */
+            }
+        }
+
+        function fail(source, message) {
+            var text = String(message || "未知错误");
+            setStatus("加载失败", source + "：" + text, true);
+            try {
+                if (bridge) bridge.reportError(String(source), text);
+            } catch (ignored) {
+                /* no-op */
+            }
+        }
+
+        function buildEvents() {
+            var names = [
+                "onAppReady",
+                "onDocumentReady",
+                "onDocumentStateChange",
+                "onError",
+                "onWarning",
+                "onRequestClose",
+                "onDownloadAs",
+                "onOutdatedVersion",
+                "onInfo",
+                "onRequestSaveAs",
+                "onRequestInsertImage",
+                "onRequestUsers",
+                "onRequestSendNotify",
+                "onRequestReferenceData"
+            ];
+            var events = {};
+            names.forEach(function (name) {
+                events[name] = function (event) {
+                    if (name === "onDocumentReady") {
+                        ready = true;
+                        hideLoading();
+                    }
+                    if (name === "onError") {
+                        var data = event && event.data ? event.data : {};
+                        setStatus(
+                            "加载失败",
+                            "错误码 " + (data.errorCode || "") + "：" + (data.errorDescription || "未知错误"),
+                            true
+                        );
+                    }
+                    post(name, event);
+                };
+            });
+            return events;
+        }
+
+        function boot() {
+            if (booted) return;
+            booted = true;
+            applyTheme();
+
+            if (!bridge) {
+                fail("bridge", "缺少 Android JS 桥，请在 App 内打开此页面");
+                return;
+            }
+
+            var config;
+            var server;
+            try {
+                config = JSON.parse(bridge.getEditorConfig());
+                server = String(bridge.getServerUrl() || "").replace(/\/+$/, "");
+            } catch (e) {
+                fail("config", e && e.message ? e.message : e);
+                return;
+            }
+            if (!server) {
+                fail("server", "未配置文档服务器地址");
+                return;
+            }
+
+            var script = document.createElement("script");
+            script.src = server + "/web-apps/apps/api/documents/api.js";
+            script.async = true;
+            script.onerror = function () {
+                fail("api.js", "无法加载 " + script.src);
+            };
+            script.onload = function () {
+                if (!window.DocsAPI || typeof window.DocsAPI.DocEditor !== "function") {
+                    fail("api.js", "api.js 已加载，但没有提供 DocsAPI.DocEditor");
+                    return;
+                }
+                config.events = buildEvents();
+                try {
+                    window.docEditor = new window.DocsAPI.DocEditor("placeholder", config);
+                    setStatus("编辑器加载中…", "文档服务器：" + server);
+                } catch (e) {
+                    fail("init", e && e.message ? e.message : e);
+                }
+            };
+            setStatus("正在加载 api.js…", server);
+            document.head.appendChild(script);
+        }
+
+        // Kotlin 通过 evaluateJavascript 调用，DocumentServer 异步回 onDownloadAs。
+        window.OOAndroidDemo = {
+            downloadAs: function (format) {
+                if (!window.docEditor || typeof window.docEditor.downloadAs !== "function") {
+                    return false;
+                }
+                try {
+                    if (format) {
+                        window.docEditor.downloadAs(format);
+                    } else {
+                        window.docEditor.downloadAs();
+                    }
+                    return true;
+                } catch (e) {
+                    post("onError", {
+                        data: {errorCode: -1, errorDescription: String(e)}
+                    });
+                    return false;
+                }
+            },
+            requestClose: function () {
+                if (!window.docEditor || typeof window.docEditor.requestClose !== "function") {
+                    return false;
+                }
+                try {
+                    window.docEditor.requestClose();
+                    return true;
+                } catch (e) {
+                    return false;
+                }
+            }
+        };
+
+        window.addEventListener("error", function (event) {
+            if (!ready) fail("javascript", event.message || "脚本错误");
+        });
+
+        if (document.readyState === "loading") {
+            document.addEventListener("DOMContentLoaded", boot);
+        } else {
+            boot();
+        }
+    })();
+</script>
+</body>
+</html>

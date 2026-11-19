@@ -6,6 +6,10 @@
 
 ### 记录库更新的原因
 
+#### 20261119
+- 更新 `libmeetcoreAnd.so`
+- 新增 native 日志运行期开关（`Call.setLogable` / `Call.getLogable`），默认关闭
+
 #### 20260420
 - 文件权限功能修复
 

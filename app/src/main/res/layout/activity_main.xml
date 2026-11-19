@@ -399,10 +399,22 @@
         </LinearLayout>
 
         <Button
-            android:id="@+id/btnTest"
+            android:id="@+id/btnMeetingFiles"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="数据监听" />
+            android:text="查看当前会议文件" />
+
+        <Button
+            android:id="@+id/btnOnlyOffice"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="ONLYOFFICE 编辑器" />
+
+        <CheckBox
+            android:id="@+id/cbLogable"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="库日志开关" />
 
         <TextView
             android:layout_width="match_parent"

@@ -78,6 +78,20 @@ object Call {
     external fun enablebackgroud(type: Int)
 
     /**
+     * 开关底层 native 日志打印（可随时调用，默认关闭）
+     * 对应 cpp：Java_com_paperless_sdk_Call_setLogable
+     *
+     * @param enable true 打开日志，false 关闭日志
+     */
+    external fun setLogable(enable: Boolean)
+
+    /**
+     * 获取当前底层 native 日志开关状态
+     * 对应 cpp：Java_com_paperless_sdk_Call_getLogable
+     */
+    external fun getLogable(): Boolean
+
+    /**
      * 初始化桌面、摄像头采集
      *
      * @param type         流类型

@@ -93,6 +93,22 @@ SdkConfig.logEnable = true
 
 > 关闭它**不影响任何功能**，只是不再打印上述日志；需要排查回调/权限问题时再打开。
 
+### 2.5.29
+#### 库更新
+   - 新增底层 native 日志运行期开关，默认关闭
+     - `control.h` 中 `logable` 宏由编译期常量改为指向 `g_logable`
+     - `jni_wallet_netinit.cpp` 新增 `g_logable` 及对应的 JNI 实现
+     - 同步更新 `libmeetcoreAnd.so`
+#### 新增
+1. `Call.setLogable(enable: Boolean)`
+   - 运行期打开/关闭底层 native 日志，默认关闭，可随时调用
+2. `Call.getLogable(): Boolean`
+   - 查询当前 native 日志开关状态
+#### 说明
+   - `SdkConfig.logEnable` 控制 Java 侧高频回调日志；native `logable` 控制 C++ 底层日志，两者相互独立
+   - App Demo 首页增加「库日志开关」复选框，可直接验证运行期开关
+   - `app/src/main/assets/client.ini` 的 `[loghttp]` / `task_*` 为本地日志联调配置；生产构建请将 `[loghttp]` 的 `enable` 置 0 或删除该配置
+
 ### 2.5.28
 #### 修复
    - 修复 `BaseJni.queryFileByDatabase`（`DBSERACH`/`SEARCH`）异步回调导致的**原生 SIGSEGV**

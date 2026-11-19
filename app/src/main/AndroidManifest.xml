@@ -28,6 +28,7 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.Paperless_sdk"
+        android:usesCleartextTraffic="true"
         tools:targetApi="31">
         <activity
             android:name=".ControlViewActivity"
@@ -42,10 +43,6 @@
             android:exported="false"
             android:launchMode="singleTop" />
         <activity
-            android:name=".view.MeetAct"
-            android:exported="false"
-            android:launchMode="singleTop" />
-        <activity
             android:name=".MainActivity"
             android:exported="true">
             <intent-filter>
@@ -54,6 +51,22 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity
+            android:name=".onlyoffice.OnlyOfficeActivity"
+            android:configChanges="orientation|screenSize|keyboardHidden"
+            android:exported="false"
+            android:launchMode="singleTop" />
+
+        <!-- 查看会议文件：下载完成后通过 FileProvider 交给系统应用打开 -->
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths" />
+        </provider>
 
         <service
             android:name=".screen.ScreenShareService"

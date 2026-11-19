@@ -10,6 +10,7 @@ import com.paperless.sdk.Paperless
 import com.paperless.sdk.SdkConfig
 import com.paperless.sdk.SdkVars
 import com.xlk.paperless.sdk.floating.FloatingPlayer
+import java.io.File
 
 /**
  *  @author : Administrator
@@ -22,6 +23,7 @@ class App : Application() {
         Paperless.init(this)
         SdkConfig.isUseSdkPlayer = true
         SdkConfig.floatingPlayEnable = true
+        SdkVars.crash_dir = SdkVars.root_dir + "crash" + File.separator
         CrashUtils.init(SdkVars.crash_dir)
         registerActivityLifecycleCallbacks(object : Application.ActivityLifecycleCallbacks {
             override fun onActivityPreCreated(activity: Activity, savedInstanceState: Bundle?) {

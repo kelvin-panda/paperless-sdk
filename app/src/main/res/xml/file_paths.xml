@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<paths xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- SdkVars.cache_dir：查看文件时下载到 cache 目录 -->
+    <cache-path
+        name="cache"
+        path="." />
+    <!-- SdkVars.files_dir / root_dir -->
+    <files-path
+        name="files"
+        path="." />
+    <!-- SdkVars.download_dir：手动下载目录 -->
+    <external-files-path
+        name="external_files"
+        path="." />
+    <external-cache-path
+        name="external_cache"
+        path="." />
+</paths>

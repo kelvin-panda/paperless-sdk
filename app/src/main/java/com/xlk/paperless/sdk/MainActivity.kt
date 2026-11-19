@@ -11,7 +11,6 @@ import android.os.Build.VERSION_CODES
 import android.os.Bundle
 import android.provider.Settings.ACTION_USAGE_ACCESS_SETTINGS
 import android.util.DisplayMetrics
-import android.util.Log
 import android.view.Gravity
 import android.view.WindowManager
 import android.widget.FrameLayout
@@ -23,7 +22,6 @@ import androidx.appcompat.app.AppCompatActivity
 import com.blankj.utilcode.util.AppUtils
 import com.blankj.utilcode.util.DeviceUtils
 import com.blankj.utilcode.util.FileUtils
-import com.blankj.utilcode.util.GsonUtils
 import com.blankj.utilcode.util.LogUtils
 import com.blankj.utilcode.util.ResourceUtils
 import com.blankj.utilcode.util.ToastUtils
@@ -36,11 +34,9 @@ import com.mogujie.tt.protobuf.InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_MED
 import com.mogujie.tt.protobuf.InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_READY_VALUE
 import com.mogujie.tt.protobuf.InterfaceMacro.Pb_Type.Pb_TYPE_MEET_INTERFACE_STREAMPLAY_VALUE
 import com.mogujie.tt.protobuf.InterfacePlaymedia
-import com.mogujie.tt.protobuf.InterfacePublicinfo
 import com.mogujie.tt.protobuf.InterfaceStream
 import com.paperless.bus.EventBusMessage
 import com.paperless.bus.SdkBusType
-import com.paperless.data.json.MeetCreateTimeJson
 import com.paperless.data.repository.base.DataRepoManager
 import com.paperless.player.DecodeQueue
 import com.paperless.sdk.Call
@@ -57,10 +53,11 @@ import com.paperless.sdk.SdkVars
 import com.paperless.sdk.SdkVars.Companion.localDeviceId
 import com.paperless.util.IniUtil
 import com.xlk.paperless.sdk.databinding.ActivityMainBinding
+import com.xlk.paperless.sdk.dialog.MeetingFilesDialog
 import com.xlk.paperless.sdk.floating.FloatingPlayer
+import com.xlk.paperless.sdk.onlyoffice.OnlyOfficeActivity
 import com.xlk.paperless.sdk.helper.AppNetworkMonitor
 import com.xlk.paperless.sdk.service.ScreenShareService
-import com.xlk.paperless.sdk.view.MeetAct
 import org.greenrobot.eventbus.EventBus
 import org.greenrobot.eventbus.Subscribe
 import org.greenrobot.eventbus.ThreadMode
@@ -133,7 +130,7 @@ class MainActivity : AppCompatActivity() {
             }
             btnCreateMeetTime.setOnClickListener {
                 val meetId = Jni.queryCurrentMeetId()
-                tvCreateMeetTime.text = Jni.queryMeetingCreatetime(meetId)
+                tvCreateMeetTime.text ="会议ID＝$meetId 时间戳=${Jni.queryMeetingCreatetime(meetId)}"
             }
             //网络监控
             btnNetwork.setOnClickListener {
@@ -256,8 +253,13 @@ class MainActivity : AppCompatActivity() {
                 LogUtils.d(sb.toString())
                 tvShowBlackList.text = sb.toString()
             }
-            btnTest.setOnClickListener {
-                startActivity(Intent(this@MainActivity, MeetAct::class.java))
+            //当前会议所有文件：查看（下载后自动打开）/ 删除（从服务器删除）
+            btnMeetingFiles.setOnClickListener {
+                MeetingFilesDialog(this@MainActivity).show()
+            }
+            //ONLYOFFICE 编辑器（WebView + DocumentServer）
+            btnOnlyOffice.setOnClickListener {
+                startActivity(OnlyOfficeActivity.newIntent(this@MainActivity))
             }
             // 悬浮窗 isForceFullScreen 开关：应用后重建播放器，下一次播放即按新配置生效
             cbForceFullScreen.isChecked = TestConfig.IS_FORCE_FULL_SCREEN
@@ -390,7 +392,12 @@ class MainActivity : AppCompatActivity() {
 
         DataRepoManager.init()
         DataRepoManager.refreshAll()
-
+        mBinding.cbLogable.isChecked = Call.getLogable()
+        mBinding.cbLogable.setOnClickListener {
+            val isChecked = mBinding.cbLogable.isChecked
+            mBinding.cbLogable.isChecked = isChecked
+            Call.setLogable(isChecked)
+        }
 //        dataRepositoryListener()
     }
 
